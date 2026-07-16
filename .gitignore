@@ -1,0 +1,30 @@
+# Gradle
+.gradle/
+**/build/
+
+# IntelliJ IDEA / Android Studio
+.idea/
+*.iml
+local.properties
+
+# Kotlin
+.kotlin/
+
+# Android
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Signing
+*.jks
+*.keystore
+
+# Operating systems
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp

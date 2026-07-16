@@ -1,0 +1,38 @@
+package org.syriacplatform.kernel
+
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertIs
+import org.syriacplatform.common.result.Result
+import org.syriacplatform.common.types.QoloId
+import org.syriacplatform.content.contracts.ContentService
+import org.syriacplatform.content.models.Qolo
+import org.syriacplatform.content.services.DefaultContentService
+
+class PlatformKernelTest {
+
+    @Test
+    fun registerAndResolveContentService() {
+        val kernel = PlatformKernel()
+        val contentService = DefaultContentService()
+
+        contentService.initialize()
+
+        val registration = kernel.registerService(
+            ContentService::class,
+            contentService
+        )
+
+        assertIs<Result.Success<*>>(registration)
+
+        val resolved = kernel.resolveService(ContentService::class)
+        val success = assertIs<Result.Success<*>>(resolved)
+        val service = success.data as ContentService
+
+        val qoloResult = service.loadQolo(QoloId(1))
+        val qoloSuccess = assertIs<Result.Success<*>>(qoloResult)
+        val qolo = qoloSuccess.data as Qolo
+
+        assertEquals("ܩܳܠܳܐ ܢܽܘܗܪܳܢܳܐ", qolo.name)
+    }
+}
