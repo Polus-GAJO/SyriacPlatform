@@ -13,12 +13,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.syriacplatform.bootstrap.PlatformBootstrap
 import org.syriacplatform.common.result.Result
 import org.syriacplatform.common.types.QoloId
 import org.syriacplatform.content.contracts.ContentService
 import org.syriacplatform.content.models.Qolo
-import org.syriacplatform.content.services.DefaultContentService
-import org.syriacplatform.kernel.PlatformKernel
 
 @Composable
 fun App() {
@@ -51,15 +50,7 @@ fun App() {
 }
 
 private fun loadDemoQoloName(): String {
-    val kernel = PlatformKernel()
-    val contentService = DefaultContentService()
-
-    contentService.initialize()
-
-    kernel.registerService(
-        ContentService::class,
-        contentService
-    )
+    val kernel = PlatformBootstrap.create()
 
     val resolvedService = kernel.resolveService(ContentService::class)
 
@@ -67,7 +58,8 @@ private fun loadDemoQoloName(): String {
         is Result.Success -> {
             when (val qoloResult = resolvedService.data.loadQolo(QoloId(1))) {
                 is Result.Success<Qolo> -> qoloResult.data.name
-                is Result.Failure -> qoloResult.error.message ?: "Qolo loading failed"
+                is Result.Failure ->
+                    qoloResult.error.message ?: "Qolo loading failed"
             }
         }
 
