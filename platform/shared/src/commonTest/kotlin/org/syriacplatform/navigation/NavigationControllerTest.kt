@@ -11,19 +11,33 @@ class NavigationControllerTest {
 
         assertEquals(
             AppDestination.HOME,
-            controller.state.currentDestination
+            controller.state.value.currentDestination
         )
     }
 
     @Test
-    fun navigatesToQoloDetails() {
-        val controller = NavigationController()
-
-        controller.navigateTo(AppDestination.QOLO_DETAILS)
+    fun startsAtProvidedDestination() {
+        val controller = NavigationController(
+            initialDestination = AppDestination.QOLO_DETAILS
+        )
 
         assertEquals(
             AppDestination.QOLO_DETAILS,
-            controller.state.currentDestination
+            controller.state.value.currentDestination
+        )
+    }
+
+    @Test
+    fun navigateToUpdatesCurrentDestination() {
+        val controller = NavigationController()
+
+        controller.navigateTo(
+            AppDestination.QOLO_DETAILS
+        )
+
+        assertEquals(
+            AppDestination.QOLO_DETAILS,
+            controller.state.value.currentDestination
         )
     }
 }

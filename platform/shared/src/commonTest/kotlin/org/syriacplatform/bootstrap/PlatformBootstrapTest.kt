@@ -45,7 +45,7 @@ class PlatformBootstrapTest {
 
         assertEquals(
             AppDestination.HOME,
-            platform.navigation.state.currentDestination
+            platform.navigation.state.value.currentDestination
         )
 
         platform.navigation.navigateTo(
@@ -54,7 +54,7 @@ class PlatformBootstrapTest {
 
         assertEquals(
             AppDestination.QOLO_DETAILS,
-            platform.navigation.state.currentDestination
+            platform.navigation.state.value.currentDestination
         )
     }
 }

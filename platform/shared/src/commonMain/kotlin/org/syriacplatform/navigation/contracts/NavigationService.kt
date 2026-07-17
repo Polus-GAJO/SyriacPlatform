@@ -1,5 +1,6 @@
 package org.syriacplatform.navigation.contracts
 
+import kotlinx.coroutines.flow.StateFlow
 import org.syriacplatform.kernel.PlatformService
 import org.syriacplatform.navigation.AppDestination
 import org.syriacplatform.navigation.NavigationState
@@ -10,9 +11,9 @@ import org.syriacplatform.navigation.NavigationState
 interface NavigationService : PlatformService {
 
     /**
-     * حالة التنقل الحالية.
+     * حالة التنقل الحالية القابلة للمراقبة.
      */
-    val state: NavigationState
+    val state: StateFlow<NavigationState>
 
     /**
      * الانتقال إلى وجهة جديدة.

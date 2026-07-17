@@ -18,7 +18,7 @@ class DefaultNavigationServiceTest {
 
         assertEquals(
             AppDestination.HOME,
-            service.state.currentDestination
+            service.state.value.currentDestination
         )
 
         service.initialize()
@@ -28,11 +28,13 @@ class DefaultNavigationServiceTest {
             service.runtimeState
         )
 
-        service.navigateTo(AppDestination.QOLO_DETAILS)
+        service.navigateTo(
+            AppDestination.QOLO_DETAILS
+        )
 
         assertEquals(
             AppDestination.QOLO_DETAILS,
-            service.state.currentDestination
+            service.state.value.currentDestination
         )
     }
 }

@@ -1,5 +1,6 @@
 package org.syriacplatform.navigation.services
 
+import kotlinx.coroutines.flow.StateFlow
 import org.syriacplatform.common.types.RuntimeState
 import org.syriacplatform.kernel.ServiceMetadata
 import org.syriacplatform.navigation.AppDestination
@@ -11,7 +12,8 @@ import org.syriacplatform.navigation.contracts.NavigationService
  * التنفيذ الافتراضي لخدمة التنقل.
  */
 class DefaultNavigationService(
-    private val controller: NavigationController = NavigationController()
+    private val controller: NavigationController =
+        NavigationController()
 ) : NavigationService {
 
     override val metadata = ServiceMetadata(
@@ -22,7 +24,7 @@ class DefaultNavigationService(
     override var runtimeState = RuntimeState.NotInitialized
         private set
 
-    override val state: NavigationState
+    override val state: StateFlow<NavigationState>
         get() = controller.state
 
     override fun initialize() {
