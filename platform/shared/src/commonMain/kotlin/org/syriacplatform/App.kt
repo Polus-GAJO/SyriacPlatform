@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import org.syriacplatform.bootstrap.PlatformBootstrap
 import org.syriacplatform.common.result.Result
 import org.syriacplatform.common.types.QoloId
-import org.syriacplatform.content.contracts.ContentService
 import org.syriacplatform.content.models.Qolo
 
 @Composable
@@ -50,21 +49,16 @@ fun App() {
 }
 
 private fun loadDemoQoloName(): String {
-    val kernel = PlatformBootstrap.create()
+    val platform = PlatformBootstrap.create()
 
-    val resolvedService = kernel.resolveService(ContentService::class)
+    return when (
+        val qoloResult =
+            platform.content.loadQolo(QoloId(1))
+    ) {
+        is Result.Success<Qolo> ->
+            qoloResult.data.name
 
-    return when (resolvedService) {
-        is Result.Success -> {
-            when (val qoloResult = resolvedService.data.loadQolo(QoloId(1))) {
-                is Result.Success<Qolo> -> qoloResult.data.name
-                is Result.Failure ->
-                    qoloResult.error.message ?: "Qolo loading failed"
-            }
-        }
-
-        is Result.Failure -> {
-            resolvedService.error.message ?: "Content Service is unavailable"
-        }
+        is Result.Failure ->
+            qoloResult.error.message ?: "Qolo loading failed"
     }
 }
