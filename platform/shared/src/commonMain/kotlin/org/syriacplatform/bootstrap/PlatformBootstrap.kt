@@ -3,6 +3,8 @@ package org.syriacplatform.bootstrap
 import org.syriacplatform.content.contracts.ContentService
 import org.syriacplatform.content.services.DefaultContentService
 import org.syriacplatform.kernel.PlatformKernel
+import org.syriacplatform.navigation.contracts.NavigationService
+import org.syriacplatform.navigation.services.DefaultNavigationService
 
 /**
  * نقطة البناء المركزية لمنصة SyriacPlatform.
@@ -18,6 +20,11 @@ object PlatformBootstrap {
         kernel.registerService(
             ContentService::class,
             DefaultContentService()
+        )
+
+        kernel.registerService(
+            NavigationService::class,
+            DefaultNavigationService()
         )
 
         kernel.initialize()
