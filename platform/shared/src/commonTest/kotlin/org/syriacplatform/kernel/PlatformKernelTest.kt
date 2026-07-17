@@ -12,11 +12,9 @@ import org.syriacplatform.content.services.DefaultContentService
 class PlatformKernelTest {
 
     @Test
-    fun registerAndResolveContentService() {
+    fun registerInitializeAndResolveContentService() {
         val kernel = PlatformKernel()
         val contentService = DefaultContentService()
-
-        contentService.initialize()
 
         val registration = kernel.registerService(
             ContentService::class,
@@ -24,6 +22,8 @@ class PlatformKernelTest {
         )
 
         assertIs<Result.Success<*>>(registration)
+
+        kernel.initialize()
 
         val resolved = kernel.resolveService(ContentService::class)
         val success = assertIs<Result.Success<*>>(resolved)
@@ -33,6 +33,9 @@ class PlatformKernelTest {
         val qoloSuccess = assertIs<Result.Success<*>>(qoloResult)
         val qolo = qoloSuccess.data as Qolo
 
-        assertEquals("ܩܳܠܳܐ ܢܽܘܗܪܳܢܳܐ", qolo.name)
+        assertEquals(
+            "ܩܳܠܳܐ ܢܽܘܗܪܳܢܳܐ",
+            qolo.name
+        )
     }
 }

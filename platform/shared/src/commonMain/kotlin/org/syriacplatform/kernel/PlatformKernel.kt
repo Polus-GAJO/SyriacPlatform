@@ -20,6 +20,12 @@ class PlatformKernel(
         )
     }
 
+    fun initialize() {
+        registry.forEachService { service ->
+            service.initialize()
+        }
+    }
+
     fun <T : PlatformService> resolveService(
         serviceType: KClass<T>
     ): Result<T> {

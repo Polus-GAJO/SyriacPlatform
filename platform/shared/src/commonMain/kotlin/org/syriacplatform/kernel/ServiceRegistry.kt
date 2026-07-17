@@ -39,4 +39,10 @@ class ServiceRegistry {
     fun getRegisteredServices(): List<ServiceMetadata> {
         return services.values.map { it.metadata }
     }
+
+    internal fun forEachService(
+        action: (PlatformService) -> Unit
+    ) {
+        services.values.forEach(action)
+    }
 }
