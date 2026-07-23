@@ -10,7 +10,9 @@ import org.syriacplatform.kernel.PlatformService
  */
 interface ContentService : PlatformService {
 
-    fun loadQolo(
+    suspend fun loadQolo(
         qoloId: QoloId
     ): Result<Qolo>
+
+    suspend fun loadAllQolos(): Result<List<Qolo>>
 }

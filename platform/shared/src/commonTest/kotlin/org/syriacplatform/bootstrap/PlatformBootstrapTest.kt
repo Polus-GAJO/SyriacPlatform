@@ -1,18 +1,24 @@
 package org.syriacplatform.bootstrap
 
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.syriacplatform.common.result.Result
 import org.syriacplatform.common.types.QoloId
 import org.syriacplatform.common.types.RuntimeState
 import org.syriacplatform.content.models.Qolo
+import org.syriacplatform.content.repository.FakeContentRepository
 import org.syriacplatform.navigation.AppDestination
 
 class PlatformBootstrapTest {
 
     @Test
-    fun createReturnsInitializedContentService() {
-        val platform = PlatformBootstrap.create()
+    fun createReturnsInitializedContentService() = runTest {
+        val platform = PlatformBootstrap.create(
+            dependencies = PlatformDependencies(
+                contentRepository = FakeContentRepository()
+            )
+        )
 
         assertEquals(
             RuntimeState.Ready,
@@ -23,9 +29,14 @@ class PlatformBootstrapTest {
             platform.content.loadQolo(QoloId(1))
 
         val qolo = when (qoloResult) {
-            is Result.Success<Qolo> -> qoloResult.data
+            is Result.Success<Qolo> ->
+                qoloResult.data
+
             is Result.Failure ->
-                error(qoloResult.error.message ?: "Qolo loading failed")
+                error(
+                    qoloResult.error.message
+                        ?: "Qolo loading failed"
+                )
         }
 
         assertEquals(
@@ -36,7 +47,11 @@ class PlatformBootstrapTest {
 
     @Test
     fun createReturnsInitializedNavigationService() {
-        val platform = PlatformBootstrap.create()
+        val platform = PlatformBootstrap.create(
+            dependencies = PlatformDependencies(
+                contentRepository = FakeContentRepository()
+            )
+        )
 
         assertEquals(
             RuntimeState.Ready,
@@ -55,6 +70,39 @@ class PlatformBootstrapTest {
         assertEquals(
             AppDestination.QOLO_DETAILS,
             platform.navigation.state.value.currentDestination
+        )
+    }
+    @Test
+    fun contentServiceLoadsAllQolos() = runTest {
+        val platform = PlatformBootstrap.create(
+            dependencies = PlatformDependencies(
+                contentRepository =
+                    FakeContentRepository()
+            )
+        )
+
+        val qolosResult =
+            platform.content.loadAllQolos()
+
+        val qolos = when (qolosResult) {
+            is Result.Success<List<Qolo>> ->
+                qolosResult.data
+
+            is Result.Failure ->
+                error(
+                    qolosResult.error.message
+                        ?: "Qolos loading failed"
+                )
+        }
+
+        assertEquals(
+            1,
+            qolos.size
+        )
+
+        assertEquals(
+            "ܩܳܠܳܐ ܢܽܘܗܪܳܢܳܐ",
+            qolos.first().name
         )
     }
 }
