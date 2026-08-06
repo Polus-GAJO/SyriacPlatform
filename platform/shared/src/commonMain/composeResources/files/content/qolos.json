@@ -1,12 +1,20 @@
-[
-  {
-    "id": 1,
-    "name": "ܩܳܠܳܐ ܕܢܽܘܗܪܳܐ",
-    "poeticMeter": "12"
-  },
-  {
-    "id": 2,
-    "name": "ܩܳܠܳܐ ܕܫܠܳܡܳܐ",
-    "poeticMeter": null
-  }
-]
+{
+  "items": [
+    {
+      "id": 438,
+      "groupId": 12,
+      "sort": 500,
+      "name": "ܩܽܘܩܳܝܳܐ",
+      "searchName": "ܩܘܩܝܐ",
+      "poeticMeter": "7-4 / 7-5 / 4-5 / 4-5 / 7-4 / 7-5 / 4-5"
+    },
+    {
+      "id": 439,
+      "groupId": 12,
+      "sort": 510,
+      "name": "ܛܽܘܒܰܝܟܝ̄ ܥܺܕܬܳܐ",
+      "searchName": "ܛܘܒܝܟܝ ܥܕܬܐ",
+      "poeticMeter": null
+    }
+  ]
+}
