@@ -22,6 +22,11 @@ import org.syriacplatform.content.models.PrayerSequence
 import org.syriacplatform.content.models.TextContent
 import org.syriacplatform.packagevalidation.PackageValidationTestFixture.packageWith
 import org.syriacplatform.packagevalidation.ValidationSeverity
+import org.syriacplatform.common.types.MelodyId
+import org.syriacplatform.common.types.QintoId
+import org.syriacplatform.content.models.MelodyQintoAssignment
+import org.syriacplatform.common.types.QoloId
+import org.syriacplatform.content.models.Melody
 
 class ReferenceValidatorTest {
 
@@ -130,11 +135,34 @@ class ReferenceValidatorTest {
             ),
             liturgicalItems = listOf(
                 LiturgicalItem(
+                    id = LiturgicalItemId(502),
+                    target = LiturgicalItemTarget.Qolo(
+                        qoloId = QoloId(999),
+                        effectiveMelodyId = MelodyId(777)
+                    )
+                ),
+                LiturgicalItem(
                     id = LiturgicalItemId(501),
                     target = LiturgicalItemTarget.Text(
                         textId = TextId(999),
                         petgomoId = PetgomoId(999)
                     )
+                )
+            ),
+            melodies = listOf(
+                Melody(
+                    id = MelodyId(777),
+                    qoloId = QoloId(888),
+                    name = "Broken Melody",
+                    searchName = "Broken Melody",
+                    hasRecording = false
+                )
+            ),
+            melodyQintoAssignments = listOf(
+                MelodyQintoAssignment(
+                    melodyId = MelodyId(666),
+                    qintoId = QintoId(888),
+                    role = null
                 )
             )
         )
@@ -142,7 +170,7 @@ class ReferenceValidatorTest {
         val issues = validator.validate(packageData)
 
         assertEquals(
-            6,
+            10,
             issues.size
         )
 
@@ -160,12 +188,16 @@ class ReferenceValidatorTest {
 
         assertEquals(
             setOf(
+                "liturgicalItems[502].target.qoloId",
+                "melodies[777].qoloId",
                 "entryPoints[1].target",
                 "occasions[101].prayerSequenceIds[0]",
                 "prayerSequences[301].prayerId",
                 "prayerSequences[301].liturgicalItemIds[0]",
                 "liturgicalItems[501].target.textId",
-                "liturgicalItems[501].target.petgomoId"
+                "liturgicalItems[501].target.petgomoId",
+                "melodyQintoAssignments[0].melodyId",
+                "melodyQintoAssignments[0].qintoId"
             ),
             issues
                 .mapNotNull { issue ->

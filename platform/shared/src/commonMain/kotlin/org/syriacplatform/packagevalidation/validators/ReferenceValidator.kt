@@ -9,6 +9,10 @@ import org.syriacplatform.packagevalidation.validators.references.PrayerSequence
 import org.syriacplatform.packagevalidation.validators.references.PrayerSequenceLiturgicalItemReferenceRule
 import org.syriacplatform.packagevalidation.validators.references.LiturgicalItemTextReferenceRule
 import org.syriacplatform.packagevalidation.validators.references.LiturgicalItemPetgomoReferenceRule
+import org.syriacplatform.packagevalidation.validators.references.LiturgicalItemQoloReferenceRule
+import org.syriacplatform.packagevalidation.validators.references.MelodyQoloReferenceRule
+import org.syriacplatform.packagevalidation.validators.references.MelodyQintoAssignmentMelodyReferenceRule
+import org.syriacplatform.packagevalidation.validators.references.MelodyQintoAssignmentQintoReferenceRule
 
 /**
  * منسق قواعد التحقق من المراجع بين كيانات الحزمة.
@@ -22,7 +26,11 @@ class ReferenceValidator(
             PrayerSequenceReferenceRule(),
             PrayerSequenceLiturgicalItemReferenceRule(),
             LiturgicalItemTextReferenceRule(),
-            LiturgicalItemPetgomoReferenceRule()
+            LiturgicalItemPetgomoReferenceRule(),
+            LiturgicalItemQoloReferenceRule(),
+            MelodyQoloReferenceRule(),
+            MelodyQintoAssignmentMelodyReferenceRule(),
+            MelodyQintoAssignmentQintoReferenceRule()
         )
 ) : PackageValidationRule<ParsedApplicationPackage> {
 
