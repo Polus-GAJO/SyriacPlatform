@@ -1,0 +1,61 @@
+package org.syriacplatform.packagevalidation
+
+import org.syriacplatform.packageformat.parsed.ParsedApplicationPackage
+import org.syriacplatform.packagevalidation.validators.IntegrityValidator
+import org.syriacplatform.packagevalidation.validators.ManifestValidator
+import org.syriacplatform.packagevalidation.validators.ReferenceValidator
+import org.syriacplatform.packagevalidation.validators.SemanticValidator
+
+/**
+ * المنسق الأعلى لعملية التحقق من الحزمة بعد Parsing.
+ *
+ * يجمع نتائج جميع طبقات التحقق الحالية في ValidationReport واحد.
+ *
+ * لا يتوقف عند أول FATAL؛ بل يجمع جميع المشكلات
+ * التي تستطيع طبقات التحقق اكتشافها في تشغيل واحد.
+ */
+class PackageValidator(
+    private val manifestValidator: ManifestValidator =
+        ManifestValidator(),
+    private val referenceValidator: ReferenceValidator =
+        ReferenceValidator(),
+    private val integrityValidator: IntegrityValidator =
+        IntegrityValidator(),
+    private val semanticValidator: SemanticValidator =
+        SemanticValidator()
+) {
+
+    fun validate(
+        value: ParsedApplicationPackage
+    ): ValidationReport {
+        val issues = buildList {
+            addAll(
+                manifestValidator.validate(
+                    value.manifest
+                )
+            )
+
+            addAll(
+                referenceValidator.validate(
+                    value
+                )
+            )
+
+            addAll(
+                integrityValidator.validate(
+                    value
+                )
+            )
+
+            addAll(
+                semanticValidator.validate(
+                    value
+                )
+            )
+        }
+
+        return ValidationReport(
+            issues = issues
+        )
+    }
+}
