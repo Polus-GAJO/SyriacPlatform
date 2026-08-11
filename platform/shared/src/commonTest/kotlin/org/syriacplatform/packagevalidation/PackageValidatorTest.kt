@@ -20,10 +20,23 @@ import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.models.TextContent
 import org.syriacplatform.packagevalidation.PackageValidationTestFixture.packageWith
 import org.syriacplatform.packagevalidation.PackageValidationTestFixture.validManifest
+import org.syriacplatform.common.types.Version
+import org.syriacplatform.packagevalidation.compatibility.CoreCompatibility
 
 class PackageValidatorTest {
 
-    private val validator = PackageValidator()
+    private val coreCompatibility =
+        CoreCompatibility(
+            version = Version(1, 2, 0),
+            supportedSchemaVersions = setOf(
+                "1.0"
+            )
+        )
+
+    private val validator =
+        PackageValidator(
+            coreCompatibility = coreCompatibility
+        )
 
     @Test
     fun validPackageProducesValidReport() {
@@ -63,7 +76,11 @@ class PackageValidatorTest {
     fun validatorCollectsIssuesFromAllValidationLayers() {
         val packageData = packageWith(
             manifest = validManifest().copy(
-                packageId = ""
+                packageId = "",
+                compatibility =
+                    validManifest().compatibility.copy(
+                        minimumCoreVersion = "2.0.0"
+                    )
             ),
 
             entryPoints = listOf(
@@ -135,18 +152,19 @@ class PackageValidatorTest {
         assertFalse(report.isValid)
 
         assertEquals(
-            4,
+            5,
             report.issues.size
         )
 
         assertEquals(
-            4,
+            5,
             report.fatalIssues.size
         )
 
         assertEquals(
             setOf(
                 "manifest.packageId",
+                "manifest.compatibility.minimumCoreVersion",
                 "entryPoints[1].target",
                 "texts[id=25]",
                 "liturgicalItems[501].target.effectiveMelodyId"

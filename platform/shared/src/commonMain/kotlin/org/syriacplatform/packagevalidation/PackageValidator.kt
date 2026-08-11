@@ -1,6 +1,8 @@
 package org.syriacplatform.packagevalidation
 
 import org.syriacplatform.packageformat.parsed.ParsedApplicationPackage
+import org.syriacplatform.packagevalidation.compatibility.CoreCompatibility
+import org.syriacplatform.packagevalidation.validators.CompatibilityValidator
 import org.syriacplatform.packagevalidation.validators.IntegrityValidator
 import org.syriacplatform.packagevalidation.validators.ManifestValidator
 import org.syriacplatform.packagevalidation.validators.ReferenceValidator
@@ -15,6 +17,7 @@ import org.syriacplatform.packagevalidation.validators.SemanticValidator
  * التي تستطيع طبقات التحقق اكتشافها في تشغيل واحد.
  */
 class PackageValidator(
+    coreCompatibility: CoreCompatibility,
     private val manifestValidator: ManifestValidator =
         ManifestValidator(),
     private val referenceValidator: ReferenceValidator =
@@ -22,7 +25,11 @@ class PackageValidator(
     private val integrityValidator: IntegrityValidator =
         IntegrityValidator(),
     private val semanticValidator: SemanticValidator =
-        SemanticValidator()
+        SemanticValidator(),
+    private val compatibilityValidator: CompatibilityValidator =
+        CompatibilityValidator(
+            coreCompatibility = coreCompatibility
+        )
 ) {
 
     fun validate(
@@ -31,6 +38,12 @@ class PackageValidator(
         val issues = buildList {
             addAll(
                 manifestValidator.validate(
+                    value.manifest
+                )
+            )
+
+            addAll(
+                compatibilityValidator.validate(
                     value.manifest
                 )
             )
