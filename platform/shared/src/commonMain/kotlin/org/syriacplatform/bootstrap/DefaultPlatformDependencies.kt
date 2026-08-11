@@ -1,10 +1,10 @@
 package org.syriacplatform.bootstrap
 
-import org.syriacplatform.common.types.Version
 import org.syriacplatform.content.repository.ApplicationPackageContentRepository
 import org.syriacplatform.packageformat.loading.ApplicationPackageLoader
 import org.syriacplatform.packageformat.loading.ResourcePackageSource
 import org.syriacplatform.packagevalidation.compatibility.CoreCompatibility
+import org.syriacplatform.packagevalidation.compatibility.CoreCompatibilityDefaults
 
 /**
  * ينشئ الاعتمادات الافتراضية المستخدمة
@@ -18,13 +18,7 @@ object DefaultPlatformDependencies {
 
     fun create(): PlatformDependencies {
         val coreCompatibility =
-            CoreCompatibility(
-                version = Version(1, 0, 0),
-                supportedSchemaVersions =
-                    setOf(
-                        "1.0"
-                    )
-            )
+            CoreCompatibilityDefaults.CURRENT
 
         val packageLoader =
             ApplicationPackageLoader(
