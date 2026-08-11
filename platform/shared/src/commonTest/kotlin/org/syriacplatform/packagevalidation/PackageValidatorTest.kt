@@ -22,6 +22,8 @@ import org.syriacplatform.packagevalidation.PackageValidationTestFixture.package
 import org.syriacplatform.packagevalidation.PackageValidationTestFixture.validManifest
 import org.syriacplatform.common.types.Version
 import org.syriacplatform.packagevalidation.compatibility.CoreCompatibility
+import org.syriacplatform.packageformat.models.PackageProfile
+import org.syriacplatform.packagevalidation.PackageValidationTestFixture.allCollectionsPresent
 
 class PackageValidatorTest {
 
@@ -77,11 +79,17 @@ class PackageValidatorTest {
         val packageData = packageWith(
             manifest = validManifest().copy(
                 packageId = "",
+                profile = PackageProfile.FULL_LIBRARY,
                 compatibility =
                     validManifest().compatibility.copy(
                         minimumCoreVersion = "2.0.0"
                     )
             ),
+
+            collectionPresence =
+                allCollectionsPresent().copy(
+                    petgomos = false
+                ),
 
             entryPoints = listOf(
                 EntryPoint(
@@ -152,12 +160,12 @@ class PackageValidatorTest {
         assertFalse(report.isValid)
 
         assertEquals(
-            5,
+            6,
             report.issues.size
         )
 
         assertEquals(
-            5,
+            6,
             report.fatalIssues.size
         )
 
@@ -165,6 +173,7 @@ class PackageValidatorTest {
             setOf(
                 "manifest.packageId",
                 "manifest.compatibility.minimumCoreVersion",
+                "collectionPresence.petgomos",
                 "entryPoints[1].target",
                 "texts[id=25]",
                 "liturgicalItems[501].target.effectiveMelodyId"

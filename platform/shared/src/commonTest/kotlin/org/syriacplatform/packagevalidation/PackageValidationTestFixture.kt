@@ -17,6 +17,7 @@ import org.syriacplatform.packageformat.models.CompatibilityInfo
 import org.syriacplatform.packageformat.models.PackageManifest
 import org.syriacplatform.packageformat.models.PackageProfile
 import org.syriacplatform.packageformat.parsed.ParsedApplicationPackage
+import org.syriacplatform.packageformat.parsed.PackageCollectionPresence
 
 object PackageValidationTestFixture {
 
@@ -47,9 +48,25 @@ object PackageValidationTestFixture {
             )
         )
     }
-
+    fun allCollectionsPresent(): PackageCollectionPresence {
+        return PackageCollectionPresence(
+            entryPoints = true,
+            occasions = true,
+            prayers = true,
+            prayerSequences = true,
+            liturgicalItems = true,
+            texts = true,
+            qolos = true,
+            melodies = true,
+            qintos = true,
+            petgomos = true,
+            melodyQintoAssignments = true
+        )
+    }
     fun packageWith(
         manifest: PackageManifest = validManifest(),
+        collectionPresence: PackageCollectionPresence =
+            allCollectionsPresent(),
         entryPoints: List<EntryPoint> = emptyList(),
         occasions: List<Occasion> = emptyList(),
         prayers: List<Prayer> = emptyList(),
@@ -64,6 +81,7 @@ object PackageValidationTestFixture {
     ): ParsedApplicationPackage {
         return ParsedApplicationPackage(
             manifest = manifest,
+            collectionPresence = collectionPresence,
             entryPoints = entryPoints,
             occasions = occasions,
             prayers = prayers,

@@ -7,6 +7,7 @@ import org.syriacplatform.packagevalidation.validators.IntegrityValidator
 import org.syriacplatform.packagevalidation.validators.ManifestValidator
 import org.syriacplatform.packagevalidation.validators.ReferenceValidator
 import org.syriacplatform.packagevalidation.validators.SemanticValidator
+import org.syriacplatform.packagevalidation.validators.ProfileValidator
 
 /**
  * المنسق الأعلى لعملية التحقق من الحزمة بعد Parsing.
@@ -20,16 +21,18 @@ class PackageValidator(
     coreCompatibility: CoreCompatibility,
     private val manifestValidator: ManifestValidator =
         ManifestValidator(),
+    private val compatibilityValidator: CompatibilityValidator =
+        CompatibilityValidator(
+            coreCompatibility = coreCompatibility
+        ),
+    private val profileValidator: ProfileValidator =
+        ProfileValidator(),
     private val referenceValidator: ReferenceValidator =
         ReferenceValidator(),
     private val integrityValidator: IntegrityValidator =
         IntegrityValidator(),
     private val semanticValidator: SemanticValidator =
-        SemanticValidator(),
-    private val compatibilityValidator: CompatibilityValidator =
-        CompatibilityValidator(
-            coreCompatibility = coreCompatibility
-        )
+        SemanticValidator()
 ) {
 
     fun validate(
@@ -45,6 +48,12 @@ class PackageValidator(
             addAll(
                 compatibilityValidator.validate(
                     value.manifest
+                )
+            )
+
+            addAll(
+                profileValidator.validate(
+                    value
                 )
             )
 

@@ -18,9 +18,14 @@ import org.syriacplatform.packageformat.models.PackageManifest
  * وقبل Package Validation وRuntime Construction.
  *
  * لا يحل المراجع ولا يبني الفهارس.
+ *
+ * collectionPresence يحفظ معلومة وجود مجموعات المحتوى
+ * فعليًا في الحزمة الأصلية، بصورة مستقلة عن كون القوائم
+ * فارغة أو غير فارغة.
  */
 data class ParsedApplicationPackage(
     val manifest: PackageManifest,
+    val collectionPresence: PackageCollectionPresence,
     val entryPoints: List<EntryPoint>,
     val occasions: List<Occasion>,
     val prayers: List<Prayer>,
