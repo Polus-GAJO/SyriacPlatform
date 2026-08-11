@@ -749,44 +749,38 @@ Applications MUST NOT reinterpret unknown directories as canonical content.
 
 # 8. Physical Directory Layout
 
-Version 1.0 defines the following directory structure.
+A package conforming to Schema v1 SHALL use the following canonical
+directory structure:
 
 ```text
-Package Root
-│
+/
 ├── manifest.json
-│
-├── content
-│   ├── entry-points.json
-│   ├── occasions.json
-│   ├── days.json
-│   ├── prayers.json
-│   ├── prayer-sequences.json
-│   ├── liturgical-items.json
-│   ├── locations.json
-│   ├── groups.json
-│   ├── qolos.json
-│   ├── qintos.json
-│   ├── melodies.json
-│   ├── texts.json
-│   ├── petgome.json
-│   └── media-assets.json
-│
-├── indexes
-│   ├── search-index.json
-│   └── ...
-│
-└── media
-    ├── audio
-    ├── notation
-    ├── images
-    ├── documents
-    └── video
-```
+└── content/
+    ├── entry-points.json
+    ├── occasions.json
+    ├── prayers.json
+    ├── prayer-sequences.json
+    ├── liturgical-items.json
+    ├── texts.json
+    ├── petgomos.json
+    ├── qolos.json
+    ├── melodies.json
+    ├── qintos.json
+    └── melody-qinto-assignments.json
 
-This directory structure is normative.
+The files listed above constitute the canonical content collections
+defined by Schema v1.
 
-Implementations SHALL NOT rename canonical directories.
+Whether a collection file is required or optional depends on the
+declared package profile.
+
+A required collection SHALL be physically present in the package even
+when it contains no items.
+
+An optional collection MAY be absent.
+
+Collections reserved for future schema versions are not part of the
+active Schema v1 package layout.
 
 ---
 
@@ -810,28 +804,32 @@ Case variations are not permitted.
 
 ## 9.2 Fixed File Names
 
-Canonical entity collections SHALL use fixed filenames.
+Schema v1 defines the following canonical file names:
 
-```text
-entry-points.json
-occasions.json
-days.json
-prayers.json
-prayer-sequences.json
-liturgical-items.json
-locations.json
-groups.json
-qolos.json
-qintos.json
-melodies.json
-texts.json
-petgome.json
-media-assets.json
-```
+| Collection | Canonical file name |
+|---|---|
+| Entry points | `entry-points.json` |
+| Occasions | `occasions.json` |
+| Prayers | `prayers.json` |
+| Prayer sequences | `prayer-sequences.json` |
+| Liturgical items | `liturgical-items.json` |
+| Texts | `texts.json` |
+| Petgomos | `petgomos.json` |
+| Qolos | `qolos.json` |
+| Melodies | `melodies.json` |
+| Qintos | `qintos.json` |
+| Melody-Qinto assignments | `melody-qinto-assignments.json` |
 
-Applications SHALL locate entity collections by these names.
+These names are canonical and SHALL be used exactly as specified.
 
-Applications MUST NOT depend on application-specific filenames.
+Collection file names are lowercase, plural where applicable, and use
+kebab-case for compound names.
+
+Implementations SHALL NOT infer alternative file names for canonical
+Schema v1 collections.
+
+In particular, `petgomos.json` is the canonical Schema v1 file name for
+the Petgomo collection.
 
 ---
 
@@ -2516,7 +2514,45 @@ This profile represents the largest canonical package defined by Version 1.0.
 
 ---
 
-## 33.4 Future Profiles
+## 33.4 Profile Collection Matrix
+
+Schema v1 defines the following collection-presence requirements:
+
+| Collection | OCCASION | SHHIMA | FULL_LIBRARY |
+|---|---|---|---|
+| `entry-points.json` | Required | Required | Required |
+| `occasions.json` | Required | Optional | Required |
+| `prayers.json` | Required | Required | Required |
+| `prayer-sequences.json` | Required | Required | Required |
+| `liturgical-items.json` | Required | Required | Required |
+| `texts.json` | Required | Required | Required |
+| `qolos.json` | Optional | Optional | Required |
+| `melodies.json` | Optional | Optional | Required |
+| `qintos.json` | Optional | Optional | Required |
+| `petgomos.json` | Optional | Optional | Required |
+| `melody-qinto-assignments.json` | Optional | Optional | Required |
+
+For the purposes of Profile Validation:
+
+- **Required** means that the collection file SHALL be physically
+  present in the package.
+- A required collection MAY contain an empty `items` array.
+- **Optional** means that the collection file MAY be absent.
+- If an optional collection is present, it SHALL satisfy all applicable
+  structural, reference, integrity, and semantic validation rules.
+- An empty collection and an absent collection are distinct states.
+- The presence of a collection does not imply that every entity in the
+  package must participate in that collection's relationships.
+
+In particular, the presence of `qintos.json` or
+`melody-qinto-assignments.json` does not require every Melody to belong
+to the eight-Qinto system.
+
+Likewise, the presence of `petgomos.json` does not require every Qolo,
+Melody, Text, or LiturgicalItem to have a Petgomo.
+---
+
+## 33.5 Future Profiles
 
 Future schema versions MAY introduce additional Package Profiles.
 
@@ -2688,43 +2724,35 @@ These names SHALL remain identical across all conforming packages.
 
 ---
 
-## A.4 Reserved Canonical Collection Files
+### A.4 Reserved Canonical Collection Files
 
-Version 1.0 reserves the following canonical collection names.
+The following collection file names are reserved for future schema
+versions and are not active canonical collections in Schema v1:
 
 ```text
-entry-points.json
-
-occasions.json
-
 days.json
-
-prayers.json
-
-prayer-sequences.json
-
-liturgical-items.json
-
 locations.json
-
 groups.json
-
-qolos.json
-
-qintos.json
-
-melodies.json
-
-texts.json
-
-petgome.json
-
 media-assets.json
-```
 
-Future schema versions may introduce additional collection files.
+These names are reserved so that future schema versions may introduce
+the corresponding collections without conflicting with extension or
+vendor-defined file names.
 
-Existing filenames SHALL NOT be redefined.
+Schema v1 loaders SHALL NOT require these files.
+
+Their absence SHALL NOT cause Profile Validation failure in Schema v1.
+
+If support for any of these collections is introduced in a future
+schema version, that schema version SHALL define:
+
+its DTO and canonical data model,
+its mapping rules,
+its collection-presence requirements,
+its reference and integrity rules where applicable,
+and its Profile Matrix requirements.
+
+The canonical Schema v1 collection files are defined in Section 9.2.
 
 ---
 
