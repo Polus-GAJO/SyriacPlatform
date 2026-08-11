@@ -1,0 +1,25 @@
+{
+  "packageId": "syriac-platform-embedded",
+  "packageName": "Syriac Platform Embedded Package",
+  "schemaVersion": "1.0",
+  "packageVersion": "1.0.0",
+  "contentVersion": "1.0.0",
+  "application": {
+    "id": "syriac-platform",
+    "name": "Syriac Platform",
+    "platform": "multiplatform",
+    "defaultLanguage": "syr"
+  },
+  "profile": "occasion",
+  "build": {
+    "generatedAt": "2026-08-11T00:00:00Z",
+    "buildTool": "embedded-development-package",
+    "buildVersion": "1.0.0",
+    "buildRevision": "1"
+  },
+  "compatibility": {
+    "minimumCoreVersion": "1.0.0",
+    "targetSchemaVersion": "1.0",
+    "supportedFeatures": []
+  }
+}

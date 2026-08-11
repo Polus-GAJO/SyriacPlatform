@@ -6,15 +6,13 @@ import org.syriacplatform.common.types.RuntimeState
 import org.syriacplatform.content.contracts.ContentService
 import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.repository.ContentRepository
-import org.syriacplatform.content.repository.JsonContentRepository
 import org.syriacplatform.kernel.ServiceMetadata
 
 /**
  * التنفيذ الافتراضي لخدمة المحتوى.
  */
 class DefaultContentService(
-    private val repository: ContentRepository =
-        JsonContentRepository()
+    private val repository: ContentRepository
 ) : ContentService {
 
     override val metadata = ServiceMetadata(
