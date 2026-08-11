@@ -767,6 +767,7 @@ directory structure:
     ├── melodies.json
     ├── qintos.json
     └── melody-qinto-assignments.json
+```
 
 The files listed above constitute the canonical content collections
 defined by Schema v1.
