@@ -13,6 +13,8 @@ import org.syriacplatform.content.models.Occasion
 import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.runtime.RuntimeEntryPoint
 import org.syriacplatform.content.runtime.RuntimeOccasion
+import org.syriacplatform.common.types.LiturgicalItemId
+import org.syriacplatform.content.runtime.ResolvedLiturgicalItem
 
 class FakeContentRepository : ContentRepository {
 
@@ -121,6 +123,18 @@ class FakeContentRepository : ContentRepository {
         return Result.Success(
             listOf(
                 occasion
+            )
+        )
+    }
+
+    override suspend fun loadLiturgicalItem(
+        id: LiturgicalItemId
+    ): Result<ResolvedLiturgicalItem> {
+        return Result.Failure(
+            PlatformError(
+                code = ErrorCode.CONTENT_NOT_FOUND,
+                message =
+                    "LiturgicalItem was not found: ${id.value}"
             )
         )
     }

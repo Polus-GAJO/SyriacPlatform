@@ -9,6 +9,8 @@ import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.runtime.RuntimeEntryPoint
 import org.syriacplatform.content.runtime.RuntimeOccasion
 import org.syriacplatform.kernel.PlatformService
+import org.syriacplatform.common.types.LiturgicalItemId
+import org.syriacplatform.content.runtime.ResolvedLiturgicalItem
 
 /**
  * العقد الأساسي للوصول إلى المحتوى الليتورجي.
@@ -34,4 +36,8 @@ interface ContentService : PlatformService {
     suspend fun loadOccasion(
         occasionId: OccasionId
     ): Result<RuntimeOccasion>
+
+    suspend fun loadLiturgicalItem(
+        liturgicalItemId: LiturgicalItemId
+    ): Result<ResolvedLiturgicalItem>
 }

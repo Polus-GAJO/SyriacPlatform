@@ -71,14 +71,16 @@ class IntegrityAllowedDuplicatesTest {
                     id = LiturgicalItemId(501),
                     target = LiturgicalItemTarget.Qolo(
                         qoloId = QoloId(438),
-                        effectiveMelodyId = MelodyId(75)
+                        effectiveMelodyId = MelodyId(75),
+                        verses = emptyList()
                     )
                 ),
                 LiturgicalItem(
                     id = LiturgicalItemId(502),
                     target = LiturgicalItemTarget.Qolo(
                         qoloId = QoloId(438),
-                        effectiveMelodyId = MelodyId(75)
+                        effectiveMelodyId = MelodyId(75),
+                        verses = emptyList()
                     )
                 )
             )

@@ -149,7 +149,8 @@ class PackageValidatorTest {
                     id = LiturgicalItemId(501),
                     target = LiturgicalItemTarget.Qolo(
                         qoloId = QoloId(438),
-                        effectiveMelodyId = MelodyId(75)
+                        effectiveMelodyId = MelodyId(75),
+                        verses = emptyList()
                     )
                 )
             )

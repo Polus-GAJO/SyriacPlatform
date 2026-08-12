@@ -20,6 +20,7 @@ sealed interface LiturgicalItemTarget {
 
     data class Qolo(
         val qoloId: QoloId,
-        val effectiveMelodyId: MelodyId
+        val effectiveMelodyId: MelodyId,
+        val verses: List<LiturgicalTextRef>
     ) : LiturgicalItemTarget
 }

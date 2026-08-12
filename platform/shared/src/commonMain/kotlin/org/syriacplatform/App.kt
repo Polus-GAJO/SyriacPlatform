@@ -31,10 +31,10 @@ import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.runtime.ResolvedLiturgicalItem
 import org.syriacplatform.content.runtime.ResolvedLiturgicalItemTarget
 import org.syriacplatform.content.runtime.RuntimeOccasion
-import org.syriacplatform.content.runtime.RuntimePrayerSequence
 import org.syriacplatform.context.PlatformContext
 import org.syriacplatform.navigation.AppDestination
 import org.syriacplatform.common.types.PrayerSequenceId
+import org.syriacplatform.common.types.LiturgicalItemId
 
 @Composable
 fun App() {
@@ -51,6 +51,10 @@ fun App() {
 
     var selectedPrayerSequenceId by remember {
         mutableStateOf<PrayerSequenceId?>(null)
+    }
+
+    var selectedLiturgicalItemId by remember {
+        mutableStateOf<LiturgicalItemId?>(null)
     }
 
     var selectedQoloId by remember {
@@ -72,6 +76,35 @@ fun App() {
                         )
                     }
                 )
+            }
+
+            AppDestination.HYMN_DETAILS -> {
+                val liturgicalItemId =
+                    selectedLiturgicalItemId
+
+                if (liturgicalItemId != null) {
+                    HymnDetailsScreen(
+                        platform = platform,
+                        liturgicalItemId =
+                            liturgicalItemId,
+                        onBack = {
+                            selectedLiturgicalItemId =
+                                null
+
+                            platform.navigation.navigateTo(
+                                AppDestination.PRAYER_DETAILS
+                            )
+                        }
+                    )
+                } else {
+                    MissingHymnSelectionScreen(
+                        onBack = {
+                            platform.navigation.navigateTo(
+                                AppDestination.PRAYER_DETAILS
+                            )
+                        }
+                    )
+                }
             }
 
             AppDestination.OCCASION_DETAILS -> {
@@ -119,11 +152,12 @@ fun App() {
                         platform = platform,
                         occasionId = selectedOccasionId,
                         prayerSequenceId = prayerSequenceId,
-                        onOpenQolo = { qoloId ->
-                            selectedQoloId = qoloId
+                        onOpenHymn = { liturgicalItemId ->
+                            selectedLiturgicalItemId =
+                                liturgicalItemId
 
                             platform.navigation.navigateTo(
-                                AppDestination.QOLO_DETAILS
+                                AppDestination.HYMN_DETAILS
                             )
                         },
                         onBack = {
@@ -495,7 +529,7 @@ private fun PrayerDetailsScreen(
     platform: PlatformContext,
     occasionId: OccasionId?,
     prayerSequenceId: PrayerSequenceId,
-    onOpenQolo: (QoloId) -> Unit,
+    onOpenHymn: (LiturgicalItemId) -> Unit,
     onBack: () -> Unit
 ) {
     val occasionResult by
@@ -593,8 +627,8 @@ private fun PrayerDetailsScreen(
                                     item ->
                                 ResolvedLiturgicalItemView(
                                     item = item,
-                                    onOpenQolo =
-                                        onOpenQolo
+                                    onOpenHymn =
+                                        onOpenHymn
                                 )
                             }
                         }
@@ -657,7 +691,7 @@ private fun MissingPrayerSelectionScreen(
 @Composable
 private fun ResolvedLiturgicalItemView(
     item: ResolvedLiturgicalItem,
-    onOpenQolo: (QoloId) -> Unit
+    onOpenHymn: (LiturgicalItemId) -> Unit
 ) {
     when (
         val target =
@@ -697,8 +731,8 @@ private fun ResolvedLiturgicalItemView(
         is ResolvedLiturgicalItemTarget.Qolo -> {
             Button(
                 onClick = {
-                    onOpenQolo(
-                        target.qolo.id
+                    onOpenHymn(
+                        item.item.id
                     )
                 },
                 modifier = Modifier
@@ -714,10 +748,9 @@ private fun ResolvedLiturgicalItemView(
                         Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text =
-                            target.qolo.name,
+                        text = target.qolo.name,
                         style =
-                            MaterialTheme.typography.titleMedium,
+                            MaterialTheme.typography.titleLarge,
                         textAlign =
                             TextAlign.Center
                     )
@@ -736,9 +769,12 @@ private fun ResolvedLiturgicalItemView(
                     )
                 }
             }
+
+
+          }
         }
     }
-}
+
 
 @Composable
 private fun QoloDetailsScreen(
@@ -920,6 +956,177 @@ private fun MissingQoloSelectionScreen(
             Text(
                 text = "Back"
             )
+        }
+    }
+}
+
+@Composable
+private fun HymnDetailsScreen(
+    platform: PlatformContext,
+    liturgicalItemId: LiturgicalItemId,
+    onBack: () -> Unit
+) {
+    val itemResult by
+    produceState<Result<ResolvedLiturgicalItem>?>(
+        initialValue = null,
+        key1 = platform,
+        key2 = liturgicalItemId
+    ) {
+        value =
+            platform.content.loadLiturgicalItem(
+                liturgicalItemId
+            )
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                MaterialTheme.colorScheme.primaryContainer
+            )
+            .padding(24.dp)
+    ) {
+        when (
+            val result = itemResult
+        ) {
+            null -> {
+                Text(
+                    text = "Loading..."
+                )
+            }
+
+            is Result.Failure -> {
+                Text(
+                    text =
+                        result.error.message
+                            ?: "Hymn loading failed"
+                )
+            }
+
+            is Result.Success -> {
+                val target =
+                    result.data.target
+
+                if (
+                    target is
+                            ResolvedLiturgicalItemTarget.Qolo
+                ) {
+                    Text(
+                        text = target.qolo.name,
+                        style =
+                            MaterialTheme.typography.headlineMedium
+                    )
+
+                    Text(
+                        text =
+                            target.effectiveMelody.name,
+                        modifier =
+                            Modifier.padding(
+                                top = 6.dp,
+                                bottom = 20.dp
+                            ),
+                        style =
+                            MaterialTheme.typography.titleMedium
+                    )
+
+                    if (target.verses.isEmpty()) {
+                        Text(
+                            text =
+                                "No verses available"
+                        )
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            verticalArrangement =
+                                Arrangement.spacedBy(
+                                    12.dp
+                                )
+                        ) {
+                            items(
+                                target.verses
+                            ) { verse ->
+                                Column(
+                                    modifier =
+                                        Modifier.fillMaxWidth()
+                                ) {
+                                    Text(
+                                        text =
+                                            verse.text.syriac,
+                                        style =
+                                            MaterialTheme.typography.bodyLarge
+                                    )
+
+                                    verse.petgomo?.let {
+                                            petgomo ->
+                                        Text(
+                                            text =
+                                                petgomo.syriac,
+                                            modifier =
+                                                Modifier.padding(
+                                                    top = 4.dp
+                                                ),
+                                            style =
+                                                MaterialTheme.typography.bodyMedium
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    Text(
+                        text =
+                            "Selected liturgical item is not a Qolo."
+                    )
+                }
+            }
+        }
+
+        Button(
+            onClick = onBack,
+            modifier =
+                Modifier.padding(
+                    top = 24.dp
+                )
+        ) {
+            Text("Back")
+        }
+    }
+}
+
+@Composable
+private fun MissingHymnSelectionScreen(
+    onBack: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                MaterialTheme.colorScheme.primaryContainer
+            )
+            .padding(24.dp),
+        verticalArrangement =
+            Arrangement.Center,
+        horizontalAlignment =
+            Alignment.CenterHorizontally
+    ) {
+        Text(
+            text =
+                "No Hymn was selected.",
+            textAlign =
+                TextAlign.Center
+        )
+
+        Button(
+            onClick = onBack,
+            modifier =
+                Modifier.padding(
+                    top = 24.dp
+                )
+        ) {
+            Text("Back")
         }
     }
 }

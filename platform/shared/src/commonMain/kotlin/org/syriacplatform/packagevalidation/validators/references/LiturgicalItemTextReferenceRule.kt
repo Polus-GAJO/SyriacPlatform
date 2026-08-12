@@ -8,8 +8,12 @@ import org.syriacplatform.packagevalidation.ValidationIssue
 import org.syriacplatform.packagevalidation.ValidationSeverity
 
 /**
- * يتحقق من أن كل LiturgicalItem من نوع Text
- * يشير إلى TextContent موجود فعليًا في الحزمة.
+ * يتحقق من أن جميع مراجع Text داخل LiturgicalItem
+ * تشير إلى TextContent موجود فعليًا في الحزمة.
+ *
+ * يشمل:
+ * - Text المستقل.
+ * - أبيات Qolo المرتبة.
  */
 class LiturgicalItemTextReferenceRule :
     PackageValidationRule<ParsedApplicationPackage> {
@@ -24,24 +28,61 @@ class LiturgicalItemTextReferenceRule :
 
         return buildList {
             value.liturgicalItems.forEach { item ->
-                val target = item.target
-
-                if (
-                    target is LiturgicalItemTarget.Text &&
-                    target.textId !in textIds
+                when (
+                    val target = item.target
                 ) {
-                    add(
-                        ValidationIssue(
-                            severity = ValidationSeverity.FATAL,
-                            code = ErrorCode.INVALID_REFERENCE,
-                            message =
-                                "Liturgical item ${item.id.value} " +
-                                        "references missing text " +
-                                        "${target.textId.value}.",
-                            location =
-                                "liturgicalItems[${item.id.value}].target.textId"
-                        )
-                    )
+                    is LiturgicalItemTarget.Text -> {
+                        if (
+                            target.textId !in textIds
+                        ) {
+                            add(
+                                ValidationIssue(
+                                    severity =
+                                        ValidationSeverity.FATAL,
+                                    code =
+                                        ErrorCode.INVALID_REFERENCE,
+                                    message =
+                                        "Liturgical item ${item.id.value} " +
+                                                "references missing text " +
+                                                "${target.textId.value}.",
+                                    location =
+                                        "liturgicalItems[${item.id.value}]" +
+                                                ".target.textId"
+                                )
+                            )
+                        }
+                    }
+
+                    is LiturgicalItemTarget.Qolo -> {
+                        target.verses.forEachIndexed {
+                                index,
+                                verse ->
+
+                            if (
+                                verse.textId !in textIds
+                            ) {
+                                add(
+                                    ValidationIssue(
+                                        severity =
+                                            ValidationSeverity.FATAL,
+                                        code =
+                                            ErrorCode.INVALID_REFERENCE,
+                                        message =
+                                            "Liturgical item " +
+                                                    "${item.id.value} " +
+                                                    "verse $index references " +
+                                                    "missing text " +
+                                                    "${verse.textId.value}.",
+                                        location =
+                                            "liturgicalItems" +
+                                                    "[${item.id.value}]" +
+                                                    ".target.verses[$index]" +
+                                                    ".textId"
+                                    )
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

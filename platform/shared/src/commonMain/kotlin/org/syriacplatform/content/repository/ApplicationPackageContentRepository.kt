@@ -15,6 +15,8 @@ import org.syriacplatform.content.runtime.RuntimeEntryPoint
 import org.syriacplatform.content.runtime.RuntimeOccasion
 import org.syriacplatform.content.models.EntryPoint
 import org.syriacplatform.content.models.Occasion
+import org.syriacplatform.common.types.LiturgicalItemId
+import org.syriacplatform.content.runtime.ResolvedLiturgicalItem
 
 /**
  * ContentRepository يعتمد على Application Package الكاملة
@@ -202,6 +204,27 @@ class ApplicationPackageContentRepository(
                         .content
                         .occasions
                 )
+
+            is Result.Failure ->
+                storeResult
+        }
+    }
+
+    override suspend fun loadLiturgicalItem(
+        id: LiturgicalItemId
+    ): Result<ResolvedLiturgicalItem> {
+
+        return when (
+            val storeResult = loadStore()
+        ) {
+            is Result.Success -> {
+                val resolver =
+                    RuntimeContentResolver(
+                        store = storeResult.data
+                    )
+
+                resolver.resolveLiturgicalItem(id)
+            }
 
             is Result.Failure ->
                 storeResult

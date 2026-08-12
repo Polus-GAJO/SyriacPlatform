@@ -8,6 +8,8 @@ import org.syriacplatform.content.models.Occasion
 import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.runtime.RuntimeEntryPoint
 import org.syriacplatform.content.runtime.RuntimeOccasion
+import org.syriacplatform.common.types.LiturgicalItemId
+import org.syriacplatform.content.runtime.ResolvedLiturgicalItem
 
 interface ContentRepository {
 
@@ -30,4 +32,8 @@ interface ContentRepository {
     suspend fun loadOccasion(
         id: OccasionId
     ): Result<RuntimeOccasion>
+
+    suspend fun loadLiturgicalItem(
+        id: LiturgicalItemId
+    ): Result<ResolvedLiturgicalItem>
 }

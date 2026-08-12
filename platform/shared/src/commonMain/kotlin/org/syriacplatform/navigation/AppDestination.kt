@@ -4,5 +4,6 @@ enum class AppDestination {
     HOME,
     OCCASION_DETAILS,
     PRAYER_DETAILS,
+    HYMN_DETAILS,
     QOLO_DETAILS
 }

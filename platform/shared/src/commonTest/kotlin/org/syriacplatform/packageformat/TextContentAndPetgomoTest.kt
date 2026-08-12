@@ -18,6 +18,10 @@ import org.syriacplatform.packageformat.dto.PackageCollectionJsonDto
 import org.syriacplatform.packageformat.dto.PetgomoJsonDto
 import org.syriacplatform.packageformat.dto.TextContentJsonDto
 import org.syriacplatform.packageformat.mappers.toDomain
+import org.syriacplatform.common.types.MelodyId
+import org.syriacplatform.common.types.QoloId
+import org.syriacplatform.content.models.LiturgicalTextRef
+import org.syriacplatform.packageformat.dto.LiturgicalTextRefJsonDto
 
 class TextContentAndPetgomoTest {
 
@@ -160,10 +164,75 @@ class TextContentAndPetgomoTest {
         )
 
         assertEquals(
-            "Qolo liturgical item must not declare petgomoId: 503",
+            "Qolo liturgical item must not declare top-level petgomoId: 503",
             failure.error.message
         )
     }
+
+    @Test
+    fun qoloMapsOrderedVersesWithContextualPetgomo() {
+        val dto =
+            LiturgicalItemJsonDto(
+                id = 504,
+                type = "qolo",
+                targetId = 438,
+                effectiveMelodyId = 75,
+                verses = listOf(
+                    LiturgicalTextRefJsonDto(
+                        textId = 1001,
+                        petgomoId = 15
+                    ),
+                    LiturgicalTextRefJsonDto(
+                        textId = 1002
+                    ),
+                    LiturgicalTextRefJsonDto(
+                        textId = 1001,
+                        petgomoId = 16
+                    )
+                )
+            )
+
+        val result = dto.toDomain()
+
+        val success =
+            assertIs<Result.Success<LiturgicalItem>>(
+                result
+            )
+
+        val target =
+            assertIs<LiturgicalItemTarget.Qolo>(
+                success.data.target
+            )
+
+        assertEquals(
+            QoloId(438),
+            target.qoloId
+        )
+
+        assertEquals(
+            MelodyId(75),
+            target.effectiveMelodyId
+        )
+
+        assertEquals(
+            listOf(
+                LiturgicalTextRef(
+                    textId = TextId(1001),
+                    petgomoId = PetgomoId(15)
+                ),
+                LiturgicalTextRef(
+                    textId = TextId(1002),
+                    petgomoId = null
+                ),
+                LiturgicalTextRef(
+                    textId = TextId(1001),
+                    petgomoId = PetgomoId(16)
+                )
+            ),
+            target.verses
+        )
+    }
+
 
     private companion object {
 

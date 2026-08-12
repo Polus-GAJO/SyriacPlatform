@@ -27,6 +27,7 @@ import org.syriacplatform.content.models.PrayerSequence
 import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.models.TextContent
 import org.syriacplatform.packagevalidation.PackageValidationTestFixture.packageWith
+import org.syriacplatform.content.models.LiturgicalTextRef
 
 class RuntimeContentResolverTest {
 
@@ -110,8 +111,17 @@ class RuntimeContentResolverTest {
                         target =
                             LiturgicalItemTarget.Qolo(
                                 qoloId = QoloId(801),
-                                effectiveMelodyId =
-                                    MelodyId(901)
+                                effectiveMelodyId = MelodyId(901),
+                                verses = listOf(
+                                    LiturgicalTextRef(
+                                        textId = TextId(601),
+                                        petgomoId = PetgomoId(701)
+                                    ),
+                                    LiturgicalTextRef(
+                                        textId = TextId(601),
+                                        petgomoId = null
+                                    )
+                                )
                             )
                     )
                 ),
@@ -280,8 +290,36 @@ class RuntimeContentResolverTest {
         )
 
         assertEquals(
+            2,
+            secondTarget.verses.size
+        )
+
+        assertEquals(
             QoloId(801),
             secondTarget.effectiveMelody.qoloId
+        )
+
+        /*
+         * أبيات الترتيلة نفسها تحفظ الترتيب والتكرار،
+         * ويحتفظ كل ظهور بسياق Petgomo الخاص به.
+         */
+        assertEquals(
+            TextId(601),
+            secondTarget.verses[0].text.id
+        )
+
+        assertEquals(
+            PetgomoId(701),
+            secondTarget.verses[0].petgomo?.id
+        )
+
+        assertEquals(
+            TextId(601),
+            secondTarget.verses[1].text.id
+        )
+
+        assertNull(
+            secondTarget.verses[1].petgomo
         )
 
         /*

@@ -138,7 +138,8 @@ class ReferenceValidatorTest {
                     id = LiturgicalItemId(502),
                     target = LiturgicalItemTarget.Qolo(
                         qoloId = QoloId(999),
-                        effectiveMelodyId = MelodyId(777)
+                        effectiveMelodyId = MelodyId(777),
+                        verses = emptyList()
                     )
                 ),
                 LiturgicalItem(

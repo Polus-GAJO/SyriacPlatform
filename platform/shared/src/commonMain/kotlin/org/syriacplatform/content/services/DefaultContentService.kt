@@ -12,6 +12,8 @@ import org.syriacplatform.content.runtime.RuntimeEntryPoint
 import org.syriacplatform.content.runtime.RuntimeOccasion
 import org.syriacplatform.content.models.EntryPoint
 import org.syriacplatform.content.models.Occasion
+import org.syriacplatform.common.types.LiturgicalItemId
+import org.syriacplatform.content.runtime.ResolvedLiturgicalItem
 
 /**
  * التنفيذ الافتراضي لخدمة المحتوى.
@@ -64,5 +66,13 @@ class DefaultContentService(
     override suspend fun loadOccasions():
             Result<List<Occasion>> {
         return repository.loadOccasions()
+    }
+
+    override suspend fun loadLiturgicalItem(
+        liturgicalItemId: LiturgicalItemId
+    ): Result<ResolvedLiturgicalItem> {
+        return repository.loadLiturgicalItem(
+            liturgicalItemId
+        )
     }
 }

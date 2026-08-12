@@ -12,7 +12,17 @@
       "type": "qolo",
       "targetId": 438,
       "effectiveMelodyId": 1,
-      "petgomoId": null
+      "petgomoId": null,
+      "verses": [
+        {
+          "textId": 1,
+          "petgomoId": null
+        },
+        {
+          "textId": 1,
+          "petgomoId": null
+        }
+      ]
     }
   ]
 }

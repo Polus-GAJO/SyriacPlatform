@@ -3,7 +3,7 @@ package org.syriacplatform.content.runtime
 import org.syriacplatform.content.models.LiturgicalItem
 import org.syriacplatform.content.models.Melody
 import org.syriacplatform.content.models.Petgomo
-import org.syriacplatform.content.models.Qolo
+import org.syriacplatform.content.models.Qolo as ContentQolo
 import org.syriacplatform.content.models.TextContent
 
 /**
@@ -15,17 +15,38 @@ data class ResolvedLiturgicalItem(
 )
 
 /**
+ * بيت نصي بعد حل مراجع ظهوره الليتورجي.
+ *
+ * يمكن أن يظهر TextContent نفسه عدة مرات داخل
+ * الترتيلة، وكل ظهور يحتفظ بـ Petgomo الخاصة به.
+ */
+data class ResolvedLiturgicalText(
+    val text: TextContent,
+    val petgomo: Petgomo?
+)
+
+/**
  * الهدف الفعلي الجاهز للاستهلاك داخل Runtime.
  */
 sealed interface ResolvedLiturgicalItemTarget {
 
+    /**
+     * نص مستقل داخل التسلسل الليتورجي.
+     */
     data class Text(
         val text: TextContent,
         val petgomo: Petgomo?
     ) : ResolvedLiturgicalItemTarget
 
+    /**
+     * ظهور ترتيلة Qolo داخل السياق الليتورجي.
+     *
+     * verses تحفظ الأبيات المحلولة بالترتيب نفسه
+     * المحدد في LiturgicalItemTarget.Qolo.
+     */
     data class Qolo(
-        val qolo: org.syriacplatform.content.models.Qolo,
-        val effectiveMelody: Melody
+        val qolo: ContentQolo,
+        val effectiveMelody: Melody,
+        val verses: List<ResolvedLiturgicalText>
     ) : ResolvedLiturgicalItemTarget
 }

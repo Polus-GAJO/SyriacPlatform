@@ -11,6 +11,7 @@ import org.syriacplatform.common.types.TextId
 import org.syriacplatform.content.models.LiturgicalItem
 import org.syriacplatform.content.models.LiturgicalItemTarget
 import org.syriacplatform.packageformat.dto.LiturgicalItemJsonDto
+import org.syriacplatform.content.models.LiturgicalTextRef
 
 /**
  * يحول العنصر الليتورجي من البنية الفيزيائية
@@ -30,6 +31,16 @@ internal fun LiturgicalItemJsonDto.toDomain(): Result<LiturgicalItem> {
                 )
             }
 
+            if (verses.isNotEmpty()) {
+                return Result.Failure(
+                    PlatformError(
+                        code = ErrorCode.INVALID_PACKAGE_DATA,
+                        message =
+                            "Text liturgical item must not declare verses: $id"
+                    )
+                )
+            }
+
             LiturgicalItemTarget.Text(
                 textId = TextId(targetId),
                 petgomoId = petgomoId?.let(::PetgomoId)
@@ -43,7 +54,7 @@ internal fun LiturgicalItemJsonDto.toDomain(): Result<LiturgicalItem> {
                         code = ErrorCode.INVALID_PACKAGE_DATA,
                         message =
                             "Qolo liturgical item must not declare " +
-                                    "petgomoId: $id"
+                                    "top-level petgomoId: $id"
                     )
                 )
             }
@@ -60,7 +71,19 @@ internal fun LiturgicalItemJsonDto.toDomain(): Result<LiturgicalItem> {
 
             LiturgicalItemTarget.Qolo(
                 qoloId = QoloId(targetId),
-                effectiveMelodyId = MelodyId(melodyId)
+                effectiveMelodyId = MelodyId(melodyId),
+                verses =
+                    verses.map { verse ->
+                        LiturgicalTextRef(
+                            textId = TextId(
+                                verse.textId
+                            ),
+                            petgomoId =
+                                verse.petgomoId?.let(
+                                    ::PetgomoId
+                                )
+                        )
+                    }
             )
         }
 
