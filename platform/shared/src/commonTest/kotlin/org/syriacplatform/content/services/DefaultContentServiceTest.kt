@@ -10,6 +10,8 @@ import org.syriacplatform.common.types.OccasionId
 import org.syriacplatform.content.repository.FakeContentRepository
 import org.syriacplatform.content.runtime.RuntimeEntryPoint
 import org.syriacplatform.content.runtime.RuntimeOccasion
+import org.syriacplatform.content.models.EntryPoint
+import org.syriacplatform.content.models.Occasion
 
 class DefaultContentServiceTest {
 
@@ -65,6 +67,54 @@ class DefaultContentServiceTest {
             assertEquals(
                 "Test Occasion",
                 success.data.occasion.name
+            )
+        }
+
+    @Test
+    fun loadEntryPointsReturnsAvailableEntryPoints() =
+        runTest {
+            val result =
+                service.loadEntryPoints()
+
+            val success =
+                assertIs<
+                        Result.Success<List<EntryPoint>>
+                        >(
+                    result
+                )
+
+            assertEquals(
+                1,
+                success.data.size
+            )
+
+            assertEquals(
+                EntryPointId(1),
+                success.data.single().id
+            )
+        }
+
+    @Test
+    fun loadOccasionsReturnsAvailableOccasions() =
+        runTest {
+            val result =
+                service.loadOccasions()
+
+            val success =
+                assertIs<
+                        Result.Success<List<Occasion>>
+                        >(
+                    result
+                )
+
+            assertEquals(
+                1,
+                success.data.size
+            )
+
+            assertEquals(
+                OccasionId(1),
+                success.data.single().id
             )
         }
 }

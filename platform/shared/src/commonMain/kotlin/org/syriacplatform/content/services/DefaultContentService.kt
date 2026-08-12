@@ -10,6 +10,8 @@ import org.syriacplatform.kernel.ServiceMetadata
 import org.syriacplatform.common.types.OccasionId
 import org.syriacplatform.content.runtime.RuntimeEntryPoint
 import org.syriacplatform.content.runtime.RuntimeOccasion
+import org.syriacplatform.content.models.EntryPoint
+import org.syriacplatform.content.models.Occasion
 
 /**
  * التنفيذ الافتراضي لخدمة المحتوى.
@@ -52,5 +54,15 @@ class DefaultContentService(
         return repository.loadOccasion(
             occasionId
         )
+    }
+
+    override suspend fun loadEntryPoints():
+            Result<List<EntryPoint>> {
+        return repository.loadEntryPoints()
+    }
+
+    override suspend fun loadOccasions():
+            Result<List<Occasion>> {
+        return repository.loadOccasions()
     }
 }

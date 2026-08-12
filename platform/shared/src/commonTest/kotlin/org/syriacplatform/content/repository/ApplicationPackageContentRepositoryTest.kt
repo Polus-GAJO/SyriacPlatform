@@ -13,6 +13,8 @@ import org.syriacplatform.packageformat.loading.PackageSource
 import org.syriacplatform.packagevalidation.compatibility.CoreCompatibility
 import org.syriacplatform.common.types.EntryPointId
 import org.syriacplatform.common.types.OccasionId
+import org.syriacplatform.content.models.EntryPoint
+import org.syriacplatform.content.models.Occasion
 
 class ApplicationPackageContentRepositoryTest {
 
@@ -142,6 +144,60 @@ class ApplicationPackageContentRepositoryTest {
             )
         }
 
+    @Test
+    fun loadEntryPointsReturnsPackageEntryPoints() =
+        runTest {
+            val repository =
+                createRuntimeTraversalRepository()
+
+            val result =
+                repository.loadEntryPoints()
+
+            val success =
+                assertIs<
+                        Result.Success<List<EntryPoint>>
+                        >(
+                    result
+                )
+
+            assertEquals(
+                1,
+                success.data.size
+            )
+
+            assertEquals(
+                EntryPointId(101),
+                success.data.single().id
+            )
+        }
+
+    @Test
+    fun loadOccasionsReturnsPackageOccasions() =
+        runTest {
+            val repository =
+                createRuntimeTraversalRepository()
+
+            val result =
+                repository.loadOccasions()
+
+            val success =
+                assertIs<
+                        Result.Success<List<Occasion>>
+                        >(
+                    result
+                )
+
+            assertEquals(
+                1,
+                success.data.size
+            )
+
+            assertEquals(
+                OccasionId(201),
+                success.data.single().id
+            )
+        }
+
     private fun createRepository():
             ApplicationPackageContentRepository {
 
@@ -261,18 +317,18 @@ class ApplicationPackageContentRepositoryTest {
 
                     PackagePaths.ENTRY_POINTS to
                             """
-    {
-      "items": [
-        {
-          "id": 101,
-          "name": "Main Entry Point",
-          "type": "occasion",
-          "targetId": 201,
-          "default": true
-        }
-      ]
-    }
-    """.trimIndent()
+                    {
+                     "items": [
+                       {
+                         "id": 101,
+                         "name": "Main Entry Point",
+                         "type": "occasion",
+                         "targetId": 201,
+                         "default": true
+                       }
+                     ]
+                    }
+                    """.trimIndent()
                                 .encodeToByteArray(),
 
                     PackagePaths.OCCASIONS to

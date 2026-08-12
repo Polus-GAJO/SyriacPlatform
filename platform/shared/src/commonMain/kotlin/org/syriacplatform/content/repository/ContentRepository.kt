@@ -3,6 +3,8 @@ package org.syriacplatform.content.repository
 import org.syriacplatform.common.result.Result
 import org.syriacplatform.common.types.OccasionId
 import org.syriacplatform.common.types.QoloId
+import org.syriacplatform.content.models.EntryPoint
+import org.syriacplatform.content.models.Occasion
 import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.runtime.RuntimeEntryPoint
 import org.syriacplatform.content.runtime.RuntimeOccasion
@@ -15,6 +17,12 @@ interface ContentRepository {
 
     suspend fun loadAllQolos():
             Result<List<Qolo>>
+
+    suspend fun loadEntryPoints():
+            Result<List<EntryPoint>>
+
+    suspend fun loadOccasions():
+            Result<List<Occasion>>
 
     suspend fun loadDefaultEntryPoint():
             Result<RuntimeEntryPoint>

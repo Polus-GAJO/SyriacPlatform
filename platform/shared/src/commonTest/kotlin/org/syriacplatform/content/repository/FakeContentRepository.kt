@@ -106,4 +106,22 @@ class FakeContentRepository : ContentRepository {
             )
         }
     }
+
+    override suspend fun loadEntryPoints():
+            Result<List<EntryPoint>> {
+        return Result.Success(
+            listOf(
+                defaultEntryPoint.entryPoint
+            )
+        )
+    }
+
+    override suspend fun loadOccasions():
+            Result<List<Occasion>> {
+        return Result.Success(
+            listOf(
+                occasion
+            )
+        )
+    }
 }

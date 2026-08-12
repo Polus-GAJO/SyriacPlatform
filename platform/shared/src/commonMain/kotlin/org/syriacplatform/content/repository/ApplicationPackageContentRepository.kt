@@ -13,6 +13,8 @@ import org.syriacplatform.common.types.OccasionId
 import org.syriacplatform.content.runtime.RuntimeContentResolver
 import org.syriacplatform.content.runtime.RuntimeEntryPoint
 import org.syriacplatform.content.runtime.RuntimeOccasion
+import org.syriacplatform.content.models.EntryPoint
+import org.syriacplatform.content.models.Occasion
 
 /**
  * ContentRepository يعتمد على Application Package الكاملة
@@ -162,6 +164,44 @@ class ApplicationPackageContentRepository(
 
                 resolver.resolveOccasion(id)
             }
+
+            is Result.Failure ->
+                storeResult
+        }
+    }
+
+    override suspend fun loadEntryPoints():
+            Result<List<EntryPoint>> {
+
+        return when (
+            val storeResult =
+                loadStore()
+        ) {
+            is Result.Success ->
+                Result.Success(
+                    storeResult.data
+                        .content
+                        .entryPoints
+                )
+
+            is Result.Failure ->
+                storeResult
+        }
+    }
+
+    override suspend fun loadOccasions():
+            Result<List<Occasion>> {
+
+        return when (
+            val storeResult =
+                loadStore()
+        ) {
+            is Result.Success ->
+                Result.Success(
+                    storeResult.data
+                        .content
+                        .occasions
+                )
 
             is Result.Failure ->
                 storeResult
