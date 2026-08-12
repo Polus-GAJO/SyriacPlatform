@@ -24,10 +24,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.syriacplatform.bootstrap.PlatformBootstrap
 import org.syriacplatform.common.result.Result
+import org.syriacplatform.common.types.OccasionId
 import org.syriacplatform.common.types.QoloId
+import org.syriacplatform.content.models.Occasion
 import org.syriacplatform.content.models.Qolo
+import org.syriacplatform.content.runtime.ResolvedLiturgicalItem
+import org.syriacplatform.content.runtime.ResolvedLiturgicalItemTarget
+import org.syriacplatform.content.runtime.RuntimeOccasion
+import org.syriacplatform.content.runtime.RuntimePrayerSequence
 import org.syriacplatform.context.PlatformContext
 import org.syriacplatform.navigation.AppDestination
+import org.syriacplatform.common.types.PrayerSequenceId
 
 @Composable
 fun App() {
@@ -38,34 +45,54 @@ fun App() {
     val navigationState by
     platform.navigation.state.collectAsState()
 
+    var selectedOccasionId by remember {
+        mutableStateOf<OccasionId?>(null)
+    }
+
+    var selectedPrayerSequenceId by remember {
+        mutableStateOf<PrayerSequenceId?>(null)
+    }
+
     var selectedQoloId by remember {
         mutableStateOf<QoloId?>(null)
     }
 
     MaterialTheme {
         when (navigationState.currentDestination) {
+
             AppDestination.HOME -> {
                 HomeScreen(
                     platform = platform,
-                    onOpenQolo = { qoloId ->
-                        selectedQoloId = qoloId
+                    onOpenOccasion = { occasionId ->
+                        selectedOccasionId =
+                            occasionId
 
                         platform.navigation.navigateTo(
-                            AppDestination.QOLO_DETAILS
+                            AppDestination.OCCASION_DETAILS
                         )
                     }
                 )
             }
 
-            AppDestination.QOLO_DETAILS -> {
-                val qoloId = selectedQoloId
+            AppDestination.OCCASION_DETAILS -> {
+                val occasionId =
+                    selectedOccasionId
 
-                if (qoloId != null) {
-                    QoloDetailsScreen(
+                if (occasionId != null) {
+                    OccasionDetailsScreen(
                         platform = platform,
-                        qoloId = qoloId,
+                        occasionId = occasionId,
+                        onOpenPrayer = { prayerSequenceId ->
+                            selectedPrayerSequenceId =
+                                prayerSequenceId
+
+                            platform.navigation.navigateTo(
+                                AppDestination.PRAYER_DETAILS
+                            )
+                        },
                         onBack = {
-                            selectedQoloId = null
+                            selectedOccasionId = null
+                            selectedPrayerSequenceId = null
 
                             platform.navigation.navigateTo(
                                 AppDestination.HOME
@@ -73,11 +100,86 @@ fun App() {
                         }
                     )
                 } else {
-                    MissingQoloSelectionScreen(
+                    MissingOccasionSelectionScreen(
                         onBack = {
                             platform.navigation.navigateTo(
                                 AppDestination.HOME
                             )
+                        }
+                    )
+                }
+            }
+
+            AppDestination.PRAYER_DETAILS -> {
+                val prayerSequenceId =
+                    selectedPrayerSequenceId
+
+                if (prayerSequenceId != null) {
+                    PrayerDetailsScreen(
+                        platform = platform,
+                        occasionId = selectedOccasionId,
+                        prayerSequenceId = prayerSequenceId,
+                        onOpenQolo = { qoloId ->
+                            selectedQoloId = qoloId
+
+                            platform.navigation.navigateTo(
+                                AppDestination.QOLO_DETAILS
+                            )
+                        },
+                        onBack = {
+                            selectedPrayerSequenceId = null
+
+                            platform.navigation.navigateTo(
+                                AppDestination.OCCASION_DETAILS
+                            )
+                        }
+                    )
+                } else {
+                    MissingPrayerSelectionScreen(
+                        onBack = {
+                            platform.navigation.navigateTo(
+                                AppDestination.OCCASION_DETAILS
+                            )
+                        }
+                    )
+                }
+            }
+
+            AppDestination.QOLO_DETAILS -> {
+                val qoloId =
+                    selectedQoloId
+
+                if (qoloId != null) {
+                    QoloDetailsScreen(
+                        platform = platform,
+                        qoloId = qoloId,
+                        onBack = {
+                            selectedQoloId =
+                                null
+
+                            if (selectedOccasionId != null) {
+                                platform.navigation.navigateTo(
+                                    AppDestination.OCCASION_DETAILS
+                                )
+                            } else {
+                                platform.navigation.navigateTo(
+                                    AppDestination.HOME
+                                )
+                            }
+                        }
+                    )
+                } else {
+                    MissingQoloSelectionScreen(
+                        onBack = {
+                            if (selectedOccasionId != null) {
+                                platform.navigation.navigateTo(
+                                    AppDestination.OCCASION_DETAILS
+                                )
+                            } else {
+                                platform.navigation.navigateTo(
+                                    AppDestination.HOME
+                                )
+                            }
                         }
                     )
                 }
@@ -89,13 +191,15 @@ fun App() {
 @Composable
 private fun HomeScreen(
     platform: PlatformContext,
-    onOpenQolo: (QoloId) -> Unit
+    onOpenOccasion: (OccasionId) -> Unit
 ) {
-    val qolosResult by produceState<Result<List<Qolo>>?>(
+    val occasionsResult by
+    produceState<Result<List<Occasion>>?>(
         initialValue = null,
         key1 = platform
     ) {
-        value = platform.content.loadAllQolos()
+        value =
+            platform.content.loadOccasions()
     }
 
     Column(
@@ -105,24 +209,28 @@ private fun HomeScreen(
                 MaterialTheme.colorScheme.primaryContainer
             )
             .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment =
+            Alignment.CenterHorizontally
     ) {
         Text(
             text = "SyriacPlatform",
-            style = MaterialTheme.typography.headlineMedium
+            style =
+                MaterialTheme.typography.headlineMedium
         )
 
         Text(
-            text = "Qolos",
+            text = "Occasions",
             modifier = Modifier.padding(
                 top = 8.dp,
                 bottom = 24.dp
             ),
-            style = MaterialTheme.typography.titleLarge
+            style =
+                MaterialTheme.typography.titleLarge
         )
 
         when (
-            val result = qolosResult
+            val result =
+                occasionsResult
         ) {
             null -> {
                 Text(
@@ -132,18 +240,22 @@ private fun HomeScreen(
 
             is Result.Failure -> {
                 Text(
-                    text = result.error.message
-                        ?: "Qolos loading failed",
-                    textAlign = TextAlign.Center
+                    text =
+                        result.error.message
+                            ?: "Occasions loading failed",
+                    textAlign =
+                        TextAlign.Center
                 )
             }
 
-            is Result.Success<List<Qolo>> -> {
-                val qolos = result.data
+            is Result.Success -> {
+                val occasions =
+                    result.data
 
-                if (qolos.isEmpty()) {
+                if (occasions.isEmpty()) {
                     Text(
-                        text = "No Qolos available"
+                        text =
+                            "No Occasions available"
                     )
                 } else {
                     LazyColumn(
@@ -151,13 +263,19 @@ private fun HomeScreen(
                             .fillMaxWidth()
                             .weight(1f),
                         verticalArrangement =
-                            Arrangement.spacedBy(12.dp)
+                            Arrangement.spacedBy(
+                                12.dp
+                            )
                     ) {
-                        items(qolos) { qolo ->
-                            QoloListItem(
-                                qolo = qolo,
+                        items(occasions) {
+                                occasion ->
+
+                            OccasionListItem(
+                                occasion = occasion,
                                 onClick = {
-                                    onOpenQolo(qolo.id)
+                                    onOpenOccasion(
+                                        occasion.id
+                                    )
                                 }
                             )
                         }
@@ -169,32 +287,454 @@ private fun HomeScreen(
 }
 
 @Composable
-private fun QoloListItem(
-    qolo: Qolo,
+private fun OccasionListItem(
+    occasion: Occasion,
     onClick: () -> Unit
 ) {
     Button(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth()
+        modifier =
+            Modifier.fillMaxWidth()
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(
+                    vertical = 8.dp
+                ),
+            horizontalAlignment =
+                Alignment.CenterHorizontally
         ) {
             Text(
-                text = qolo.name,
-                style = MaterialTheme.typography.titleLarge,
-                textAlign = TextAlign.Center
+                text = occasion.name,
+                style =
+                    MaterialTheme.typography.titleLarge,
+                textAlign =
+                    TextAlign.Center
             )
 
-            qolo.poeticMeter?.let { poeticMeter ->
+            occasion.description?.let {
+                    description ->
+
                 Text(
-                    text = "Poetic meter: $poeticMeter",
-                    modifier = Modifier.padding(top = 4.dp),
-                    style = MaterialTheme.typography.bodyMedium
+                    text = description,
+                    modifier =
+                        Modifier.padding(
+                            top = 4.dp
+                        ),
+                    style =
+                        MaterialTheme.typography.bodyMedium,
+                    textAlign =
+                        TextAlign.Center
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun OccasionDetailsScreen(
+    platform: PlatformContext,
+    occasionId: OccasionId,
+    onOpenPrayer: (PrayerSequenceId) -> Unit,
+    onBack: () -> Unit
+) {
+    val occasionResult by
+    produceState<Result<RuntimeOccasion>?>(
+        initialValue = null,
+        key1 = platform,
+        key2 = occasionId
+    ) {
+        value =
+            platform.content.loadOccasion(
+                occasionId
+            )
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                MaterialTheme.colorScheme.primaryContainer
+            )
+            .padding(24.dp)
+    ) {
+        when (
+            val result =
+                occasionResult
+        ) {
+            null -> {
+                Text(
+                    text = "Loading..."
+                )
+            }
+
+            is Result.Failure -> {
+                Text(
+                    text =
+                        result.error.message
+                            ?: "Occasion loading failed",
+                    textAlign =
+                        TextAlign.Center
+                )
+            }
+
+            is Result.Success -> {
+                val runtimeOccasion =
+                    result.data
+
+                Text(
+                    text =
+                        runtimeOccasion.occasion.name,
+                    style =
+                        MaterialTheme.typography.headlineMedium
+                )
+
+                runtimeOccasion
+                    .occasion
+                    .description
+                    ?.let { description ->
+                        Text(
+                            text = description,
+                            modifier =
+                                Modifier.padding(
+                                    top = 8.dp,
+                                    bottom = 16.dp
+                                )
+                        )
+                    }
+
+                if (
+                    runtimeOccasion
+                        .prayerSequences
+                        .isEmpty()
+                ) {
+                    Text(
+                        text =
+                            "No prayer sequences available",
+                        modifier =
+                            Modifier.padding(
+                                top = 24.dp
+                            )
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        verticalArrangement =
+                            Arrangement.spacedBy(
+                                20.dp
+                            )
+                    ) {
+                        items(
+                            runtimeOccasion
+                                .prayerSequences
+                        ) { sequence ->
+                            Button(
+                                onClick = {
+                                    onOpenPrayer(
+                                        sequence.sequence.id
+                                    )
+                                },
+                                modifier =
+                                    Modifier.fillMaxWidth()
+                            ) {
+                                Column(
+                                    modifier =
+                                        Modifier.fillMaxWidth(),
+                                    horizontalAlignment =
+                                        Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = sequence.prayer.name,
+                                        style =
+                                            MaterialTheme.typography.titleLarge,
+                                        textAlign =
+                                            TextAlign.Center
+                                    )
+
+                                    sequence.prayer.description?.let {
+                                            description ->
+                                        Text(
+                                            text = description,
+                                            modifier =
+                                                Modifier.padding(
+                                                    top = 4.dp
+                                                ),
+                                            style =
+                                                MaterialTheme.typography.bodyMedium,
+                                            textAlign =
+                                                TextAlign.Center
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Button(
+            onClick = onBack,
+            modifier =
+                Modifier.padding(
+                    top = 24.dp
+                )
+        ) {
+            Text(
+                text = "Back"
+            )
+        }
+    }
+}
+
+@Composable
+private fun PrayerDetailsScreen(
+    platform: PlatformContext,
+    occasionId: OccasionId?,
+    prayerSequenceId: PrayerSequenceId,
+    onOpenQolo: (QoloId) -> Unit,
+    onBack: () -> Unit
+) {
+    val occasionResult by
+    produceState<Result<RuntimeOccasion>?>(
+        initialValue = null,
+        key1 = platform,
+        key2 = occasionId,
+        key3 = prayerSequenceId
+    ) {
+        value =
+            if (occasionId != null) {
+                platform.content.loadOccasion(
+                    occasionId
+                )
+            } else {
+                null
+            }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                MaterialTheme.colorScheme.primaryContainer
+            )
+            .padding(24.dp)
+    ) {
+        when (
+            val result =
+                occasionResult
+        ) {
+            null -> {
+                Text(
+                    text = "Loading..."
+                )
+            }
+
+            is Result.Failure -> {
+                Text(
+                    text =
+                        result.error.message
+                            ?: "Prayer loading failed"
+                )
+            }
+
+            is Result.Success -> {
+                val sequence =
+                    result.data
+                        .prayerSequences
+                        .firstOrNull { item ->
+                            item.sequence.id ==
+                                    prayerSequenceId
+                        }
+
+                if (sequence == null) {
+                    Text(
+                        text =
+                            "Prayer sequence was not found."
+                    )
+                } else {
+                    Text(
+                        text = sequence.prayer.name,
+                        style =
+                            MaterialTheme.typography.headlineMedium
+                    )
+
+                    sequence.prayer.description?.let {
+                            description ->
+                        Text(
+                            text = description,
+                            modifier =
+                                Modifier.padding(
+                                    top = 8.dp,
+                                    bottom = 16.dp
+                                )
+                        )
+                    }
+
+                    if (sequence.items.isEmpty()) {
+                        Text(
+                            text =
+                                "No liturgical items available"
+                        )
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            verticalArrangement =
+                                Arrangement.spacedBy(
+                                    12.dp
+                                )
+                        ) {
+                            items(sequence.items) {
+                                    item ->
+                                ResolvedLiturgicalItemView(
+                                    item = item,
+                                    onOpenQolo =
+                                        onOpenQolo
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Button(
+            onClick = onBack,
+            modifier =
+                Modifier.padding(
+                    top = 24.dp
+                )
+        ) {
+            Text(
+                text = "Back"
+            )
+        }
+    }
+}
+
+@Composable
+private fun MissingPrayerSelectionScreen(
+    onBack: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                MaterialTheme.colorScheme.primaryContainer
+            )
+            .padding(24.dp),
+        verticalArrangement =
+            Arrangement.Center,
+        horizontalAlignment =
+            Alignment.CenterHorizontally
+    ) {
+        Text(
+            text =
+                "No Prayer was selected.",
+            textAlign =
+                TextAlign.Center
+        )
+
+        Button(
+            onClick = onBack,
+            modifier =
+                Modifier.padding(
+                    top = 24.dp
+                )
+        ) {
+            Text(
+                text = "Back"
+            )
+        }
+    }
+}
+
+@Composable
+private fun ResolvedLiturgicalItemView(
+    item: ResolvedLiturgicalItem,
+    onOpenQolo: (QoloId) -> Unit
+) {
+    when (
+        val target =
+            item.target
+    ) {
+        is ResolvedLiturgicalItemTarget.Text -> {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        vertical = 8.dp
+                    )
+            ) {
+                Text(
+                    text =
+                        target.text.syriac,
+                    style =
+                        MaterialTheme.typography.bodyLarge
+                )
+
+                target.petgomo?.let {
+                        petgomo ->
+                    Text(
+                        text =
+                            petgomo.syriac,
+                        modifier =
+                            Modifier.padding(
+                                top = 4.dp
+                            ),
+                        style =
+                            MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        }
+
+        is ResolvedLiturgicalItemTarget.Qolo -> {
+            Button(
+                onClick = {
+                    onOpenQolo(
+                        target.qolo.id
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        vertical = 8.dp
+                    )
+            ) {
+                Column(
+                    modifier =
+                        Modifier.fillMaxWidth(),
+                    horizontalAlignment =
+                        Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text =
+                            target.qolo.name,
+                        style =
+                            MaterialTheme.typography.titleMedium,
+                        textAlign =
+                            TextAlign.Center
+                    )
+
+                    Text(
+                        text =
+                            target.effectiveMelody.name,
+                        modifier =
+                            Modifier.padding(
+                                top = 4.dp
+                            ),
+                        style =
+                            MaterialTheme.typography.bodyMedium,
+                        textAlign =
+                            TextAlign.Center
+                    )
+                }
             }
         }
     }
@@ -206,12 +746,16 @@ private fun QoloDetailsScreen(
     qoloId: QoloId,
     onBack: () -> Unit
 ) {
-    val qoloResult by produceState<Result<Qolo>?>(
+    val qoloResult by
+    produceState<Result<Qolo>?>(
         initialValue = null,
         key1 = platform,
         key2 = qoloId
     ) {
-        value = platform.content.loadQolo(qoloId)
+        value =
+            platform.content.loadQolo(
+                qoloId
+            )
     }
 
     Column(
@@ -221,48 +765,70 @@ private fun QoloDetailsScreen(
                 MaterialTheme.colorScheme.primaryContainer
             )
             .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalArrangement =
+            Arrangement.Center,
+        horizontalAlignment =
+            Alignment.CenterHorizontally
     ) {
         Text(
             text = "Qolo Details",
-            style = MaterialTheme.typography.headlineMedium
+            style =
+                MaterialTheme.typography.headlineMedium
         )
 
         when (
-            val result = qoloResult
+            val result =
+                qoloResult
         ) {
             null -> {
                 Text(
                     text = "Loading...",
-                    modifier = Modifier.padding(top = 24.dp)
+                    modifier =
+                        Modifier.padding(
+                            top = 24.dp
+                        )
                 )
             }
 
             is Result.Failure -> {
                 Text(
-                    text = result.error.message
-                        ?: "Qolo loading failed",
-                    modifier = Modifier.padding(top = 24.dp),
-                    textAlign = TextAlign.Center
+                    text =
+                        result.error.message
+                            ?: "Qolo loading failed",
+                    modifier =
+                        Modifier.padding(
+                            top = 24.dp
+                        ),
+                    textAlign =
+                        TextAlign.Center
                 )
             }
 
-            is Result.Success<Qolo> -> {
-                val qolo = result.data
+            is Result.Success -> {
+                val qolo =
+                    result.data
 
                 Text(
                     text = qolo.name,
-                    modifier = Modifier.padding(top = 24.dp),
+                    modifier =
+                        Modifier.padding(
+                            top = 24.dp
+                        ),
                     style =
                         MaterialTheme.typography.headlineLarge,
-                    textAlign = TextAlign.Center
+                    textAlign =
+                        TextAlign.Center
                 )
 
-                qolo.poeticMeter?.let { poeticMeter ->
+                qolo.poeticMeter?.let {
+                        poeticMeter ->
                     Text(
-                        text = "Poetic meter: $poeticMeter",
-                        modifier = Modifier.padding(top = 12.dp),
+                        text =
+                            "Poetic meter: $poeticMeter",
+                        modifier =
+                            Modifier.padding(
+                                top = 12.dp
+                            ),
                         style =
                             MaterialTheme.typography.titleMedium
                     )
@@ -272,7 +838,47 @@ private fun QoloDetailsScreen(
 
         Button(
             onClick = onBack,
-            modifier = Modifier.padding(top = 24.dp)
+            modifier =
+                Modifier.padding(
+                    top = 24.dp
+                )
+        ) {
+            Text(
+                text = "Back"
+            )
+        }
+    }
+}
+
+@Composable
+private fun MissingOccasionSelectionScreen(
+    onBack: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                MaterialTheme.colorScheme.primaryContainer
+            )
+            .padding(24.dp),
+        verticalArrangement =
+            Arrangement.Center,
+        horizontalAlignment =
+            Alignment.CenterHorizontally
+    ) {
+        Text(
+            text =
+                "No Occasion was selected.",
+            textAlign =
+                TextAlign.Center
+        )
+
+        Button(
+            onClick = onBack,
+            modifier =
+                Modifier.padding(
+                    top = 24.dp
+                )
         ) {
             Text(
                 text = "Back"
@@ -292,17 +898,24 @@ private fun MissingQoloSelectionScreen(
                 MaterialTheme.colorScheme.primaryContainer
             )
             .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalArrangement =
+            Arrangement.Center,
+        horizontalAlignment =
+            Alignment.CenterHorizontally
     ) {
         Text(
-            text = "No Qolo was selected.",
-            textAlign = TextAlign.Center
+            text =
+                "No Qolo was selected.",
+            textAlign =
+                TextAlign.Center
         )
 
         Button(
             onClick = onBack,
-            modifier = Modifier.padding(top = 24.dp)
+            modifier =
+                Modifier.padding(
+                    top = 24.dp
+                )
         ) {
             Text(
                 text = "Back"
