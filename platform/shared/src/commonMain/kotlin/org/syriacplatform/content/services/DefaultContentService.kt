@@ -7,6 +7,9 @@ import org.syriacplatform.content.contracts.ContentService
 import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.repository.ContentRepository
 import org.syriacplatform.kernel.ServiceMetadata
+import org.syriacplatform.common.types.OccasionId
+import org.syriacplatform.content.runtime.RuntimeEntryPoint
+import org.syriacplatform.content.runtime.RuntimeOccasion
 
 /**
  * التنفيذ الافتراضي لخدمة المحتوى.
@@ -36,5 +39,18 @@ class DefaultContentService(
 
     override suspend fun loadAllQolos(): Result<List<Qolo>> {
         return repository.loadAllQolos()
+    }
+
+    override suspend fun loadDefaultEntryPoint():
+            Result<RuntimeEntryPoint> {
+        return repository.loadDefaultEntryPoint()
+    }
+
+    override suspend fun loadOccasion(
+        occasionId: OccasionId
+    ): Result<RuntimeOccasion> {
+        return repository.loadOccasion(
+            occasionId
+        )
     }
 }

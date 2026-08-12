@@ -1,8 +1,11 @@
 package org.syriacplatform.content.contracts
 
 import org.syriacplatform.common.result.Result
+import org.syriacplatform.common.types.OccasionId
 import org.syriacplatform.common.types.QoloId
 import org.syriacplatform.content.models.Qolo
+import org.syriacplatform.content.runtime.RuntimeEntryPoint
+import org.syriacplatform.content.runtime.RuntimeOccasion
 import org.syriacplatform.kernel.PlatformService
 
 /**
@@ -14,5 +17,13 @@ interface ContentService : PlatformService {
         qoloId: QoloId
     ): Result<Qolo>
 
-    suspend fun loadAllQolos(): Result<List<Qolo>>
+    suspend fun loadAllQolos():
+            Result<List<Qolo>>
+
+    suspend fun loadDefaultEntryPoint():
+            Result<RuntimeEntryPoint>
+
+    suspend fun loadOccasion(
+        occasionId: OccasionId
+    ): Result<RuntimeOccasion>
 }

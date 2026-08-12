@@ -11,6 +11,8 @@ import org.syriacplatform.packageformat.loading.ApplicationPackageLoader
 import org.syriacplatform.packageformat.loading.PackagePaths
 import org.syriacplatform.packageformat.loading.PackageSource
 import org.syriacplatform.packagevalidation.compatibility.CoreCompatibility
+import org.syriacplatform.common.types.EntryPointId
+import org.syriacplatform.common.types.OccasionId
 
 class ApplicationPackageContentRepositoryTest {
 
@@ -103,6 +105,40 @@ class ApplicationPackageContentRepositoryTest {
             assertEquals(
                 org.syriacplatform.common.types.ErrorCode.CONTENT_NOT_FOUND,
                 failure.error.code
+            )
+        }
+
+    @Test
+    fun loadDefaultEntryPointReturnsResolvedRuntimeEntryPoint() =
+        runTest {
+            val repository =
+                createRuntimeTraversalRepository()
+
+            val result =
+                repository.loadDefaultEntryPoint()
+
+            val success =
+                assertIs<
+                        Result.Success<
+                                org.syriacplatform.content.runtime.RuntimeEntryPoint
+                                >
+                        >(
+                    result
+                )
+
+            assertEquals(
+                EntryPointId(101),
+                success.data.entryPoint.id
+            )
+
+            assertEquals(
+                OccasionId(201),
+                success.data.occasion.occasion.id
+            )
+
+            assertEquals(
+                1,
+                success.data.occasion.prayerSequences.size
             )
         }
 
@@ -207,5 +243,96 @@ class ApplicationPackageContentRepositoryTest {
               }
             }
         """.trimIndent()
+    }
+
+    private fun createRuntimeTraversalRepository():
+            ApplicationPackageContentRepository {
+
+        val emptyCollection =
+            """{"items":[]}"""
+                .encodeToByteArray()
+
+        val source =
+            FakePackageSource(
+                files = mapOf(
+                    PackagePaths.MANIFEST to
+                            validManifestJson()
+                                .encodeToByteArray(),
+
+                    PackagePaths.ENTRY_POINTS to
+                            """
+    {
+      "items": [
+        {
+          "id": 101,
+          "name": "Main Entry Point",
+          "type": "occasion",
+          "targetId": 201,
+          "default": true
+        }
+      ]
+    }
+    """.trimIndent()
+                                .encodeToByteArray(),
+
+                    PackagePaths.OCCASIONS to
+                            """
+                    {
+                      "items": [
+                        {
+                          "id": 201,
+                          "name": "Test Occasion",
+                          "description": null,
+                          "prayerSequenceIds": [301]
+                        }
+                      ]
+                    }
+                    """.trimIndent()
+                                .encodeToByteArray(),
+
+                    PackagePaths.PRAYERS to
+                            """
+                    {
+                      "items": [
+                        {
+                          "id": 401,
+                          "name": "Test Prayer",
+                          "description": null
+                        }
+                      ]
+                    }
+                    """.trimIndent()
+                                .encodeToByteArray(),
+
+                    PackagePaths.PRAYER_SEQUENCES to
+                            """
+                    {
+                      "items": [
+                        {
+                          "id": 301,
+                          "prayerId": 401,
+                          "liturgicalItemIds": []
+                        }
+                      ]
+                    }
+                    """.trimIndent()
+                                .encodeToByteArray(),
+
+                    PackagePaths.LITURGICAL_ITEMS to
+                            emptyCollection,
+
+                    PackagePaths.TEXTS to
+                            emptyCollection
+                )
+            )
+
+        return ApplicationPackageContentRepository(
+            loader =
+                ApplicationPackageLoader(
+                    source = source
+                ),
+            coreCompatibility =
+                coreCompatibility
+        )
     }
 }

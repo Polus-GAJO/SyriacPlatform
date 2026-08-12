@@ -1,11 +1,18 @@
 package org.syriacplatform.content.repository
 
 import org.syriacplatform.common.result.Result
+import org.syriacplatform.common.types.EntryPointId
 import org.syriacplatform.common.types.ErrorCode
 import org.syriacplatform.common.types.GroupId
+import org.syriacplatform.common.types.OccasionId
 import org.syriacplatform.common.types.PlatformError
 import org.syriacplatform.common.types.QoloId
+import org.syriacplatform.content.models.EntryPoint
+import org.syriacplatform.content.models.EntryPointTarget
+import org.syriacplatform.content.models.Occasion
 import org.syriacplatform.content.models.Qolo
+import org.syriacplatform.content.runtime.RuntimeEntryPoint
+import org.syriacplatform.content.runtime.RuntimeOccasion
 
 class FakeContentRepository : ContentRepository {
 
@@ -20,12 +27,42 @@ class FakeContentRepository : ContentRepository {
         )
     )
 
+    private val occasion =
+        Occasion(
+            id = OccasionId(1),
+            name = "Test Occasion",
+            description = null,
+            prayerSequenceIds = emptyList()
+        )
+
+    private val runtimeOccasion =
+        RuntimeOccasion(
+            occasion = occasion,
+            prayerSequences = emptyList()
+        )
+
+    private val defaultEntryPoint =
+        RuntimeEntryPoint(
+            entryPoint =
+                EntryPoint(
+                    id = EntryPointId(1),
+                    name = "Default Entry Point",
+                    target =
+                        EntryPointTarget.Occasion(
+                            occasionId = OccasionId(1)
+                        ),
+                    isDefault = true
+                ),
+            occasion = runtimeOccasion
+        )
+
     override suspend fun loadQolo(
         id: QoloId
     ): Result<Qolo> {
-        val qolo = qolos.firstOrNull { item ->
-            item.id == id
-        }
+        val qolo =
+            qolos.firstOrNull { item ->
+                item.id == id
+            }
 
         return if (qolo != null) {
             Result.Success(qolo)
@@ -33,13 +70,40 @@ class FakeContentRepository : ContentRepository {
             Result.Failure(
                 PlatformError(
                     code = ErrorCode.CONTENT_NOT_FOUND,
-                    message = "Qolo was not found: ${id.value}"
+                    message =
+                        "Qolo was not found: ${id.value}"
                 )
             )
         }
     }
 
-    override suspend fun loadAllQolos(): Result<List<Qolo>> {
+    override suspend fun loadAllQolos():
+            Result<List<Qolo>> {
         return Result.Success(qolos)
+    }
+
+    override suspend fun loadDefaultEntryPoint():
+            Result<RuntimeEntryPoint> {
+        return Result.Success(
+            defaultEntryPoint
+        )
+    }
+
+    override suspend fun loadOccasion(
+        id: OccasionId
+    ): Result<RuntimeOccasion> {
+        return if (id == occasion.id) {
+            Result.Success(
+                runtimeOccasion
+            )
+        } else {
+            Result.Failure(
+                PlatformError(
+                    code = ErrorCode.CONTENT_NOT_FOUND,
+                    message =
+                        "Occasion was not found: ${id.value}"
+                )
+            )
+        }
     }
 }

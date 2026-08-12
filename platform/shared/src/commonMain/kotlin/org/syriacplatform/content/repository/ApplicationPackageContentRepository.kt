@@ -7,8 +7,12 @@ import org.syriacplatform.common.types.QoloId
 import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.packageformat.loading.ApplicationPackageLoader
 import org.syriacplatform.packageformat.loading.PackageLoadResult
-import org.syriacplatform.packageformat.parsed.ParsedApplicationPackage
 import org.syriacplatform.packagevalidation.compatibility.CoreCompatibility
+import org.syriacplatform.content.runtime.RuntimeContentStore
+import org.syriacplatform.common.types.OccasionId
+import org.syriacplatform.content.runtime.RuntimeContentResolver
+import org.syriacplatform.content.runtime.RuntimeEntryPoint
+import org.syriacplatform.content.runtime.RuntimeOccasion
 
 /**
  * ContentRepository يعتمد على Application Package الكاملة
@@ -22,22 +26,21 @@ class ApplicationPackageContentRepository(
     private val coreCompatibility: CoreCompatibility
 ) : ContentRepository {
 
-    private var cachedPackage:
-            ParsedApplicationPackage? = null
+    private var cachedStore:
+            RuntimeContentStore? = null
 
     override suspend fun loadQolo(
         id: QoloId
     ): Result<Qolo> {
         return when (
-            val packageResult =
-                loadPackage()
+            val storeResult =
+                loadStore()
         ) {
             is Result.Success -> {
                 val qolo =
-                    packageResult.data.qolos
-                        .firstOrNull { item ->
-                            item.id == id
-                        }
+                    storeResult.data
+                        .index
+                        .qolosById[id]
 
                 if (qolo != null) {
                     Result.Success(qolo)
@@ -54,7 +57,7 @@ class ApplicationPackageContentRepository(
             }
 
             is Result.Failure ->
-                packageResult
+                storeResult
         }
     }
 
@@ -62,26 +65,26 @@ class ApplicationPackageContentRepository(
             Result<List<Qolo>> {
 
         return when (
-            val packageResult =
-                loadPackage()
+            val storeResult =
+                loadStore()
         ) {
             is Result.Success ->
                 Result.Success(
-                    packageResult.data.qolos
+                    storeResult.data
+                        .content
+                        .qolos
                 )
 
             is Result.Failure ->
-                packageResult
+                storeResult
         }
     }
 
-    private suspend fun loadPackage():
-            Result<ParsedApplicationPackage> {
+    private suspend fun loadStore():
+            Result<RuntimeContentStore> {
 
-        cachedPackage?.let { packageData ->
-            return Result.Success(
-                packageData
-            )
+        cachedStore?.let { store ->
+            return Result.Success(store)
         }
 
         return when (
@@ -92,12 +95,14 @@ class ApplicationPackageContentRepository(
                 )
         ) {
             is PackageLoadResult.Success -> {
-                cachedPackage =
-                    result.packageData
+                val store =
+                    RuntimeContentStore.from(
+                        result.packageData
+                    )
 
-                Result.Success(
-                    result.packageData
-                )
+                cachedStore = store
+
+                Result.Success(store)
             }
 
             is PackageLoadResult.ValidationFailed -> {
@@ -117,6 +122,49 @@ class ApplicationPackageContentRepository(
                 Result.Failure(
                     result.error
                 )
+        }
+    }
+
+    override suspend fun loadDefaultEntryPoint():
+            Result<RuntimeEntryPoint> {
+
+        return when (
+            val storeResult =
+                loadStore()
+        ) {
+            is Result.Success -> {
+                val resolver =
+                    RuntimeContentResolver(
+                        store = storeResult.data
+                    )
+
+                resolver.resolveDefaultEntryPoint()
+            }
+
+            is Result.Failure ->
+                storeResult
+        }
+    }
+
+    override suspend fun loadOccasion(
+        id: OccasionId
+    ): Result<RuntimeOccasion> {
+
+        return when (
+            val storeResult =
+                loadStore()
+        ) {
+            is Result.Success -> {
+                val resolver =
+                    RuntimeContentResolver(
+                        store = storeResult.data
+                    )
+
+                resolver.resolveOccasion(id)
+            }
+
+            is Result.Failure ->
+                storeResult
         }
     }
 }
