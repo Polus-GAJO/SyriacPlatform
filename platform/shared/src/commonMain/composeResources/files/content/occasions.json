@@ -1,3 +1,10 @@
 {
-  "items": []
+  "items": [
+    {
+      "id": 1,
+      "name": "مناسبة تجريبية",
+      "description": "أول مناسبة حقيقية لاختبار Runtime Content",
+      "prayerSequenceIds": [1]
+    }
+  ]
 }

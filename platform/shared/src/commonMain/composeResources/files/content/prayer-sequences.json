@@ -1,3 +1,9 @@
 {
-  "items": []
+  "items": [
+    {
+      "id": 1,
+      "prayerId": 1,
+      "liturgicalItemIds": [1, 2, 1]
+    }
+  ]
 }

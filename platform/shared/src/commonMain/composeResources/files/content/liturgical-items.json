@@ -1,3 +1,18 @@
 {
-  "items": []
+  "items": [
+    {
+      "id": 1,
+      "type": "text",
+      "targetId": 1,
+      "effectiveMelodyId": null,
+      "petgomoId": null
+    },
+    {
+      "id": 2,
+      "type": "qolo",
+      "targetId": 438,
+      "effectiveMelodyId": 1,
+      "petgomoId": null
+    }
+  ]
 }
