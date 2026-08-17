@@ -26,6 +26,9 @@ Private Const EXPORT_ROOT As String = _
 Private Const SCHEMA_VERSION As Long = 1
 Private Const EXPORTER_VERSION As String = "1.0"
 
+Private Const SAMPLE_EXPORT_ROOT As String = _
+    "D:\SyriacPlatform\author-database\samples\mapping-analysis"
+
 
 ' ============================================================
 ' PUBLIC ENTRY POINT
@@ -1213,3 +1216,431 @@ Private Function Spaces( _
 
 End Function
 
+
+
+' ============================================================
+' REPRESENTATIVE DATA EXPORT
+' ============================================================
+
+Private Const SAMPLE_EXPORT_ROOT As String = _
+    "D:\SyriacPlatform\author-database\samples\mapping-analysis"
+
+
+Public Sub ExportRepresentativeData()
+
+    Const OCCASION_ID As Long = 1
+
+    On Error GoTo ErrorHandler
+
+    EnsureFolderExists SAMPLE_EXPORT_ROOT
+
+    ExportRepresentativeOccasion OCCASION_ID
+    ExportRepresentativeOccaExis OCCASION_ID
+    ExportRepresentativeExistsIn OCCASION_ID
+    ExportRepresentativeExistsInText OCCASION_ID
+    ExportRepresentativePetExis OCCASION_ID
+    ExportRepresentativePrayers OCCASION_ID
+    ExportRepresentativeQolos OCCASION_ID
+    ExportRepresentativeQintos OCCASION_ID
+    ExportRepresentativeMelodies OCCASION_ID
+    ExportRepresentativeTexts OCCASION_ID
+    ExportRepresentativePetgomos OCCASION_ID
+
+    MsgBox _
+        "Representative data exported successfully." & vbCrLf & vbCrLf & _
+        "Occasion: " & OCCASION_ID & vbCrLf & _
+        SAMPLE_EXPORT_ROOT, _
+        vbInformation, _
+        "SyriacPlatform Representative Export"
+
+    Exit Sub
+
+ErrorHandler:
+
+    MsgBox _
+        "Representative data export failed." & vbCrLf & vbCrLf & _
+        "Error " & Err.Number & ":" & vbCrLf & _
+        Err.Description, _
+        vbCritical, _
+        "SyriacPlatform Representative Export"
+
+End Sub
+
+
+
+Private Sub ExportRepresentativeOccasion(ByVal occasionId As Long)
+
+    Dim sqlText As String
+
+    sqlText = _
+        "SELECT * FROM Occasion " & _
+        "WHERE OccN = " & occasionId & ";"
+
+    ExportQueryToCsv _
+        sqlText, _
+        SAMPLE_EXPORT_ROOT & "\Occasion.csv"
+
+End Sub
+
+
+Private Sub ExportRepresentativeOccaExis(ByVal occasionId As Long)
+
+    Dim sqlText As String
+
+    sqlText = _
+        "SELECT * FROM OccaExis " & _
+        "WHERE OccN = " & occasionId & " " & _
+        "ORDER BY OccaExisID;"
+
+    ExportQueryToCsv _
+        sqlText, _
+        SAMPLE_EXPORT_ROOT & "\OccaExis.csv"
+
+End Sub
+
+
+Private Sub ExportRepresentativeExistsIn(ByVal occasionId As Long)
+
+    Dim sqlText As String
+
+    sqlText = "SELECT DISTINCT E.* "
+    sqlText = sqlText & "FROM ExistsIn AS E "
+    sqlText = sqlText & "INNER JOIN OccaExis AS OE "
+    sqlText = sqlText & "ON E.ID = OE.ExistInID "
+    sqlText = sqlText & "WHERE OE.OccN = " & occasionId & " "
+    sqlText = sqlText & "ORDER BY E.PrayerN, E.Sort, E.ID;"
+
+    ExportQueryToCsv _
+        sqlText, _
+        SAMPLE_EXPORT_ROOT & "\ExistsIn.csv"
+
+End Sub
+
+
+Private Sub ExportRepresentativeExistsInText(ByVal occasionId As Long)
+
+    Dim sqlText As String
+
+    sqlText = "SELECT EIT.* "
+    sqlText = sqlText & "FROM ExistsInText AS EIT "
+    sqlText = sqlText & "INNER JOIN "
+    sqlText = sqlText & "("
+    sqlText = sqlText & "SELECT DISTINCT E.ID "
+    sqlText = sqlText & "FROM ExistsIn AS E "
+    sqlText = sqlText & "INNER JOIN OccaExis AS OE "
+    sqlText = sqlText & "ON E.ID = OE.ExistInID "
+    sqlText = sqlText & "WHERE OE.OccN = " & occasionId
+    sqlText = sqlText & ") AS X "
+    sqlText = sqlText & "ON EIT.ExistsInID = X.ID "
+    sqlText = sqlText & _
+        "ORDER BY EIT.ExistsInID, EIT.SortInPra, EIT.ID;"
+
+    ExportQueryToCsv _
+        sqlText, _
+        SAMPLE_EXPORT_ROOT & "\ExistsInText.csv"
+
+End Sub
+
+
+Private Sub ExportRepresentativePetExis(ByVal occasionId As Long)
+
+    Dim sqlText As String
+
+    sqlText = "SELECT PE.* "
+    sqlText = sqlText & "FROM PetExis AS PE "
+    sqlText = sqlText & "INNER JOIN "
+    sqlText = sqlText & "("
+    sqlText = sqlText & "SELECT EIT.ID "
+    sqlText = sqlText & "FROM ExistsInText AS EIT "
+    sqlText = sqlText & "INNER JOIN "
+    sqlText = sqlText & "("
+    sqlText = sqlText & "SELECT DISTINCT E.ID "
+    sqlText = sqlText & "FROM ExistsIn AS E "
+    sqlText = sqlText & "INNER JOIN OccaExis AS OE "
+    sqlText = sqlText & "ON E.ID = OE.ExistInID "
+    sqlText = sqlText & "WHERE OE.OccN = " & occasionId
+    sqlText = sqlText & ") AS X "
+    sqlText = sqlText & "ON EIT.ExistsInID = X.ID"
+    sqlText = sqlText & ") AS Y "
+    sqlText = sqlText & "ON PE.ExistInTextID = Y.ID "
+    sqlText = sqlText & _
+        "ORDER BY PE.ExistInTextID, PE.PetExistID;"
+
+    ExportQueryToCsv _
+        sqlText, _
+        SAMPLE_EXPORT_ROOT & "\PetExis.csv"
+
+End Sub
+
+
+Private Sub ExportRepresentativePrayers(ByVal occasionId As Long)
+
+    Dim sqlText As String
+
+    sqlText = "SELECT DISTINCT P.* "
+    sqlText = sqlText & "FROM Prayers AS P "
+    sqlText = sqlText & "INNER JOIN "
+    sqlText = sqlText & "("
+    sqlText = sqlText & "SELECT DISTINCT E.PrayerN "
+    sqlText = sqlText & "FROM ExistsIn AS E "
+    sqlText = sqlText & "INNER JOIN OccaExis AS OE "
+    sqlText = sqlText & "ON E.ID = OE.ExistInID "
+    sqlText = sqlText & "WHERE OE.OccN = " & occasionId & " "
+    sqlText = sqlText & "AND E.PrayerN IS NOT NULL"
+    sqlText = sqlText & ") AS X "
+    sqlText = sqlText & "ON P.PrayerN = X.PrayerN "
+    sqlText = sqlText & "ORDER BY P.PrayerN;"
+
+    ExportQueryToCsv _
+        sqlText, _
+        SAMPLE_EXPORT_ROOT & "\Prayers.csv"
+
+End Sub
+
+
+Private Sub ExportRepresentativeQolos(ByVal occasionId As Long)
+
+    Dim sqlText As String
+
+    sqlText = "SELECT DISTINCT Q.* "
+    sqlText = sqlText & "FROM Qolos AS Q "
+    sqlText = sqlText & "INNER JOIN "
+    sqlText = sqlText & "("
+    sqlText = sqlText & "SELECT DISTINCT E.QoloN "
+    sqlText = sqlText & "FROM ExistsIn AS E "
+    sqlText = sqlText & "INNER JOIN OccaExis AS OE "
+    sqlText = sqlText & "ON E.ID = OE.ExistInID "
+    sqlText = sqlText & "WHERE OE.OccN = " & occasionId & " "
+    sqlText = sqlText & "AND E.QoloN IS NOT NULL"
+    sqlText = sqlText & ") AS X "
+    sqlText = sqlText & "ON Q.QoloN = X.QoloN "
+    sqlText = sqlText & "ORDER BY Q.QoloN;"
+
+    ExportQueryToCsv _
+        sqlText, _
+        SAMPLE_EXPORT_ROOT & "\Qolos.csv"
+
+End Sub
+
+
+
+Private Sub ExportRepresentativeQintos(ByVal occasionId As Long)
+
+    Dim sqlText As String
+
+    sqlText = "SELECT DISTINCT QI.* "
+    sqlText = sqlText & "FROM Qinto AS QI "
+    sqlText = sqlText & "INNER JOIN "
+    sqlText = sqlText & "("
+    sqlText = sqlText & "SELECT DISTINCT E.QintoN "
+    sqlText = sqlText & "FROM ExistsIn AS E "
+    sqlText = sqlText & "INNER JOIN OccaExis AS OE "
+    sqlText = sqlText & "ON E.ID = OE.ExistInID "
+    sqlText = sqlText & "WHERE OE.OccN = " & occasionId & " "
+    sqlText = sqlText & "AND E.QintoN IS NOT NULL"
+    sqlText = sqlText & ") AS X "
+    sqlText = sqlText & "ON QI.QintoN = X.QintoN "
+    sqlText = sqlText & "ORDER BY QI.QintoN;"
+
+    ExportQueryToCsv _
+        sqlText, _
+        SAMPLE_EXPORT_ROOT & "\Qinto.csv"
+
+End Sub
+
+
+Private Sub ExportRepresentativeMelodies(ByVal occasionId As Long)
+
+    Dim sqlText As String
+
+    sqlText = "SELECT DISTINCT M.* "
+    sqlText = sqlText & "FROM Melody AS M "
+    sqlText = sqlText & "INNER JOIN "
+    sqlText = sqlText & "("
+    sqlText = sqlText & "SELECT DISTINCT E.QoloN "
+    sqlText = sqlText & "FROM ExistsIn AS E "
+    sqlText = sqlText & "INNER JOIN OccaExis AS OE "
+    sqlText = sqlText & "ON E.ID = OE.ExistInID "
+    sqlText = sqlText & "WHERE OE.OccN = " & occasionId & " "
+    sqlText = sqlText & "AND E.QoloN IS NOT NULL"
+    sqlText = sqlText & ") AS X "
+    sqlText = sqlText & "ON M.QoloN = X.QoloN "
+    sqlText = sqlText & _
+        "ORDER BY M.QoloN, M.QintoN, M.MelodyN;"
+
+    ExportQueryToCsv _
+        sqlText, _
+        SAMPLE_EXPORT_ROOT & "\Melody.csv"
+
+End Sub
+
+
+Private Sub ExportRepresentativeTexts(ByVal occasionId As Long)
+
+    Dim sqlText As String
+
+    sqlText = "SELECT DISTINCT T.* "
+    sqlText = sqlText & "FROM Texts AS T "
+    sqlText = sqlText & "INNER JOIN "
+    sqlText = sqlText & "("
+    sqlText = sqlText & "SELECT DISTINCT EIT.TextID "
+    sqlText = sqlText & "FROM ExistsInText AS EIT "
+    sqlText = sqlText & "INNER JOIN "
+    sqlText = sqlText & "("
+    sqlText = sqlText & "SELECT DISTINCT E.ID "
+    sqlText = sqlText & "FROM ExistsIn AS E "
+    sqlText = sqlText & "INNER JOIN OccaExis AS OE "
+    sqlText = sqlText & "ON E.ID = OE.ExistInID "
+    sqlText = sqlText & "WHERE OE.OccN = " & occasionId
+    sqlText = sqlText & ") AS X "
+    sqlText = sqlText & "ON EIT.ExistsInID = X.ID "
+    sqlText = sqlText & "WHERE EIT.TextID IS NOT NULL"
+    sqlText = sqlText & ") AS Y "
+    sqlText = sqlText & "ON T.TextID = Y.TextID "
+    sqlText = sqlText & "ORDER BY T.TextID;"
+
+    ExportQueryToCsv _
+        sqlText, _
+        SAMPLE_EXPORT_ROOT & "\Texts.csv"
+
+End Sub
+
+
+Private Sub ExportRepresentativePetgomos(ByVal occasionId As Long)
+
+    Dim sqlText As String
+
+    sqlText = "SELECT DISTINCT P.* "
+    sqlText = sqlText & "FROM Petgomo AS P "
+    sqlText = sqlText & "INNER JOIN "
+    sqlText = sqlText & "("
+    sqlText = sqlText & "SELECT DISTINCT PE.PetN "
+    sqlText = sqlText & "FROM PetExis AS PE "
+    sqlText = sqlText & "INNER JOIN "
+    sqlText = sqlText & "("
+    sqlText = sqlText & "SELECT EIT.ID "
+    sqlText = sqlText & "FROM ExistsInText AS EIT "
+    sqlText = sqlText & "INNER JOIN "
+    sqlText = sqlText & "("
+    sqlText = sqlText & "SELECT DISTINCT E.ID "
+    sqlText = sqlText & "FROM ExistsIn AS E "
+    sqlText = sqlText & "INNER JOIN OccaExis AS OE "
+    sqlText = sqlText & "ON E.ID = OE.ExistInID "
+    sqlText = sqlText & "WHERE OE.OccN = " & occasionId
+    sqlText = sqlText & ") AS X "
+    sqlText = sqlText & "ON EIT.ExistsInID = X.ID"
+    sqlText = sqlText & ") AS Y "
+    sqlText = sqlText & "ON PE.ExistInTextID = Y.ID "
+    sqlText = sqlText & "WHERE PE.PetN IS NOT NULL"
+    sqlText = sqlText & ") AS Z "
+    sqlText = sqlText & "ON P.PetN = Z.PetN "
+    sqlText = sqlText & "ORDER BY P.PetN;"
+
+    ExportQueryToCsv _
+        sqlText, _
+        SAMPLE_EXPORT_ROOT & "\Petgomo.csv"
+
+End Sub
+
+
+
+
+Private Sub ExportQueryToCsv( _
+    ByVal sqlText As String, _
+    ByVal filePath As String _
+)
+
+    Dim db As DAO.Database
+    Dim rs As DAO.Recordset
+
+    Set db = CurrentDb
+    Set rs = db.OpenRecordset(sqlText, dbOpenSnapshot)
+
+    WriteRecordsetToUtf8Csv rs, filePath
+
+    rs.Close
+
+    Set rs = Nothing
+    Set db = Nothing
+
+End Sub
+
+
+Private Sub WriteRecordsetToUtf8Csv( _
+    ByVal rs As DAO.Recordset, _
+    ByVal filePath As String _
+)
+
+    Dim output As String
+    Dim fieldIndex As Long
+
+    For fieldIndex = 0 To rs.Fields.Count - 1
+
+        If fieldIndex > 0 Then
+            output = output & ","
+        End If
+
+        output = output & _
+            CsvValue(rs.Fields(fieldIndex).Name)
+
+    Next fieldIndex
+
+    output = output & vbCrLf
+
+    Do While Not rs.EOF
+
+        For fieldIndex = 0 To rs.Fields.Count - 1
+
+            If fieldIndex > 0 Then
+                output = output & ","
+            End If
+
+            output = output & _
+                CsvValue(rs.Fields(fieldIndex).value)
+
+        Next fieldIndex
+
+        output = output & vbCrLf
+
+        rs.MoveNext
+
+    Loop
+
+    WriteUtf8File filePath, output
+
+End Sub
+
+
+Private Function CsvValue(ByVal value As Variant) As String
+
+    Dim text As String
+
+    If IsNull(value) Then
+        CsvValue = ""
+        Exit Function
+    End If
+
+    If VarType(value) = vbBoolean Then
+
+        If CBool(value) Then
+            text = "true"
+        Else
+            text = "false"
+        End If
+
+    ElseIf VarType(value) = vbDate Then
+
+        text = Format$( _
+            CDate(value), _
+            "yyyy-mm-dd hh:nn:ss" _
+        )
+
+    Else
+        text = CStr(value)
+    End If
+
+    text = Replace(text, """", """""")
+
+    CsvValue = """" & text & """"
+
+End Function
