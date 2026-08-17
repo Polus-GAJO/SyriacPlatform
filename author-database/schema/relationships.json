@@ -1,0 +1,411 @@
+﻿{
+  "schemaVersion": 1,
+  "exporterVersion": "1.0",
+  "relationships": [
+    {
+      "name": "BooksExistsIn",
+      "primaryTable": "Books",
+      "foreignTable": "ExistsIn",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": false,
+      "attributes": 256,
+      "columns": [
+        {
+          "primaryColumn": "BookN",
+          "foreignColumn": "BookN"
+        }
+      ]
+    },
+    {
+      "name": "DaysExistsIn",
+      "primaryTable": "Days",
+      "foreignTable": "ExistsIn",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": false,
+      "attributes": 33554688,
+      "columns": [
+        {
+          "primaryColumn": "DayN",
+          "foreignColumn": "DayN"
+        }
+      ]
+    },
+    {
+      "name": "ExistsInExistsInText",
+      "primaryTable": "ExistsIn",
+      "foreignTable": "ExistsInText",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": true,
+      "attributes": 4352,
+      "columns": [
+        {
+          "primaryColumn": "ID",
+          "foreignColumn": "ExistsInID"
+        }
+      ]
+    },
+    {
+      "name": "ExistsInOccaExis",
+      "primaryTable": "ExistsIn",
+      "foreignTable": "OccaExis",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": true,
+      "attributes": 16781568,
+      "columns": [
+        {
+          "primaryColumn": "ID",
+          "foreignColumn": "ExistInID"
+        }
+      ]
+    },
+    {
+      "name": "ExistsInTextPetExis",
+      "primaryTable": "ExistsInText",
+      "foreignTable": "PetExis",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": true,
+      "attributes": 4352,
+      "columns": [
+        {
+          "primaryColumn": "ID",
+          "foreignColumn": "ExistInTextID"
+        }
+      ]
+    },
+    {
+      "name": "GroupsQolos",
+      "primaryTable": "Groups",
+      "foreignTable": "Qolos",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": false,
+      "attributes": 256,
+      "columns": [
+        {
+          "primaryColumn": "GroupN",
+          "foreignColumn": "GroupN"
+        }
+      ]
+    },
+    {
+      "name": "LocationExistsIn",
+      "primaryTable": "Location",
+      "foreignTable": "ExistsIn",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": false,
+      "attributes": 33554688,
+      "columns": [
+        {
+          "primaryColumn": "LocationN",
+          "foreignColumn": "LocationN"
+        }
+      ]
+    },
+    {
+      "name": "MelodyMNMelody",
+      "primaryTable": "Melody",
+      "foreignTable": "MNMelody",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": true,
+      "attributes": 4352,
+      "columns": [
+        {
+          "primaryColumn": "MelodyN",
+          "foreignColumn": "MelodyN"
+        }
+      ]
+    },
+    {
+      "name": "MonthsOccasion",
+      "primaryTable": "Months",
+      "foreignTable": "Occasion",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": false,
+      "attributes": 33554688,
+      "columns": [
+        {
+          "primaryColumn": "MonthSort",
+          "foreignColumn": "OccMonth"
+        }
+      ]
+    },
+    {
+      "name": "MusicNotesMNMelody",
+      "primaryTable": "MusicNotes",
+      "foreignTable": "MNMelody",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": true,
+      "attributes": 4352,
+      "columns": [
+        {
+          "primaryColumn": "MNN",
+          "foreignColumn": "MNN"
+        }
+      ]
+    },
+    {
+      "name": "NotesExistsIn",
+      "primaryTable": "Notes",
+      "foreignTable": "ExistsIn",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": false,
+      "attributes": 256,
+      "columns": [
+        {
+          "primaryColumn": "NoteN",
+          "foreignColumn": "NoteN"
+        }
+      ]
+    },
+    {
+      "name": "NotesMelody",
+      "primaryTable": "Notes",
+      "foreignTable": "Melody",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": false,
+      "attributes": 256,
+      "columns": [
+        {
+          "primaryColumn": "NoteN",
+          "foreignColumn": "NoteN"
+        }
+      ]
+    },
+    {
+      "name": "OccasionOccaExis",
+      "primaryTable": "Occasion",
+      "foreignTable": "OccaExis",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": false,
+      "attributes": 256,
+      "columns": [
+        {
+          "primaryColumn": "OccN",
+          "foreignColumn": "OccN"
+        }
+      ]
+    },
+    {
+      "name": "PetgomoPetExis",
+      "primaryTable": "Petgomo",
+      "foreignTable": "PetExis",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": true,
+      "attributes": 4352,
+      "columns": [
+        {
+          "primaryColumn": "PetN",
+          "foreignColumn": "PetN"
+        }
+      ]
+    },
+    {
+      "name": "PrayersExistsIn",
+      "primaryTable": "Prayers",
+      "foreignTable": "ExistsIn",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": false,
+      "attributes": 256,
+      "columns": [
+        {
+          "primaryColumn": "PrayerN",
+          "foreignColumn": "PrayerN"
+        }
+      ]
+    },
+    {
+      "name": "QintoExistsIn",
+      "primaryTable": "Qinto",
+      "foreignTable": "ExistsIn",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": false,
+      "attributes": 256,
+      "columns": [
+        {
+          "primaryColumn": "QintoN",
+          "foreignColumn": "QintoN"
+        }
+      ]
+    },
+    {
+      "name": "QintoMelody",
+      "primaryTable": "Qinto",
+      "foreignTable": "Melody",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": false,
+      "attributes": 256,
+      "columns": [
+        {
+          "primaryColumn": "QintoN",
+          "foreignColumn": "QintoN"
+        }
+      ]
+    },
+    {
+      "name": "QolosExistsIn",
+      "primaryTable": "Qolos",
+      "foreignTable": "ExistsIn",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": false,
+      "attributes": 256,
+      "columns": [
+        {
+          "primaryColumn": "QoloN",
+          "foreignColumn": "QoloN"
+        }
+      ]
+    },
+    {
+      "name": "QolosMelody",
+      "primaryTable": "Qolos",
+      "foreignTable": "Melody",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": false,
+      "attributes": 256,
+      "columns": [
+        {
+          "primaryColumn": "QoloN",
+          "foreignColumn": "QoloN"
+        }
+      ]
+    },
+    {
+      "name": "QolosTextMelody",
+      "primaryTable": "Qolos",
+      "foreignTable": "TextMelody",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": true,
+      "attributes": 4352,
+      "columns": [
+        {
+          "primaryColumn": "QoloN",
+          "foreignColumn": "TMQolo"
+        }
+      ]
+    },
+    {
+      "name": "RofMP3Melody",
+      "primaryTable": "RofMP3",
+      "foreignTable": "Melody",
+      "referentialIntegrity": false,
+      "cascadeUpdate": false,
+      "cascadeDelete": false,
+      "attributes": 3,
+      "columns": [
+        {
+          "primaryColumn": "RofMeloN",
+          "foreignColumn": "MelodyN"
+        }
+      ]
+    },
+    {
+      "name": "SubjectsTextSubjects",
+      "primaryTable": "Subjects",
+      "foreignTable": "TextSubjects",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": true,
+      "attributes": 4352,
+      "columns": [
+        {
+          "primaryColumn": "SubID",
+          "foreignColumn": "SubID"
+        }
+      ]
+    },
+    {
+      "name": "TextsExistsInText",
+      "primaryTable": "Texts",
+      "foreignTable": "ExistsInText",
+      "referentialIntegrity": false,
+      "cascadeUpdate": false,
+      "cascadeDelete": false,
+      "attributes": 2,
+      "columns": [
+        {
+          "primaryColumn": "TextID",
+          "foreignColumn": "TextID"
+        }
+      ]
+    },
+    {
+      "name": "TextsPetExis",
+      "primaryTable": "Texts",
+      "foreignTable": "PetExis",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": true,
+      "attributes": 4352,
+      "columns": [
+        {
+          "primaryColumn": "TextID",
+          "foreignColumn": "TextID"
+        }
+      ]
+    },
+    {
+      "name": "TextsTextIndex",
+      "primaryTable": "Texts",
+      "foreignTable": "TextIndex",
+      "referentialIntegrity": true,
+      "cascadeUpdate": false,
+      "cascadeDelete": true,
+      "attributes": 4096,
+      "columns": [
+        {
+          "primaryColumn": "TextID",
+          "foreignColumn": "TextID"
+        }
+      ]
+    },
+    {
+      "name": "TextsTextMelody",
+      "primaryTable": "Texts",
+      "foreignTable": "TextMelody",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": true,
+      "attributes": 4352,
+      "columns": [
+        {
+          "primaryColumn": "TextID",
+          "foreignColumn": "TMText"
+        }
+      ]
+    },
+    {
+      "name": "TextsTextSubjects",
+      "primaryTable": "Texts",
+      "foreignTable": "TextSubjects",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": true,
+      "attributes": 4352,
+      "columns": [
+        {
+          "primaryColumn": "TextID",
+          "foreignColumn": "TextID"
+        }
+      ]
+    }
+  ]
+}

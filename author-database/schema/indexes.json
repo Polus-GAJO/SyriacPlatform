@@ -1,0 +1,1301 @@
+﻿{
+  "schemaVersion": 1,
+  "exporterVersion": "1.0",
+  "indexes": [
+    {
+      "table": "Books",
+      "name": "BooksBookName",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "BookName",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Books",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "BookN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Days",
+      "name": "DaysDayName",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "DayName",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Days",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "DayN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsIn",
+      "name": "BooksExistsIn",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "BookN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsIn",
+      "name": "DaysExistsIn",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "DayN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsIn",
+      "name": "ExistsinBookN",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "BookN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsIn",
+      "name": "ExistsinDayN",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "DayN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsIn",
+      "name": "ExistsinPrayerN",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "PrayerN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsIn",
+      "name": "ExistsinQoloN",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "QoloN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsIn",
+      "name": "LocationExistsIn",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "LocationN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsIn",
+      "name": "NotesExistsIn",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "NoteN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsIn",
+      "name": "PrayersExistsIn",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "PrayerN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsIn",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "ID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsIn",
+      "name": "QintoExistsIn",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "QintoN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsIn",
+      "name": "QolosExistsIn",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "QoloN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsInText",
+      "name": "ExistsInExistsInText",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "ExistsInID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsInText",
+      "name": "ExistsInID",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "ExistsInID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsInText",
+      "name": "ExistsInQoloN",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "TextID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsInText",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "ID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Groups",
+      "name": "GroupsGroupName",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "GroupName",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Groups",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "GroupN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Location",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "LocationN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Melody",
+      "name": "MelodyMelody",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "Melody",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Melody",
+      "name": "MelodyNoteN",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "NoteN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Melody",
+      "name": "MelodyQintoN",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "QintoN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Melody",
+      "name": "MelodyQoloN",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "QoloN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Melody",
+      "name": "NotesMelody",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "NoteN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Melody",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MelodyN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Melody",
+      "name": "QintoMelody",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "QintoN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Melody",
+      "name": "QolosMelody",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "QoloN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MNMelody",
+      "name": "MelodyMNMelody",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MelodyN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MNMelody",
+      "name": "MNMelodyEdition",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "Edition",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MNMelody",
+      "name": "MNMelodyMelodyN",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MelodyN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MNMelody",
+      "name": "MNMelodyMNN",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MNN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MNMelody",
+      "name": "MusicNotesMNMelody",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MNN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MNMelody",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MNID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Months",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MonthSort",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MusicNotes",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MNN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Notes",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "NoteN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "OccaExis",
+      "name": "ExistsInOccaExis",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "ExistInID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "OccaExis",
+      "name": "OccasionOccaExis",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "OccN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "OccaExis",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "OccaExisID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Occasion",
+      "name": "MonthsOccasion",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "OccMonth",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Occasion",
+      "name": "OccDay",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "OccDay",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Occasion",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "OccN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "PetExis",
+      "name": "ExistInTextID",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "ExistInTextID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "PetExis",
+      "name": "ExistsInTextPetExis",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "ExistInTextID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "PetExis",
+      "name": "PetgomoPetExis",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "PetN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "PetExis",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "PetExistID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "PetExis",
+      "name": "TextID",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "TextID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "PetExis",
+      "name": "TextsPetExis",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "TextID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Petgomo",
+      "name": "ABCD",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "ABCD",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Petgomo",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "PetN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Prayers",
+      "name": "PrayersPraer",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "Prayer",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Prayers",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "PrayerN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Qinto",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "QintoN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Qinto",
+      "name": "QintoQinto",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "Qinto",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Qolos",
+      "name": "GroupsQolos",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "GroupN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Qolos",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "QoloN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Qolos",
+      "name": "QolosGroupN",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "GroupN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Qolos",
+      "name": "QolosQolo",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "Qolo",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Qolos",
+      "name": "QolosQoloN",
+      "primary": false,
+      "unique": true,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "QoloN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "RofMP3",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "RofMeloN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "SimilarTextsTemp",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "ID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Subjects",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "SubID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "tblTempCopyPrayer",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "ID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "tblTempCopyPrayer",
+      "name": "SrcExistsInID",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "SrcExistsInID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "tblTempResults",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "TextID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "TextIndex",
+      "name": "Position",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "Position",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "TextIndex",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "IndexID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "TextIndex",
+      "name": "TextID",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "TextID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "TextIndex",
+      "name": "TextsTextIndex",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "TextID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "TextIndex",
+      "name": "Word",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "Word",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "TextMelody",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "TMID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "TextMelody",
+      "name": "QolosTextMelody",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "TMQolo",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "TextMelody",
+      "name": "TextsTextMelody",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "TMText",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Texts",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "TextID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Texts",
+      "name": "TextSearchKey",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "TextSearchKey",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "TextSubjects",
+      "name": "idxTextSub",
+      "primary": false,
+      "unique": true,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "TextID",
+          "ordinal": 0,
+          "descending": false
+        },
+        {
+          "name": "SubID",
+          "ordinal": 1,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "TextSubjects",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "TextSubjectID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "TextSubjects",
+      "name": "SubID",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "SubID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "TextSubjects",
+      "name": "SubjectsTextSubjects",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "SubID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "TextSubjects",
+      "name": "TextID",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "TextID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "TextSubjects",
+      "name": "TextsTextSubjects",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "TextID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Users",
+      "name": "PrimaryKey",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "UserID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    }
+  ]
+}
