@@ -2,7 +2,7 @@
 
 Version 1.0
 
-Implementation alignment revision: 2026-08-13
+Implementation alignment revision: 2026-08-18
 
 ------------------------------------------------------------------------
 
