@@ -4,8 +4,8 @@
 
 **Status:** Official Development Plan\
 **Updated:** 2026-08-18\
-**Repository baseline:** Phase 7 Build Tools development-preview
-generation
+**Verified implementation baseline:** `06d10ee`\
+**Documentation correction follows:** `3ca4c6b`
 
 ------------------------------------------------------------------------
 
@@ -317,145 +317,64 @@ representing and displaying contextual liturgical hierarchy.
 
 # Phase 7 --- Build Tools and Author Database Integration
 
-**Status:** In Progress --- First Physical Development Preview Generated
-
-## Objectives
-
-Connect the authoritative Author Database workflow to the existing
-Application Package specification and Core runtime without introducing a
-parallel content path.
+**Status:** Completed --- First Real End-to-End Content Slice Verified
 
 ## Completed
 
-### Controlled Author Database Boundary
+- controlled Author Database export;
+- Build Tools source loading and Schema-v1 mapping;
+- contextual Qolo verses and Petgomo mapping;
+- physical package generation;
+- nullable effective-Melody state;
+- `melodyCandidateIds` preservation;
+- Loader/Validator and Runtime integration;
+- Repository/Service/PlatformContext integration;
+- Android Reference Application verification.
 
--   Version-controlled schema snapshot
--   Controlled representative export
--   Representative slice: `OccN = 1`
--   Source table classification
--   Stable source-identity rules
--   Explicit mapping contract in `AuthorDatabaseMapping.md`
-
-### Build Tools Source and Mapping Layer
-
--   `AuthorSourceDataLoader`
--   canonical Schema-v1 mapping
--   Occasion/Prayer/LiturgicalItem composition mapping
--   contextual Qolo verse mapping
--   contextual Petgomo mapping
--   deterministic PrayerSequence projection
--   deterministic EntryPoint projection
--   source diagnostics for unresolved authoring data
-
-### Development Preview
-
-The full representative composition currently contains:
+Representative `OccN = 1`:
 
 ``` text
-20 resolved Qolo occurrences
-32 package-blocking source occurrences
+20 resolved
+29 unresolved
+ 3 ambiguous
+------------
+52 total Qolo occurrences
 ```
 
-A dedicated `DevelopmentPreviewSlice` selects only the 20
-already-resolved occurrences for the current non-production proof while
-preserving their occurrence identities and authored relative ordering.
-
-The 32 blocked source occurrences remain explicit diagnostics in the
-full composition.
-
-### Physical Schema-v1 Generation
-
--   `SchemaV1PreviewPackageAssembler`
--   `SchemaV1PackageWriter`
--   manifest generation
--   canonical collection generation
--   physical package directory generation
--   Occasion-profile development preview
--   20 generated Qolo Liturgical Items
--   Build Tools tests for preview selection, ordering, navigation, and
-    physical package output
-
-## Current Contract
-
-The generated preview conforms to the existing Schema-v1 rule that a
-Qolo Liturgical Item has a valid `effectiveMelodyId`.
-
-Build Tools must not invent Melody/Qinto decisions for unresolved source
-occurrences. Ambiguous or undetermined cases remain outside the preview
-package until resolved authoritatively.
-
-## Remaining Work
-
--   Load the Build Tools-generated package through the existing
-    `ApplicationPackageLoader`
--   Pass the existing package validation pipeline
--   Resolve the generated real content through `RuntimeContentResolver`
--   Expose it through the existing repository/service/`PlatformContext`
-    path
--   Verify the generated preview in the Android Reference Application
--   Keep unresolved source diagnostics traceable to Author Database
-    records
--   Decide future authoring rules for Melody ambiguity only from
-    authoritative domain requirements
+All 52 remain in authored liturgical order.
 
 ## Success Criteria
 
-The current Phase-7 milestone is complete when:
-
-``` text
-Author Database
-        ↓
-controlled export
-        ↓
-Build Tools
-        ↓
-generated Schema-v1 package
-        ↓
-existing Core validation/runtime
-        ↓
-Reference Application
-```
-
-works without manual package rewriting, parallel loading logic, or
-invented editorial data.
-
-## Output
-
-A proven Author Database → Build Tools → Schema-v1 → existing Core
-integration path using real representative content.
+Achieved: Author Database → Build Tools → Schema v1 → existing Core →
+Reference Application, with no manual package rewriting or arbitrary
+Melody selection.
 
 ------------------------------------------------------------------------
 
-# Phase 8 --- First Production Content Slice
+# Phase 8 --- Generalize Build Tools and Broaden Real-Content Coverage
 
-**Status:** Partially Entered Through Phase-7 Development Preview
+**Status:** Next Major Engineering Stage
 
 ## Objectives
 
-Move from the controlled development preview to a production-meaningful
-real content slice after the generated package has completed end-to-end
-Core integration.
+Turn the Occasion-1 proof into a reusable workflow for arbitrary selected
+Occasions.
 
 ## Planned Work
 
--   Select one representative production content slice
--   Generate it through Build Tools
--   Verify canonical identity and contextual relationships
--   Verify occasion/prayer/hymn hierarchy
--   Verify verse ordering and repetition
--   Verify Melody and Petgomo context
--   Verify Syriac presentation requirements
--   Identify domain cases not covered by the sample package
+- remove `OccN = 1` assumptions from generation;
+- define explicit Occasion/build-configuration input;
+- preserve stable IDs, ordering, and all Melody-resolution states;
+- produce actionable diagnostics;
+- run 3--5 deliberately different representative Occasions end-to-end;
+- classify new cases at the Author Database, Build Tools, Schema, Core,
+  or application boundary;
+- extend Content Domain only when real cases require it.
 
 ## Success Criteria
 
-The Reference Application renders a real liturgical content slice
-without application-specific data reconstruction.
-
-## Output
-
-A real-content proof that the platform architecture works beyond
-synthetic sample data.
+The same generation workflow can build and validate multiple Occasion
+packages without Occasion-specific mapper code or manual JSON editing.
 
 ------------------------------------------------------------------------
 
@@ -658,36 +577,23 @@ Applications consume it.
 
 # Immediate Next Milestone
 
-The immediate objective is no longer to define the first Build Tools
-output. That output now exists as the physical Occasion-1 development
-preview.
-
-The next milestone is:
-
 ``` text
-generated Occasion-1 preview package
+selected OccN / build configuration
         ↓
-ApplicationPackageLoader
+controlled Author Database export
         ↓
-PackageValidator
+generic Build Tools mapping
         ↓
-RuntimeContentStore
+Schema-v1 package
         ↓
-RuntimeContentResolver
-        ↓
-ApplicationPackageContentRepository
-        ↓
-DefaultContentService
-        ↓
-PlatformContext
+existing Core
         ↓
 Reference Application
 ```
 
-This must use the existing Core path unchanged.
-
-The unresolved 32 source occurrences remain a separate authoring/build
-concern and must not be hidden by weakening Schema v1.
+Use several deliberately chosen Occasions to broaden real-content
+coverage. Production UI styling is not the immediate milestone; the
+Reference Application remains a visual smoke-test surface.
 
 ------------------------------------------------------------------------
 

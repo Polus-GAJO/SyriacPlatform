@@ -6,8 +6,8 @@
 **Updated:** 2026-08-18\
 **Repository:** `SyriacPlatform`\
 **Branch:** `main`\
-**Documentation baseline:** Phase 7 Build Tools development-preview
-generation
+**Implementation baseline:** `06d10ee`\
+**Documentation correction follows:** `3ca4c6b`
 
 ------------------------------------------------------------------------
 
@@ -1400,147 +1400,175 @@ existing Core
 
 # Decision 035
 
-## Incomplete Authoring Data Must Remain Explicit
+## Qolo Occurrence Identity Is Independent from Melody Resolution
 
 ### Decision
 
-The representative Author Database slice may contain valid but
-incomplete authoring data. Build Tools must distinguish resolvable
-occurrences from package-blocking occurrences instead of fabricating
-missing editorial facts.
+A contextual Qolo occurrence remains valid even when one effective Melody
+has not been resolved.
 
 ### Reason
 
-The Author Database is a living authoring system. An undetermined Qinto,
-ambiguous Melody, or incomplete contextual text assignment is not
-permission for Build Tools to invent content merely to satisfy Schema
-v1.
+Legitimate source states include undetermined Qinto and multiple Melody
+candidates. Removing the Qolo would destroy valid liturgical structure.
 
 ### Impact
 
-The full `OccN = 1` composition currently records:
-
-``` text
-20 resolved Qolo occurrences
-32 package-blocking source occurrences
-```
-
-The blocking occurrences remain diagnostics that can be traced back to
-the source.
+`LiturgicalItemTarget.Qolo` now carries nullable `effectiveMelodyId`,
+`melodyCandidateIds`, and ordered `verses`.
 
 ------------------------------------------------------------------------
 
 # Decision 036
 
-## Development Preview May Select Only Already-Resolved Occurrences
+## Melody Resolution Has Three Explicit States
 
 ### Decision
 
-A dedicated `DevelopmentPreviewSlice` may produce a non-production
-preview from the already-resolved occurrences of an otherwise incomplete
-representative source slice.
+The package/runtime preserve resolved, unresolved, and ambiguous states.
 
-### Reason
-
-The project needs an end-to-end proof of real Author Database content
-entering the existing package/runtime architecture before every
-authoring gap in the representative Occasion has been completed.
-
-The preview must not masquerade as a complete production package.
+``` text
+resolved   → effectiveMelodyId != null, candidates empty
+unresolved → effectiveMelodyId = null, candidates empty
+ambiguous  → effectiveMelodyId = null, candidates preserved
+```
 
 ### Impact
 
-The current preview:
+Runtime exposes `effectiveMelody: Melody?` and
+`melodyCandidates: List<Melody>` and never selects a candidate by an
+arbitrary heuristic.
 
--   retains the 20 resolved occurrences;
--   excludes the 32 blocked occurrences from the preview package only;
--   preserves the included occurrence IDs;
--   preserves authored relative ordering;
--   clears preview blocking diagnostics only because blocked occurrences
-    are intentionally outside that development slice.
-
-The full composition remains the authoritative place where unresolved
-source diagnostics are preserved.
+This refines Decision 028: verse resolution remains, while Melody
+cardinality is now explicit.
 
 ------------------------------------------------------------------------
 
 # Decision 037
 
-## Schema-v1 Effective Melody Requirement Is Not Weakened for Preview Data
+## Schema v1 Preserves Unresolved and Ambiguous Melody State
 
 ### Decision
 
-The current Schema-v1 rule requiring a valid `effectiveMelodyId` for a
-Qolo Liturgical Item remains in force.
-
-Build Tools development-preview logic must adapt the selected source
-slice to the existing valid-package boundary; it must not weaken the
-package contract to accommodate unresolved authoring data.
-
-### Reason
-
-Current Core mapping and validation require the effective Melody, and
-the representative source contains real ambiguity and undetermined-Qinto
-cases that belong to the authoring/build boundary.
-
-Changing the schema merely to make incomplete source data load would
-move an unresolved editorial decision into runtime.
+Qolo Liturgical Items support nullable `effectiveMelodyId` and
+`melodyCandidateIds`.
 
 ### Impact
 
-For the current implementation:
+Every supplied effective/candidate Melody must resolve and belong to the
+same Qolo. A missing effective Melody does not invalidate the occurrence.
+Candidate order does not imply preference.
 
--   uniquely resolved Melody cases may be emitted;
--   ambiguous cases remain blocked;
--   undetermined Qinto is not normalized into a false value;
--   arbitrary first-row/lowest-ID Melody selection is forbidden;
--   no `melodyCandidateIds` field is part of the established Schema-v1
-    contract.
-
-A future schema change remains possible, but it requires an explicit
-architecture/specification decision rather than an ad-hoc mapper
-workaround.
+This corrects the temporary documentation assumption that every Qolo
+required one non-null effective Melody.
 
 ------------------------------------------------------------------------
 
 # Decision 038
 
-## Physical Package Generation Is Now Part of the Build Tools Proof
+## Occasion-1 Package Preserves All 52 Qolo Occurrences
 
 ### Decision
 
-Build Tools now include a physical Schema-v1 package writer for the
-Occasion-1 development preview.
-
-### Reason
-
-Mapping objects in memory is insufficient to prove the package boundary.
-The Build Tools must demonstrate that real mapped data can be serialized
-into the same physical structure expected by the Core.
+The generated Occasion-1 package contains every mapped Qolo occurrence,
+not only the 20 with one resolved effective Melody.
 
 ### Impact
 
-The current package-writer test verifies generation of:
-
 ``` text
-manifest.json
-content/entry-points.json
-content/occasions.json
-content/prayers.json
-content/prayer-sequences.json
-content/liturgical-items.json
-content/texts.json
-content/qolos.json
-content/melodies.json
-media/
+20 resolved
+29 unresolved
+ 3 ambiguous
+------------
+52 total
 ```
 
-The current preview contains 20 Qolo Liturgical Items.
+`DevelopmentPreviewSlice` no longer means a resolved-only subset; its
+name may be revisited when Build Tools are generalized.
 
-`qintos.json` is intentionally absent from this Occasion preview because
-it is optional for the profile and the included occurrences already
-carry resolved effective Melody references.
+------------------------------------------------------------------------
 
-The next architectural proof is to load this generated package through
-the existing `ApplicationPackageLoader` and validation/runtime path
-unchanged.
+# Decision 039
+
+## Generated Real Content Must Pass the Existing Core Unchanged
+
+### Decision
+
+Build Tools output must enter the existing loader, validator, runtime,
+repository, service, PlatformContext, and Reference Application path.
+
+### Impact
+
+That full path has now been verified for Occasion 1, including the 52
+Qolo occurrences and all three Melody-resolution states.
+
+------------------------------------------------------------------------
+
+# Decision 040
+
+## Reference Application Remains a Visual Smoke-Test Surface
+
+### Decision
+
+Presentation work at this stage should primarily improve inspection of
+real content, not begin final production UI design.
+
+### Impact
+
+Right alignment, readable Syriac fonts, and correct Petgomo-before-Text
+presentation are useful verification aids. Final styling should later be
+centralized in a presentation/theme layer rather than accumulated in
+`App.kt`.
+
+------------------------------------------------------------------------
+
+# Current Architecture Snapshot
+
+``` text
+Author Database
+        ↓
+controlled export
+        ↓
+Build Tools
+        ↓
+Schema-v1 Application Package
+        ↓
+ApplicationPackageLoader / PackageValidator
+        ↓
+RuntimeContentStore / RuntimeContentResolver
+        ↓
+Repository / ContentService / PlatformContext
+        ↓
+Reference Application
+```
+
+The verified representative package contains all 52 Qolo occurrences and
+preserves resolved, unresolved, and ambiguous Melody states.
+
+------------------------------------------------------------------------
+
+# Current Engineering Status
+
+Phase 7 now includes controlled Author Database export, Build Tools
+mapping, physical package generation, nullable/candidate Melody state,
+Core integration tests, Runtime integration tests, Reference Application
+synchronization, and Android emulator verification.
+
+The next major stage is Build Tools generalization across multiple
+Occasions.
+
+------------------------------------------------------------------------
+
+# Restart Guidance
+
+1. Read `CurrentState.md`.
+2. Consult this notebook for architectural reasoning.
+3. Consult `ApplicationPackageSpecification.md` for physical package rules.
+4. Consult `AuthorDatabaseMapping.md` for source interpretation.
+5. Run relevant Build Tools/shared tests before major changes.
+6. Extend the existing package/runtime path rather than creating a parallel path.
+
+------------------------------------------------------------------------
+
+End of Engineering Notebook v1.3
+

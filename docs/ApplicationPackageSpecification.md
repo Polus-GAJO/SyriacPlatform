@@ -1228,8 +1228,10 @@ Each record uses the following physical fields as applicable:
 -   `id` --- stable identifier of the Liturgical Item occurrence;
 -   `type` --- target type;
 -   `targetId` --- identifier of the canonical target;
--   `effectiveMelodyId` --- contextual effective Melody identifier where
-    permitted;
+-   `effectiveMelodyId` --- the single effective Melody when one is
+    resolved for a Qolo occurrence; it may be `null`;
+-   `melodyCandidateIds` --- zero or more candidate Melody identifiers
+    preserved when the source cannot lawfully select one effective Melody;
 -   `petgomoId` --- contextual Petgomo identifier where permitted;
 -   `verses` --- ordered contextual verse references where permitted.
 
@@ -1246,6 +1248,7 @@ Example:
   "type": "text",
   "targetId": 601,
   "effectiveMelodyId": null,
+  "melodyCandidateIds": [],
   "petgomoId": 701
 }
 ```
@@ -1254,6 +1257,7 @@ For `type = "text"`:
 
 -   `targetId` MUST reference an existing Text;
 -   `effectiveMelodyId` MUST be absent or `null`;
+-   `melodyCandidateIds` MUST be absent or empty;
 -   `petgomoId` MAY be absent or `null`; when non-null, it MUST
     reference an existing Petgomo;
 -   `verses` MUST be absent or empty.
@@ -1265,9 +1269,10 @@ Text.
 ### 12.5.2 Qolo Liturgical Item
 
 A Qolo Liturgical Item represents one contextual occurrence of a
-canonical Qolo.
+canonical Qolo. The occurrence remains valid even when one effective
+Melody has not yet been resolved.
 
-Example:
+Resolved single-Melody example:
 
 ``` json
 {
@@ -1275,38 +1280,73 @@ Example:
   "type": "qolo",
   "targetId": 438,
   "effectiveMelodyId": 75,
+  "melodyCandidateIds": [],
   "petgomoId": null,
   "verses": [
-    {
-      "textId": 601,
-      "petgomoId": 701
-    },
-    {
-      "textId": 602,
-      "petgomoId": null
-    }
+    { "textId": 601, "petgomoId": 701 },
+    { "textId": 602, "petgomoId": null }
   ]
+}
+```
+
+Unresolved-Melody example:
+
+``` json
+{
+  "id": 503,
+  "type": "qolo",
+  "targetId": 319,
+  "effectiveMelodyId": null,
+  "melodyCandidateIds": [],
+  "petgomoId": null,
+  "verses": []
+}
+```
+
+Ambiguous-Melody example:
+
+``` json
+{
+  "id": 504,
+  "type": "qolo",
+  "targetId": 116,
+  "effectiveMelodyId": null,
+  "melodyCandidateIds": [119, 1965],
+  "petgomoId": null,
+  "verses": []
 }
 ```
 
 For `type = "qolo"`:
 
 -   `targetId` MUST reference an existing Qolo;
--   `effectiveMelodyId` MUST be present and non-null and MUST reference
-    an existing Melody;
--   the effective Melody MUST be compatible with the referenced Qolo
-    according to Schema v1 content rules;
+-   `effectiveMelodyId` MAY be absent or `null`; when non-null, it MUST
+    reference an existing Melody compatible with the referenced Qolo;
+-   `melodyCandidateIds` MAY be absent or empty; every supplied candidate
+    MUST reference an existing Melody compatible with the referenced Qolo;
+-   an absent or null `effectiveMelodyId` MUST NOT cause the Qolo
+    occurrence itself to be discarded;
+-   candidate order MUST NOT be interpreted as preference or as permission
+    to select the first candidate;
 -   top-level `petgomoId` MUST be absent or `null`;
 -   `verses` MAY be absent or empty when the occurrence has no verses;
     otherwise it contains the ordered contextual Text occurrences
     belonging to this Qolo occurrence.
 
+The current Build Tools use three explicit Melody-resolution states:
+
+``` text
+resolved   → effectiveMelodyId != null, melodyCandidateIds = []
+unresolved → effectiveMelodyId = null, melodyCandidateIds = []
+ambiguous  → effectiveMelodyId = null, melodyCandidateIds contains the known candidates
+```
+
+The Core MUST preserve these explicit states. It MUST NOT invent an
+effective Melody for an unresolved occurrence and MUST NOT choose one
+candidate arbitrarily from an ambiguous occurrence.
+
 The canonical Qolo does not own the selected contextual verses. Verse
 selection and ordering belong to the Liturgical Item occurrence.
-
-This permits the same canonical Qolo to be reused in different
-liturgical contexts with different effective melodies, selected verses,
-verse ordering, or contextual Petgomo associations.
 
 ------------------------------------------------------------------------
 
@@ -2639,13 +2679,19 @@ For a Text Liturgical Item:
 For a Qolo Liturgical Item:
 
 -   `targetId` MUST resolve to an existing Qolo;
--   `effectiveMelodyId` MUST resolve to an existing Melody;
+-   when `effectiveMelodyId` is non-null, it MUST resolve to an existing
+    Melody;
+-   every identifier in `melodyCandidateIds` MUST resolve to an existing
+    Melody;
 -   every `verses[].textId` MUST resolve to an existing Text;
 -   every non-null `verses[].petgomoId` MUST resolve to an existing
     Petgomo.
 
-Failure to resolve any required contextual reference is a package
-validation failure.
+A missing optional `effectiveMelodyId` is not an unresolved reference and
+is not by itself a package-validation failure.
+
+Failure to resolve any reference actually declared by the package is a
+package-validation failure.
 
 Repeated references are not referential-integrity errors merely because
 they repeat an identifier.
@@ -2735,15 +2781,22 @@ In particular:
 
 -   a Text Liturgical Item MUST NOT declare a non-null
     `effectiveMelodyId`;
+-   a Text Liturgical Item MUST NOT declare non-empty
+    `melodyCandidateIds`;
 -   a Text Liturgical Item MUST NOT contain contextual Qolo `verses`;
 -   a Qolo Liturgical Item MUST NOT declare a non-null top-level
     `petgomoId`;
--   a Qolo Liturgical Item MUST declare a valid `effectiveMelodyId`;
--   the effective Melody MUST be compatible with the referenced Qolo
-    according to Schema v1 content rules;
+-   a Qolo Liturgical Item MAY have a null `effectiveMelodyId`;
+-   a non-null effective Melody MUST be compatible with the referenced
+    Qolo;
+-   every Melody candidate MUST be compatible with the referenced Qolo;
+-   absence of one effective Melody MUST NOT invalidate or remove the
+    Qolo occurrence;
 -   verse order and repeated verse occurrences MUST be preserved;
 -   the Core Engine MUST NOT infer verse selection from the canonical
-    Qolo.
+    Qolo;
+-   the Core Engine MUST NOT select an effective Melody from candidate
+    order or from an unrelated runtime heuristic.
 
 ------------------------------------------------------------------------
 
@@ -3605,7 +3658,7 @@ Verify:
 -   media references
 -   collection references
 -   Liturgical Item target references
--   Qolo effective Melody references
+-   Qolo effective-Melody and candidate-Melody references
 -   contextual verse Text references
 -   contextual verse Petgomo references
 

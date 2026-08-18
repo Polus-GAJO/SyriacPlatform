@@ -2,8 +2,7 @@
 
 **Status:** Engineering Reference --- Phase 7\
 **Version:** 1.1-draft\
-**Baseline:** current Phase-7 Build Tools working baseline ---
-2026-08-18\
+**Baseline:** verified implementation `06d10ee`; documentation correction follows `3ca4c6b`\
 **Scope:** Author Database → Build Tools → Application Package Schema v1
 
 ------------------------------------------------------------------------
@@ -457,72 +456,52 @@ logic only when a specific rule requires it.
 ### 10.1 General rule
 
 The source model permits more than one Melody for the same Qolo and
-Qinto. Therefore this rule is invalid in the general case:
+Qinto. Therefore `Qolo + Qinto → exactly one Melody` is not a valid
+general rule.
 
-``` text
-Qolo + Qinto → exactly one Melody
-```
-
-Build Tools must resolve the contextual result explicitly before
-emitting an `effectiveMelodyId` required by a package occurrence.
+Build Tools preserve the Qolo occurrence independently from whether one
+effective Melody can be resolved.
 
 ### 10.2 Resolved single-Melody case
 
-If:
-
-1.  the contextual Qinto is explicitly resolved (`QintoN > 0`); and
-2.  exactly one Melody is applicable to the `(QoloN, QintoN)`
-    combination;
-
-then Build Tools may set:
+When one lawful Melody is resolved for the contextual `(QoloN, QintoN)`:
 
 ``` text
 effectiveMelodyId = Melody.MelodyN
+melodyCandidateIds = []
 ```
 
 ### 10.3 Ambiguous case
 
-If more than one Melody is applicable to the same contextual
-`(QoloN, QintoN)` combination, Build Tools MUST NOT choose a Melody by:
+When more than one Melody is applicable, Build Tools MUST NOT choose by
+ID, row order, insertion order, first result, or arbitrary default.
 
--   lowest/highest `MelodyN`;
--   row order;
--   insertion order;
--   first query result;
--   arbitrary default.
+The Qolo occurrence remains valid and Build Tools emit:
 
-The source occurrence is classified as unresolved melody ambiguity until
-an explicit authoring rule identifies the intended result.
+``` text
+effectiveMelodyId = null
+melodyCandidateIds = [all known legal candidates]
+```
 
-A future Author Database design may need to represent either:
-
--   one explicitly preferred/effective Melody; or
--   multiple intended Melodies when the liturgical meaning genuinely
-    requires more than one.
-
-These two cases must not be conflated.
+Candidate order does not express preference.
 
 ### 10.4 Undetermined Qinto
 
-`QintoN = 0` means that the author has not yet determined the Qinto. It
-is not a canonical Qinto value.
+`QintoN = 0` or null means that no explicit Qinto has been determined at
+that source position. Build Tools preserve the Qolo occurrence and emit:
 
-A null Qinto likewise does not authorize arbitrary melody selection.
+``` text
+effectiveMelodyId = null
+melodyCandidateIds = []
+```
 
-For such cases Build Tools must preserve the unresolved state at the
-source-validation stage and must not fabricate `effectiveMelodyId`.
+Build Tools MUST NOT fabricate a Qinto or Melody.
 
 ### 10.5 Representative-data finding
 
-The Phase-7 representative slice confirmed real cases where one
-`(QoloN, QintoN)` combination has multiple Melodies. Therefore melody
-ambiguity is a real source-domain case, not merely a theoretical future
-possibility.
-
-The representative slice also contains Qolo 319 (the Psalm) with many
-occurrences whose Qinto remains intentionally undetermined during
-authoring. This is expected source state and must not be normalized into
-a false Qinto.
+The representative slice confirms both real ambiguity and intentionally
+undetermined Qinto states. The implemented mapping preserves both in the
+generated package instead of deleting their Qolo occurrences.
 
 ------------------------------------------------------------------------
 
@@ -587,7 +566,8 @@ valid complete source data
 valid but incomplete authoring data
 invalid/inconsistent source data
 resolved build-time data
-unresolved package-blocking data
+package-valid unresolved Melody state
+invalid/package-blocking source data
 ```
 
 Incomplete authoring data must not be silently repaired by inventing
@@ -650,13 +630,15 @@ referenced by its `ExistsInText` occurrence.
 
 ### 13.6 Melody validation
 
--   Exactly one valid Melody for a resolved Qolo/Qinto may be resolved
-    automatically.
--   Multiple valid Melodies require an explicit future authoring/domain
-    rule.
--   Zero valid Melodies for a context that requires `effectiveMelodyId`
-    is package-blocking unless the applicable profile/schema rule
-    permits omission.
+-   Exactly one lawful Melody may be emitted as `effectiveMelodyId`.
+-   Multiple lawful Melodies MUST NOT be collapsed to one arbitrary
+    choice; their IDs are preserved in `melodyCandidateIds`.
+-   An undetermined Qinto may produce `effectiveMelodyId = null` with an
+    empty candidate list.
+-   A null effective Melody is not by itself package-blocking and MUST NOT
+    cause the Qolo occurrence to disappear.
+-   Every emitted effective or candidate Melody reference must resolve to
+    an existing canonical Melody belonging to the same Qolo.
 
 ### 13.7 Completeness diagnostics
 
@@ -782,13 +764,18 @@ serialization tie policy that preserves equality semantically.
 
 ### 17.3 Melody authoring rule
 
-The Author Database requires a future explicit mechanism for contexts
-where `(Qolo, Qinto)` does not identify one intended Melody.
+The package/runtime path can now preserve ambiguity without deleting the
+Qolo occurrence, but the Author Database still requires a future explicit
+mechanism for contexts where `(Qolo, Qinto)` does not identify one
+intended Melody.
 
 The future design must distinguish:
 
 -   selecting one intended Melody from alternatives; and
 -   intentionally requiring more than one Melody.
+
+Until then, Build Tools preserve all known candidates and do not treat
+candidate order as preference.
 
 ### 17.4 Qinto inheritance/calculation
 
@@ -865,62 +852,38 @@ When implementation discovers a new source-domain case:
 
 ## 20. Current Phase-7 Implementation Status
 
-The schema exporter and representative-data exporter established the
-controlled, versioned Author Database boundary, and the first Build
-Tools implementation now exists against that boundary.
+Phase 7 has proved the complete first real-content path from the
+controlled Author Database export to the Reference Application.
 
-The implemented development path includes:
+For representative `OccN = 1`, the generated package preserves all 52
+Qolo occurrences:
 
 ``` text
-Controlled Author Database export
-        ↓
-AuthorSourceDataLoader
-        ↓
-SchemaV1CanonicalMapper
-        ↓
-SchemaV1CompositionMapper
-        ↓
-DevelopmentPreviewSlice
-        ↓
-SchemaV1NavigationMapper
-        ↓
-SchemaV1PreviewPackageAssembler
-        ↓
-SchemaV1PackageWriter
-        ↓
-physical Schema-v1 package
+20 resolved effective-Melody occurrences
+29 unresolved occurrences with no selected Melody
+ 3 ambiguous occurrences with multiple Melody candidates
+---------------------------------------------------------
+52 total Qolo occurrences
 ```
 
-For the representative `OccN = 1` data currently used by the Build Tools
-tests:
+The package states are:
 
--   the full source composition contains both resolvable and unresolved
-    authoring occurrences;
--   20 Qolo occurrences are currently resolvable and are retained in the
-    development preview;
--   32 source occurrences remain package-blocking in the full
-    composition;
--   `DevelopmentPreviewSlice` deliberately excludes those blocked
-    occurrences without changing the identity or authored relative order
-    of the included occurrences;
--   the preview can therefore generate a physical Schema-v1 Occasion
-    package while the full representative source still preserves its
-    diagnostics.
+``` text
+resolved   → effectiveMelodyId != null, melodyCandidateIds = []
+unresolved → effectiveMelodyId = null, melodyCandidateIds = []
+ambiguous  → effectiveMelodyId = null, melodyCandidateIds = [candidate ids]
+```
 
-This development-preview mechanism is not an editorial repair mechanism
-and is not permission to silently discard unresolved content in a
-production package. It exists to prove the real Author Database → Build
-Tools → Schema-v1 generation path using the subset that already
-satisfies the current package contract.
+No occurrence is removed merely because Qinto is undetermined or because
+multiple Melody candidates exist.
 
-The current Schema-v1 contract is unchanged: a published Qolo Liturgical
-Item requires a valid `effectiveMelodyId`. Ambiguous or undetermined
-Melody/Qinto source cases remain Build Tools concerns until an explicit
-authoring/domain rule resolves them or a future schema revision
-deliberately changes the package contract.
+The generated package has passed the existing Core loader, validator,
+runtime resolver, repository/service path, and Android Reference
+Application. The emulator displays the real Occasion → Prayers → Qolo
+occurrences → ordered contextual verses flow.
 
-The next Phase-7 objective is to connect the generated
-development-preview package to the existing Core
-loading/validation/runtime path and verify the result end-to-end in the
-Reference Application, while continuing to preserve the 32 unresolved
-source occurrences as actionable authoring diagnostics.
+The next Build Tools objective is generalization: accept a selected
+Occasion/build configuration instead of being tied to `OccN = 1`, then
+validate the same pipeline against several representative real
+Occasions.
+

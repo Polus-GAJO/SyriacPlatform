@@ -5,8 +5,9 @@
 **Last updated:** 2026-08-18\
 **Repository:** SyriacPlatform\
 **Branch:** `main`\
-**Current milestone:** Phase 7 --- Build Tools development-preview
-package generation
+**Current milestone:** Phase 7 real-content vertical slice completed\
+**Verified functional milestone:** `06d10ee`\
+**Documentation correction follows:** `3ca4c6b`
 
 ------------------------------------------------------------------------
 
@@ -415,7 +416,8 @@ The conceptual structure is now:
 ``` text
 LiturgicalItemTarget.Qolo
 ├── qoloId
-├── effectiveMelodyId
+├── effectiveMelodyId: MelodyId?
+├── melodyCandidateIds: List<MelodyId>
 └── verses: List<LiturgicalTextRef>
 ```
 
@@ -649,7 +651,8 @@ A resolved Qolo occurrence now has the conceptual form:
 ``` text
 ResolvedLiturgicalItemTarget.Qolo
 ├── qolo
-├── effectiveMelody
+├── effectiveMelody: Melody?
+├── melodyCandidates: List<Melody>
 └── verses
     ├── ResolvedLiturgicalText
     ├── ResolvedLiturgicalText
@@ -968,7 +971,8 @@ RuntimeContentResolver.resolveLiturgicalItem(...)
 ResolvedLiturgicalItemTarget.Qolo
         │
         ├── Qolo
-        ├── effective Melody
+        ├── effective Melody?
+        ├── Melody candidates
         └── resolved verses
 ```
 
@@ -1478,203 +1482,114 @@ phase.
 
 ------------------------------------------------------------------------
 
-# 52. Phase 7 --- Build Tools Implementation Update
+# 52. Phase 7 --- Real Author Database Vertical Slice
 
-The implementation has moved beyond the package/runtime foundation
-described earlier in this document. A separate Build Tools module now
-consumes the controlled Author Database export and maps real
-representative data toward Schema v1.
+Phase 7 has reached its first complete real-content milestone.
 
-The current Build Tools path is:
+The verified path is:
 
 ``` text
 Author Database
         ↓
-controlled export
+controlled CSV export
         ↓
-AuthorSourceDataLoader
+Build Tools
         ↓
-SchemaV1CanonicalMapper
+Schema-v1 package
         ↓
-SchemaV1CompositionMapper
+ApplicationPackageLoader / PackageValidator
         ↓
-DevelopmentPreviewSlice
+RuntimeContentStore / RuntimeContentResolver
         ↓
-SchemaV1NavigationMapper
+Repository / ContentService / PlatformContext
         ↓
-SchemaV1PreviewPackageAssembler
-        ↓
-SchemaV1PackageWriter
-        ↓
-Schema-v1 package directory
+Reference Application
 ```
 
-The Build Tools do not create a parallel runtime model. Their output
-remains the same Schema-v1 Application Package consumed by the existing
-Core.
+No parallel loading path is used.
 
-## 52.1 Representative real-content slice
+## 52.1 Representative slice
 
-The active representative source slice remains:
+For `OccN = 1`, all 52 Qolo occurrences are preserved:
 
 ``` text
-OccN = 1
+20 resolved effective-Melody occurrences
+29 unresolved occurrences
+ 3 ambiguous Melody occurrences
+----------------------------------
+52 total Qolo occurrences
 ```
 
-The full mapped composition currently exposes two distinct states:
+Runtime states:
 
 ``` text
-20 resolved Qolo occurrences
-32 package-blocking source occurrences
+resolved   → effectiveMelody != null, melodyCandidates = []
+unresolved → effectiveMelody = null, melodyCandidates = []
+ambiguous  → effectiveMelody = null, melodyCandidates contains candidates
 ```
 
-The 32 blocked occurrences are retained as diagnostics in the full
-composition. They are not silently repaired, assigned arbitrary
-Melodies, or treated as valid package content.
+An unresolved or ambiguous Melody does not remove the Qolo occurrence.
 
-`DevelopmentPreviewSlice` creates a controlled non-production preview
-containing the 20 already-resolved occurrences. It preserves their
-source occurrence identity and their authored relative ordering.
+## 52.2 Package and Core contract
 
-## 52.2 Physical package generation
-
-`SchemaV1PackageWriter` now writes a physical development-preview
-package with the standard package layout, including:
+`liturgical-items.json` contains all 52 real Qolo occurrences and may
+carry:
 
 ``` text
-manifest.json
-
-content/
-├── entry-points.json
-├── occasions.json
-├── prayers.json
-├── prayer-sequences.json
-├── liturgical-items.json
-├── texts.json
-├── qolos.json
-└── melodies.json
-
-media/
+effectiveMelodyId: Long?
+melodyCandidateIds: List<Long>
+verses: ordered contextual text references
 ```
 
-The current writer test verifies that the preview contains 20 Qolo
-Liturgical Items and that the expected Schema-v1 files and manifest
-metadata are written.
+Core validation checks every Melody reference actually supplied and
+ensures effective/candidate Melodies belong to the referenced Qolo.
+Runtime preserves unresolved and ambiguous states and does not choose a
+candidate arbitrarily.
 
-`qintos.json` is deliberately absent from the current Occasion
-development preview because the Occasion profile does not require that
-collection and the included preview occurrences already have their
-effective Melody resolved.
+## 52.3 End-to-end verification
 
-## 52.3 Melody boundary remains strict
+The generated package has successfully passed Build Tools tests, Core
+Loader/Validator integration, Runtime integration, synchronization into
+the Reference Application, Android debug build, and emulator visual
+verification.
 
-The current Schema-v1/Core contract still requires a Qolo Liturgical
-Item to carry a valid `effectiveMelodyId`.
-
-Therefore:
-
--   a uniquely resolvable source Melody may enter the preview/package;
--   ambiguous Melody selection must not be resolved by row order, lowest
-    ID, or an arbitrary default;
--   an undetermined Qinto must not be converted into a false Qinto;
--   unresolved source occurrences remain Build Tools diagnostics rather
-    than partially valid runtime content.
-
-No `melodyCandidateIds` package field has been established by the
-current implementation baseline.
-
-## 52.4 Current verified Build Tools behaviors
-
-The current Build Tools tests establish that:
-
--   controlled source data can be loaded;
--   canonical entities can be mapped;
--   contextual Qolo verses and Petgomo references can be mapped;
--   deterministic PrayerSequence and EntryPoint projections can be
-    produced;
--   unresolved full-composition data blocks normal navigation/package
-    assembly;
--   the development preview contains only resolved occurrences;
--   preview occurrence identity and relative source ordering are
-    preserved;
--   a physical Schema-v1 development-preview package can be written.
+The emulator verifies the correct Occasion, ordered Prayers, all Qolo
+occurrences, ordered contextual verses, and Petgomo displayed before its
+associated Text.
 
 ------------------------------------------------------------------------
 
 # 53. Current Restart Point
 
-Development should now resume from the Build Tools integration boundary
-rather than from the older sample-package milestone.
-
-The immediate path is:
-
-``` text
-generated Occasion-1 development-preview package
-        ↓
-existing ApplicationPackageLoader
-        ↓
-existing PackageValidator
-        ↓
-RuntimeContentStore / RuntimeContentResolver
-        ↓
-ApplicationPackageContentRepository
-        ↓
-DefaultContentService
-        ↓
-PlatformContext
-        ↓
-Reference Application
-```
-
-The next proof should establish that the package physically generated by
-Build Tools can enter the existing Core unchanged.
-
-The 32 unresolved source occurrences should remain visible as
-authoring/build diagnostics and should not be hidden merely to complete
-that proof.
-
-------------------------------------------------------------------------
-
-# 54. Current State Summary --- 2026-08-18
-
-SyriacPlatform now has both sides of the package boundary under active
-implementation:
+The Occasion-1 proof is complete. The immediate engineering objective is
+to generalize Build Tools so generation is not tied to one representative
+Occasion.
 
 ``` text
-AUTHORING / BUILD SIDE
-
-Author Database
+selected OccN / build configuration
         ↓
 controlled export
         ↓
-Build Tools source loading
+generic Build Tools mapping
         ↓
-canonical mapping
+Schema-v1 package
         ↓
-composition mapping
-        ↓
-development preview
-        ↓
-Schema-v1 physical package generation
-
-
-RUNTIME SIDE
-
-Schema-v1 Application Package
-        ↓
-loading
-        ↓
-validation
-        ↓
-runtime store/index/resolution
-        ↓
-repository/service
-        ↓
-PlatformContext
+existing Core
         ↓
 Reference Application
 ```
 
-The remaining near-term task is to join these two already-existing sides
-end-to-end with the generated real-content preview package, without
-introducing a second content path or weakening Schema-v1 validation.
+Next, deliberately selected additional Occasions should be used to expose
+new real-domain cases before Audio, Search, or production UI work expands.
+
+------------------------------------------------------------------------
+
+# 54. Immediate Engineering Priorities
+
+1. Generalize Occasion selection/configuration in Build Tools.
+2. Preserve deterministic generation and stable source identities.
+3. Run several representative real Occasions through the full pipeline.
+4. Classify newly discovered cases at the correct architectural boundary.
+5. Extend Content Domain/schema rules only when real requirements demand it.
+6. Keep the Reference Application primarily as a visual smoke-test surface.
+
