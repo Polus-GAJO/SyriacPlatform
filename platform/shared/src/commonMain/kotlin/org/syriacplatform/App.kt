@@ -35,6 +35,7 @@ import org.syriacplatform.context.PlatformContext
 import org.syriacplatform.navigation.AppDestination
 import org.syriacplatform.common.types.PrayerSequenceId
 import org.syriacplatform.common.types.LiturgicalItemId
+import org.syriacplatform.presentation.theme.SyriacTextStyles
 
 @Composable
 fun App() {
@@ -1058,20 +1059,16 @@ private fun HymnDetailsScreen(
                                         Text(
                                             text =
                                                 petgomo.syriac,
-                                            modifier =
-                                                Modifier.padding(
-                                                    top = 4.dp
-                                                ),
-                                            style =
-                                                MaterialTheme.typography.bodyMedium
+                                            modifier = Modifier.fillMaxWidth(),
+                                            style = SyriacTextStyles.body()
                                         )
                                     }
 
                                     Text(
                                         text =
                                             verse.text.syriac,
-                                        style =
-                                            MaterialTheme.typography.bodyLarge
+                                        modifier = Modifier.fillMaxWidth(),
+                                        style = SyriacTextStyles.body()
                                     )
 
 
