@@ -10,92 +10,100 @@ import org.syriacplatform.common.types.QoloId
 import org.syriacplatform.common.types.TextId
 import org.syriacplatform.content.models.LiturgicalItem
 import org.syriacplatform.content.models.LiturgicalItemTarget
-import org.syriacplatform.packageformat.dto.LiturgicalItemJsonDto
 import org.syriacplatform.content.models.LiturgicalTextRef
+import org.syriacplatform.packageformat.dto.LiturgicalItemJsonDto
 
 /**
  * يحول العنصر الليتورجي من البنية الفيزيائية
  * إلى هدف قانوني قوي النوع.
  */
 internal fun LiturgicalItemJsonDto.toDomain(): Result<LiturgicalItem> {
-    val resolvedTarget = when (type.trim().lowercase()) {
-        "text" -> {
-            if (effectiveMelodyId != null) {
-                return Result.Failure(
-                    PlatformError(
-                        code = ErrorCode.INVALID_PACKAGE_DATA,
-                        message =
-                            "Text liturgical item must not declare " +
-                                    "effectiveMelodyId: $id"
-                    )
-                )
-            }
-
-            if (verses.isNotEmpty()) {
-                return Result.Failure(
-                    PlatformError(
-                        code = ErrorCode.INVALID_PACKAGE_DATA,
-                        message =
-                            "Text liturgical item must not declare verses: $id"
-                    )
-                )
-            }
-
-            LiturgicalItemTarget.Text(
-                textId = TextId(targetId),
-                petgomoId = petgomoId?.let(::PetgomoId)
-            )
-        }
-
-        "qolo" -> {
-            if (petgomoId != null) {
-                return Result.Failure(
-                    PlatformError(
-                        code = ErrorCode.INVALID_PACKAGE_DATA,
-                        message =
-                            "Qolo liturgical item must not declare " +
-                                    "top-level petgomoId: $id"
-                    )
-                )
-            }
-
-            val melodyId = effectiveMelodyId
-                ?: return Result.Failure(
-                    PlatformError(
-                        code = ErrorCode.MISSING_REQUIRED_FIELD,
-                        message =
-                            "Qolo liturgical item requires " +
-                                    "effectiveMelodyId: $id"
-                    )
-                )
-
-            LiturgicalItemTarget.Qolo(
-                qoloId = QoloId(targetId),
-                effectiveMelodyId = MelodyId(melodyId),
-                verses =
-                    verses.map { verse ->
-                        LiturgicalTextRef(
-                            textId = TextId(
-                                verse.textId
-                            ),
-                            petgomoId =
-                                verse.petgomoId?.let(
-                                    ::PetgomoId
-                                )
+    val resolvedTarget =
+        when (type.trim().lowercase()) {
+            "text" -> {
+                if (effectiveMelodyId != null) {
+                    return Result.Failure(
+                        PlatformError(
+                            code = ErrorCode.INVALID_PACKAGE_DATA,
+                            message =
+                                "Text liturgical item must not declare " +
+                                        "effectiveMelodyId: $id"
                         )
-                    }
-            )
-        }
+                    )
+                }
 
-        else -> {
-            return Result.Failure(
-                PlatformError(
-                    code = ErrorCode.UNEXPECTED_ENTITY_TYPE,
-                    message = "Unsupported liturgical item type: $type"
+                if (melodyCandidateIds.isNotEmpty()) {
+                    return Result.Failure(
+                        PlatformError(
+                            code = ErrorCode.INVALID_PACKAGE_DATA,
+                            message =
+                                "Text liturgical item must not declare " +
+                                        "melodyCandidateIds: $id"
+                        )
+                    )
+                }
+
+                if (verses.isNotEmpty()) {
+                    return Result.Failure(
+                        PlatformError(
+                            code = ErrorCode.INVALID_PACKAGE_DATA,
+                            message =
+                                "Text liturgical item must not declare verses: $id"
+                        )
+                    )
+                }
+
+                LiturgicalItemTarget.Text(
+                    textId = TextId(targetId),
+                    petgomoId =
+                        petgomoId?.let(::PetgomoId)
                 )
-            )
+            }
+
+            "qolo" -> {
+                if (petgomoId != null) {
+                    return Result.Failure(
+                        PlatformError(
+                            code = ErrorCode.INVALID_PACKAGE_DATA,
+                            message =
+                                "Qolo liturgical item must not declare " +
+                                        "top-level petgomoId: $id"
+                        )
+                    )
+                }
+
+                LiturgicalItemTarget.Qolo(
+                    qoloId = QoloId(targetId),
+                    effectiveMelodyId =
+                        effectiveMelodyId?.let(::MelodyId),
+                    melodyCandidateIds =
+                        melodyCandidateIds.map(::MelodyId),
+                    verses =
+                        verses.map { verse ->
+                            LiturgicalTextRef(
+                                textId =
+                                    TextId(
+                                        verse.textId
+                                    ),
+                                petgomoId =
+                                    verse.petgomoId?.let(
+                                        ::PetgomoId
+                                    )
+                            )
+                        }
+                )
+            }
+
+            else -> {
+                return Result.Failure(
+                    PlatformError(
+                        code = ErrorCode.UNEXPECTED_ENTITY_TYPE,
+                        message =
+                            "Unsupported liturgical item type: $type"
+                    )
+                )
+            }
         }
-    }
 
     return Result.Success(
         LiturgicalItem(

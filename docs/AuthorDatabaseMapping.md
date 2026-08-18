@@ -245,6 +245,38 @@ The Author Database currently has no dedicated `PrayerSequence` entity or sequen
 
 For the current Phase-7 mapping, Build Tools construct the package `PrayerSequence` as a projection required by the existing Core.
 
+### 8.0 PrayerSequence identity
+
+`PrayerSequence` has no direct Author Database identity. Its Schema-v1
+identifier is therefore a deterministic Build Tools projection derived
+from the source identities that define the sequence context.
+
+For the current Occasion-oriented Phase-7 mapping:
+
+```text
+PrayerSequence.id =
+    (Occasion.id << 32) | Prayer.id
+```
+Both source identifiers must be positive 32-bit Author Database
+identifiers.
+
+This projection guarantees that:
+
+the same (Occasion, Prayer) pair always produces the same
+PrayerSequence.id;
+the same Prayer used in different Occasions produces distinct
+PrayerSequence identities;
+no query order, row order, localized name, or generated sequence
+counter participates in identity;
+Prayer and Occasion source identifiers remain unchanged.
+
+The numeric value of the projected identifier carries no liturgical
+ordering or precedence. It is an engineering identity only.
+
+A future explicit Author Database PrayerSequence identity may replace
+this projection through a documented migration rule.
+
+
 ### 8.1 Prayer ordering
 
 At the current source baseline, prayers are presented in their established natural order by `PrayerN`. Until the Author Database gains an explicit prayer-order field, Build Tools may use `PrayerN` to construct the ordered prayer list for the applicable entry context.
@@ -401,6 +433,25 @@ Single-rite package   → selected Prayer or ordered liturgical content
 Build Tools/package configuration is responsible for producing the Schema-v1 EntryPoint representation required by the target application profile.
 
 EntryPoint identity must be deterministic and stable for the same package/application configuration, but it is not a canonical Author Database content identity.
+
+### 11.1 EntryPoint identity
+
+For the current single-Occasion package projection, Build Tools derive
+the EntryPoint identifier deterministically from the target Occasion:
+
+```text
+EntryPoint.id = Occasion.id
+```
+This does not mean that EntryPoint and Occasion are the same domain
+entity. Their identifiers belong to distinct typed identifier
+namespaces.
+
+The rule is valid for the current Occasion-oriented projection only.
+Other application profiles may define their own deterministic
+EntryPoint identity policy when their navigation root differs.
+
+EntryPoint identity must never depend on display names, query order,
+or arbitrary generated counters.
 
 ---
 

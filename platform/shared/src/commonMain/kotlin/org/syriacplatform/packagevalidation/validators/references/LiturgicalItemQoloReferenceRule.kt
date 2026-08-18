@@ -39,8 +39,10 @@ class LiturgicalItemQoloReferenceRule :
                     if (target.qoloId !in qoloIds) {
                         add(
                             ValidationIssue(
-                                severity = ValidationSeverity.FATAL,
-                                code = ErrorCode.INVALID_REFERENCE,
+                                severity =
+                                    ValidationSeverity.FATAL,
+                                code =
+                                    ErrorCode.INVALID_REFERENCE,
                                 message =
                                     "Liturgical item ${item.id.value} " +
                                             "references missing qolo " +
@@ -52,21 +54,55 @@ class LiturgicalItemQoloReferenceRule :
                         )
                     }
 
-                    if (target.effectiveMelodyId !in melodyIds) {
+                    val effectiveMelodyId =
+                        target.effectiveMelodyId
+
+                    if (
+                        effectiveMelodyId != null &&
+                        effectiveMelodyId !in melodyIds
+                    ) {
                         add(
                             ValidationIssue(
-                                severity = ValidationSeverity.FATAL,
-                                code = ErrorCode.INVALID_REFERENCE,
+                                severity =
+                                    ValidationSeverity.FATAL,
+                                code =
+                                    ErrorCode.INVALID_REFERENCE,
                                 message =
                                     "Liturgical item ${item.id.value} " +
                                             "references missing effective melody " +
-                                            "${target.effectiveMelodyId.value}.",
+                                            "${effectiveMelodyId.value}.",
                                 location =
                                     "liturgicalItems[${item.id.value}]" +
                                             ".target.effectiveMelodyId"
                             )
                         )
                     }
+
+                    target.melodyCandidateIds
+                        .forEach { candidateId ->
+
+                            if (candidateId !in melodyIds) {
+                                add(
+                                    ValidationIssue(
+                                        severity =
+                                            ValidationSeverity.FATAL,
+                                        code =
+                                            ErrorCode.INVALID_REFERENCE,
+                                        message =
+                                            "Liturgical item " +
+                                                    "${item.id.value} " +
+                                                    "references missing melody " +
+                                                    "candidate " +
+                                                    "${candidateId.value}.",
+                                        location =
+                                            "liturgicalItems[" +
+                                                    "${item.id.value}]" +
+                                                    ".target." +
+                                                    "melodyCandidateIds"
+                                    )
+                                )
+                            }
+                        }
                 }
             }
         }

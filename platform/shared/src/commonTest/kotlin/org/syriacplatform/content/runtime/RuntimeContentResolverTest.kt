@@ -286,7 +286,7 @@ class RuntimeContentResolverTest {
 
         assertEquals(
             MelodyId(901),
-            secondTarget.effectiveMelody.id
+            secondTarget.effectiveMelody?.id
         )
 
         assertEquals(
@@ -296,7 +296,7 @@ class RuntimeContentResolverTest {
 
         assertEquals(
             QoloId(801),
-            secondTarget.effectiveMelody.qoloId
+            secondTarget.effectiveMelody?.qoloId
         )
 
         /*

@@ -11,7 +11,9 @@ import kotlinx.serialization.Serializable
  *
  * للنوع qolo:
  * - targetId يشير إلى Qolo.
- * - effectiveMelodyId يحدد اللحن الفعلي.
+ * - effectiveMelodyId يحدد اللحن الفعلي عندما يكون محسومًا.
+ * - melodyCandidateIds تحفظ الألحان المرشحة عندما
+ *   لا يمكن حسم Melody واحدة.
  * - verses تحفظ الأبيات المرتبة لهذا الظهور الليتورجي.
  */
 @Serializable
@@ -20,6 +22,7 @@ internal data class LiturgicalItemJsonDto(
     val type: String,
     val targetId: Long,
     val effectiveMelodyId: Long? = null,
+    val melodyCandidateIds: List<Long> = emptyList(),
     val petgomoId: Long? = null,
     val verses: List<LiturgicalTextRefJsonDto> = emptyList()
 )

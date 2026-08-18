@@ -757,7 +757,8 @@ private fun ResolvedLiturgicalItemView(
 
                     Text(
                         text =
-                            target.effectiveMelody.name,
+                            target.effectiveMelody?.name
+                        ?: "Melody unresolved",
                         modifier =
                             Modifier.padding(
                                 top = 4.dp
@@ -1019,7 +1020,8 @@ private fun HymnDetailsScreen(
 
                     Text(
                         text =
-                            target.effectiveMelody.name,
+                            target.effectiveMelody?.name
+                                ?: "Melody unresolved",
                         modifier =
                             Modifier.padding(
                                 top = 6.dp,
@@ -1051,13 +1053,6 @@ private fun HymnDetailsScreen(
                                     modifier =
                                         Modifier.fillMaxWidth()
                                 ) {
-                                    Text(
-                                        text =
-                                            verse.text.syriac,
-                                        style =
-                                            MaterialTheme.typography.bodyLarge
-                                    )
-
                                     verse.petgomo?.let {
                                             petgomo ->
                                         Text(
@@ -1071,6 +1066,15 @@ private fun HymnDetailsScreen(
                                                 MaterialTheme.typography.bodyMedium
                                         )
                                     }
+
+                                    Text(
+                                        text =
+                                            verse.text.syriac,
+                                        style =
+                                            MaterialTheme.typography.bodyLarge
+                                    )
+
+
                                 }
                             }
                         }

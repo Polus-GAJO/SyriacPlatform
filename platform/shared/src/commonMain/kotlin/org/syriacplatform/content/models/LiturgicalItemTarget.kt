@@ -18,9 +18,24 @@ sealed interface LiturgicalItemTarget {
         val petgomoId: PetgomoId? = null
     ) : LiturgicalItemTarget
 
+    /**
+     * ظهور Qolo داخل السياق الليتورجي.
+     *
+     * وجود Qolo في الصلاة مستقل عن حسم اللحن.
+     *
+     * effectiveMelodyId:
+     * - يحتوي Melody واحدة عندما يكون اللحن محسومًا.
+     * - null عندما لا يمكن حسم Melody واحدة.
+     *
+     * melodyCandidateIds:
+     * - فارغة عندما لا توجد قينة محددة أو لا توجد مرشحات.
+     * - تحتوي المرشحات القانونية عندما توجد أكثر من Melody
+     *   ولا يجوز اختيار واحدة منها اعتباطيًا.
+     */
     data class Qolo(
         val qoloId: QoloId,
-        val effectiveMelodyId: MelodyId,
+        val effectiveMelodyId: MelodyId? = null,
+        val melodyCandidateIds: List<MelodyId> = emptyList(),
         val verses: List<LiturgicalTextRef>
     ) : LiturgicalItemTarget
 }

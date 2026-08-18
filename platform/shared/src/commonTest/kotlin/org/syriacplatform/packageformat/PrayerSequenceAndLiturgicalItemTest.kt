@@ -18,6 +18,8 @@ import org.syriacplatform.packageformat.dto.LiturgicalItemJsonDto
 import org.syriacplatform.packageformat.dto.PackageCollectionJsonDto
 import org.syriacplatform.packageformat.dto.PrayerSequenceJsonDto
 import org.syriacplatform.packageformat.mappers.toDomain
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class PrayerSequenceAndLiturgicalItemTest {
 
@@ -107,26 +109,41 @@ class PrayerSequenceAndLiturgicalItemTest {
     }
 
     @Test
-    fun qoloWithoutEffectiveMelodyProducesFailure() {
-        val dto = LiturgicalItemJsonDto(
-            id = 504,
-            type = "qolo",
-            targetId = 438,
-            effectiveMelodyId = null
-        )
+    fun qoloWithoutEffectiveMelodyIsAccepted() {
+        val dto =
+            LiturgicalItemJsonDto(
+                id = 502L,
+                type = "qolo",
+                targetId = 801L,
+                effectiveMelodyId = null,
+                petgomoId = null,
+                verses = emptyList()
+            )
 
-        val result = dto.toDomain()
-        val failure =
-            assertIs<Result.Failure>(result)
+        val result =
+            dto.toDomain()
+
+        val success =
+            assertIs<Result.Success<LiturgicalItem>>(
+                result
+            )
+
+        val target =
+            assertIs<LiturgicalItemTarget.Qolo>(
+                success.data.target
+            )
 
         assertEquals(
-            ErrorCode.MISSING_REQUIRED_FIELD,
-            failure.error.code
+            QoloId(801L),
+            target.qoloId
         )
 
-        assertEquals(
-            "Qolo liturgical item requires effectiveMelodyId: 504",
-            failure.error.message
+        assertNull(
+            target.effectiveMelodyId
+        )
+
+        assertTrue(
+            target.melodyCandidateIds.isEmpty()
         )
     }
 
@@ -174,6 +191,54 @@ class PrayerSequenceAndLiturgicalItemTest {
         assertEquals(
             "Unsupported liturgical item type: reading",
             failure.error.message
+        )
+    }
+
+    @Test
+    fun qoloWithAmbiguousMelodyCandidatesIsAccepted() {
+        val dto =
+            LiturgicalItemJsonDto(
+                id = 503L,
+                type = "qolo",
+                targetId = 116L,
+                effectiveMelodyId = null,
+                melodyCandidateIds =
+                    listOf(
+                        119L,
+                        1965L
+                    ),
+                petgomoId = null,
+                verses = emptyList()
+            )
+
+        val result =
+            dto.toDomain()
+
+        val success =
+            assertIs<Result.Success<LiturgicalItem>>(
+                result
+            )
+
+        val target =
+            assertIs<LiturgicalItemTarget.Qolo>(
+                success.data.target
+            )
+
+        assertEquals(
+            QoloId(116L),
+            target.qoloId
+        )
+
+        assertNull(
+            target.effectiveMelodyId
+        )
+
+        assertEquals(
+            listOf(
+                MelodyId(119L),
+                MelodyId(1965L)
+            ),
+            target.melodyCandidateIds
         )
     }
 

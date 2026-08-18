@@ -2,9 +2,16 @@
   "items": [
     {
       "id": 1,
-      "name": "مناسبة تجريبية",
-      "description": "أول مناسبة حقيقية لاختبار Runtime Content",
-      "prayerSequenceIds": [1]
+      "name": "ܩܽܘܕܳܫ ܥܺܕܬܳܐ",
+      "description": null,
+      "prayerSequenceIds": [
+        4294967297,
+        4294967299,
+        4294967300,
+        4294967301,
+        4294967305,
+        4294967306
+      ]
     }
   ]
 }

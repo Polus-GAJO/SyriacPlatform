@@ -31,35 +31,88 @@ class LiturgicalItemEffectiveMelodyRule :
                 val target = item.target
 
                 if (target is LiturgicalItemTarget.Qolo) {
-                    val melody =
-                        melodiesById[target.effectiveMelodyId]
 
-                    /*
-                     * إذا لم توجد Melody، فلا ننتج خطأ هنا.
-                     * ReferenceValidator مسؤول عن المرجع المفقود.
-                     */
-                    if (
-                        melody != null &&
-                        melody.qoloId != target.qoloId
-                    ) {
-                        add(
-                            ValidationIssue(
-                                severity = ValidationSeverity.FATAL,
-                                code = ErrorCode.INVALID_PACKAGE_DATA,
-                                message =
-                                    "Effective melody " +
-                                            "${target.effectiveMelodyId.value} " +
-                                            "belongs to qolo " +
-                                            "${melody.qoloId.value}, " +
-                                            "but liturgical item " +
-                                            "${item.id.value} uses qolo " +
-                                            "${target.qoloId.value}.",
-                                location =
-                                    "liturgicalItems[${item.id.value}]" +
-                                            ".target.effectiveMelodyId"
+                    val effectiveMelodyId =
+                        target.effectiveMelodyId
+
+                    if (effectiveMelodyId != null) {
+                        val melody =
+                            melodiesById[
+                                effectiveMelodyId
+                            ]
+
+                        /*
+                         * المراجع المفقودة مسؤولية
+                         * Reference Validation.
+                         */
+                        if (
+                            melody != null &&
+                            melody.qoloId != target.qoloId
+                        ) {
+                            add(
+                                ValidationIssue(
+                                    severity =
+                                        ValidationSeverity.FATAL,
+                                    code =
+                                        ErrorCode.INVALID_PACKAGE_DATA,
+                                    message =
+                                        "Effective melody " +
+                                                "${effectiveMelodyId.value} " +
+                                                "belongs to qolo " +
+                                                "${melody.qoloId.value}, " +
+                                                "but liturgical item " +
+                                                "${item.id.value} uses qolo " +
+                                                "${target.qoloId.value}.",
+                                    location =
+                                        "liturgicalItems[" +
+                                                "${item.id.value}]" +
+                                                ".target." +
+                                                "effectiveMelodyId"
+                                )
                             )
-                        )
+                        }
                     }
+
+                    target.melodyCandidateIds
+                        .forEach { candidateId ->
+
+                            val candidate =
+                                melodiesById[
+                                    candidateId
+                                ]
+
+                            /*
+                             * المراجع المفقودة مسؤولية
+                             * Reference Validation.
+                             */
+                            if (
+                                candidate != null &&
+                                candidate.qoloId !=
+                                target.qoloId
+                            ) {
+                                add(
+                                    ValidationIssue(
+                                        severity =
+                                            ValidationSeverity.FATAL,
+                                        code =
+                                            ErrorCode.INVALID_PACKAGE_DATA,
+                                        message =
+                                            "Melody candidate " +
+                                                    "${candidateId.value} " +
+                                                    "belongs to qolo " +
+                                                    "${candidate.qoloId.value}, " +
+                                                    "but liturgical item " +
+                                                    "${item.id.value} uses qolo " +
+                                                    "${target.qoloId.value}.",
+                                        location =
+                                            "liturgicalItems[" +
+                                                    "${item.id.value}]" +
+                                                    ".target." +
+                                                    "melodyCandidateIds"
+                                    )
+                                )
+                            }
+                        }
                 }
             }
         }

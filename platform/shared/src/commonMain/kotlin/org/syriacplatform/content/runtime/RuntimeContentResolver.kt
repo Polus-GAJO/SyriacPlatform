@@ -236,15 +236,40 @@ class RuntimeContentResolver(
                             target.qoloId.value
                         )
 
-                val melody =
-                    store.index
-                        .melodiesById[
-                        target.effectiveMelodyId
-                    ]
-                        ?: return notFound(
-                            "Melody",
-                            target.effectiveMelodyId.value
-                        )
+                val effectiveMelody =
+                    target.effectiveMelodyId?.let {
+                            melodyId ->
+
+                        store.index
+                            .melodiesById[
+                            melodyId
+                        ]
+                            ?: return notFound(
+                                "Melody",
+                                melodyId.value
+                            )
+                    }
+
+                val melodyCandidates =
+                    mutableListOf<
+                            org.syriacplatform.content.models.Melody
+                            >()
+
+                target.melodyCandidateIds.forEach {
+                        melodyId ->
+
+                    val melody =
+                        store.index
+                            .melodiesById[
+                            melodyId
+                        ]
+                            ?: return notFound(
+                                "Melody",
+                                melodyId.value
+                            )
+
+                    melodyCandidates.add(melody)
+                }
 
                 val resolvedVerses =
                     mutableListOf<ResolvedLiturgicalText>()
@@ -294,8 +319,12 @@ class RuntimeContentResolver(
                         target =
                             ResolvedLiturgicalItemTarget.Qolo(
                                 qolo = qolo,
-                                effectiveMelody = melody,
-                                verses = resolvedVerses
+                                effectiveMelody =
+                                    effectiveMelody,
+                                melodyCandidates =
+                                    melodyCandidates,
+                                verses =
+                                    resolvedVerses
                             )
                     )
                 )
