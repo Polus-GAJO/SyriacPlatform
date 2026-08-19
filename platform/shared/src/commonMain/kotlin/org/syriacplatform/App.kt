@@ -342,10 +342,8 @@ private fun OccasionListItem(
         ) {
             Text(
                 text = occasion.name,
-                style =
-                    MaterialTheme.typography.titleLarge,
-                textAlign =
-                    TextAlign.Center
+                style = SyriacTextStyles.body(),
+                textAlign = TextAlign.Center
             )
 
             occasion.description?.let {
@@ -419,10 +417,8 @@ private fun OccasionDetailsScreen(
                     result.data
 
                 Text(
-                    text =
-                        runtimeOccasion.occasion.name,
-                    style =
-                        MaterialTheme.typography.headlineMedium
+                    text = runtimeOccasion.occasion.name,
+                    style = SyriacTextStyles.body()
                 )
 
                 runtimeOccasion
@@ -483,10 +479,8 @@ private fun OccasionDetailsScreen(
                                 ) {
                                     Text(
                                         text = sequence.prayer.name,
-                                        style =
-                                            MaterialTheme.typography.titleLarge,
-                                        textAlign =
-                                            TextAlign.Center
+                                        style = SyriacTextStyles.body(),
+                                        textAlign = TextAlign.Center
                                     )
 
                                     sequence.prayer.description?.let {
@@ -593,8 +587,7 @@ private fun PrayerDetailsScreen(
                 } else {
                     Text(
                         text = sequence.prayer.name,
-                        style =
-                            MaterialTheme.typography.headlineMedium
+                        style = SyriacTextStyles.body()
                     )
 
                     sequence.prayer.description?.let {
@@ -723,7 +716,7 @@ private fun ResolvedLiturgicalItemView(
                                 top = 4.dp
                             ),
                         style =
-                            MaterialTheme.typography.bodyMedium
+                            MaterialTheme.typography.titleMedium
                     )
                 }
             }
@@ -751,7 +744,7 @@ private fun ResolvedLiturgicalItemView(
                     Text(
                         text = target.qolo.name,
                         style =
-                            MaterialTheme.typography.titleLarge,
+                            SyriacTextStyles.body(),
                         textAlign =
                             TextAlign.Center
                     )
@@ -1015,8 +1008,7 @@ private fun HymnDetailsScreen(
                 ) {
                     Text(
                         text = target.qolo.name,
-                        style =
-                            MaterialTheme.typography.headlineMedium
+                        style = SyriacTextStyles.body()
                     )
 
                     Text(

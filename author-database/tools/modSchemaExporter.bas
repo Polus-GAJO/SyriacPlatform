@@ -1565,7 +1565,7 @@ Private Sub ExportTexts( _
 
     Dim sqlText As String
 
-    sqlText = "SELECT DISTINCT T.* "
+    sqlText = "SELECT T.* "
     sqlText = sqlText & "FROM Texts AS T "
     sqlText = sqlText & "INNER JOIN "
     sqlText = sqlText & "("
@@ -1599,7 +1599,7 @@ Private Sub ExportPetgomos( _
 
     Dim sqlText As String
 
-    sqlText = "SELECT DISTINCT P.* "
+    sqlText = "SELECT P.* "
     sqlText = sqlText & "FROM Petgomo AS P "
     sqlText = sqlText & "INNER JOIN "
     sqlText = sqlText & "("

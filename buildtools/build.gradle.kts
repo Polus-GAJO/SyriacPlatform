@@ -7,9 +7,73 @@ kotlin {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+    implementation(
+        "org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0"
+    )
 
-    testImplementation(libs.kotlin.test)
+    testImplementation(
+        libs.kotlin.test
+    )
+}
+
+val occasionId =
+    providers.gradleProperty("occasionId")
+        .orElse("1")
+        .get()
+
+require(
+    occasionId.toLongOrNull()
+        ?.let { it > 0L } == true
+) {
+    "occasionId must be a positive integer."
+}
+
+val occasionSourceDirectory =
+    layout.projectDirectory.dir(
+        "../author-database/exports/occasion-$occasionId"
+    )
+
+val occasionPreviewDirectory =
+    layout.buildDirectory.dir(
+        "generated/occasion-$occasionId-preview"
+    )
+
+tasks.register<JavaExec>(
+    "buildOccasionPreview"
+) {
+    group = "syriacplatform"
+
+    description =
+        "Builds Occasion $occasionId export " +
+                "into a Schema-v1 preview package."
+
+    classpath =
+        sourceSets["main"]
+            .runtimeClasspath
+
+    mainClass.set(
+        "org.syriacplatform.buildtools.packagebuilder." +
+                "OccasionPackageBuildMainKt"
+    )
+
+    inputs.dir(
+        occasionSourceDirectory
+    )
+
+    outputs.dir(
+        occasionPreviewDirectory
+    )
+
+    args(
+        occasionId,
+        occasionSourceDirectory
+            .asFile
+            .absolutePath,
+        occasionPreviewDirectory
+            .get()
+            .asFile
+            .absolutePath
+    )
 }
 
 tasks.register<Sync>(
@@ -17,56 +81,27 @@ tasks.register<Sync>(
 ) {
     group = "syriacplatform"
 
-    val occasionId =
-        providers.gradleProperty(
-            "occasionId"
-        )
-            .orElse("1")
-
     description =
-        "Copies the selected Occasion development preview " +
+        "Builds and copies Occasion $occasionId preview " +
                 "into the Reference Application package resources."
 
-    dependsOn("test")
-
-    val previewDirectory =
-        layout.buildDirectory.dir(
-            occasionId.map { id ->
-                "generated/occasion-$id-preview"
-            }
-        )
+    dependsOn(
+        "buildOccasionPreview"
+    )
 
     val referencePackageDirectory =
         layout.projectDirectory.dir(
-            "../platform/shared/src/commonMain/composeResources/files"
+            "../platform/shared/src/commonMain/" +
+                    "composeResources/files"
         )
 
-    from(previewDirectory)
+    from(
+        occasionPreviewDirectory
+    )
 
-    into(referencePackageDirectory)
-
-    doFirst {
-        val id =
-            occasionId.get()
-
-        require(
-            id.toLongOrNull()?.let { it > 0L } == true
-        ) {
-            "occasionId must be a positive integer."
-        }
-
-        val source =
-            previewDirectory
-                .get()
-                .asFile
-
-        require(
-            source.isDirectory
-        ) {
-            "Development preview package for Occasion " +
-                    "$id was not generated: $source"
-        }
-    }
+    into(
+        referencePackageDirectory
+    )
 }
 
 tasks.test {

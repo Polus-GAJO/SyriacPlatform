@@ -7,6 +7,7 @@ import androidx.compose.ui.text.style.TextAlign
 import org.jetbrains.compose.resources.Font
 import org.syriacplatform.resources.Res
 import org.syriacplatform.resources.serto_jerusalem
+import androidx.compose.ui.unit.sp
 
 object SyriacTextStyles {
 
@@ -19,6 +20,7 @@ object SyriacTextStyles {
                         Res.font.serto_jerusalem
                     )
                 ),
+            fontSize = 26.sp,
             textAlign = TextAlign.Right
         )
     }
