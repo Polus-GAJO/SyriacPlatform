@@ -3,6 +3,8 @@ package org.syriacplatform.buildtools.packagebuilder
 import org.syriacplatform.buildtools.schema.SchemaV1CanonicalContent
 import org.syriacplatform.buildtools.schema.SchemaV1CompositionDraft
 import org.syriacplatform.buildtools.schema.SchemaV1NavigationContent
+import org.syriacplatform.buildtools.schema.SchemaV1QoloLiturgicalItem
+import org.syriacplatform.buildtools.schema.SchemaV1UnresolvedQoloLiturgicalItem
 
 class SchemaV1PreviewPackageAssembler {
 
@@ -39,11 +41,17 @@ class SchemaV1PreviewPackageAssembler {
 
         val qoloIds =
             liturgicalItems
+                .filterIsInstance<
+                        SchemaV1QoloLiturgicalItem
+                        >()
                 .map { it.qoloId }
                 .toSet()
 
         val melodyIds =
             liturgicalItems
+                .filterIsInstance<
+                        SchemaV1QoloLiturgicalItem
+                        >()
                 .flatMap { item ->
                     buildList {
                         item.effectiveMelodyId?.let {

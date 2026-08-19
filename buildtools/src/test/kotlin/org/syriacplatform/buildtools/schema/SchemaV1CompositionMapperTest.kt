@@ -122,9 +122,13 @@ class SchemaV1CompositionMapperTest {
             mapRepresentativeSource()
 
         val items =
-            draft.prayers.flatMap {
-                it.resolvedItems
-            }
+            draft.prayers
+                .flatMap {
+                    it.resolvedItems
+                }
+                .filterIsInstance<
+                        SchemaV1QoloLiturgicalItem
+                        >()
 
         assertEquals(
             52,

@@ -56,4 +56,15 @@ sealed interface ResolvedLiturgicalItemTarget {
         val melodyCandidates: List<Melody>,
         val verses: List<ResolvedLiturgicalText>
     ) : ResolvedLiturgicalItemTarget
+
+    /**
+     * ظهور Qolo موجود فعليًا في التسلسل الليتورجي
+     * لكن هويته canonical لم تُحسم بعد.
+     *
+     * يمكن أن يحمل نصوصًا سياقية محلولة
+     * حتى قبل معرفة Qolo الحقيقية.
+     */
+    data class UnresolvedQolo(
+        val verses: List<ResolvedLiturgicalText>
+    ) : ResolvedLiturgicalItemTarget
 }

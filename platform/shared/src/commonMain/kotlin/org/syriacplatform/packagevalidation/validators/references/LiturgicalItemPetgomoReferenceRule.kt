@@ -94,6 +94,41 @@ class LiturgicalItemPetgomoReferenceRule :
                             }
                         }
                     }
+
+                    is LiturgicalItemTarget.UnresolvedQolo -> {
+                        target.verses.forEachIndexed {
+                                index,
+                                verse ->
+
+                            val petgomoId =
+                                verse.petgomoId
+
+                            if (
+                                petgomoId != null &&
+                                petgomoId !in petgomoIds
+                            ) {
+                                add(
+                                    ValidationIssue(
+                                        severity =
+                                            ValidationSeverity.FATAL,
+                                        code =
+                                            ErrorCode.INVALID_REFERENCE,
+                                        message =
+                                            "Liturgical item " +
+                                                    "${item.id.value} " +
+                                                    "verse $index references " +
+                                                    "missing petgomo " +
+                                                    "${petgomoId.value}.",
+                                        location =
+                                            "liturgicalItems" +
+                                                    "[${item.id.value}]" +
+                                                    ".target.verses[$index]" +
+                                                    ".petgomoId"
+                                    )
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -18,6 +18,7 @@ class SchemaV1CanonicalMapper {
                 .map(::mapPrayer),
 
             qolos = source.qolos
+                .filter { it.id > 0L }
                 .map(::mapQolo),
 
             texts = source.texts

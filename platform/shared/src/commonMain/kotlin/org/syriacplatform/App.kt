@@ -767,8 +767,58 @@ private fun ResolvedLiturgicalItemView(
 
 
           }
+
+        is ResolvedLiturgicalItemTarget.UnresolvedQolo -> {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        vertical = 8.dp
+                    ),
+                horizontalAlignment =
+                    Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Qolo unresolved",
+                    style =
+                        MaterialTheme.typography.titleMedium,
+                    textAlign =
+                        TextAlign.Center
+                )
+
+                target.verses.forEach { verse ->
+                    verse.petgomo?.let { petgomo ->
+                        Text(
+                            text =
+                                petgomo.syriac,
+                            modifier =
+                                Modifier.padding(
+                                    top = 8.dp
+                                ),
+                            style =
+                                MaterialTheme.typography.titleMedium,
+                            textAlign =
+                                TextAlign.Center
+                        )
+                    }
+
+                    Text(
+                        text =
+                            verse.text.syriac,
+                        modifier =
+                            Modifier.padding(
+                                top = 4.dp
+                            ),
+                        style =
+                            SyriacTextStyles.body(),
+                        textAlign =
+                            TextAlign.Right
+                    )
+                }
+            }
         }
     }
+}
 
 
 @Composable

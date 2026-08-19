@@ -38,4 +38,15 @@ sealed interface LiturgicalItemTarget {
         val melodyCandidateIds: List<MelodyId> = emptyList(),
         val verses: List<LiturgicalTextRef>
     ) : LiturgicalItemTarget
+
+    /**
+     * ظهور Qolo حقيقي داخل السياق الليتورجي
+     * لكن هويته canonical لم تُحسم بعد في قاعدة المؤلف.
+     *
+     * يبقى العنصر الليتورجي وموضعه محفوظين،
+     * ويمكن أن يحمل نصوصًا سياقية حتى قبل حسم Qolo.
+     */
+    data class UnresolvedQolo(
+        val verses: List<LiturgicalTextRef>
+    ) : LiturgicalItemTarget
 }

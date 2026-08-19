@@ -5,8 +5,13 @@ data class SchemaV1LiturgicalTextRef(
     val petgomoId: Long?
 )
 
+sealed interface SchemaV1LiturgicalItem {
+    val id: Long
+    val verses: List<SchemaV1LiturgicalTextRef>
+}
+
 data class SchemaV1QoloLiturgicalItem(
-    val id: Long,
+    override val id: Long,
     val qoloId: Long,
 
     /*
@@ -23,13 +28,18 @@ data class SchemaV1QoloLiturgicalItem(
      */
     val melodyCandidateIds: List<Long> = emptyList(),
 
-    val verses: List<SchemaV1LiturgicalTextRef>
-)
+    override val verses: List<SchemaV1LiturgicalTextRef>
+) : SchemaV1LiturgicalItem
+
+data class SchemaV1UnresolvedQoloLiturgicalItem(
+    override val id: Long,
+    override val verses: List<SchemaV1LiturgicalTextRef>
+) : SchemaV1LiturgicalItem
 
 data class SchemaV1PrayerCompositionDraft(
     val prayerId: Long,
     val orderedSourceItemIds: List<Long>,
-    val resolvedItems: List<SchemaV1QoloLiturgicalItem>,
+    val resolvedItems: List<SchemaV1LiturgicalItem>,
     val blockedItemIds: List<Long>
 )
 

@@ -94,6 +94,68 @@ internal fun LiturgicalItemJsonDto.toDomain(): Result<LiturgicalItem> {
                 )
             }
 
+            "qolo-unresolved" -> {
+                if (targetId != 0L) {
+                    return Result.Failure(
+                        PlatformError(
+                            code = ErrorCode.INVALID_PACKAGE_DATA,
+                            message =
+                                "Unresolved Qolo liturgical item must " +
+                                        "declare targetId 0: $id"
+                        )
+                    )
+                }
+
+                if (effectiveMelodyId != null) {
+                    return Result.Failure(
+                        PlatformError(
+                            code = ErrorCode.INVALID_PACKAGE_DATA,
+                            message =
+                                "Unresolved Qolo liturgical item must not " +
+                                        "declare effectiveMelodyId: $id"
+                        )
+                    )
+                }
+
+                if (melodyCandidateIds.isNotEmpty()) {
+                    return Result.Failure(
+                        PlatformError(
+                            code = ErrorCode.INVALID_PACKAGE_DATA,
+                            message =
+                                "Unresolved Qolo liturgical item must not " +
+                                        "declare melodyCandidateIds: $id"
+                        )
+                    )
+                }
+
+                if (petgomoId != null) {
+                    return Result.Failure(
+                        PlatformError(
+                            code = ErrorCode.INVALID_PACKAGE_DATA,
+                            message =
+                                "Unresolved Qolo liturgical item must not " +
+                                        "declare top-level petgomoId: $id"
+                        )
+                    )
+                }
+
+                LiturgicalItemTarget.UnresolvedQolo(
+                    verses =
+                        verses.map { verse ->
+                            LiturgicalTextRef(
+                                textId =
+                                    TextId(
+                                        verse.textId
+                                    ),
+                                petgomoId =
+                                    verse.petgomoId?.let(
+                                        ::PetgomoId
+                                    )
+                            )
+                        }
+                )
+            }
+
             else -> {
                 return Result.Failure(
                     PlatformError(

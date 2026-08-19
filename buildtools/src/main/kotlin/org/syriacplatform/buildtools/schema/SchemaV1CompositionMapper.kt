@@ -51,13 +51,28 @@ class SchemaV1CompositionMapper(
 
                     val resolved =
                         mutableListOf<
-                                SchemaV1QoloLiturgicalItem
+                                SchemaV1LiturgicalItem
                                 >()
 
                     val blocked =
                         mutableListOf<Long>()
 
                     prayerItems.forEach { item ->
+
+                        if (item.qoloId == 0L) {
+                            resolved +=
+                                SchemaV1UnresolvedQoloLiturgicalItem(
+                                    id = item.id,
+                                    verses =
+                                        mapVerses(
+                                            source = source,
+                                            existsInId = item.id
+                                        )
+                                )
+
+                            return@forEach
+                        }
+
                         when (
                             val resolution =
                                 melodyResolver.resolve(

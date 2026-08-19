@@ -8,8 +8,8 @@ import org.syriacplatform.buildtools.schema.SchemaV1Prayer
 import org.syriacplatform.buildtools.schema.SchemaV1PrayerSequence
 import org.syriacplatform.buildtools.schema.SchemaV1Qinto
 import org.syriacplatform.buildtools.schema.SchemaV1Qolo
-import org.syriacplatform.buildtools.schema.SchemaV1QoloLiturgicalItem
 import org.syriacplatform.buildtools.schema.SchemaV1Text
+import org.syriacplatform.buildtools.schema.SchemaV1LiturgicalItem
 
 data class SchemaV1PreviewPackage(
     val manifest: SchemaV1PreviewManifest,
@@ -17,7 +17,7 @@ data class SchemaV1PreviewPackage(
     val occasions: List<SchemaV1Occasion>,
     val prayers: List<SchemaV1Prayer>,
     val prayerSequences: List<SchemaV1PrayerSequence>,
-    val liturgicalItems: List<SchemaV1QoloLiturgicalItem>,
+    val liturgicalItems: List<SchemaV1LiturgicalItem>,
     val texts: List<SchemaV1Text>,
     val petgomos: List<SchemaV1Petgomo>,
     val qolos: List<SchemaV1Qolo>,

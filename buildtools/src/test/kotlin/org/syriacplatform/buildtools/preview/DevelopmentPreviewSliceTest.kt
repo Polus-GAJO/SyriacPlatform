@@ -8,6 +8,7 @@ import kotlin.test.assertTrue
 import org.syriacplatform.buildtools.schema.SchemaV1CompositionMapper
 import org.syriacplatform.buildtools.schema.SchemaV1NavigationMapper
 import org.syriacplatform.buildtools.source.AuthorSourceDataLoader
+import org.syriacplatform.buildtools.schema.SchemaV1QoloLiturgicalItem
 
 class DevelopmentPreviewSliceTest {
 
@@ -34,9 +35,13 @@ class DevelopmentPreviewSliceTest {
             previewSlice.create(full)
 
         val items =
-            preview.prayers.flatMap {
-                it.resolvedItems
-            }
+            preview.prayers
+                .flatMap {
+                    it.resolvedItems
+                }
+                .filterIsInstance<
+                        SchemaV1QoloLiturgicalItem
+                        >()
 
         assertEquals(
             20,

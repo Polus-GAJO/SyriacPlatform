@@ -20,6 +20,8 @@ import org.syriacplatform.buildtools.schema.SchemaV1PrayerSequence
 import org.syriacplatform.buildtools.schema.SchemaV1Qinto
 import org.syriacplatform.buildtools.schema.SchemaV1Qolo
 import org.syriacplatform.buildtools.schema.SchemaV1QoloLiturgicalItem
+import org.syriacplatform.buildtools.schema.SchemaV1LiturgicalItem
+import org.syriacplatform.buildtools.schema.SchemaV1UnresolvedQoloLiturgicalItem
 import org.syriacplatform.buildtools.schema.SchemaV1Text
 import kotlinx.serialization.ExperimentalSerializationApi
 
@@ -328,68 +330,123 @@ class SchemaV1PackageWriter {
     }
 
     private fun liturgicalItemJson(
-        item: SchemaV1QoloLiturgicalItem
+        item: SchemaV1LiturgicalItem
     ): JsonElement {
-        return buildJsonObject {
-            put("id", item.id)
-            put("type", "qolo")
-            put("targetId", item.qoloId)
 
-            if (item.effectiveMelodyId != null) {
-                put(
-                    "effectiveMelodyId",
-                    item.effectiveMelodyId
-                )
-            } else {
-                put(
-                    "effectiveMelodyId",
-                    JsonNull
-                )
-            }
+        return when (item) {
 
-            put(
-                "melodyCandidateIds",
-                longArrayJson(
-                    item.melodyCandidateIds
-                )
-            )
+            is SchemaV1QoloLiturgicalItem -> {
+                buildJsonObject {
+                    put("id", item.id)
+                    put("type", "qolo")
+                    put("targetId", item.qoloId)
 
-            put(
-                "petgomoId",
-                JsonNull
-            )
-
-            put(
-                "verses",
-                buildJsonArray {
-                    item.verses.forEach {
-                            verse ->
-
-                        add(
-                            buildJsonObject {
-                                put(
-                                    "textId",
-                                    verse.textId
-                                )
-
-                                if (
-                                    verse.petgomoId != null
-                                ) {
-                                    put(
-                                        "petgomoId",
-                                        verse.petgomoId
-                                    )
-                                } else {
-                                    put(
-                                        "petgomoId",
-                                        JsonNull
-                                    )
-                                }
-                            }
+                    if (item.effectiveMelodyId != null) {
+                        put(
+                            "effectiveMelodyId",
+                            item.effectiveMelodyId
+                        )
+                    } else {
+                        put(
+                            "effectiveMelodyId",
+                            JsonNull
                         )
                     }
+
+                    put(
+                        "melodyCandidateIds",
+                        longArrayJson(
+                            item.melodyCandidateIds
+                        )
+                    )
+
+                    put(
+                        "petgomoId",
+                        JsonNull
+                    )
+
+                    put(
+                        "verses",
+                        liturgicalVersesJson(
+                            item.verses
+                        )
+                    )
                 }
-            )
+            }
+
+            is SchemaV1UnresolvedQoloLiturgicalItem -> {
+                buildJsonObject {
+                    put("id", item.id)
+                    put("type", "qolo-unresolved")
+
+                    /*
+                     * targetId remains physically required
+                     * by Schema-v1 JSON DTO.
+                     *
+                     * Zero here means that Qolo identity
+                     * is intentionally unresolved.
+                     */
+                    put("targetId", 0L)
+
+                    put(
+                        "effectiveMelodyId",
+                        JsonNull
+                    )
+
+                    put(
+                        "melodyCandidateIds",
+                        JsonArray(emptyList())
+                    )
+
+                    put(
+                        "petgomoId",
+                        JsonNull
+                    )
+
+                    put(
+                        "verses",
+                        liturgicalVersesJson(
+                            item.verses
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    private fun liturgicalVersesJson(
+        verses:
+        List<
+                org.syriacplatform.buildtools.schema
+                .SchemaV1LiturgicalTextRef
+                >
+    ): JsonArray {
+
+        return buildJsonArray {
+            verses.forEach { verse ->
+                add(
+                    buildJsonObject {
+                        put(
+                            "textId",
+                            verse.textId
+                        )
+
+                        if (
+                            verse.petgomoId != null
+                        ) {
+                            put(
+                                "petgomoId",
+                                verse.petgomoId
+                            )
+                        } else {
+                            put(
+                                "petgomoId",
+                                JsonNull
+                            )
+                        }
+                    }
+                )
+            }
         }
     }
 
