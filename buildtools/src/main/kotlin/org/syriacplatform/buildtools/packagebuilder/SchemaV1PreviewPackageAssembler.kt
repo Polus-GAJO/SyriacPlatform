@@ -9,13 +9,23 @@ class SchemaV1PreviewPackageAssembler {
     fun assemble(
         canonical: SchemaV1CanonicalContent,
         composition: SchemaV1CompositionDraft,
-        navigation: SchemaV1NavigationContent
+        navigation: SchemaV1NavigationContent,
+        config: OccasionPackageBuildConfig
     ): SchemaV1PreviewPackage {
         require(
             !composition.hasBlockingDiagnostics
         ) {
             "Preview package assembly requires a " +
                     "non-blocking composition."
+        }
+
+        require(
+            composition.occasionId ==
+                    config.occasionId
+        ) {
+            "Composition Occasion ${composition.occasionId} " +
+                    "does not match build configuration Occasion " +
+                    "${config.occasionId}."
         }
 
         val liturgicalItems =
@@ -127,32 +137,35 @@ class SchemaV1PreviewPackageAssembler {
             manifest =
                 SchemaV1PreviewManifest(
                     packageId =
-                        "org.syriacplatform.preview.occasion1",
+                        config.packageId,
                     packageName =
-                        "Occasion 1 Development Preview",
+                        config.packageName,
                     schemaVersion = "1.0",
-                    packageVersion = "0.1.0",
+                    packageVersion =
+                        config.packageVersion,
                     contentVersion =
-                        "occasion-1-preview",
+                        config.contentVersion,
                     applicationId =
-                        "syriacplatform-reference",
+                        config.applicationId,
                     applicationName =
-                        "SyriacPlatform Reference",
-                    platform = "generic",
-                    defaultLanguage = "syr",
+                        config.applicationName,
+                    platform =
+                        config.platform,
+                    defaultLanguage =
+                        config.defaultLanguage,
                     profile = "Occasion",
                     minimumCoreVersion = "1.0.0",
                     targetSchemaVersion = "1.0",
                     supportedFeatures =
                         emptyList(),
                     generatedAt =
-                        "2026-08-18T00:00:00Z",
+                        config.generatedAt,
                     buildTool =
-                        "SyriacPlatform Build Tools",
+                        config.buildTool,
                     buildVersion =
-                        "0.1.0",
+                        config.buildVersion,
                     buildRevision =
-                        "working-tree"
+                        config.buildRevision
                 ),
 
             entryPoints =

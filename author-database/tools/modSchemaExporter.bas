@@ -1225,6 +1225,9 @@ End Function
 Private Const SAMPLE_EXPORT_ROOT As String = _
     "D:\SyriacPlatform\author-database\samples\mapping-analysis"
 
+Private Const OCCASION_EXPORT_ROOT As String = _
+    "D:\SyriacPlatform\author-database\exports"
+
 
 Public Sub ExportRepresentativeData()
 
@@ -1232,19 +1235,9 @@ Public Sub ExportRepresentativeData()
 
     On Error GoTo ErrorHandler
 
-    EnsureFolderExists SAMPLE_EXPORT_ROOT
-
-    ExportRepresentativeOccasion OCCASION_ID
-    ExportRepresentativeOccaExis OCCASION_ID
-    ExportRepresentativeExistsIn OCCASION_ID
-    ExportRepresentativeExistsInText OCCASION_ID
-    ExportRepresentativePetExis OCCASION_ID
-    ExportRepresentativePrayers OCCASION_ID
-    ExportRepresentativeQolos OCCASION_ID
-    ExportRepresentativeQintos OCCASION_ID
-    ExportRepresentativeMelodies OCCASION_ID
-    ExportRepresentativeTexts OCCASION_ID
-    ExportRepresentativePetgomos OCCASION_ID
+    ExportOccasionDataToFolder _
+        OCCASION_ID, _
+        SAMPLE_EXPORT_ROOT
 
     MsgBox _
         "Representative data exported successfully." & vbCrLf & vbCrLf & _
@@ -1266,9 +1259,75 @@ ErrorHandler:
 
 End Sub
 
+Public Sub ExportOccasionData(ByVal occasionId As Long)
+
+    Dim outputRoot As String
+
+    On Error GoTo ErrorHandler
+
+    If occasionId <= 0 Then
+        Err.Raise _
+            vbObjectError + 1000, _
+            "ExportOccasionData", _
+            "Occasion id must be positive."
+    End If
+
+    outputRoot = _
+        OCCASION_EXPORT_ROOT & _
+        "\occasion-" & _
+        CStr(occasionId)
+
+    ExportOccasionDataToFolder _
+        occasionId, _
+        outputRoot
+
+    MsgBox _
+        "Occasion data exported successfully." & vbCrLf & vbCrLf & _
+        "Occasion: " & occasionId & vbCrLf & _
+        outputRoot, _
+        vbInformation, _
+        "SyriacPlatform Occasion Export"
+
+    Exit Sub
+
+ErrorHandler:
+
+    MsgBox _
+        "Occasion data export failed." & vbCrLf & vbCrLf & _
+        "Error " & Err.Number & ":" & vbCrLf & _
+        Err.Description, _
+        vbCritical, _
+        "SyriacPlatform Occasion Export"
+
+End Sub
+
+Private Sub ExportOccasionDataToFolder( _
+    ByVal occasionId As Long, _
+    ByVal outputRoot As String _
+)
+
+    EnsureFolderExists outputRoot
+
+    ExportOccasion occasionId, outputRoot
+    ExportOccaExis occasionId, outputRoot
+    ExportExistsIn occasionId, outputRoot
+    ExportExistsInText occasionId, outputRoot
+    ExportPetExis occasionId, outputRoot
+    ExportPrayers occasionId, outputRoot
+    ExportQolos occasionId, outputRoot
+    ExportQintos occasionId, outputRoot
+    ExportMelodies occasionId, outputRoot
+    ExportTexts occasionId, outputRoot
+    ExportPetgomos occasionId, outputRoot
+
+End Sub
 
 
-Private Sub ExportRepresentativeOccasion(ByVal occasionId As Long)
+
+Private Sub ExportOccasion( _
+    ByVal occasionId As Long, _
+    ByVal outputRoot As String _
+)
 
     Dim sqlText As String
 
@@ -1278,12 +1337,15 @@ Private Sub ExportRepresentativeOccasion(ByVal occasionId As Long)
 
     ExportQueryToCsv _
         sqlText, _
-        SAMPLE_EXPORT_ROOT & "\Occasion.csv"
+        outputRoot & "\Occasion.csv"
 
 End Sub
 
 
-Private Sub ExportRepresentativeOccaExis(ByVal occasionId As Long)
+Private Sub ExportOccaExis( _
+    ByVal occasionId As Long, _
+    ByVal outputRoot As String _
+)
 
     Dim sqlText As String
 
@@ -1294,12 +1356,15 @@ Private Sub ExportRepresentativeOccaExis(ByVal occasionId As Long)
 
     ExportQueryToCsv _
         sqlText, _
-        SAMPLE_EXPORT_ROOT & "\OccaExis.csv"
+        outputRoot & "\OccaExis.csv"
 
 End Sub
 
 
-Private Sub ExportRepresentativeExistsIn(ByVal occasionId As Long)
+Private Sub ExportExistsIn( _
+    ByVal occasionId As Long, _
+    ByVal outputRoot As String _
+)
 
     Dim sqlText As String
 
@@ -1312,12 +1377,15 @@ Private Sub ExportRepresentativeExistsIn(ByVal occasionId As Long)
 
     ExportQueryToCsv _
         sqlText, _
-        SAMPLE_EXPORT_ROOT & "\ExistsIn.csv"
+        outputRoot & "\ExistsIn.csv"
 
 End Sub
 
 
-Private Sub ExportRepresentativeExistsInText(ByVal occasionId As Long)
+Private Sub ExportExistsInText( _
+    ByVal occasionId As Long, _
+    ByVal outputRoot As String _
+)
 
     Dim sqlText As String
 
@@ -1337,12 +1405,15 @@ Private Sub ExportRepresentativeExistsInText(ByVal occasionId As Long)
 
     ExportQueryToCsv _
         sqlText, _
-        SAMPLE_EXPORT_ROOT & "\ExistsInText.csv"
+        outputRoot & "\ExistsInText.csv"
 
 End Sub
 
 
-Private Sub ExportRepresentativePetExis(ByVal occasionId As Long)
+Private Sub ExportPetExis( _
+    ByVal occasionId As Long, _
+    ByVal outputRoot As String _
+)
 
     Dim sqlText As String
 
@@ -1368,12 +1439,15 @@ Private Sub ExportRepresentativePetExis(ByVal occasionId As Long)
 
     ExportQueryToCsv _
         sqlText, _
-        SAMPLE_EXPORT_ROOT & "\PetExis.csv"
+        outputRoot & "\PetExis.csv"
 
 End Sub
 
 
-Private Sub ExportRepresentativePrayers(ByVal occasionId As Long)
+Private Sub ExportPrayers( _
+    ByVal occasionId As Long, _
+    ByVal outputRoot As String _
+)
 
     Dim sqlText As String
 
@@ -1393,12 +1467,15 @@ Private Sub ExportRepresentativePrayers(ByVal occasionId As Long)
 
     ExportQueryToCsv _
         sqlText, _
-        SAMPLE_EXPORT_ROOT & "\Prayers.csv"
+        outputRoot & "\Prayers.csv"
 
 End Sub
 
 
-Private Sub ExportRepresentativeQolos(ByVal occasionId As Long)
+Private Sub ExportQolos( _
+    ByVal occasionId As Long, _
+    ByVal outputRoot As String _
+)
 
     Dim sqlText As String
 
@@ -1418,13 +1495,16 @@ Private Sub ExportRepresentativeQolos(ByVal occasionId As Long)
 
     ExportQueryToCsv _
         sqlText, _
-        SAMPLE_EXPORT_ROOT & "\Qolos.csv"
+        outputRoot & "\Qolos.csv"
 
 End Sub
 
 
 
-Private Sub ExportRepresentativeQintos(ByVal occasionId As Long)
+Private Sub ExportQintos( _
+    ByVal occasionId As Long, _
+    ByVal outputRoot As String _
+)
 
     Dim sqlText As String
 
@@ -1444,12 +1524,15 @@ Private Sub ExportRepresentativeQintos(ByVal occasionId As Long)
 
     ExportQueryToCsv _
         sqlText, _
-        SAMPLE_EXPORT_ROOT & "\Qinto.csv"
+        outputRoot & "\Qinto.csv"
 
 End Sub
 
 
-Private Sub ExportRepresentativeMelodies(ByVal occasionId As Long)
+Private Sub ExportMelodies( _
+    ByVal occasionId As Long, _
+    ByVal outputRoot As String _
+)
 
     Dim sqlText As String
 
@@ -1470,12 +1553,15 @@ Private Sub ExportRepresentativeMelodies(ByVal occasionId As Long)
 
     ExportQueryToCsv _
         sqlText, _
-        SAMPLE_EXPORT_ROOT & "\Melody.csv"
+        outputRoot & "\Melody.csv"
 
 End Sub
 
 
-Private Sub ExportRepresentativeTexts(ByVal occasionId As Long)
+Private Sub ExportTexts( _
+    ByVal occasionId As Long, _
+    ByVal outputRoot As String _
+)
 
     Dim sqlText As String
 
@@ -1501,12 +1587,15 @@ Private Sub ExportRepresentativeTexts(ByVal occasionId As Long)
 
     ExportQueryToCsv _
         sqlText, _
-        SAMPLE_EXPORT_ROOT & "\Texts.csv"
+        outputRoot & "\Texts.csv"
 
 End Sub
 
 
-Private Sub ExportRepresentativePetgomos(ByVal occasionId As Long)
+Private Sub ExportPetgomos( _
+    ByVal occasionId As Long, _
+    ByVal outputRoot As String _
+)
 
     Dim sqlText As String
 
@@ -1538,7 +1627,7 @@ Private Sub ExportRepresentativePetgomos(ByVal occasionId As Long)
 
     ExportQueryToCsv _
         sqlText, _
-        SAMPLE_EXPORT_ROOT & "\Petgomo.csv"
+        outputRoot & "\Petgomo.csv"
 
 End Sub
 

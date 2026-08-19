@@ -28,3 +28,5 @@ desktop.ini
 *.log
 *.tmp
 *.temp
+# Author Database generated exports
+author-database/exports/

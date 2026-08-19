@@ -69,11 +69,19 @@ class SchemaV1PackageWriterTest {
                 composition = preview
             )
 
+        val config =
+            OccasionPackageBuildConfig
+                .developmentPreview(
+                    occasionId =
+                        source.occasion.id
+                )
+
         val packageData =
             assembler.assemble(
                 canonical = canonical,
                 composition = preview,
-                navigation = navigation
+                navigation = navigation,
+                config = config
             )
 
         val output =

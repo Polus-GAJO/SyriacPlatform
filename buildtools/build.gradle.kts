@@ -12,18 +12,28 @@ dependencies {
     testImplementation(libs.kotlin.test)
 }
 
-tasks.register<Sync>("syncDevelopmentPreviewToReferenceApp") {
+tasks.register<Sync>(
+    "syncDevelopmentPreviewToReferenceApp"
+) {
     group = "syriacplatform"
 
+    val occasionId =
+        providers.gradleProperty(
+            "occasionId"
+        )
+            .orElse("1")
+
     description =
-        "Copies the generated Occasion 1 development preview " +
+        "Copies the selected Occasion development preview " +
                 "into the Reference Application package resources."
 
     dependsOn("test")
 
     val previewDirectory =
         layout.buildDirectory.dir(
-            "generated/occasion-1-preview"
+            occasionId.map { id ->
+                "generated/occasion-$id-preview"
+            }
         )
 
     val referencePackageDirectory =
@@ -36,11 +46,25 @@ tasks.register<Sync>("syncDevelopmentPreviewToReferenceApp") {
     into(referencePackageDirectory)
 
     doFirst {
-        val source =
-            previewDirectory.get().asFile
+        val id =
+            occasionId.get()
 
-        require(source.isDirectory) {
-            "Development preview package was not generated: $source"
+        require(
+            id.toLongOrNull()?.let { it > 0L } == true
+        ) {
+            "occasionId must be a positive integer."
+        }
+
+        val source =
+            previewDirectory
+                .get()
+                .asFile
+
+        require(
+            source.isDirectory
+        ) {
+            "Development preview package for Occasion " +
+                    "$id was not generated: $source"
         }
     }
 }
