@@ -598,3 +598,101 @@ Reference Application remains a visual smoke-test surface.
 ------------------------------------------------------------------------
 
 End of Roadmap v1.3
+
+------------------------------------------------------------------------
+
+# Roadmap Update â€” 2026-08-20
+
+This section supersedes earlier roadmap statements only where they
+conflict with the verified implementation state below. All other roadmap
+content remains in force.
+
+## Current verified baseline
+
+```text
+2eac9db
+```
+
+The real-content pipeline is now verified for:
+
+- parameterized Occasion package generation;
+- synchronization to the reference application;
+- complete long-text transport;
+- resolved Qolo occurrences;
+- unresolved Qolo occurrences originating from `QoloN = 0`;
+- strict detection of missing canonical Text references;
+- multiple real Occasions, including complex content extraction from
+  Holy Week after Author Database cleanup.
+
+## Completed milestone: generalized real-Occasion pipeline
+
+The earlier single-Occasion vertical slice has become a reusable
+development workflow.
+
+This milestone is considered complete for the current phase.
+
+It does not imply that every liturgical composition dimension is already
+modeled.
+
+## Next milestone: Day-aware Composition and Navigation
+
+### Goal
+
+Represent the day dimension required by multi-day Occasions without
+creating a parallel import or package-loading path.
+
+### Proven need
+
+Occasion 41 contains prayer structures repeated across several days.
+
+The existing pipeline retrieves the content correctly, but composition
+currently groups occurrences sharing the same prayer identity without
+preserving the required `DayN` separation.
+
+### Required design work
+
+The next implementation should determine:
+
+1. the semantic role and identity rules for a day occurrence;
+2. how source `DayN` enters Build Tools composition;
+3. how day grouping is represented in Schema v1 or an explicitly
+   versioned compatible extension;
+4. how runtime resolution exposes day-aware structure;
+5. how navigation traverses Occasion -> Day -> Prayer where applicable;
+6. how ordinary single-day Occasions remain simple and compatible;
+7. how ordering and repetition are preserved;
+8. what validation rules are required for day references/grouping.
+
+### Constraints
+
+The implementation must not:
+
+- introduce a second content-import pipeline for Holy Week;
+- infer liturgical day relationships that the Author Database has not
+  supplied;
+- merge distinct day occurrences merely because they use the same
+  canonical Prayer;
+- move presentation-only decisions into canonical content entities;
+- weaken existing canonical-reference validation.
+
+### Acceptance criteria
+
+The milestone is complete when:
+
+- ordinary previously verified Occasions still build and run;
+- unresolved Qolo behavior remains intact;
+- a multi-day Occasion such as Occasion 41 preserves separate day
+  groupings;
+- prayers and liturgical items appear under the correct day;
+- content remains complete and ordered;
+- package validation and runtime tests cover the new day-aware path;
+- the reference application can navigate the resulting structure without
+  a special-case Holy Week loader.
+
+## Subsequent work
+
+After day-aware composition is stable, continue the existing roadmap for
+broader application behavior and UI development.
+
+The reference UI should remain primarily a verification surface until
+the underlying content/composition contracts are stable.

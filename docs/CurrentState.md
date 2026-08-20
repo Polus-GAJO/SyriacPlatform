@@ -1593,3 +1593,197 @@ new real-domain cases before Audio, Search, or production UI work expands.
 5. Extend Content Domain/schema rules only when real requirements demand it.
 6. Keep the Reference Application primarily as a visual smoke-test surface.
 
+
+------------------------------------------------------------------------
+
+# Implementation Alignment Update â€” 2026-08-20
+
+This section records the verified implementation delta established after
+the previous CurrentState milestone. It supplements the preceding
+sections; it does not replace or reinterpret them.
+
+## Verified baseline
+
+The current verified repository baseline for this update is:
+
+```text
+2eac9db
+```
+
+This baseline includes the generalized real-Occasion build workflow and
+end-to-end support for unresolved Qolo occurrences.
+
+## Generalized real-Occasion build workflow
+
+The Build Tools workflow is no longer tied to a single hard-coded
+development Occasion.
+
+A real Occasion export can be selected by `occasionId`, built into a
+preview Application Package, and synchronized to the reference
+application.
+
+The verified development command is:
+
+```powershell
+.\gradlew.bat :buildtools:syncDevelopmentPreviewToReferenceApp -PoccasionId=<ID>
+```
+
+The build workflow uses the corresponding Author Database export
+directory:
+
+```text
+author-database/exports/occasion-<ID>
+```
+
+and produces the generated preview under:
+
+```text
+buildtools/build/generated/occasion-<ID>-preview
+```
+
+The Gradle workflow was also verified with Configuration Cache reuse.
+A repeated build with unchanged inputs can complete as up-to-date while
+reusing the configuration cache.
+
+The synchronized Compose resources may require Android Studio's
+"Sync Project with Gradle Files" before an already-running development
+environment reflects a newly selected Occasion. This is a development
+workflow concern, not an Application Package semantic rule.
+
+## Long text export
+
+Long Syriac texts are now verified end-to-end without the earlier
+truncation.
+
+The failure was traced to the Author Database export path rather than to
+the runtime text model. After correction, full text values were verified
+in the exported `Texts.csv`, generated package JSON, and reference
+application.
+
+Long text content must therefore remain untruncated through:
+
+```text
+Author Database
+    -> CSV export
+    -> Build Tools mapping
+    -> Application Package JSON
+    -> Runtime
+    -> UI
+```
+
+## Unresolved Qolo occurrences
+
+A source occurrence with:
+
+```text
+QoloN = 0
+```
+
+has an explicit domain meaning.
+
+It is not automatically corrupt data and it must not be silently
+discarded.
+
+It represents a real liturgical position reserved for a Qolo whose
+canonical identity has not yet been established in the Author Database.
+The occurrence may legitimately have no contextual texts yet.
+
+The platform therefore supports an unresolved Qolo occurrence as a
+distinct occurrence type.
+
+Important invariants are:
+
+1. `QoloN = 0` is a source sentinel for an unresolved Qolo occurrence.
+2. It does not create canonical Qolo entity `0`.
+3. It preserves the liturgical position and occurrence ordering.
+4. It does not invent a Qolo name, text, melody, or canonical identity.
+5. It remains distinguishable from an ordinary resolved Qolo.
+6. Package validation, runtime resolution, and UI handling understand
+   the unresolved occurrence explicitly.
+
+This behavior is implemented across Build Tools, package representation,
+mapping, validation, runtime resolution, and the reference UI.
+
+## Source integrity and orphan references
+
+Real-content testing exposed stale `ExistsInText` records whose
+`TextID` values no longer existed in the Author Database.
+
+These records resulted from an authoring-history operation in which old
+long texts were deleted after being replaced by newly divided texts,
+while corresponding linking records remained.
+
+The package build correctly rejected this condition with the invariant
+that every contextual Text referenced by a LiturgicalItem must exist in
+canonical content.
+
+The correct response is to repair the Author Database relationships.
+Build Tools must not silently drop or synthesize missing canonical
+content merely to make the package build succeed.
+
+This failure therefore remains useful source-integrity detection.
+
+## Verified real-content coverage
+
+The generalized pipeline has been exercised against multiple real
+Occasions with different content characteristics.
+
+Verified results include:
+
+- ordinary Occasion structures already used during the vertical-slice
+  work;
+- Occasion 84 after unresolved-Qolo support;
+- Occasion 370;
+- Occasion 41 after stale `ExistsInText` references were removed from
+  the Author Database.
+
+For Occasion 41, the platform successfully extracted and transported
+the real content after source cleanup.
+
+This establishes an important boundary:
+
+> The remaining problem for Occasion 41 is not content extraction.
+
+## Day-aware composition gap
+
+Occasion 41 represents Holy Week and contains repeated prayer structures
+across multiple days.
+
+The current composition path groups occurrences by prayer without yet
+preserving the required day-level separation represented by source
+`DayN`.
+
+The observed result is that, for example, the liturgical items belonging
+to the same prayer across the week can appear together under one prayer
+presentation.
+
+The content itself is present; the missing semantic dimension is the
+day-aware composition/navigation layer.
+
+Therefore the next architectural task is:
+
+```text
+Day-aware Composition and Navigation
+```
+
+The implementation must determine how `DayN` is represented through the
+generated package, runtime composition, and application navigation
+without introducing a parallel content-loading path or encoding
+presentation decisions into canonical content.
+
+## Current restart point
+
+At baseline `2eac9db`, the next development session should treat the
+following as established:
+
+```text
+Author Database export       verified
+Parameterized Occasion build verified
+Long-text transport          verified
+Unresolved Qolo occurrence   supported
+Source orphan detection      verified
+Real Occasion extraction     verified
+Day-aware composition        next architectural task
+```
+
+The next work should extend the existing pipeline rather than replace it.

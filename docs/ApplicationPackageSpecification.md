@@ -3726,3 +3726,93 @@ The following principles summarize the intent of this specification.
     not infer missing verse selections.
 
 These principles should guide future revisions of this specification.
+
+------------------------------------------------------------------------
+
+# Implementation Alignment Update â€” 2026-08-20
+
+This section records package semantics established by the current
+implementation and real-content verification.
+
+## Unresolved Qolo occurrence
+
+Schema v1 package generation supports a liturgical occurrence whose
+source Qolo identity is unresolved.
+
+This is an occurrence-level concept, not a canonical Qolo entity.
+
+The source condition:
+
+```text
+QoloN = 0
+```
+
+must therefore be represented without adding canonical Qolo `0` to the
+`qolos` collection.
+
+The package/runtime model must preserve enough information to keep the
+occurrence in its correct ordered liturgical position and to identify it
+as unresolved.
+
+An unresolved Qolo occurrence:
+
+- may have no canonical `qoloId`;
+- may have no contextual verses;
+- must not cause a fabricated Qolo entity to be emitted;
+- must survive package mapping and runtime resolution as an explicit
+  unresolved occurrence;
+- must be handled explicitly by reference validation;
+- must remain distinguishable from a resolved Qolo.
+
+The current implementation uses the explicit unresolved-Qolo occurrence
+path introduced at baseline `2eac9db`.
+
+## Canonical reference integrity
+
+Contextual text references emitted by liturgical items must resolve to
+canonical content in the package.
+
+Package assembly must fail when a contextual `Text` reference points to
+a canonical text that is absent.
+
+This rule is intentional and was verified against real orphan
+`ExistsInText` source records.
+
+Package generation must not repair this condition by silently removing
+the occurrence or synthesizing canonical content.
+
+## Full text preservation
+
+The Application Package does not define a preview-length limit for
+canonical liturgical text.
+
+Text content transported from the Author Database must remain complete
+through package generation.
+
+Truncation for UI preview, if ever required, is a presentation concern
+and must not mutate canonical package text.
+
+## Multi-day composition
+
+Real-content testing has established a required future composition
+dimension for multi-day Occasions.
+
+Source `DayN` distinguishes liturgical occurrences that may otherwise
+share the same Prayer identity.
+
+The current package pipeline successfully extracts the content, but
+Schema v1 composition/navigation does not yet model the required
+day-level separation.
+
+Until the representation is deliberately specified:
+
+- multi-day content must not be assigned to a second package format;
+- `DayN` must not be treated as disposable source metadata;
+- repeated prayer structures across different days must not be assumed
+  to be one semantic occurrence merely because their canonical Prayer
+  identity matches;
+- the next schema/composition work must define a day-aware structure
+  while preserving canonical-entity versus occurrence separation.
+
+This is a composition/navigation extension of the existing package
+pipeline, not a replacement content-loading mechanism.

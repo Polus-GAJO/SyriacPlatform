@@ -887,3 +887,100 @@ Occasion/build configuration instead of being tied to `OccN = 1`, then
 validate the same pipeline against several representative real
 Occasions.
 
+
+------------------------------------------------------------------------
+
+# Implementation Alignment Update â€” 2026-08-20
+
+This section records Author Database semantics confirmed by real-content
+testing. It supplements the existing mapping rules.
+
+## `QoloN = 0`
+
+`QoloN = 0` is a meaningful source sentinel.
+
+It represents a liturgical Qolo occurrence whose canonical Qolo identity
+is not yet known. It preserves a real position in the authored
+liturgical structure until the canonical Qolo can be identified later.
+
+Mapping rule:
+
+```text
+ExistsIn.QoloN = 0
+    -> unresolved Qolo occurrence
+    -> no canonical Qolo 0 is generated
+```
+
+The exporter may include the source information necessary to preserve
+this occurrence, but Build Tools must not require `Qolos.QoloSerch` for
+canonical Qolo `0`, because no such canonical entity is being asserted.
+
+An unresolved occurrence may have no `ExistsInText` rows. This is valid
+when the Author Database structure has been created before the missing
+textual content is authored.
+
+The sentinel must not be confused with:
+
+- a resolved Qolo whose real identifier is zero;
+- permission to create a fake canonical Qolo;
+- permission to infer a name, melody, or text.
+
+## Orphan `ExistsInText` records
+
+`ExistsInText.TextID` must resolve to an existing canonical row in
+`Texts`.
+
+A linking row whose `TextID` no longer exists is invalid source data.
+
+Real-content testing confirmed that such rows can remain after an old
+text is deleted while its relationship rows are not deleted.
+
+Required behavior:
+
+```text
+ExistsInText.TextID
+    -> must resolve to Texts.TextID
+    -> otherwise package generation fails
+```
+
+Build Tools must not silently omit the orphan relationship and must not
+invent replacement canonical text.
+
+The Author Database should be repaired at the source.
+
+## Long text transport
+
+Text export must preserve the complete Author Database text value.
+
+The exporter must not apply a fixed-length conversion that truncates
+long text fields before CSV generation.
+
+The verified path is:
+
+```text
+Texts
+    -> complete CSV field
+    -> canonical mapping
+    -> texts.json
+    -> runtime TextContent
+```
+
+## `DayN` and multi-day Occasions
+
+Real-content testing of Occasion 41 established that `DayN` carries
+semantic information required to distinguish repeated prayer structures
+across the days of a multi-day Occasion.
+
+The current export can retrieve the underlying records, but the current
+composition model does not yet preserve `DayN` as a first-class
+composition/navigation dimension.
+
+Therefore:
+
+1. `DayN` must not be discarded as semantically irrelevant.
+2. Build Tools must not flatten distinct day occurrences merely because
+   they share the same Prayer identity.
+3. The exact Schema v1 representation is a pending architecture task.
+4. No second import mechanism should be introduced merely for multi-day
+   Occasions; the existing Author Database -> Build Tools -> Application
+   Package pipeline remains the intended path.

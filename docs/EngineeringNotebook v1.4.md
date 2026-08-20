@@ -1572,3 +1572,158 @@ Occasions.
 
 End of Engineering Notebook v1.3
 
+
+------------------------------------------------------------------------
+
+# Engineering Update â€” 2026-08-20
+
+## Baseline
+
+Verified repository baseline:
+
+```text
+2eac9db
+```
+
+This update records the engineering work completed after the previous
+notebook revision.
+
+## Generalized Occasion preview workflow
+
+The development preview workflow was generalized so that a real
+Occasion can be selected by Gradle property instead of being fixed to a
+single sample.
+
+Verified command:
+
+```powershell
+.\gradlew.bat :buildtools:syncDevelopmentPreviewToReferenceApp -PoccasionId=<ID>
+```
+
+The workflow builds from:
+
+```text
+author-database/exports/occasion-<ID>
+```
+
+through the unified `OccasionPackageBuilder`, writes a generated preview,
+and synchronizes it to the reference application.
+
+The Gradle tasks were corrected so that Configuration Cache can be
+stored and reused. Consecutive unchanged runs were verified as
+successful and up-to-date.
+
+## Long-text investigation
+
+Real Occasion testing exposed truncated Syriac text.
+
+The investigation separated the pipeline into stages:
+
+```text
+Access
+-> exported Texts.csv
+-> generated package
+-> synchronized Compose resources
+-> runtime/UI
+```
+
+The truncation was ultimately corrected at the export path. Full text
+was then verified in `Texts.csv`, generated JSON, and the running
+reference application.
+
+This confirmed the value of diagnosing the earliest stage at which data
+changes rather than assuming the runtime/UI is responsible.
+
+## Unresolved Qolo design
+
+Occasion 84 exposed a source row with `QoloN = 0`.
+
+Initial mapping treated every Qolo row as a canonical Qolo and failed
+because canonical fields such as `QoloSerch` were absent.
+
+Author Database semantics clarified that `QoloN = 0` is deliberate: it
+reserves a real liturgical position for a Qolo whose identity has not
+yet been established.
+
+The implementation was therefore extended with an explicit unresolved
+Qolo occurrence rather than deleting the occurrence or creating fake
+canonical content.
+
+The support now crosses:
+
+```text
+Build Tools composition
+-> preview package
+-> package JSON mapping
+-> package validation
+-> runtime resolver
+-> reference UI
+```
+
+The canonical Qolo collection does not gain Qolo `0`.
+
+Relevant implementation commit:
+
+```text
+2eac9db Support unresolved Qolo occurrences across package runtime
+```
+
+## Real source-integrity failure
+
+Holy Week testing exposed contextual Text IDs that were referenced by
+`ExistsInText` but no longer existed in `Texts`.
+
+The missing IDs were traced to stale relationship rows left after older
+long texts had been divided into smaller texts and the old canonical
+texts deleted.
+
+The Author Database was cleaned by removing the invalid relationship
+rows.
+
+After cleanup, package generation successfully transported the real
+content.
+
+The existing failure:
+
+```text
+Not every contextual Text referenced by LiturgicalItems exists in canonical content.
+```
+
+is therefore retained as correct validation behavior.
+
+## Real Occasion results
+
+The generalized pipeline has now been exercised beyond the initial
+sample Occasions.
+
+Verified examples include Occasion 84 and Occasion 370.
+
+Occasion 41 (Holy Week) also successfully exports and transports its
+content after source cleanup.
+
+The remaining Holy Week defect is structural presentation/composition:
+items from the same prayer across several days are currently grouped
+under one prayer because `DayN` is not yet represented in the
+composition/navigation model.
+
+## Engineering conclusion
+
+The tests establish that the platform does not need a separate import
+mechanism for complex multi-day Occasions.
+
+The next task is to extend the existing composition model with the
+missing day dimension.
+
+Next engineering target:
+
+```text
+Day-aware Composition and Navigation
+```
+
+The design must preserve:
+
+- one Author Database export pipeline;
+- one Application Package pipeline;
+- canonical entity versus liturgical occurrence separation;
+- ordered/repeated liturgical usage;
+- explicit validation rather than silent repair.
