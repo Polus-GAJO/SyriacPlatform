@@ -1787,3 +1787,37 @@ Day-aware composition        next architectural task
 ```
 
 The next work should extend the existing pipeline rather than replace it.
+
+
+------------------------------------------------------------------------
+
+# Architecture Planning Update â€” 2026-08-21
+
+<!-- AUDIO-INTEGRATION-CURRENT-STATE-2026-08-21 -->
+
+Architecture review baseline:
+
+``` text
+eabb3c9
+```
+
+Audio Integration is now the active design and implementation stage.
+
+Day-aware Composition and Navigation remains a confirmed architectural
+requirement, including the previously established `DayN` findings, but
+is intentionally deferred to a later broader contextual-organization
+phase.
+
+At this documentation point no Audio implementation has yet been added
+to the Core, Application Package, Build Tools, or Reference Application.
+
+The approved Audio architecture is documented in:
+
+- `ApplicationContentModel.md`;
+- `AuthorDatabaseMapping.md`;
+- `EngineeringNotebook v1.4.md`;
+- `Roadmap v1.4.md`.
+
+The physical Application Package media contract remains intentionally
+open until the Author Database media schema and source mapping are
+designed in detail.

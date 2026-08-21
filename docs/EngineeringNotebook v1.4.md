@@ -1727,3 +1727,467 @@ The design must preserve:
 - canonical entity versus liturgical occurrence separation;
 - ordered/repeated liturgical usage;
 - explicit validation rather than silent repair.
+
+
+------------------------------------------------------------------------
+
+# Audio Integration Architecture Update â€” 2026-08-21
+
+<!-- AUDIO-INTEGRATION-ENGINEERING-2026-08-21 -->
+
+## Baseline
+
+Architecture review baseline:
+
+``` text
+eabb3c9
+```
+
+No Audio implementation change is implied by this documentation update.
+
+The purpose of this update is to establish the media architecture before
+modifying the Author Database, Application Package, Core, or Reference
+Application.
+
+# Decision 041
+
+## MediaAsset Is a Reusable Platform Entity
+
+### Decision
+
+MediaAsset is an independent reusable platform entity.
+
+It is not owned by Melody, Qolo, LiturgicalItem, or application UI.
+
+### Reason
+
+The same physical/logical media resource may legitimately be reused by
+multiple content entities and multiple applications.
+
+Embedding file paths or audio fields directly in content entities would
+couple content identity to storage and distribution.
+
+### Impact
+
+Content-to-media association is represented through explicit
+relationships.
+
+Media binaries can evolve independently from canonical liturgical
+entities.
+
+# Decision 042
+
+## Melody-to-Media Is Many-to-Many
+
+### Decision
+
+Melody and MediaAsset use an explicit many-to-many relationship.
+
+Conceptually:
+
+``` text
+Melody
+   *
+   â”‚ MelodyMedia
+   *
+MediaAsset
+```
+
+### Reason
+
+Several Melody identities may use the same actual recorded performance.
+
+Duplicating the media file for each Melody would create unnecessary
+storage duplication and inconsistent media identity.
+
+### Impact
+
+`MelodyMedia` owns relationship-specific properties such as `role` and
+`sort`.
+
+MediaAsset does not contain `MelodyId`.
+
+# Decision 043
+
+## Media Role Belongs to the Relationship
+
+### Decision
+
+The semantic purpose of a media resource in relation to content belongs
+to the relationship rather than MediaAsset itself.
+
+### Reason
+
+Media type answers what kind of resource exists.
+
+Relationship role answers why that resource is associated with this
+content.
+
+The same MediaAsset may potentially have different relationship roles in
+different contexts.
+
+### Impact
+
+Concepts such as `RECORDING`, future teaching/reference roles, and
+relationship ordering are modeled on media relationships.
+
+# Decision 044
+
+## Authoring Media Location Is Relative
+
+### Decision
+
+The Author Database stores a source-relative media path rather than an
+absolute workstation path or deployment URL.
+
+### Reason
+
+Authoring media roots vary between computers and environments.
+
+Deployment locations may also change independently from authored
+content.
+
+### Impact
+
+Authoring resolution follows:
+
+``` text
+environment-specific media root
+        +
+SourceRelativePath
+        =
+authoring source file
+```
+
+Absolute local paths and cloud-provider URLs do not become canonical
+media identity.
+
+# Decision 045
+
+## Media Distribution Is Independent from Authoring
+
+### Decision
+
+Local, embedded, remote, and hybrid media access are runtime/distribution
+policies rather than Author Database relationships.
+
+### Reason
+
+Moving media between package storage, device cache, CDN, or another
+cloud provider must not require rewriting content relationships.
+
+### Impact
+
+The same MediaAsset identity can be resolved through different physical
+resource strategies.
+
+A future hybrid resolver may prefer a valid local resource and fall back
+to a remote source when required.
+
+# Decision 046
+
+## MediaAsset Identity Is Independent from Exact Binary Bytes
+
+### Decision
+
+MediaAsset identifies the logical media resource rather than one exact
+binary encoding.
+
+### Reason
+
+Noise reduction, normalization, metadata correction, re-encoding, or
+replacement of a damaged copy should not require rebuilding all content
+relationships.
+
+### Impact
+
+The same MediaAssetId may remain while the physical file changes.
+
+A materially different performance or resource receives a new
+MediaAssetId.
+
+Build-derived checksum metadata distinguishes physical binary revisions.
+
+# Decision 047
+
+## Checksums Detect Physical Media Changes
+
+### Decision
+
+Physical media changes are detected through build-derived cryptographic
+checksums rather than by changing MediaAsset identity.
+
+### Reason
+
+A media file may be replaced under the same source-relative path while
+remaining the same logical resource.
+
+Installed or cached applications need a deterministic way to determine
+whether their local binary is current.
+
+### Impact
+
+Conceptually:
+
+``` text
+same MediaAssetId
++
+same checksum
+    -> same physical revision
+
+same MediaAssetId
++
+different checksum
+    -> updated physical revision
+```
+
+A manual media revision number is not required solely for binary-change
+detection.
+
+# Decision 048
+
+## Contextual Media Is Separate from Melody Media
+
+### Decision
+
+Media associated with a reusable Melody is distinct from media associated
+with one contextual LiturgicalItem.
+
+### Reason
+
+A teaching/reference recording of a Melody and a performance of one
+specific liturgical occurrence represent different relationships even
+when both are audio.
+
+### Impact
+
+The architecture distinguishes `MelodyMedia` from
+`LiturgicalItemMedia`.
+
+Both may reference reusable MediaAsset entities.
+
+# Decision 049
+
+## Media Timing Is Not a MediaAsset Property
+
+### Decision
+
+Verse/text playback timing does not belong to MediaAsset itself.
+
+### Reason
+
+Timing describes how structured content maps onto temporal regions of a
+media resource.
+
+The same MediaAsset may be used in several liturgical contexts.
+
+### Impact
+
+`startMs` and `endMs` are modeled through reusable timing structures
+rather than as MediaAsset fields.
+
+# Decision 050
+
+## Timing Sets and Segments Are Reusable
+
+### Decision
+
+Temporal segmentation is represented through reusable MediaTimingSet and
+MediaSegment entities.
+
+Conceptually:
+
+``` text
+MediaAsset
+    â†“
+MediaTimingSet
+    â†“
+ordered MediaSegments
+```
+
+### Reason
+
+The same recording and the same temporal divisions may be reused by
+different liturgical occurrences.
+
+Duplicating start/end values for every `ExistsIn` occurrence would create
+redundant authoring data and synchronization risk.
+
+### Impact
+
+Multiple contextual media relationships may reference the same
+MediaTimingSet.
+
+Timing is authored once and reused where semantically valid.
+
+# Decision 051
+
+## Contextual Text Occurrences Map to Reusable Media Segments
+
+### Decision
+
+The association between a contextual text occurrence and a temporal
+segment is represented explicitly.
+
+Conceptually:
+
+``` text
+contextual Text occurrence
+        â†“
+LiturgicalTextMediaSegment
+        â†“
+MediaSegment
+```
+
+### Reason
+
+Different contextual text occurrences may use the same canonical Text,
+the same recording, and the same timing segment while remaining distinct
+liturgical occurrences.
+
+### Impact
+
+Different `ExistsInText` identities can reference the same
+MediaSegment.
+
+This preserves contextual identity without duplicating authoritative
+timing information.
+
+# Decision 052
+
+## AudioService Does Not Interpret Liturgical Structure
+
+### Decision
+
+The future AudioService is responsible for playback, not for resolving
+liturgical relationships.
+
+### Reason
+
+Audio playback and content interpretation are separate platform
+responsibilities.
+
+### Impact
+
+Content/runtime resolution determines a MediaAsset and optional
+`startMs` / `endMs`.
+
+AudioService performs operations such as play, pause, resume, seek, and
+stop and exposes playback state.
+
+The AudioService does not select Melody, Qolo, Text, Petgomo, or
+MediaSegment relationships.
+
+# Decision 053
+
+## Hybrid Media Resolution Is a Supported Architectural Direction
+
+### Decision
+
+The media architecture must permit local and remote resource resolution,
+including a hybrid strategy.
+
+### Reason
+
+Applications may require offline media while also benefiting from
+cloud-hosted updates and selective downloads.
+
+### Impact
+
+A future runtime may conceptually resolve media as:
+
+``` text
+valid local resource
+    -> use local
+
+otherwise remote resource available
+    -> retrieve/cache/use remote
+
+otherwise
+    -> unavailable
+```
+
+Content identity and media relationships remain unchanged regardless of
+the physical resolution strategy.
+
+# Decision 054
+
+## Legacy RofMP3 Is a Migration Source, Not the Target Model
+
+### Decision
+
+The existing `Rof mp3.accdb` Attachment-based storage is treated as a
+legacy migration source.
+
+### Reason
+
+Embedding audio binaries in an auxiliary Access database couples
+authoring storage to Access and prevents clean local/cloud/hybrid media
+distribution.
+
+### Impact
+
+Existing attachments will eventually be extracted into an external media
+library and represented through MediaAsset and MelodyMedia records.
+
+Migration must be verified before the legacy source is retired.
+
+# Decision 055
+
+## Day-Aware Composition Is Deferred to Broader Contextual Organization
+
+### Decision
+
+Day-aware Composition and Navigation is intentionally deferred.
+
+Audio Integration becomes the active architecture stage.
+
+### Reason
+
+The `DayN` requirement remains valid, but it belongs to a broader
+contextual-organization design rather than needing to block the now
+well-defined Audio Integration work.
+
+The real-content pipeline has already established the stable content
+identities and contextual occurrence boundaries required by media.
+
+### Impact
+
+Audio design must not introduce Day-specific assumptions.
+
+The existing `DayN` findings remain authoritative and must not be lost.
+
+A later contextual-organization phase will address Day-aware composition
+together with the broader contextual model.
+
+## Audio Architecture Snapshot
+
+``` text
+Author Database
+â”œâ”€â”€ MediaAsset
+â”œâ”€â”€ MelodyMedia
+â”œâ”€â”€ LiturgicalItemMedia
+â”œâ”€â”€ MediaTimingSet
+â”œâ”€â”€ MediaSegment
+â””â”€â”€ LiturgicalTextMediaSegment
+        â†“
+Build Tools
+        â†“
+Application Package media representation
+        â†“
+Package Validation
+        â†“
+Runtime media resolution
+        â†“
+Content / Media relationship resolution
+        â†“
+AudioService
+        â†“
+platform playback backend
+        â†“
+Application UI
+```
+
+The physical Application Package representation remains a separate
+schema decision and must be documented before implementation publishes
+new canonical media collections.

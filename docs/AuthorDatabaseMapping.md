@@ -984,3 +984,269 @@ Therefore:
 4. No second import mechanism should be introduced merely for multi-day
    Occasions; the existing Author Database -> Build Tools -> Application
    Package pipeline remains the intended path.
+
+
+------------------------------------------------------------------------
+
+# Audio / Media Mapping Architecture â€” 2026-08-21
+
+<!-- AUDIO-MEDIA-MAPPING-2026-08-21 -->
+
+This section supersedes Section 17.5 for the active Audio Integration
+design phase.
+
+The existing `RofMP3` authoring arrangement is treated as a migration
+source rather than the target SyriacPlatform media schema.
+
+## Existing audio source
+
+The current authoring environment includes a separate Microsoft Access
+database:
+
+``` text
+Rof mp3.accdb
+```
+
+containing:
+
+``` text
+RofMp3
+â”œâ”€â”€ RofMeloN
+â”œâ”€â”€ Melodyserch
+â”œâ”€â”€ Record
+â””â”€â”€ Audiolink
+```
+
+Current semantics are:
+
+- `RofMeloN` associates the existing audio record with Melody;
+- `Melodyserch` is legacy/unused and shall not enter the platform model;
+- `Record` is legacy/unused and shall not determine runtime media
+  availability;
+- `Audiolink` is an Access Attachment containing the current audio file.
+
+The Attachment-based database is not the target media architecture.
+
+Audio binaries shall ultimately be stored outside the Author Database.
+
+## Target Author Database media model
+
+The target logical authoring model introduces explicit media entities and
+relationships.
+
+### MediaAsset
+
+``` text
+MediaAsset
+â”œâ”€â”€ MediaAssetID
+â”œâ”€â”€ MediaType
+â””â”€â”€ SourceRelativePath
+```
+
+`MediaAssetID` identifies the stable logical media resource.
+
+`MediaType` identifies the resource category.
+
+`SourceRelativePath` identifies the source resource relative to the
+configured authoring media root.
+
+Absolute workstation paths and deployment/cloud URLs must not be stored
+as MediaAsset identity.
+
+### Authoring media root
+
+The existing Author Database already uses computer-specific media-root
+configuration through the authoring environment.
+
+This principle is retained:
+
+``` text
+computer/environment media root
+        +
+MediaAsset.SourceRelativePath
+        =
+physical authoring source
+```
+
+The exact future location of the media-root configuration may be refined
+during physical Author Database design.
+
+Environment-specific roots are authoring configuration and shall not be
+published as Application Package content.
+
+## MelodyMedia
+
+Melody-to-media association is many-to-many.
+
+``` text
+MelodyMedia
+â”œâ”€â”€ MelodyN
+â”œâ”€â”€ MediaAssetID
+â”œâ”€â”€ Role
+â””â”€â”€ Sort
+```
+
+One MediaAsset may be associated with several Melody records.
+
+This is required because multiple Melody identities may use the same
+actual recorded performance.
+
+Build Tools must preserve the explicit relationship rather than
+duplicating the media resource.
+
+`Role` describes the purpose of the media relationship.
+
+`Sort` provides authored ordering when multiple media relationships are
+available.
+
+MediaAsset identifiers must not be used as implicit preference order.
+
+## LiturgicalItemMedia source relationship
+
+Contextual recordings are associated with the source liturgical
+occurrence represented by `ExistsIn.ID`.
+
+Conceptually:
+
+``` text
+LiturgicalItemMedia
+â”œâ”€â”€ LiturgicalItemMediaID
+â”œâ”€â”€ ExistsInID
+â”œâ”€â”€ MediaAssetID
+â”œâ”€â”€ Role
+â”œâ”€â”€ Sort
+â””â”€â”€ TimingSetID?
+```
+
+`ExistsInID` preserves the contextual liturgical occurrence boundary.
+
+A MediaAsset may be reused by several `ExistsIn` occurrences.
+
+Contextual media must not be copied merely because the same recording is
+used in several prayers, occasions, or other liturgical contexts.
+
+## Reusable media timing
+
+Timing data for text-level playback is reusable independently from one
+`ExistsIn` occurrence.
+
+### MediaTimingSet
+
+``` text
+MediaTimingSet
+â”œâ”€â”€ MediaTimingSetID
+â””â”€â”€ MediaAssetID
+```
+
+A MediaTimingSet defines one reusable segmentation of one MediaAsset.
+
+More than one contextual liturgical occurrence may reference the same
+MediaTimingSet when it uses the same recording and segmentation.
+
+### MediaSegment
+
+``` text
+MediaSegment
+â”œâ”€â”€ MediaSegmentID
+â”œâ”€â”€ MediaTimingSetID
+â”œâ”€â”€ Sequence
+â”œâ”€â”€ StartMs
+â””â”€â”€ EndMs
+```
+
+Timing values are stored as integer milliseconds.
+
+Required source invariants include:
+
+``` text
+StartMs >= 0
+EndMs > StartMs
+```
+
+Where media duration is known during build:
+
+``` text
+EndMs <= durationMs
+```
+
+### LiturgicalTextMediaSegment
+
+The mapping between contextual source Text occurrences and reusable
+segments is represented separately.
+
+``` text
+LiturgicalTextMediaSegment
+â”œâ”€â”€ ExistsInTextID
+â””â”€â”€ MediaSegmentID
+```
+
+This permits different `ExistsInText` records to reuse the same segment.
+
+Example:
+
+``` text
+ExistsIn 100
+    ExistsInText 1001 -> MediaSegment 1
+    ExistsInText 1002 -> MediaSegment 2
+
+ExistsIn 200
+    ExistsInText 2001 -> MediaSegment 1
+    ExistsInText 2002 -> MediaSegment 2
+```
+
+The contextual text occurrences remain distinct while the authoritative
+timing is stored once.
+
+## Build-time physical metadata
+
+The Author Database should not manually maintain physical metadata that
+can be derived reliably from the media file.
+
+Build Tools are responsible for deriving, where required:
+
+``` text
+mime type
+file size
+duration
+checksum
+published resource path/location
+```
+
+A changed checksum does not by itself create a new MediaAsset identity.
+
+A new MediaAsset identity is required when the media resource changes
+materially rather than merely receiving a corrected or re-encoded
+physical representation.
+
+## Migration boundary
+
+`Rof mp3.accdb` is a legacy migration source.
+
+The intended migration direction is:
+
+``` text
+RofMP3 Attachment
+        â†“
+extract physical media
+        â†“
+external authoring media library
+        +
+MediaAsset records
+        +
+MelodyMedia relationships
+```
+
+The legacy source must not be removed until migration verification proves
+that media resources and Melody associations have been preserved.
+
+## Schema boundary
+
+This section defines Author Database semantics and the intended mapping
+boundary.
+
+It does not yet declare the physical Application Package representation.
+
+`media-assets.json`, media relationship collections, timing collections,
+resource distribution policy, and schema-version compatibility must be
+defined in `ApplicationPackageSpecification.md` before Build Tools emit
+them as official package content.

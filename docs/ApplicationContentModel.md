@@ -3902,3 +3902,577 @@ This separation provides a stable foundation for:
 
 The Application Content Model therefore serves as the conceptual contract between the platform's editorial system and its runtime applications.
 
+
+
+------------------------------------------------------------------------
+
+# Audio and Media Architecture Alignment â€” 2026-08-21
+
+<!-- AUDIO-ARCHITECTURE-ALIGNMENT-2026-08-21 -->
+
+This section refines and supersedes earlier MediaAsset and media-reference
+statements where they conflict with the rules below.
+
+The purpose of this alignment is to establish the logical media model
+before the physical Application Package representation and runtime audio
+implementation are finalized.
+
+## Media Architecture Principle
+
+Media is a reusable platform capability.
+
+Audio files, images, notation, documents, and future media resources must
+not be modeled as application-specific properties or as direct filesystem
+paths embedded in presentation code.
+
+The logical flow is:
+
+``` text
+Content identity
+        â†“
+Media relationship
+        â†“
+MediaAsset
+        â†“
+Resource resolution
+        â†“
+Media service
+```
+
+Content entities describe what the content is.
+
+MediaAsset describes the reusable media resource.
+
+Relationship entities describe why and how a MediaAsset is associated
+with content.
+
+Runtime resource resolution determines where the physical resource is
+obtained.
+
+## MediaAsset Identity
+
+MediaAsset represents one stable reusable media resource.
+
+Conceptually:
+
+``` text
+MediaAsset
+â”œâ”€â”€ id
+â””â”€â”€ type
+```
+
+Authoring and package representations may contain additional fields
+appropriate to their respective responsibilities.
+
+MediaAsset identity is independent from:
+
+- Melody identity;
+- Qolo identity;
+- LiturgicalItem identity;
+- Text identity;
+- filesystem location;
+- cloud-provider URL;
+- exact binary checksum.
+
+A MediaAsset identifier remains stable when the physical representation
+of the same logical media resource is corrected or improved.
+
+Examples that normally preserve MediaAsset identity include:
+
+- noise reduction;
+- normalization;
+- metadata correction;
+- re-encoding;
+- replacing a damaged copy with a corrected copy of the same recording.
+
+A materially different performance or media resource receives a new
+MediaAsset identity.
+
+Therefore:
+
+``` text
+logical media identity
+        â‰ 
+exact file binary
+```
+
+The exact binary representation may be identified independently through
+derived package metadata such as a checksum.
+
+## MediaAsset Is Not Owned by Content
+
+MediaAsset does not contain MelodyId, LiturgicalItemId, QoloId, or other
+content ownership fields.
+
+Relationships between media and content are represented explicitly.
+
+This allows one MediaAsset to be reused by multiple content entities
+without duplicating the underlying media resource.
+
+## MelodyMedia
+
+MelodyMedia represents a reusable many-to-many relationship between
+Melody and MediaAsset.
+
+Conceptually:
+
+``` text
+Melody
+   *
+   â”‚
+   â”‚ MelodyMedia
+   â”‚
+   *
+MediaAsset
+```
+
+The relationship contains contextual relationship information such as:
+
+``` text
+MelodyMedia
+â”œâ”€â”€ melodyId
+â”œâ”€â”€ mediaAssetId
+â”œâ”€â”€ role
+â””â”€â”€ sort
+```
+
+A single MediaAsset may therefore be associated with multiple Melodies.
+
+This is required because distinct Melody identities may legitimately use
+the same actual recorded performance.
+
+Media must not be duplicated merely because several Melodies reference
+the same recording.
+
+### Role
+
+`role` describes why the MediaAsset is related to the Melody.
+
+It is distinct from MediaAsset type.
+
+For example:
+
+``` text
+MediaAsset.type = AUDIO
+MelodyMedia.role = RECORDING
+```
+
+Future roles may distinguish teaching, reference, performance, or other
+uses when real requirements establish those distinctions.
+
+### Sort
+
+`sort` provides authored ordering when more than one MediaAsset has the
+same applicable role.
+
+Applications and Build Tools must not infer preference from MediaAsset
+identifiers.
+
+## LiturgicalItemMedia
+
+LiturgicalItemMedia represents the relationship between one contextual
+liturgical occurrence and a MediaAsset.
+
+Conceptually:
+
+``` text
+LiturgicalItem
+      *
+      â”‚
+      â”‚ LiturgicalItemMedia
+      â”‚
+      *
+MediaAsset
+```
+
+This relationship is distinct from MelodyMedia.
+
+MelodyMedia describes media associated with the reusable Melody itself.
+
+LiturgicalItemMedia describes media associated with one contextual
+liturgical use.
+
+Examples include:
+
+- a complete performance of the selected hymn occurrence;
+- a recording containing the exact contextual verses;
+- another contextual recording whose use depends on the liturgical
+  occurrence.
+
+The same MediaAsset may be reused by multiple LiturgicalItems.
+
+A contextual media relationship may contain:
+
+``` text
+LiturgicalItemMedia
+â”œâ”€â”€ liturgicalItemId
+â”œâ”€â”€ mediaAssetId
+â”œâ”€â”€ role
+â”œâ”€â”€ sort
+â””â”€â”€ timingSetId?
+```
+
+The exact physical representation belongs to the Application Package
+Specification.
+
+## Media Timing
+
+Timing information does not belong to MediaAsset itself.
+
+A MediaAsset identifies the reusable media resource.
+
+Timing describes how portions of that resource correspond to structured
+content.
+
+Therefore fields such as:
+
+``` text
+startMs
+endMs
+```
+
+must not be stored as intrinsic MediaAsset properties.
+
+## MediaTimingSet
+
+MediaTimingSet represents one reusable temporal segmentation of a
+MediaAsset.
+
+Conceptually:
+
+``` text
+MediaAsset
+      â”‚
+      â–¼
+MediaTimingSet
+      â”‚
+      â”œâ”€â”€ MediaSegment
+      â”œâ”€â”€ MediaSegment
+      â””â”€â”€ MediaSegment
+```
+
+A timing set may be reused by more than one LiturgicalItemMedia
+relationship when those contextual occurrences use the same recording
+and the same temporal segmentation.
+
+This prevents duplicate timing data when the same text and recording are
+reused in different liturgical contexts.
+
+## MediaSegment
+
+MediaSegment represents one ordered temporal interval inside a
+MediaTimingSet.
+
+Conceptually:
+
+``` text
+MediaSegment
+â”œâ”€â”€ id
+â”œâ”€â”€ timingSetId
+â”œâ”€â”€ sequence
+â”œâ”€â”€ startMs
+â””â”€â”€ endMs
+```
+
+Timing is represented numerically in milliseconds.
+
+The following basic invariant applies:
+
+``` text
+0 <= startMs < endMs
+```
+
+When authoritative media duration is available:
+
+``` text
+endMs <= media duration
+```
+
+`sequence` identifies the ordered position of the segment within the
+timing set.
+
+MediaSegment does not permanently own a canonical Text or one
+LiturgicalItem occurrence.
+
+## LiturgicalTextMediaSegment
+
+LiturgicalTextMediaSegment maps a contextual text occurrence to a
+reusable MediaSegment.
+
+Conceptually:
+
+``` text
+contextual Text occurrence
+        â”‚
+        â–¼
+LiturgicalTextMediaSegment
+        â”‚
+        â–¼
+MediaSegment
+```
+
+This additional relationship is required because different contextual
+occurrences may use the same canonical Text, the same recording, and the
+same timing segment while retaining distinct contextual identities.
+
+For example:
+
+``` text
+Liturgical occurrence A
+    Text occurrence A1 â”€â”€â–؛ Segment 1
+    Text occurrence A2 â”€â”€â–؛ Segment 2
+
+Liturgical occurrence B
+    Text occurrence B1 â”€â”€â–؛ Segment 1
+    Text occurrence B2 â”€â”€â–؛ Segment 2
+```
+
+The contextual Text occurrence identifiers differ.
+
+The timing data is nevertheless stored only once.
+
+This preserves both contextual occurrence identity and reusable timing
+information.
+
+## Verse Playback and Synchronization
+
+The media model supports direct playback of a contextual text occurrence.
+
+Runtime resolution may expose:
+
+``` text
+Resolved contextual text
+â”œâ”€â”€ text
+â””â”€â”€ audio segment
+    â”œâ”€â”€ mediaAsset
+    â”œâ”€â”€ startMs
+    â””â”€â”€ endMs
+```
+
+Selecting the text may therefore request playback of the corresponding
+interval without requiring application UI code to understand authoring
+relationships.
+
+The same timing information may also support reverse synchronization:
+
+``` text
+text selection
+    â†’ seek to media segment
+
+playback position
+    â†’ identify active media segment
+    â†’ identify contextual text occurrence
+```
+
+This enables future verse highlighting during continuous playback.
+
+The Audio service itself does not need to understand Text, Qolo,
+Melody, or liturgical structure.
+
+It receives a resolved media resource and optional playback interval.
+
+## Authoring Source versus Runtime Resource
+
+The location used by the Author Database to find an authoring file is
+not the runtime media location.
+
+These are separate concepts:
+
+``` text
+Authoring source
+        â‰ 
+Application Package resource
+        â‰ 
+Runtime distribution location
+```
+
+The Author Database should identify a media source using a relative
+authoring path.
+
+Conceptually:
+
+``` text
+MediaSourceRoot
+        +
+SourceRelativePath
+```
+
+The root is environment-specific.
+
+The relative path belongs to authoring data.
+
+Build Tools resolve the source file and determine its published package
+or distribution representation.
+
+Absolute workstation paths must not become canonical package content.
+
+## Local, Remote, and Hybrid Resolution
+
+Media relationships are independent from the physical distribution
+strategy.
+
+The same MediaAsset may be resolved from an embedded/local package
+resource, a local media cache, a remote/cloud media source, or through a
+hybrid strategy.
+
+A hybrid runtime may conceptually use:
+
+``` text
+if valid local resource exists
+    use local resource
+else if remote resource is available
+    retrieve remote resource
+    cache when appropriate
+    use retrieved resource
+else
+    report media unavailable
+```
+
+The Author Database must not encode a cloud provider or deployment URL
+as part of the logical content relationship.
+
+Changing the media host must not require rewriting Melody, LiturgicalItem,
+or MediaAsset relationships.
+
+## Binary Change Detection
+
+MediaAsset identity does not identify the exact binary bytes of a file.
+
+Build Tools may derive technical metadata including:
+
+``` text
+mimeType
+fileSize
+durationMs
+checksum
+```
+
+A cryptographic checksum may be used to determine whether a locally
+available or cached resource represents the expected binary revision.
+
+Therefore:
+
+``` text
+same MediaAssetId
++
+different checksum
+```
+
+may legally represent an updated physical version of the same logical
+media resource.
+
+A materially different media resource receives a new MediaAssetId.
+
+## Authoring versus Package MediaAsset
+
+The Author Database and Application Package intentionally require
+different MediaAsset representations.
+
+The Author Database stores editorial/source facts.
+
+Conceptually:
+
+``` text
+Author MediaAsset
+â”œâ”€â”€ MediaAssetId
+â”œâ”€â”€ MediaType
+â””â”€â”€ SourceRelativePath
+```
+
+Build Tools inspect the actual source resource and derive physical
+metadata.
+
+The Application Package may expose runtime information such as:
+
+``` text
+Package MediaAsset
+â”œâ”€â”€ id
+â”œâ”€â”€ type
+â”œâ”€â”€ resource location
+â”œâ”€â”€ mimeType
+â”œâ”€â”€ fileSize
+â”œâ”€â”€ checksum
+â””â”€â”€ durationMs?
+```
+
+The exact serialized fields and resource-location strategy are defined
+only by the Application Package Specification.
+
+Derived physical metadata should not become manually maintained Author
+Database data unless an explicit authoring requirement later justifies
+it.
+
+## Media Relationship Summary
+
+The logical media architecture is:
+
+``` text
+Melody
+   *
+   â”‚ MelodyMedia
+   *
+MediaAsset
+   *
+   â”‚ LiturgicalItemMedia
+   *
+LiturgicalItem
+
+MediaAsset
+   â”‚
+   â””â”€â”€ MediaTimingSet
+           â”‚
+           â””â”€â”€ ordered MediaSegments
+
+contextual Text occurrence
+   â”‚
+   â””â”€â”€ LiturgicalTextMediaSegment
+           â”‚
+           â””â”€â”€ MediaSegment
+```
+
+The model preserves the following distinctions:
+
+``` text
+MediaAsset
+    = what media resource exists
+
+Media relationship
+    = why that resource is associated with content
+
+MediaTimingSet
+    = one reusable segmentation of that resource
+
+MediaSegment
+    = one temporal interval
+
+LiturgicalTextMediaSegment
+    = which contextual text occurrence uses that interval
+```
+
+## Media Design Invariants
+
+The following rules are established:
+
+1. MediaAsset is an independent reusable entity.
+2. Melody and MediaAsset have a many-to-many relationship.
+3. Melody media relationships are represented explicitly.
+4. Relationship role and ordering belong to the relationship.
+5. MediaAsset does not store a deployment URL as canonical identity.
+6. Authoring uses a relative media-source path.
+7. The authoring media root is environment-specific.
+8. Build Tools transform authoring sources into runtime/package resources.
+9. Local, cloud, and hybrid resolution are distribution/runtime policies.
+10. MediaAsset identity survives physical improvements to the same
+    logical resource.
+11. A materially different media resource receives a new identity.
+12. Binary checksums identify physical-resource changes independently
+    from MediaAsset identity.
+13. Replacing a physical file does not require changing MediaAssetId when
+    logical media identity remains unchanged.
+14. Manual media revision numbers are not required merely to detect
+    binary changes when authoritative checksums are available.
+15. Timing data belongs to media/content usage, not to MediaAsset itself.
+16. Reusable timing data must not be duplicated merely because the same
+    recording appears in multiple liturgical contexts.
+17. Applications consume resolved media relationships rather than
+    reconstructing Author Database relationships.

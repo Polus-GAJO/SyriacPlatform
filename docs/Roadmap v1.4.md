@@ -696,3 +696,141 @@ broader application behavior and UI development.
 
 The reference UI should remain primarily a verification surface until
 the underlying content/composition contracts are stable.
+
+
+------------------------------------------------------------------------
+
+# Roadmap Update â€” 2026-08-21
+
+<!-- AUDIO-INTEGRATION-ROADMAP-2026-08-21 -->
+
+This update supersedes the 2026-08-20 roadmap update only where the
+immediate milestone order has changed.
+
+## Architecture review baseline
+
+``` text
+eabb3c9
+```
+
+## Immediate milestone: Audio Integration
+
+Audio Integration is now the active next platform stage.
+
+The real-content pipeline has established the canonical and contextual
+identities required for media relationships.
+
+The Audio Integration architecture shall be designed and implemented as
+a reusable platform capability rather than an application-specific
+player.
+
+### Architecture scope
+
+The stage includes:
+
+- reusable MediaAsset identity;
+- many-to-many Melody-to-media relationships;
+- contextual LiturgicalItem-to-media relationships;
+- relationship roles and authored ordering;
+- authoring source-relative media paths;
+- Build Tools media discovery and physical metadata derivation;
+- reusable MediaTimingSet and MediaSegment structures;
+- contextual Text-occurrence-to-segment mapping;
+- Application Package media representation;
+- media reference and timing validation;
+- runtime media resolution;
+- AudioService;
+- playback state;
+- play/pause/resume/seek/stop behavior;
+- interval playback for contextual text occurrences;
+- support for future playback-position-to-text synchronization;
+- local resource resolution;
+- architecture compatible with future remote/cloud and hybrid media
+  resolution.
+
+### Architectural constraints
+
+Audio Integration must not:
+
+- embed Author Database logic in runtime applications;
+- make application UI construct media filesystem paths;
+- use Melody IDs as implicit media filenames;
+- duplicate a media resource merely because several Melodies or
+  liturgical occurrences use it;
+- place contextual timing data inside MediaAsset;
+- couple canonical media identity to one cloud provider;
+- change MediaAsset identity merely because the same logical resource is
+  re-encoded or physically corrected;
+- bypass the existing Application Package validation/runtime path;
+- introduce Day-specific composition assumptions.
+
+### Implementation order
+
+The intended implementation order is:
+
+``` text
+formal media architecture
+        â†“
+Author Database physical media schema
+        â†“
+legacy RofMP3 migration design
+        â†“
+controlled media export
+        â†“
+Build Tools media mapping
+        â†“
+Application Package media contract
+        â†“
+package validation
+        â†“
+runtime media resolution
+        â†“
+AudioService
+        â†“
+platform playback backend
+        â†“
+Reference Application verification
+```
+
+### Acceptance direction
+
+The Audio Integration milestone is not complete merely when an audio file
+plays.
+
+Completion requires demonstrating that:
+
+- media identity is reusable;
+- one recording can serve multiple Melodies;
+- one recording and timing set can serve multiple contextual liturgical
+  occurrences;
+- contextual text selection can start playback at the correct segment;
+- playback can stop at the authoritative segment end;
+- applications do not need Author Database or physical-path knowledge;
+- media passes through the same package/runtime architectural discipline
+  as other platform content.
+
+## Deferred milestone: Contextual Organization
+
+The previously planned Day-aware Composition and Navigation work remains
+required but is deferred.
+
+The verified `DayN` findings from multi-day Occasion testing remain
+authoritative.
+
+They will be addressed later as part of a broader contextual-organization
+design rather than as the immediate next implementation stage.
+
+The future design must still preserve:
+
+- distinct day occurrences;
+- authored ordering;
+- canonical-versus-contextual separation;
+- one Author Database export path;
+- one Application Package path;
+- explicit validation;
+- no Holy-Week-specific loader.
+
+Deferral does not mean that `DayN` is semantically unimportant.
+
+It means only that the broader contextual organization model will be
+designed in a later dedicated stage.
