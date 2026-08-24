@@ -2191,3 +2191,149 @@ Application UI
 The physical Application Package representation remains a separate
 schema decision and must be documented before implementation publishes
 new canonical media collections.
+
+------------------------------------------------------------------------
+
+# Decision 056
+
+## Canonical Audio Media Source
+
+### Decision
+
+For media-aware builds, `MelodyMedia` is the authoritative source of melody-recording relationships.
+
+The legacy `Melody.Record` Boolean must not determine published recording availability when canonical Media data is available.
+
+`SchemaV1Melody` exposes:
+
+```text
+hasRecording
+recordingIds[]
+```
+
+where `recordingIds` reference packaged MediaAsset identities.
+
+### Reason
+
+A Boolean cannot represent multiple recordings, stable media identity, media type, ordering, shared recordings, or future media metadata.
+
+### Impact
+
+The authoritative media-aware path is:
+
+```text
+MediaAsset + MelodyMedia
+        v
+MediaSourceData
+        v
+SchemaV1CanonicalMedia
+        v
+package-specific media selection
+        v
+SchemaV1Melody.recordingIds[]
+```
+
+The legacy non-media path remains temporarily available for compatibility, but it is not authoritative for published audio media.
+
+------------------------------------------------------------------------
+
+# Decision 057
+
+## Physical Media Root Is Build-Time State
+
+### Decision
+
+Physical source media remains outside the Git repository and is supplied through a configurable media-library root.
+
+`MediaAsset.SourceRelativePath` is relative to that root.
+
+Build Tools convert that source path into a package-relative `media/...` path.
+
+Absolute workstation paths must never enter Application Package JSON.
+
+### Reason
+
+The authoring filesystem is a build concern. Application Packages must remain portable across Android, iOS, desktop, tests, and future distribution mechanisms.
+
+### Impact
+
+The currently verified development root is:
+
+```text
+D:\SyriacPlatformMedia
+```
+
+This path is not part of the package contract.
+
+The root may be overridden by:
+
+```text
+-PmediaLibraryRoot=<path>
+```
+
+or:
+
+```text
+SYRIACPLATFORM_MEDIA_ROOT
+```
+
+------------------------------------------------------------------------
+
+# Decision 058
+
+## Media References, Metadata, and Files Are Emitted Together
+
+### Decision
+
+`recordingIds`, `media-assets.json`, and their selected physical media files must enter the package as one build operation.
+
+Only MediaAssets required by the current package are copied.
+
+### Reason
+
+Publishing recording references without corresponding MediaAsset metadata and physical files would create dangling runtime references.
+
+Copying the complete authoring media library would make packages unnecessarily large and would weaken package isolation.
+
+### Impact
+
+The verified package shape now includes:
+
+```text
+content/
+|-- melodies.json
+`-- media-assets.json
+
+media/
+`-- ...
+```
+
+A fresh Occasion 2 build produced 13 selected MediaAssets and 13 physical media files with no broken references or missing files.
+
+------------------------------------------------------------------------
+
+# Decision 059
+
+## Initial Media Role Semantics
+
+### Decision
+
+The initial media-role semantics are:
+
+```text
+RECORDING
+= recording of the melody itself
+
+PERFORMANCE
+= recording of the complete liturgical occurrence
+```
+
+### Reason
+
+A melody recording and a complete liturgical performance are different domain relationships even when both are represented by audio or video files.
+
+### Impact
+
+The currently completed Build Tools vertical slice implements melody `RECORDING`.
+
+Occurrence-level `PERFORMANCE` and timing/segment integration remain future work.

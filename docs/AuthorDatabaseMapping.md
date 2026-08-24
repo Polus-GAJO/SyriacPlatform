@@ -1250,3 +1250,92 @@ It does not yet declare the physical Application Package representation.
 resource distribution policy, and schema-version compatibility must be
 defined in `ApplicationPackageSpecification.md` before Build Tools emit
 them as official package content.
+
+------------------------------------------------------------------------
+
+# Audio / Media Mapping Implementation Status --- 2026-08-25
+
+<!-- AUDIO-MEDIA-IMPLEMENTED-2026-08-25 -->
+
+The Audio / Media Mapping Architecture defined earlier in this document has now been implemented for the first melody-recording vertical slice.
+
+The verified authoring relationship is:
+
+```text
+Melody
+   v
+MelodyMedia
+   v
+MediaAsset
+```
+
+`MelodyMedia` is authoritative for melody recordings in media-aware builds.
+
+The official controlled Media export is:
+
+```text
+author-database/exports/media/
+|-- MediaAsset.csv
+|-- MelodyMedia.csv
+|-- ExistsInMedia.csv
+|-- MediaTimingSet.csv
+|-- MediaSegment.csv
+`-- ExistsInTextMediaSegment.csv
+```
+
+Empty CSVs are valid for media structures without authored rows.
+
+`MediaAsset.SourceRelativePath` remains relative to the external media-library root and must not contain an absolute workstation path.
+
+The implemented transformation is:
+
+```text
+MediaAsset.csv + MelodyMedia.csv
+        v
+MediaSourceDataLoader
+        v
+MediaSourceData
+        v
+SchemaV1MediaMapper
+        v
+SchemaV1CanonicalMedia
+        v
+SchemaV1PackageMediaSelector
+```
+
+For a media-aware package:
+
+```text
+MelodyMedia.MediaAssetID
+        v
+SchemaV1Melody.recordingIds[]
+        v
+packaged MediaAsset.id
+```
+
+and:
+
+```text
+MediaAsset.SourceRelativePath
+        v
+"media/" + SourceRelativePath
+        v
+packaged MediaAsset.path
+```
+
+`SchemaV1Melody.hasRecording` is derived from the canonical selected recording relationships.
+
+The legacy `Melody.Record` flag is not authoritative in this path.
+
+A fresh Occasion 2 export from the current Author Database was built through the media-aware pipeline and produced:
+
+```text
+13 MediaAssets
+6 prayers
+51 liturgical items
+13 physical media files
+```
+
+All `recordingIds` resolved to packaged MediaAssets and all packaged MediaAsset paths resolved to existing physical package files.
+
+This establishes the first verified end-to-end media mapping from the current Author Database into an Application Package.

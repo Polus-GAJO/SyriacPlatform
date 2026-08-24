@@ -3816,3 +3816,87 @@ Until the representation is deliberately specified:
 
 This is a composition/navigation extension of the existing package
 pipeline, not a replacement content-loading mechanism.
+
+------------------------------------------------------------------------
+
+# Audio Media Package Emission --- Implemented Contract 2026-08-25
+
+<!-- AUDIO-MEDIA-PACKAGE-EMISSION-2026-08-25 -->
+
+The preview package writer now emits the first implemented physical media contract for melody recordings.
+
+## Metadata files
+
+When selected media is present, the package contains:
+
+```text
+content/
+|-- melodies.json
+`-- media-assets.json
+```
+
+A melody recording relationship is serialized as:
+
+```text
+Melody.recordingIds[]
+```
+
+Each value references one `MediaAsset.id` in `media-assets.json`.
+
+The current emitted MediaAsset fields are:
+
+```text
+id
+type
+path
+```
+
+## Physical media directory
+
+Selected media binaries are copied under:
+
+```text
+media/
+```
+
+`MediaAsset.path` is relative to the package root.
+
+Example:
+
+```text
+media/audio/melodies/media-000217.mp3
+```
+
+Absolute source-library paths are forbidden in package content.
+
+The authoring `SourceRelativePath` is transformed at build time:
+
+```text
+audio/melodies/media-000217.mp3
+        v
+media/audio/melodies/media-000217.mp3
+```
+
+## Selection rule
+
+The writer does not copy the complete external media library.
+
+Build Tools first select MediaAssets referenced by melodies included in the current package, then emit only those MediaAssets and binaries.
+
+Shared MediaAssets are emitted once even when referenced by more than one Melody.
+
+## Integrity rule
+
+For every emitted `recordingIds` value:
+
+1. a matching `MediaAsset.id` must exist in `content/media-assets.json`;
+2. the MediaAsset package-relative `path` must resolve inside the package;
+3. the referenced physical package file must exist.
+
+A fresh Occasion 2 package was verified with 13 MediaAssets and 13 physical files, with no broken references or missing files.
+
+## Current scope
+
+This implemented contract covers melody `RECORDING` media.
+
+Occurrence-level `PERFORMANCE`, timing sets, timed segments, and verse synchronization are not yet part of the emitted runtime package contract.

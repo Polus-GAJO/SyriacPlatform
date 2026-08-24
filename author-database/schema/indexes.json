@@ -243,6 +243,136 @@
       ]
     },
     {
+      "table": "ExistsInMedia",
+      "name": "ExistsInExistsInMedia",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "ExistsInID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsInMedia",
+      "name": "IX_ExistsInMedia_ExistsInID",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "ExistsInID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsInMedia",
+      "name": "IX_ExistsInMedia_MediaAssetID",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MediaAssetID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsInMedia",
+      "name": "IX_ExistsInMedia_TimingSetID",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MediaTimingSetID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsInMedia",
+      "name": "MediaAssetExistsInMedia",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MediaAssetID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsInMedia",
+      "name": "MediaTimingSetExistsInMedia",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MediaTimingSetID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsInMedia",
+      "name": "PK_ExistsInMedia",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "ExistsInMediaID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsInMedia",
+      "name": "UX_ExistsInMedia",
+      "primary": false,
+      "unique": true,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "ExistsInID",
+          "ordinal": 0,
+          "descending": false
+        },
+        {
+          "name": "MediaAssetID",
+          "ordinal": 1,
+          "descending": false
+        },
+        {
+          "name": "Role",
+          "ordinal": 2,
+          "descending": false
+        }
+      ]
+    },
+    {
       "table": "ExistsInText",
       "name": "ExistsInExistsInText",
       "primary": false,
@@ -303,6 +433,101 @@
       ]
     },
     {
+      "table": "ExistsInTextMediaSegment",
+      "name": "ExistsInTextExistsInTextMediaSegment",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "ExistsInTextID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsInTextMediaSegment",
+      "name": "IX_ExistsInTextMediaSegment_Segment",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MediaSegmentID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsInTextMediaSegment",
+      "name": "IX_ExistsInTextMediaSegment_Text",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "ExistsInTextID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsInTextMediaSegment",
+      "name": "MediaSegmentExistsInTextMediaSegment",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MediaSegmentID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsInTextMediaSegment",
+      "name": "PK_ExistsInTextMediaSegment",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "ExistsInTextMediaSegmentID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsInTextMediaSegment",
+      "name": "UX_ExistsInTextMediaSegment",
+      "primary": false,
+      "unique": true,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "ExistsInTextID",
+          "ordinal": 0,
+          "descending": false
+        },
+        {
+          "name": "MediaSegmentID",
+          "ordinal": 1,
+          "descending": false
+        }
+      ]
+    },
+    {
       "table": "Groups",
       "name": "GroupsGroupName",
       "primary": false,
@@ -342,6 +567,131 @@
       "columns": [
         {
           "name": "LocationN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MediaAsset",
+      "name": "PK_MediaAsset",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MediaAssetID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MediaSegment",
+      "name": "IX_MediaSegment_TimingSetID",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MediaTimingSetID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MediaSegment",
+      "name": "MediaTimingSetMediaSegment",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MediaTimingSetID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MediaSegment",
+      "name": "PK_MediaSegment",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MediaSegmentID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MediaSegment",
+      "name": "UX_MediaSegment_Sequence",
+      "primary": false,
+      "unique": true,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MediaTimingSetID",
+          "ordinal": 0,
+          "descending": false
+        },
+        {
+          "name": "Sequence",
+          "ordinal": 1,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MediaTimingSet",
+      "name": "IX_MediaTimingSet_MediaAssetID",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MediaAssetID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MediaTimingSet",
+      "name": "MediaAssetMediaTimingSet",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MediaAssetID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MediaTimingSet",
+      "name": "PK_MediaTimingSet",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MediaTimingSetID",
           "ordinal": 0,
           "descending": false
         }
@@ -463,6 +813,106 @@
         {
           "name": "QoloN",
           "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MelodyMedia",
+      "name": "IX_MelodyMedia_MediaAssetID",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MediaAssetID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MelodyMedia",
+      "name": "IX_MelodyMedia_MelodyN",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MelodyN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MelodyMedia",
+      "name": "MediaAssetMelodyMedia",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MediaAssetID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MelodyMedia",
+      "name": "MelodyMelodyMedia",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MelodyN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MelodyMedia",
+      "name": "PK_MelodyMedia",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MelodyMediaID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MelodyMedia",
+      "name": "UX_MelodyMedia",
+      "primary": false,
+      "unique": true,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MelodyN",
+          "ordinal": 0,
+          "descending": false
+        },
+        {
+          "name": "MediaAssetID",
+          "ordinal": 1,
+          "descending": false
+        },
+        {
+          "name": "Role",
+          "ordinal": 2,
           "descending": false
         }
       ]

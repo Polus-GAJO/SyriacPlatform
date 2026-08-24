@@ -38,13 +38,32 @@ val occasionPreviewDirectory =
         "generated/occasion-$occasionId-preview"
     )
 
+val mediaSourceDirectory =
+    layout.projectDirectory.dir(
+        "../author-database/exports/media"
+    )
+
+val mediaLibraryRoot =
+    providers.gradleProperty(
+        "mediaLibraryRoot"
+    )
+        .orElse(
+            providers.environmentVariable(
+                "SYRIACPLATFORM_MEDIA_ROOT"
+            )
+        )
+        .orElse(
+            "D:\\SyriacPlatformMedia"
+        )
+        .get()
+
 tasks.register<JavaExec>(
     "buildOccasionPreview"
 ) {
     group = "syriacplatform"
 
     description =
-        "Builds Occasion $occasionId export " +
+        "Builds Occasion $occasionId export with media " +
                 "into a Schema-v1 preview package."
 
     classpath =
@@ -60,6 +79,14 @@ tasks.register<JavaExec>(
         occasionSourceDirectory
     )
 
+    inputs.dir(
+        mediaSourceDirectory
+    )
+
+    inputs.dir(
+        file(mediaLibraryRoot)
+    )
+
     outputs.dir(
         occasionPreviewDirectory
     )
@@ -68,6 +95,13 @@ tasks.register<JavaExec>(
         occasionId,
         occasionSourceDirectory
             .asFile
+            .absolutePath,
+        mediaSourceDirectory
+            .asFile
+            .absolutePath,
+        file(
+            mediaLibraryRoot
+        )
             .absolutePath,
         occasionPreviewDirectory
             .get()

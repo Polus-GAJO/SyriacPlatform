@@ -24,10 +24,17 @@ Private Const EXPORT_ROOT As String = _
     "D:\SyriacPlatform\author-database\schema"
 
 Private Const SCHEMA_VERSION As Long = 1
-Private Const EXPORTER_VERSION As String = "1.0"
+Private Const EXPORTER_VERSION As String = "1.1"
 
 Private Const SAMPLE_EXPORT_ROOT As String = _
     "D:\SyriacPlatform\author-database\samples\mapping-analysis"
+
+Private Const OCCASION_EXPORT_ROOT As String = _
+    "D:\SyriacPlatform\author-database\exports"
+
+Private Const MEDIA_EXPORT_ROOT As String = _
+    "D:\SyriacPlatform\author-database\exports\media"
+
 
 
 ' ============================================================
@@ -1219,14 +1226,136 @@ End Function
 
 
 ' ============================================================
+' MEDIA DATA EXPORT
+' SYRIACPLATFORM-MEDIA-DATA-EXPORT-V1
+'
+' Exports the complete Author Database media-authoring model to:
+'
+'   D:\SyriacPlatform\author-database\exports\media\
+'
+' Files:
+'   MediaAsset.csv
+'   MelodyMedia.csv
+'   ExistsInMedia.csv
+'   MediaTimingSet.csv
+'   MediaSegment.csv
+'   ExistsInTextMediaSegment.csv
+'
+' Physical media files are not copied by this procedure.
+' All six files are always emitted. Empty tables still produce
+' a CSV containing the canonical column header.
+' ============================================================
+
+Public Sub ExportMediaData()
+
+    On Error GoTo ErrorHandler
+
+    EnsureFolderExists MEDIA_EXPORT_ROOT
+
+    ExportMediaAssets MEDIA_EXPORT_ROOT
+    ExportMelodyMedia MEDIA_EXPORT_ROOT
+    ExportExistsInMedia MEDIA_EXPORT_ROOT
+    ExportMediaTimingSets MEDIA_EXPORT_ROOT
+    ExportMediaSegments MEDIA_EXPORT_ROOT
+    ExportExistsInTextMediaSegments MEDIA_EXPORT_ROOT
+
+    MsgBox _
+        "Media data exported successfully." & vbCrLf & vbCrLf & _
+        "MediaAsset rows: " & DCount("*", "MediaAsset") & vbCrLf & _
+        "MelodyMedia rows: " & DCount("*", "MelodyMedia") & vbCrLf & _
+        "ExistsInMedia rows: " & DCount("*", "ExistsInMedia") & vbCrLf & _
+        "MediaTimingSet rows: " & DCount("*", "MediaTimingSet") & vbCrLf & _
+        "MediaSegment rows: " & DCount("*", "MediaSegment") & vbCrLf & _
+        "ExistsInTextMediaSegment rows: " & _
+            DCount("*", "ExistsInTextMediaSegment") & vbCrLf & vbCrLf & _
+        MEDIA_EXPORT_ROOT, _
+        vbInformation, _
+        "SyriacPlatform Media Export"
+
+    Exit Sub
+
+ErrorHandler:
+
+    MsgBox _
+        "Media data export failed." & vbCrLf & vbCrLf & _
+        "Error " & Err.Number & ":" & vbCrLf & _
+        Err.Description, _
+        vbCritical, _
+        "SyriacPlatform Media Export"
+
+End Sub
+
+
+Private Sub ExportMediaAssets(ByVal outputRoot As String)
+
+    ExportQueryToCsv _
+        "SELECT MediaAssetID, MediaType, SourceRelativePath " & _
+        "FROM MediaAsset ORDER BY MediaAssetID;", _
+        outputRoot & "\MediaAsset.csv"
+
+End Sub
+
+
+Private Sub ExportMelodyMedia(ByVal outputRoot As String)
+
+    ExportQueryToCsv _
+        "SELECT MelodyMediaID, MelodyN, MediaAssetID, Role, Sort " & _
+        "FROM MelodyMedia " & _
+        "ORDER BY MelodyN, Sort, MelodyMediaID;", _
+        outputRoot & "\MelodyMedia.csv"
+
+End Sub
+
+
+Private Sub ExportExistsInMedia(ByVal outputRoot As String)
+
+    ExportQueryToCsv _
+        "SELECT ExistsInMediaID, ExistsInID, MediaAssetID, Role, Sort, " & _
+        "MediaTimingSetID FROM ExistsInMedia " & _
+        "ORDER BY ExistsInID, Sort, ExistsInMediaID;", _
+        outputRoot & "\ExistsInMedia.csv"
+
+End Sub
+
+
+Private Sub ExportMediaTimingSets(ByVal outputRoot As String)
+
+    ExportQueryToCsv _
+        "SELECT MediaTimingSetID, MediaAssetID, Name " & _
+        "FROM MediaTimingSet " & _
+        "ORDER BY MediaAssetID, MediaTimingSetID;", _
+        outputRoot & "\MediaTimingSet.csv"
+
+End Sub
+
+
+Private Sub ExportMediaSegments(ByVal outputRoot As String)
+
+    ExportQueryToCsv _
+        "SELECT MediaSegmentID, MediaTimingSetID, Sequence, StartMs, EndMs " & _
+        "FROM MediaSegment " & _
+        "ORDER BY MediaTimingSetID, Sequence, MediaSegmentID;", _
+        outputRoot & "\MediaSegment.csv"
+
+End Sub
+
+
+Private Sub ExportExistsInTextMediaSegments(ByVal outputRoot As String)
+
+    ExportQueryToCsv _
+        "SELECT ExistsInTextMediaSegmentID, ExistsInTextID, MediaSegmentID " & _
+        "FROM ExistsInTextMediaSegment " & _
+        "ORDER BY ExistsInTextID, MediaSegmentID, ExistsInTextMediaSegmentID;", _
+        outputRoot & "\ExistsInTextMediaSegment.csv"
+
+End Sub
+
+
+' ============================================================
 ' REPRESENTATIVE DATA EXPORT
 ' ============================================================
 
-Private Const SAMPLE_EXPORT_ROOT As String = _
-    "D:\SyriacPlatform\author-database\samples\mapping-analysis"
 
-Private Const OCCASION_EXPORT_ROOT As String = _
-    "D:\SyriacPlatform\author-database\exports"
 
 
 Public Sub ExportRepresentativeData()

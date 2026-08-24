@@ -13,6 +13,26 @@ class SchemaV1CanonicalMapper {
     fun map(
         source: AuthorSourceData
     ): SchemaV1CanonicalContent {
+        return mapInternal(
+            source = source,
+            media = null
+        )
+    }
+
+    fun map(
+        source: AuthorSourceData,
+        media: SchemaV1CanonicalMedia
+    ): SchemaV1CanonicalContent {
+        return mapInternal(
+            source = source,
+            media = media
+        )
+    }
+
+    private fun mapInternal(
+        source: AuthorSourceData,
+        media: SchemaV1CanonicalMedia?
+    ): SchemaV1CanonicalContent {
         return SchemaV1CanonicalContent(
             prayers = source.prayers
                 .map(::mapPrayer),
@@ -32,7 +52,18 @@ class SchemaV1CanonicalMapper {
                 .map(::mapQinto),
 
             melodies = source.melodies
-                .map(::mapMelody)
+                .map { melody ->
+                    mapMelody(
+                        source = melody,
+                        recordingIds = media
+                            ?.recordingsForMelody(
+                                melody.id
+                            )
+                            ?.map {
+                                it.mediaAssetId
+                            }
+                    )
+                }
         )
     }
 
@@ -135,8 +166,13 @@ class SchemaV1CanonicalMapper {
     }
 
     fun mapMelody(
-        source: MelodySource
+        source: MelodySource,
+        recordingIds: List<Long>? = null
     ): SchemaV1Melody {
+        val resolvedRecordingIds =
+            recordingIds
+                ?: emptyList()
+
         return SchemaV1Melody(
             id = source.id,
 
@@ -159,7 +195,17 @@ class SchemaV1CanonicalMapper {
                     field = "Melody"
                 ),
 
-            hasRecording = source.hasRecording ?: false
+            hasRecording =
+                if (recordingIds != null) {
+                    resolvedRecordingIds
+                        .isNotEmpty()
+                } else {
+                    source.hasRecording
+                        ?: false
+                },
+
+            recordingIds =
+                resolvedRecordingIds
         )
     }
 

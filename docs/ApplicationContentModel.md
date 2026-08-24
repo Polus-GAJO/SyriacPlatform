@@ -4476,3 +4476,52 @@ The following rules are established:
     recording appears in multiple liturgical contexts.
 17. Applications consume resolved media relationships rather than
     reconstructing Author Database relationships.
+
+---
+
+# Melody Recording Package Contract --- Implemented Status 2026-08-25
+
+<!-- MELODY-RECORDING-PACKAGE-IMPLEMENTED-2026-08-25 -->
+
+The first runtime-oriented melody recording representation is now emitted by Build Tools.
+
+The implemented package-facing relationship is:
+
+```text
+Melody
+|-- hasRecording
+`-- recordingIds[]
+       v
+    MediaAsset
+    |-- id
+    |-- type
+    `-- path
+```
+
+`recordingIds` contain package MediaAsset identifiers.
+
+`MediaAsset.path` is package-relative, for example:
+
+```text
+media/audio/melodies/media-000217.mp3
+```
+
+It is never an absolute authoring-machine path.
+
+The physical package currently emits:
+
+```text
+content/melodies.json
+content/media-assets.json
+media/...
+```
+
+Only MediaAssets selected for the package are emitted and copied.
+
+In the media-aware Build Tools path, recording availability is derived from canonical `MelodyMedia` relationships established by the Author Database.
+
+Applications must not reconstruct those authoring relationships and must not interpret the legacy `Melody.Record` field as authoritative.
+
+The first verified fresh real-data build was Occasion 2. It produced 13 MediaAssets and 13 corresponding physical package files with no dangling recording references or missing files.
+
+Runtime loading and playback of this representation remain the next implementation stage.

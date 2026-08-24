@@ -4,26 +4,28 @@ import java.nio.file.Files
 import java.nio.file.Path
 import org.syriacplatform.buildtools.preview.DevelopmentPreviewSlice
 import org.syriacplatform.buildtools.schema.SchemaV1CanonicalMapper
+import org.syriacplatform.buildtools.schema.SchemaV1CanonicalMedia
+import org.syriacplatform.buildtools.schema.SchemaV1CompositionDraft
 import org.syriacplatform.buildtools.schema.SchemaV1CompositionMapper
+import org.syriacplatform.buildtools.schema.SchemaV1MediaMapper
 import org.syriacplatform.buildtools.schema.SchemaV1NavigationMapper
+import org.syriacplatform.buildtools.schema.SchemaV1PackageMediaSelector
+import org.syriacplatform.buildtools.schema.SchemaV1QoloLiturgicalItem
 import org.syriacplatform.buildtools.source.AuthorSourceDataLoader
+import org.syriacplatform.buildtools.source.MediaSourceDataLoader
 
-/**
- * نقطة الدخول الموحدة لبناء حزمة Occasion.
- *
- * تجمع هذه الفئة مراحل Build Tools الحالية في عملية واحدة:
- *
- * source
- *   -> canonical mapping
- *   -> composition mapping
- *   -> development package slice
- *   -> navigation projection
- *   -> package assembly
- *   -> physical package writing
- */
 class OccasionPackageBuilder(
     private val loader: AuthorSourceDataLoader =
         AuthorSourceDataLoader(),
+
+    private val mediaLoader: MediaSourceDataLoader =
+        MediaSourceDataLoader(),
+
+    private val mediaMapper: SchemaV1MediaMapper =
+        SchemaV1MediaMapper(),
+
+    private val mediaSelector: SchemaV1PackageMediaSelector =
+        SchemaV1PackageMediaSelector(),
 
     private val canonicalMapper: SchemaV1CanonicalMapper =
         SchemaV1CanonicalMapper(),
@@ -49,10 +51,40 @@ class OccasionPackageBuilder(
         occasionId: Long,
         outputDirectory: Path
     ): OccasionPackageBuildResult {
+        return buildInternal(
+            sourceDirectory = sourceDirectory,
+            mediaSourceDirectory = null,
+            mediaLibraryRoot = null,
+            occasionId = occasionId,
+            outputDirectory = outputDirectory
+        )
+    }
 
-        require(
-            occasionId > 0
-        ) {
+    fun build(
+        sourceDirectory: Path,
+        mediaSourceDirectory: Path,
+        mediaLibraryRoot: Path,
+        occasionId: Long,
+        outputDirectory: Path
+    ): OccasionPackageBuildResult {
+        return buildInternal(
+            sourceDirectory = sourceDirectory,
+            mediaSourceDirectory = mediaSourceDirectory,
+            mediaLibraryRoot = mediaLibraryRoot,
+            occasionId = occasionId,
+            outputDirectory = outputDirectory
+        )
+    }
+
+    private fun buildInternal(
+        sourceDirectory: Path,
+        mediaSourceDirectory: Path?,
+        mediaLibraryRoot: Path?,
+        occasionId: Long,
+        outputDirectory: Path
+    ): OccasionPackageBuildResult {
+
+        require(occasionId > 0) {
             "Occasion id must be positive."
         }
 
@@ -60,6 +92,16 @@ class OccasionPackageBuilder(
             sourceDirectory
                 .toAbsolutePath()
                 .normalize()
+
+        val normalizedMediaSourceDirectory =
+            mediaSourceDirectory
+                ?.toAbsolutePath()
+                ?.normalize()
+
+        val normalizedMediaLibraryRoot =
+            mediaLibraryRoot
+                ?.toAbsolutePath()
+                ?.normalize()
 
         val normalizedOutputDirectory =
             outputDirectory
@@ -73,29 +115,43 @@ class OccasionPackageBuilder(
             "Source and output directories must be different."
         }
 
+        if (normalizedMediaSourceDirectory != null) {
+            require(
+                normalizedMediaLibraryRoot != null
+            ) {
+                "A mediaLibraryRoot is required for a media-aware build."
+            }
+
+            require(
+                normalizedMediaSourceDirectory !=
+                        normalizedOutputDirectory
+            ) {
+                "Media source and output directories must be different."
+            }
+
+            require(
+                normalizedMediaLibraryRoot !=
+                        normalizedOutputDirectory
+            ) {
+                "Media library root and output directory must be different."
+            }
+        }
+
         val source =
             loader.load(
                 normalizedSourceDirectory
             )
 
         require(
-            source.occasion.id ==
-                    occasionId
+            source.occasion.id == occasionId
         ) {
             "Requested Occasion $occasionId " +
                     "does not match source Occasion " +
                     "${source.occasion.id}."
         }
 
-        val canonical =
-            canonicalMapper.map(
-                source
-            )
-
         val fullComposition =
-            compositionMapper.map(
-                source
-            )
+            compositionMapper.map(source)
 
         val packageComposition =
             previewSlice.create(
@@ -108,9 +164,43 @@ class OccasionPackageBuilder(
         ) {
             "Generated composition Occasion " +
                     "${packageComposition.occasionId} " +
-                    "does not match requested Occasion " +
-                    "$occasionId."
+                    "does not match requested Occasion $occasionId."
         }
+
+        val packageMedia: SchemaV1CanonicalMedia =
+            if (
+                normalizedMediaSourceDirectory != null
+            ) {
+                mediaSelector.select(
+                    canonicalMedia =
+                        mediaMapper.map(
+                            mediaLoader.load(
+                                normalizedMediaSourceDirectory
+                            )
+                        ),
+                    melodyIds =
+                        packageMelodyIds(
+                            packageComposition
+                        )
+                )
+            } else {
+                SchemaV1CanonicalMedia(
+                    mediaAssets = emptyList(),
+                    melodyMedia = emptyList()
+                )
+            }
+
+        val canonical =
+            if (
+                normalizedMediaSourceDirectory != null
+            ) {
+                canonicalMapper.map(
+                    source = source,
+                    media = packageMedia
+                )
+            } else {
+                canonicalMapper.map(source)
+            }
 
         val navigation =
             navigationMapper.map(
@@ -129,15 +219,10 @@ class OccasionPackageBuilder(
                 canonical = canonical,
                 composition = packageComposition,
                 navigation = navigation,
-                config = config
+                config = config,
+                media = packageMedia
             )
 
-        /*
-         * Build output is regenerated from scratch.
-         *
-         * This avoids stale optional files from a previous
-         * package build remaining inside the output directory.
-         */
         if (
             Files.exists(
                 normalizedOutputDirectory
@@ -156,7 +241,11 @@ class OccasionPackageBuilder(
         writer.write(
             packageData = packageData,
             outputDirectory =
-                normalizedOutputDirectory
+                normalizedOutputDirectory,
+            mediaLibraryRoot =
+                normalizedMediaLibraryRoot,
+            sourceMediaAssets =
+                packageMedia.mediaAssets
         )
 
         return OccasionPackageBuildResult(
@@ -165,5 +254,27 @@ class OccasionPackageBuilder(
                 normalizedOutputDirectory,
             packageData = packageData
         )
+    }
+
+    private fun packageMelodyIds(
+        composition: SchemaV1CompositionDraft
+    ): Set<Long> {
+        return composition.prayers
+            .flatMap { it.resolvedItems }
+            .filterIsInstance<
+                    SchemaV1QoloLiturgicalItem
+                    >()
+            .flatMap { item ->
+                buildList {
+                    item.effectiveMelodyId?.let {
+                        add(it)
+                    }
+
+                    addAll(
+                        item.melodyCandidateIds
+                    )
+                }
+            }
+            .toSet()
     }
 }

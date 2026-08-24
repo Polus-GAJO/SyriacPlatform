@@ -33,6 +33,21 @@
       ]
     },
     {
+      "name": "ExistsInExistsInMedia",
+      "primaryTable": "ExistsIn",
+      "foreignTable": "ExistsInMedia",
+      "referentialIntegrity": true,
+      "cascadeUpdate": false,
+      "cascadeDelete": true,
+      "attributes": 4096,
+      "columns": [
+        {
+          "primaryColumn": "ID",
+          "foreignColumn": "ExistsInID"
+        }
+      ]
+    },
+    {
       "name": "ExistsInExistsInText",
       "primaryTable": "ExistsIn",
       "foreignTable": "ExistsInText",
@@ -59,6 +74,21 @@
         {
           "primaryColumn": "ID",
           "foreignColumn": "ExistInID"
+        }
+      ]
+    },
+    {
+      "name": "ExistsInTextExistsInTextMediaSegment",
+      "primaryTable": "ExistsInText",
+      "foreignTable": "ExistsInTextMediaSegment",
+      "referentialIntegrity": true,
+      "cascadeUpdate": false,
+      "cascadeDelete": true,
+      "attributes": 4096,
+      "columns": [
+        {
+          "primaryColumn": "ID",
+          "foreignColumn": "ExistsInTextID"
         }
       ]
     },
@@ -104,6 +134,111 @@
         {
           "primaryColumn": "LocationN",
           "foreignColumn": "LocationN"
+        }
+      ]
+    },
+    {
+      "name": "MediaAssetExistsInMedia",
+      "primaryTable": "MediaAsset",
+      "foreignTable": "ExistsInMedia",
+      "referentialIntegrity": true,
+      "cascadeUpdate": false,
+      "cascadeDelete": false,
+      "attributes": 0,
+      "columns": [
+        {
+          "primaryColumn": "MediaAssetID",
+          "foreignColumn": "MediaAssetID"
+        }
+      ]
+    },
+    {
+      "name": "MediaAssetMediaTimingSet",
+      "primaryTable": "MediaAsset",
+      "foreignTable": "MediaTimingSet",
+      "referentialIntegrity": true,
+      "cascadeUpdate": false,
+      "cascadeDelete": false,
+      "attributes": 0,
+      "columns": [
+        {
+          "primaryColumn": "MediaAssetID",
+          "foreignColumn": "MediaAssetID"
+        }
+      ]
+    },
+    {
+      "name": "MediaAssetMelodyMedia",
+      "primaryTable": "MediaAsset",
+      "foreignTable": "MelodyMedia",
+      "referentialIntegrity": true,
+      "cascadeUpdate": false,
+      "cascadeDelete": false,
+      "attributes": 0,
+      "columns": [
+        {
+          "primaryColumn": "MediaAssetID",
+          "foreignColumn": "MediaAssetID"
+        }
+      ]
+    },
+    {
+      "name": "MediaSegmentExistsInTextMediaSegment",
+      "primaryTable": "MediaSegment",
+      "foreignTable": "ExistsInTextMediaSegment",
+      "referentialIntegrity": true,
+      "cascadeUpdate": false,
+      "cascadeDelete": true,
+      "attributes": 4096,
+      "columns": [
+        {
+          "primaryColumn": "MediaSegmentID",
+          "foreignColumn": "MediaSegmentID"
+        }
+      ]
+    },
+    {
+      "name": "MediaTimingSetExistsInMedia",
+      "primaryTable": "MediaTimingSet",
+      "foreignTable": "ExistsInMedia",
+      "referentialIntegrity": true,
+      "cascadeUpdate": false,
+      "cascadeDelete": false,
+      "attributes": 0,
+      "columns": [
+        {
+          "primaryColumn": "MediaTimingSetID",
+          "foreignColumn": "MediaTimingSetID"
+        }
+      ]
+    },
+    {
+      "name": "MediaTimingSetMediaSegment",
+      "primaryTable": "MediaTimingSet",
+      "foreignTable": "MediaSegment",
+      "referentialIntegrity": true,
+      "cascadeUpdate": false,
+      "cascadeDelete": true,
+      "attributes": 4096,
+      "columns": [
+        {
+          "primaryColumn": "MediaTimingSetID",
+          "foreignColumn": "MediaTimingSetID"
+        }
+      ]
+    },
+    {
+      "name": "MelodyMelodyMedia",
+      "primaryTable": "Melody",
+      "foreignTable": "MelodyMedia",
+      "referentialIntegrity": true,
+      "cascadeUpdate": false,
+      "cascadeDelete": true,
+      "attributes": 4096,
+      "columns": [
+        {
+          "primaryColumn": "MelodyN",
+          "foreignColumn": "MelodyN"
         }
       ]
     },

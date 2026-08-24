@@ -3,6 +3,8 @@ package org.syriacplatform.buildtools.packagebuilder
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption
+import org.syriacplatform.buildtools.schema.SchemaV1MediaAsset
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -36,7 +38,9 @@ class SchemaV1PackageWriter {
 
     fun write(
         packageData: SchemaV1PreviewPackage,
-        outputDirectory: Path
+        outputDirectory: Path,
+        mediaLibraryRoot: Path? = null,
+        sourceMediaAssets: List<SchemaV1MediaAsset> = emptyList()
     ) {
         val contentDirectory =
             outputDirectory.resolve("content")
@@ -51,6 +55,21 @@ class SchemaV1PackageWriter {
         Files.createDirectories(
             mediaDirectory
         )
+
+        if (packageData.mediaAssets.isNotEmpty()) {
+            require(mediaLibraryRoot != null) {
+                "A mediaLibraryRoot is required when the package contains media."
+            }
+
+            copyMediaFiles(
+                packageData = packageData,
+                sourceMediaAssets = sourceMediaAssets,
+                mediaLibraryRoot =
+                    mediaLibraryRoot,
+                outputDirectory =
+                    outputDirectory
+            )
+        }
 
         writeJson(
             outputDirectory.resolve(
@@ -137,6 +156,16 @@ class SchemaV1PackageWriter {
                 "melodies.json",
                 packageData.melodies.map(
                     ::melodyJson
+                )
+            )
+        }
+
+        if (packageData.mediaAssets.isNotEmpty()) {
+            writeCollection(
+                contentDirectory,
+                "media-assets.json",
+                packageData.mediaAssets.map(
+                    ::mediaAssetJson
                 )
             )
         }
@@ -511,6 +540,23 @@ class SchemaV1PackageWriter {
                 "hasRecording",
                 item.hasRecording
             )
+
+            put(
+                "recordingIds",
+                longArrayJson(
+                    item.recordingIds
+                )
+            )
+        }
+    }
+
+    private fun mediaAssetJson(
+        item: SchemaV1PackageMediaAsset
+    ): JsonElement {
+        return buildJsonObject {
+            put("id", item.id)
+            put("type", item.mediaType)
+            put("path", item.path)
         }
     }
 
@@ -608,5 +654,93 @@ class SchemaV1PackageWriter {
             text,
             StandardCharsets.UTF_8
         )
+    }
+
+    private fun copyMediaFiles(
+        packageData: SchemaV1PreviewPackage,
+        sourceMediaAssets: List<SchemaV1MediaAsset>,
+        mediaLibraryRoot: Path,
+        outputDirectory: Path
+    ) {
+        val normalizedRoot =
+            mediaLibraryRoot
+                .toAbsolutePath()
+                .normalize()
+
+        require(
+            Files.isDirectory(
+                normalizedRoot
+            )
+        ) {
+            "Media library root does not exist: $normalizedRoot"
+        }
+
+        val sourceById =
+            sourceMediaAssets.associateBy {
+                it.id
+            }
+
+        packageData.mediaAssets.forEach { packageAsset ->
+            val sourceAsset =
+                sourceById[packageAsset.id]
+                    ?: error(
+                        "No source MediaAsset was supplied for " +
+                                "package MediaAsset ${packageAsset.id}."
+                    )
+
+            val sourcePath =
+                normalizedRoot
+                    .resolve(
+                        sourceAsset
+                            .sourceRelativePath
+                    )
+                    .normalize()
+
+            require(
+                sourcePath.startsWith(
+                    normalizedRoot
+                )
+            ) {
+                "MediaAsset ${sourceAsset.id} resolves outside " +
+                        "the media library root."
+            }
+
+            require(
+                Files.isRegularFile(
+                    sourcePath
+                )
+            ) {
+                "MediaAsset ${sourceAsset.id} source file " +
+                        "does not exist: $sourcePath"
+            }
+
+            val targetPath =
+                outputDirectory
+                    .resolve(
+                        packageAsset.path
+                    )
+                    .normalize()
+
+            require(
+                targetPath.startsWith(
+                    outputDirectory
+                        .toAbsolutePath()
+                        .normalize()
+                )
+            ) {
+                "Package MediaAsset ${packageAsset.id} resolves " +
+                        "outside the package output directory."
+            }
+
+            Files.createDirectories(
+                targetPath.parent
+            )
+
+            Files.copy(
+                sourcePath,
+                targetPath,
+                StandardCopyOption.REPLACE_EXISTING
+            )
+        }
     }
 }

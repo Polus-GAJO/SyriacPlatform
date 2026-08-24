@@ -22,7 +22,14 @@ data class SchemaV1PreviewPackage(
     val petgomos: List<SchemaV1Petgomo>,
     val qolos: List<SchemaV1Qolo>,
     val melodies: List<SchemaV1Melody>,
-    val qintos: List<SchemaV1Qinto>
+    val qintos: List<SchemaV1Qinto>,
+    val mediaAssets: List<SchemaV1PackageMediaAsset> = emptyList()
+)
+
+data class SchemaV1PackageMediaAsset(
+    val id: Long,
+    val mediaType: String,
+    val path: String
 )
 
 data class SchemaV1PreviewManifest(

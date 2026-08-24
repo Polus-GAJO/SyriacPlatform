@@ -380,30 +380,72 @@ packages without Occasion-specific mapper code or manual JSON editing.
 
 # Phase 9 --- Audio Integration
 
-**Status:** Planned
+**Status:** In Progress --- Build/Package Vertical Slice Completed and Verified
 
-## Objectives
+## Objective
 
-Connect the Audio Domain to resolved runtime content.
+Integrate audio as a reusable platform capability connected to canonical content rather than as an application-specific feature.
 
-## Planned Work
+## Completed --- Author Database and Build Tools
 
--   Playback service
--   Play/Pause
--   Seek
--   Playback state
--   Content-to-audio relationships required by the real application
--   Verse synchronization where authoritative timing data exists
+-   Created the Author Database physical media tables, indexes, and relationships.
+-   Established `RECORDING` and `PERFORMANCE` role semantics.
+-   Audited, dry-ran, migrated, and verified useful legacy audio links.
+-   Added official Media export support to `modSchemaExporter.bas`.
+-   Regenerated the version-controlled Author Database schema snapshot.
+-   Added Build Tools media source models, loader, mapper, canonical media models, and package media selection.
+-   Made `MelodyMedia` authoritative over legacy `Melody.Record` in media-aware builds.
+-   Added `recordingIds[]` to package melody data.
+-   Added `media-assets.json`.
+-   Added package-relative media paths.
+-   Added selective copying of physical media.
+-   Added a media-aware Occasion package build entry point while preserving legacy non-media compatibility.
+-   Added automated tests for source loading, mapping, relationships, canonical media, package selection, package emission, physical copying, and CLI arguments.
+-   Freshly exported Occasion 2 from the current Access Author Database.
+-   Rebuilt Occasion 2 through the complete media-aware pipeline.
+-   Verified 13 packaged MediaAssets and 13 physical media files with no broken references or missing files.
 
-## Entry Condition
+## Verified Build/Package Path
 
-Audio work should begin only after the real content slice establishes
-the content identities and relationships that audio must reference.
+```text
+Author Database
+        v
+Occasion + Media Export
+        v
+Build Tools
+        v
+Canonical Media
+        v
+Package-specific Media Selection
+        v
+recordingIds + media-assets.json
+        v
+Physical packaged media
+```
+
+## Next Work --- Runtime Audio Integration
+
+-   Load packaged MediaAssets through the Core/runtime path.
+-   Resolve `recordingIds` to package-relative media resources.
+-   Introduce reusable playback service behavior.
+-   Implement Play/Pause.
+-   Implement Seek.
+-   Expose playback state.
+-   Define application-facing selection behavior when more than one recording exists.
+
+## Deferred Within Audio Integration
+
+-   Occurrence-level `PERFORMANCE` package/runtime integration.
+-   `MediaTimingSet`, `MediaSegment`, and `ExistsInTextMediaSegment`.
+-   Verse synchronization once authoritative timing data is populated.
+-   Author Database form/workflow modernization for future media editing.
+-   Equivalent media migration for notation images.
 
 ## Output
 
-Reusable audio playback integrated with platform content rather than
-embedded directly in one application.
+The completed portion establishes the Author Database -> Build Tools -> Application Package side of audio.
+
+Phase 9 remains active until Core/runtime media resolution and reusable playback are implemented.
 
 ------------------------------------------------------------------------
 

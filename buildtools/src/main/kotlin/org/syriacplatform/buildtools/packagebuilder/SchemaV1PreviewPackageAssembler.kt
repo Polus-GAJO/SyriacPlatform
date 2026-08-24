@@ -1,6 +1,7 @@
 package org.syriacplatform.buildtools.packagebuilder
 
 import org.syriacplatform.buildtools.schema.SchemaV1CanonicalContent
+import org.syriacplatform.buildtools.schema.SchemaV1CanonicalMedia
 import org.syriacplatform.buildtools.schema.SchemaV1CompositionDraft
 import org.syriacplatform.buildtools.schema.SchemaV1NavigationContent
 import org.syriacplatform.buildtools.schema.SchemaV1QoloLiturgicalItem
@@ -12,7 +13,11 @@ class SchemaV1PreviewPackageAssembler {
         canonical: SchemaV1CanonicalContent,
         composition: SchemaV1CompositionDraft,
         navigation: SchemaV1NavigationContent,
-        config: OccasionPackageBuildConfig
+        config: OccasionPackageBuildConfig,
+        media: SchemaV1CanonicalMedia = SchemaV1CanonicalMedia(
+            mediaAssets = emptyList(),
+            melodyMedia = emptyList()
+        )
     ): SchemaV1PreviewPackage {
         require(
             !composition.hasBlockingDiagnostics
@@ -211,7 +216,18 @@ class SchemaV1PreviewPackageAssembler {
  * on each Qolo LiturgicalItem.
  */
             qintos =
-                emptyList()
+                emptyList(),
+
+            mediaAssets =
+                media.mediaAssets.map { asset ->
+                    SchemaV1PackageMediaAsset(
+                        id = asset.id,
+                        mediaType = asset.mediaType,
+                        path =
+                            "media/" +
+                                    asset.sourceRelativePath
+                    )
+                }
         )
     }
 }

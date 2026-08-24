@@ -42,7 +42,8 @@ data class SchemaV1Melody(
     val qoloId: Long,
     val name: String,
     val searchName: String,
-    val hasRecording: Boolean
+    val hasRecording: Boolean,
+    val recordingIds: List<Long> = emptyList()
 )
 
 data class SchemaV1CanonicalContent(

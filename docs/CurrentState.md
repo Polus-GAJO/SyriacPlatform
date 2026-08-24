@@ -1821,3 +1821,113 @@ The approved Audio architecture is documented in:
 The physical Application Package media contract remains intentionally
 open until the Author Database media schema and source mapping are
 designed in detail.
+
+------------------------------------------------------------------------
+
+# 17. Verified Author Database -> Media Package Integration (2026-08-25)
+
+The first complete audio-media build/package vertical slice is implemented and verified against the current Author Database.
+
+## 17.1 Author Database and export
+
+The Author Database now contains the physical media architecture and its indexes and relationships. For the initial audio model:
+
+- `RECORDING` = recording of the melody itself.
+- `PERFORMANCE` = recording of the complete liturgical occurrence.
+- `MelodyMedia` is the authoritative melody-to-`MediaAsset` relationship for media-aware builds.
+- the legacy `Melody.Record` field is no longer the recording source of truth in that path.
+
+`modSchemaExporter.bas` now emits the official Media export under:
+
+```text
+author-database/exports/media/
+â”œâ”€â”€ MediaAsset.csv
+â”œâ”€â”€ MelodyMedia.csv
+â”œâ”€â”€ ExistsInMedia.csv
+â”œâ”€â”€ MediaTimingSet.csv
+â”œâ”€â”€ MediaSegment.csv
+â””â”€â”€ ExistsInTextMediaSegment.csv
+```
+
+The physical media library remains outside Git. The verified development root is `D:\SyriacPlatformMedia`; it is a build-time input only and is never serialized as an absolute package path.
+
+## 17.2 Build Tools media path
+
+The implemented path is:
+
+```text
+MediaSourceDataLoader
+ -> MediaSourceMapper / MediaSourceData
+ -> SchemaV1MediaMapper
+ -> SchemaV1CanonicalMedia
+ -> SchemaV1PackageMediaSelector
+ -> SchemaV1CanonicalMapper
+```
+
+`SchemaV1Melody` now exposes `hasRecording` and `recordingIds[]`. In media-aware builds these are derived from canonical `MelodyMedia` relationships.
+
+Only MediaAssets required by melodies selected for the package are retained.
+
+## 17.3 Physical package output
+
+An authoring relative path such as:
+
+```text
+audio/melodies/media-000217.mp3
+```
+
+becomes:
+
+```text
+media/audio/melodies/media-000217.mp3
+```
+
+The package writer emits `content/media-assets.json`, writes `recordingIds` in `content/melodies.json`, and copies only selected physical media under `media/`.
+
+The media-aware build entry point is integrated with `:buildtools:buildOccasionPreview`. The media root can be overridden by `-PmediaLibraryRoot=<path>` or `SYRIACPLATFORM_MEDIA_ROOT`.
+
+## 17.4 Real end-to-end verification
+
+Occasion 2 was freshly exported from the current Microsoft Access Author Database using `ExportOccasionData 2`, then explicitly rebuilt with:
+
+```text
+.\gradlew.bat :buildtools:buildOccasionPreview -PoccasionId=2 --rerun-tasks
+```
+
+Verified result:
+
+```text
+Occasion 2 package built successfully.
+Mode: media-aware
+Packaged media assets: 13
+Prayers: 6
+Liturgical items: 51
+BUILD SUCCESSFUL
+```
+
+Package integrity checks established:
+
+- 13 packaged MediaAssets;
+- 13 copied physical media files;
+- every `recordingIds` reference resolved to a packaged MediaAsset;
+- every packaged MediaAsset path resolved to an existing package file;
+- no broken media references;
+- no missing physical package files.
+
+Thus the verified path is now:
+
+```text
+Current Author Database
+ -> Occasion + Media Export
+ -> Build Tools
+ -> Canonical Media
+ -> package-specific selection
+ -> recordingIds + media-assets.json
+ -> physical packaged media
+```
+
+## 17.5 Current boundary
+
+The Build Tools / Application Package side of melody audio is implemented and verified. Runtime media loading and playback are not yet implemented.
+
+Occurrence-level `PERFORMANCE` integration and `MediaTimingSet` / `MediaSegment` / `ExistsInTextMediaSegment` package/runtime behavior remain future work.
