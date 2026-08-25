@@ -1,5 +1,6 @@
 package org.syriacplatform.content.models
 
+import org.syriacplatform.common.types.MediaAssetId
 import org.syriacplatform.common.types.MelodyId
 import org.syriacplatform.common.types.QoloId
 
@@ -14,5 +15,6 @@ data class Melody(
     val qoloId: QoloId,
     val name: String,
     val searchName: String,
-    val hasRecording: Boolean
+    val hasRecording: Boolean,
+    val recordingIds: List<MediaAssetId> = emptyList()
 )

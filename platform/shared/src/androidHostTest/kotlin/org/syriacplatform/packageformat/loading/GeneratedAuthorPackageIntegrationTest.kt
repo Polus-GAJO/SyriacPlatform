@@ -83,7 +83,7 @@ class GeneratedAuthorPackageIntegrationTest {
                 success.packageData
 
             assertEquals(
-                "org.syriacplatform.preview.occasion1",
+                "org.syriacplatform.preview.occasion2",
                 packageData.manifest.packageId
             )
 
@@ -98,7 +98,7 @@ class GeneratedAuthorPackageIntegrationTest {
             )
 
             assertEquals(
-                52,
+                51,
                 packageData.liturgicalItems.size
             )
 
@@ -120,6 +120,39 @@ class GeneratedAuthorPackageIntegrationTest {
 
             assertTrue(
                 packageData.melodies.isNotEmpty()
+            )
+
+            /*
+             * Occasion 2 is the verified media-aware preview:
+             * Build Tools selected and packaged exactly the
+             * MediaAssets referenced by its Melody recordingIds.
+             */
+            assertTrue(
+                packageData.collectionPresence.mediaAssets
+            )
+
+            assertEquals(
+                13,
+                packageData.mediaAssets.size
+            )
+
+            val mediaAssetIds =
+                packageData.mediaAssets
+                    .map { it.id }
+                    .toSet()
+
+            val recordingIds =
+                packageData.melodies
+                    .flatMap { it.recordingIds }
+                    .toSet()
+
+            assertTrue(
+                recordingIds.isNotEmpty()
+            )
+
+            assertEquals(
+                mediaAssetIds,
+                recordingIds
             )
 
             /*
@@ -187,7 +220,7 @@ class GeneratedAuthorPackageIntegrationTest {
             "buildtools",
             "build",
             "generated",
-            "occasion-1-preview"
+            "occasion-2-preview"
         ).toAbsolutePath().normalize()
     }
 

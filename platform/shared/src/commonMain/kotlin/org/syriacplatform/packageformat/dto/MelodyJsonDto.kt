@@ -8,5 +8,6 @@ internal data class MelodyJsonDto(
     val qoloId: Long,
     val name: String,
     val searchName: String,
-    val hasRecording: Boolean
+    val hasRecording: Boolean,
+    val recordingIds: List<Long> = emptyList()
 )

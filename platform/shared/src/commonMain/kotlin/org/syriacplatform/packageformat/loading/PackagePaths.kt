@@ -1,8 +1,8 @@
 package org.syriacplatform.packageformat.loading
 
 /**
- * المسارات القانونية الثابتة لملفات Application Package
- * وفق Application Package Specification Schema v1.
+ * ط§ظ„ظ…ط³ط§ط±ط§طھ ط§ظ„ظ‚ط§ظ†ظˆظ†ظٹط© ط§ظ„ط«ط§ط¨طھط© ظ„ظ…ظ„ظپط§طھ Application Package
+ * ظˆظپظ‚ Application Package Specification Schema v1.
  */
 object PackagePaths {
 
@@ -35,6 +35,9 @@ object PackagePaths {
 
     const val MELODIES =
         "content/melodies.json"
+
+    const val MEDIA_ASSETS =
+        "content/media-assets.json"
 
     const val QINTOS =
         "content/qintos.json"

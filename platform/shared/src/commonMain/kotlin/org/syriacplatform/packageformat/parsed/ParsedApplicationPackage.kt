@@ -2,6 +2,7 @@ package org.syriacplatform.packageformat.parsed
 
 import org.syriacplatform.content.models.EntryPoint
 import org.syriacplatform.content.models.LiturgicalItem
+import org.syriacplatform.content.models.MediaAsset
 import org.syriacplatform.content.models.Melody
 import org.syriacplatform.content.models.MelodyQintoAssignment
 import org.syriacplatform.content.models.Occasion
@@ -36,5 +37,6 @@ data class ParsedApplicationPackage(
     val qolos: List<Qolo>,
     val melodies: List<Melody>,
     val qintos: List<Qinto>,
-    val melodyQintoAssignments: List<MelodyQintoAssignment>
+    val melodyQintoAssignments: List<MelodyQintoAssignment>,
+    val mediaAssets: List<MediaAsset> = emptyList()
 )

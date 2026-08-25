@@ -2,6 +2,7 @@ package org.syriacplatform.content.runtime
 
 import org.syriacplatform.content.models.EntryPoint
 import org.syriacplatform.content.models.LiturgicalItem
+import org.syriacplatform.content.models.MediaAsset
 import org.syriacplatform.content.models.Melody
 import org.syriacplatform.content.models.MelodyQintoAssignment
 import org.syriacplatform.content.models.Occasion
@@ -33,7 +34,8 @@ data class RuntimeContent(
     val qolos: List<Qolo>,
     val melodies: List<Melody>,
     val qintos: List<Qinto>,
-    val melodyQintoAssignments: List<MelodyQintoAssignment>
+    val melodyQintoAssignments: List<MelodyQintoAssignment>,
+    val mediaAssets: List<MediaAsset> = emptyList()
 ) {
 
     companion object {
@@ -53,7 +55,9 @@ data class RuntimeContent(
                 melodies = packageData.melodies,
                 qintos = packageData.qintos,
                 melodyQintoAssignments =
-                    packageData.melodyQintoAssignments
+                    packageData.melodyQintoAssignments,
+                mediaAssets =
+                    packageData.mediaAssets
             )
         }
     }

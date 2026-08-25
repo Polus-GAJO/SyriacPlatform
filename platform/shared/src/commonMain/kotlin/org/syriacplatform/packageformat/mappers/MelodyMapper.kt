@@ -1,6 +1,7 @@
 package org.syriacplatform.packageformat.mappers
 
 import org.syriacplatform.common.result.Result
+import org.syriacplatform.common.types.MediaAssetId
 import org.syriacplatform.common.types.MelodyId
 import org.syriacplatform.common.types.QoloId
 import org.syriacplatform.content.models.Melody
@@ -13,7 +14,8 @@ internal fun MelodyJsonDto.toDomain(): Result<Melody> {
             qoloId = QoloId(qoloId),
             name = name,
             searchName = searchName,
-            hasRecording = hasRecording
+            hasRecording = hasRecording,
+            recordingIds = recordingIds.map(::MediaAssetId)
         )
     )
 }

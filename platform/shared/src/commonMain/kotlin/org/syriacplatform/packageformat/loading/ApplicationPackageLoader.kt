@@ -1,4 +1,4 @@
-package org.syriacplatform.packageformat.loading
+﻿package org.syriacplatform.packageformat.loading
 
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -7,6 +7,7 @@ import org.syriacplatform.common.types.ErrorCode
 import org.syriacplatform.common.types.PlatformError
 import org.syriacplatform.packageformat.dto.EntryPointJsonDto
 import org.syriacplatform.packageformat.dto.LiturgicalItemJsonDto
+import org.syriacplatform.packageformat.dto.MediaAssetJsonDto
 import org.syriacplatform.packageformat.dto.MelodyJsonDto
 import org.syriacplatform.packageformat.dto.MelodyQintoAssignmentJsonDto
 import org.syriacplatform.packageformat.dto.OccasionJsonDto
@@ -26,18 +27,18 @@ import org.syriacplatform.packagevalidation.PackageValidator
 import org.syriacplatform.packagevalidation.compatibility.CoreCompatibility
 
 /**
- * المنسق الأعلى لتحميل Application Package.
+ * ط§ظ„ظ…ظ†ط³ظ‚ ط§ظ„ط£ط¹ظ„ظ‰ ظ„طھط­ظ…ظٹظ„ Application Package.
  *
- * المسار التشغيلي الكامل:
+ * ط§ظ„ظ…ط³ط§ط± ط§ظ„طھط´ط؛ظٹظ„ظٹ ط§ظ„ظƒط§ظ…ظ„:
  *
  * PackageSource
- * → read canonical files once
- * → structure / collection presence
- * → JSON DTO decoding
- * → DTO-to-Domain mapping
- * → ParsedApplicationPackage
- * → PackageValidator
- * → PackageLoadResult
+ * â†’ read canonical files once
+ * â†’ structure / collection presence
+ * â†’ JSON DTO decoding
+ * â†’ DTO-to-Domain mapping
+ * â†’ ParsedApplicationPackage
+ * â†’ PackageValidator
+ * â†’ PackageLoadResult
  */
 class ApplicationPackageLoader(
     private val source: PackageSource,
@@ -47,9 +48,9 @@ class ApplicationPackageLoader(
 ) {
 
     /**
-     * المسار التشغيلي الرئيسي.
+     * ط§ظ„ظ…ط³ط§ط± ط§ظ„طھط´ط؛ظٹظ„ظٹ ط§ظ„ط±ط¦ظٹط³ظٹ.
      *
-     * تقرأ جميع الملفات القانونية مرة واحدة فقط.
+     * طھظ‚ط±ط£ ط¬ظ…ظٹط¹ ط§ظ„ظ…ظ„ظپط§طھ ط§ظ„ظ‚ط§ظ†ظˆظ†ظٹط© ظ…ط±ط© ظˆط§ط­ط¯ط© ظپظ‚ط·.
      */
     suspend fun load(
         coreCompatibility: CoreCompatibility
@@ -297,6 +298,44 @@ class ApplicationPackageLoader(
                         result.error
                     )
             }
+        val mediaAssets =
+
+            when (
+
+                val result =
+
+                    parseCollection<MediaAssetJsonDto, org.syriacplatform.content.models.MediaAsset>(
+
+                        bytes = files.mediaAssets,
+
+                        path = PackagePaths.MEDIA_ASSETS,
+
+                        mapper = { dto ->
+
+                            dto.toDomain()
+
+                        }
+
+                    )
+
+            ) {
+
+                is Result.Success ->
+
+                    result.data
+
+
+
+                is Result.Failure ->
+
+                    return PackageLoadResult.Failure(
+
+                        result.error
+
+                    )
+
+            }
+
 
         val packageData =
             ParsedApplicationPackage(
@@ -314,7 +353,8 @@ class ApplicationPackageLoader(
                 melodies = melodies,
                 qintos = qintos,
                 melodyQintoAssignments =
-                    melodyQintoAssignments
+                    melodyQintoAssignments,
+                mediaAssets = mediaAssets
             )
 
         val validationReport =
@@ -341,7 +381,7 @@ class ApplicationPackageLoader(
     }
 
     /**
-     * API تشخيصية لاكتشاف البنية الفيزيائية فقط.
+     * API طھط´ط®ظٹطµظٹط© ظ„ط§ظƒطھط´ط§ظپ ط§ظ„ط¨ظ†ظٹط© ط§ظ„ظپظٹط²ظٹط§ط¦ظٹط© ظپظ‚ط·.
      */
     suspend fun discoverStructure(): PackageStructure {
         val files =
@@ -351,7 +391,7 @@ class ApplicationPackageLoader(
     }
 
     /**
-     * API تشخيصية لتحميل الـ Manifest فقط.
+     * API طھط´ط®ظٹطµظٹط© ظ„طھط­ظ…ظٹظ„ ط§ظ„ظ€ Manifest ظپظ‚ط·.
      */
     suspend fun loadManifest(): Result<PackageManifest> {
         val bytes =
@@ -391,7 +431,9 @@ class ApplicationPackageLoader(
                     qintos =
                         files.qintos != null,
                     melodyQintoAssignments =
-                        files.melodyQintoAssignments != null
+                        files.melodyQintoAssignments != null,
+                    mediaAssets =
+                        files.mediaAssets != null
                 )
         )
     }
@@ -455,10 +497,10 @@ class ApplicationPackageLoader(
     ): Result<List<T>> {
 
         /*
-         * Collection الغائبة لا تعتبر parse failure.
+         * Collection ط§ظ„ط؛ط§ط¦ط¨ط© ظ„ط§ طھط¹طھط¨ط± parse failure.
          *
-         * ProfileValidator هو المسؤول عن تقرير
-         * هل غيابها قانوني للـ Profile أم لا.
+         * ProfileValidator ظ‡ظˆ ط§ظ„ظ…ط³ط¤ظˆظ„ ط¹ظ† طھظ‚ط±ظٹط±
+         * ظ‡ظ„ ط؛ظٹط§ط¨ظ‡ط§ ظ‚ط§ظ†ظˆظ†ظٹ ظ„ظ„ظ€ Profile ط£ظ… ظ„ط§.
          */
         if (bytes == null) {
             return Result.Success(
@@ -568,6 +610,11 @@ class ApplicationPackageLoader(
                 source.readBytesOrNull(
                     PackagePaths.MELODIES
                 ),
+            mediaAssets =
+                source.readBytesOrNull(
+                    PackagePaths.MEDIA_ASSETS
+                ),
+
             qintos =
                 source.readBytesOrNull(
                     PackagePaths.QINTOS
@@ -580,8 +627,8 @@ class ApplicationPackageLoader(
     }
 
     /**
-     * يحتفظ بالـ bytes المقروءة حتى لا يقرأ load()
-     * أي canonical file أكثر من مرة.
+     * ظٹط­طھظپط¸ ط¨ط§ظ„ظ€ bytes ط§ظ„ظ…ظ‚ط±ظˆط،ط© ط­طھظ‰ ظ„ط§ ظٹظ‚ط±ط£ load()
+     * ط£ظٹ canonical file ط£ظƒط«ط± ظ…ظ† ظ…ط±ط©.
      */
     private data class PackageFileSet(
         val manifest: ByteArray?,
@@ -594,6 +641,7 @@ class ApplicationPackageLoader(
         val petgomos: ByteArray?,
         val qolos: ByteArray?,
         val melodies: ByteArray?,
+        val mediaAssets: ByteArray?,
         val qintos: ByteArray?,
         val melodyQintoAssignments: ByteArray?
     )

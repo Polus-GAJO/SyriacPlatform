@@ -1,7 +1,8 @@
-package org.syriacplatform.content.runtime
+﻿package org.syriacplatform.content.runtime
 
 import org.syriacplatform.common.types.EntryPointId
 import org.syriacplatform.common.types.LiturgicalItemId
+import org.syriacplatform.common.types.MediaAssetId
 import org.syriacplatform.common.types.MelodyId
 import org.syriacplatform.common.types.OccasionId
 import org.syriacplatform.common.types.PetgomoId
@@ -12,6 +13,7 @@ import org.syriacplatform.common.types.QoloId
 import org.syriacplatform.common.types.TextId
 import org.syriacplatform.content.models.EntryPoint
 import org.syriacplatform.content.models.LiturgicalItem
+import org.syriacplatform.content.models.MediaAsset
 import org.syriacplatform.content.models.Melody
 import org.syriacplatform.content.models.MelodyQintoAssignment
 import org.syriacplatform.content.models.Occasion
@@ -23,10 +25,10 @@ import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.models.TextContent
 
 /**
- * فهارس القراءة السريعة للمحتوى القانوني داخل Runtime.
+ * ظپظ‡ط§ط±ط³ ط§ظ„ظ‚ط±ط§ط،ط© ط§ظ„ط³ط±ظٹط¹ط© ظ„ظ„ظ…ط­طھظˆظ‰ ط§ظ„ظ‚ط§ظ†ظˆظ†ظٹ ط¯ط§ط®ظ„ Runtime.
  *
- * تُبنى بعد Package Validation، ولذلك يمكن الاعتماد
- * على uniqueness الخاصة بالـ canonical IDs.
+ * طھظڈط¨ظ†ظ‰ ط¨ط¹ط¯ Package ValidationطŒ ظˆظ„ط°ظ„ظƒ ظٹظ…ظƒظ† ط§ظ„ط§ط¹طھظ…ط§ط¯
+ * ط¹ظ„ظ‰ uniqueness ط§ظ„ط®ط§طµط© ط¨ط§ظ„ظ€ canonical IDs.
  */
 class RuntimeContentIndex private constructor(
     val entryPointsById: Map<EntryPointId, EntryPoint>,
@@ -40,11 +42,12 @@ class RuntimeContentIndex private constructor(
     val petgomosById: Map<PetgomoId, Petgomo>,
     val qolosById: Map<QoloId, Qolo>,
     val melodiesById: Map<MelodyId, Melody>,
+    val mediaAssetsById: Map<MediaAssetId, MediaAsset>,
     val qintosById: Map<QintoId, Qinto>,
 
     /**
-     * MelodyQintoAssignment لا تملك Canonical ID مستقلة،
-     * لذلك نفهرس العلاقات بحسب طرفيها.
+     * MelodyQintoAssignment ظ„ط§ طھظ…ظ„ظƒ Canonical ID ظ…ط³طھظ‚ظ„ط©طŒ
+     * ظ„ط°ظ„ظƒ ظ†ظپظ‡ط±ط³ ط§ظ„ط¹ظ„ط§ظ‚ط§طھ ط¨ط­ط³ط¨ ط·ط±ظپظٹظ‡ط§.
      */
     val melodyQintoAssignmentsByMelodyId:
     Map<MelodyId, List<MelodyQintoAssignment>>,
@@ -85,6 +88,11 @@ class RuntimeContentIndex private constructor(
 
                 melodiesById =
                     content.melodies.associateBy { it.id },
+
+                mediaAssetsById =
+                    content.mediaAssets.associateBy { it.id },
+
+
 
                 qintosById =
                     content.qintos.associateBy { it.id },
