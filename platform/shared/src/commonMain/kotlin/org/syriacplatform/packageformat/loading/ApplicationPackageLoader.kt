@@ -1,4 +1,4 @@
-﻿package org.syriacplatform.packageformat.loading
+package org.syriacplatform.packageformat.loading
 
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -27,18 +27,18 @@ import org.syriacplatform.packagevalidation.PackageValidator
 import org.syriacplatform.packagevalidation.compatibility.CoreCompatibility
 
 /**
- * ط§ظ„ظ…ظ†ط³ظ‚ ط§ظ„ط£ط¹ظ„ظ‰ ظ„طھط­ظ…ظٹظ„ Application Package.
+ * المنسق الأعلى لتحميل Application Package.
  *
- * ط§ظ„ظ…ط³ط§ط± ط§ظ„طھط´ط؛ظٹظ„ظٹ ط§ظ„ظƒط§ظ…ظ„:
+ * المسار التشغيلي الكامل:
  *
  * PackageSource
- * â†’ read canonical files once
- * â†’ structure / collection presence
- * â†’ JSON DTO decoding
- * â†’ DTO-to-Domain mapping
- * â†’ ParsedApplicationPackage
- * â†’ PackageValidator
- * â†’ PackageLoadResult
+ * → read canonical files once
+ * → structure / collection presence
+ * → JSON DTO decoding
+ * → DTO-to-Domain mapping
+ * → ParsedApplicationPackage
+ * → PackageValidator
+ * → PackageLoadResult
  */
 class ApplicationPackageLoader(
     private val source: PackageSource,
@@ -48,9 +48,9 @@ class ApplicationPackageLoader(
 ) {
 
     /**
-     * ط§ظ„ظ…ط³ط§ط± ط§ظ„طھط´ط؛ظٹظ„ظٹ ط§ظ„ط±ط¦ظٹط³ظٹ.
+     * المسار التشغيلي الرئيسي.
      *
-     * طھظ‚ط±ط£ ط¬ظ…ظٹط¹ ط§ظ„ظ…ظ„ظپط§طھ ط§ظ„ظ‚ط§ظ†ظˆظ†ظٹط© ظ…ط±ط© ظˆط§ط­ط¯ط© ظپظ‚ط·.
+     * تقرأ جميع الملفات القانونية مرة واحدة فقط.
      */
     suspend fun load(
         coreCompatibility: CoreCompatibility
@@ -381,7 +381,7 @@ class ApplicationPackageLoader(
     }
 
     /**
-     * API طھط´ط®ظٹطµظٹط© ظ„ط§ظƒطھط´ط§ظپ ط§ظ„ط¨ظ†ظٹط© ط§ظ„ظپظٹط²ظٹط§ط¦ظٹط© ظپظ‚ط·.
+     * API تشخيصية لاكتشاف البنية الفيزيائية فقط.
      */
     suspend fun discoverStructure(): PackageStructure {
         val files =
@@ -391,7 +391,7 @@ class ApplicationPackageLoader(
     }
 
     /**
-     * API طھط´ط®ظٹطµظٹط© ظ„طھط­ظ…ظٹظ„ ط§ظ„ظ€ Manifest ظپظ‚ط·.
+     * API تشخيصية لتحميل الـ Manifest فقط.
      */
     suspend fun loadManifest(): Result<PackageManifest> {
         val bytes =
@@ -497,11 +497,11 @@ class ApplicationPackageLoader(
     ): Result<List<T>> {
 
         /*
-         * Collection ط§ظ„ط؛ط§ط¦ط¨ط© ظ„ط§ طھط¹طھط¨ط± parse failure.
-         *
-         * ProfileValidator ظ‡ظˆ ط§ظ„ظ…ط³ط¤ظˆظ„ ط¹ظ† طھظ‚ط±ظٹط±
-         * ظ‡ظ„ ط؛ظٹط§ط¨ظ‡ط§ ظ‚ط§ظ†ظˆظ†ظٹ ظ„ظ„ظ€ Profile ط£ظ… ظ„ط§.
-         */
+ * Collection الغائبة لا تعتبر parse failure.
+ *
+ * ProfileValidator هو المسؤول عن تقرير
+ * هل غيابها قانوني للـ Profile أم لا.
+ */
         if (bytes == null) {
             return Result.Success(
                 emptyList()
@@ -627,8 +627,8 @@ class ApplicationPackageLoader(
     }
 
     /**
-     * ظٹط­طھظپط¸ ط¨ط§ظ„ظ€ bytes ط§ظ„ظ…ظ‚ط±ظˆط،ط© ط­طھظ‰ ظ„ط§ ظٹظ‚ط±ط£ load()
-     * ط£ظٹ canonical file ط£ظƒط«ط± ظ…ظ† ظ…ط±ط©.
+     * يحتفظ بالـ bytes المقروءة حتى لا يقرأ load()
+     * أي canonical file أكثر من مرة.
      */
     private data class PackageFileSet(
         val manifest: ByteArray?,
