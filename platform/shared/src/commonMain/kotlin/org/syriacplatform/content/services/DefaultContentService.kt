@@ -1,9 +1,11 @@
 package org.syriacplatform.content.services
 
 import org.syriacplatform.common.result.Result
+import org.syriacplatform.common.types.MelodyId
 import org.syriacplatform.common.types.QoloId
 import org.syriacplatform.common.types.RuntimeState
 import org.syriacplatform.content.contracts.ContentService
+import org.syriacplatform.content.models.MediaAsset
 import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.repository.ContentRepository
 import org.syriacplatform.kernel.ServiceMetadata
@@ -74,5 +76,11 @@ class DefaultContentService(
         return repository.loadLiturgicalItem(
             liturgicalItemId
         )
+    }
+
+    override suspend fun loadMelodyRecordings(
+        melodyId: MelodyId
+    ): Result<List<MediaAsset>> {
+        return repository.loadMelodyRecordings(melodyId)
     }
 }

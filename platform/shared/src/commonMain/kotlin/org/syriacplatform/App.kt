@@ -12,6 +12,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,10 +23,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.syriacplatform.audio.contracts.AudioService
+import org.syriacplatform.audio.models.PlaybackState
+import org.syriacplatform.audio.models.PlaybackStatus
 import org.syriacplatform.bootstrap.PlatformBootstrap
 import org.syriacplatform.common.result.Result
+import org.syriacplatform.common.types.MediaAssetId
 import org.syriacplatform.common.types.OccasionId
 import org.syriacplatform.common.types.QoloId
+import org.syriacplatform.content.models.MediaAsset
 import org.syriacplatform.content.models.Occasion
 import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.runtime.ResolvedLiturgicalItem
@@ -38,7 +44,7 @@ import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.presentation.theme.SyriacTextStyles
 
 @Composable
-fun App() {
+fun App(audioService: AudioService? = null) {
     val platform = remember {
         PlatformBootstrap.create()
     }
@@ -86,6 +92,7 @@ fun App() {
                 if (liturgicalItemId != null) {
                     HymnDetailsScreen(
                         platform = platform,
+                        audioService = audioService,
                         liturgicalItemId =
                             liturgicalItemId,
                         onBack = {
@@ -1008,135 +1015,200 @@ private fun MissingQoloSelectionScreen(
 @Composable
 private fun HymnDetailsScreen(
     platform: PlatformContext,
+    audioService: AudioService?,
     liturgicalItemId: LiturgicalItemId,
     onBack: () -> Unit
 ) {
-    val itemResult by
-    produceState<Result<ResolvedLiturgicalItem>?>(
+    val itemResult by produceState<Result<ResolvedLiturgicalItem>?>(
         initialValue = null,
         key1 = platform,
         key2 = liturgicalItemId
     ) {
-        value =
-            platform.content.loadLiturgicalItem(
-                liturgicalItemId
-            )
+        value = platform.content.loadLiturgicalItem(liturgicalItemId)
+    }
+
+    val playbackState = rememberPlaybackState(audioService)
+
+    var pendingAutoPlayId by remember(liturgicalItemId) {
+        mutableStateOf<MediaAssetId?>(null)
+    }
+
+    LaunchedEffect(
+        playbackState.status,
+        playbackState.mediaAssetId,
+        pendingAutoPlayId,
+        audioService
+    ) {
+        val pendingId = pendingAutoPlayId
+
+        if (
+            audioService != null &&
+            pendingId != null &&
+            playbackState.status == PlaybackStatus.Ready &&
+            playbackState.mediaAssetId == pendingId
+        ) {
+            audioService.play()
+            pendingAutoPlayId = null
+        }
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                MaterialTheme.colorScheme.primaryContainer
-            )
+            .background(MaterialTheme.colorScheme.primaryContainer)
             .padding(24.dp)
     ) {
-        when (
-            val result = itemResult
-        ) {
-            null -> {
-                Text(
-                    text = "Loading..."
-                )
-            }
+        when (val result = itemResult) {
+            null -> Text("Loading...")
 
             is Result.Failure -> {
-                Text(
-                    text =
-                        result.error.message
-                            ?: "Hymn loading failed"
-                )
+                Text(result.error.message ?: "Hymn loading failed")
             }
 
             is Result.Success -> {
-                val target =
-                    result.data.target
+                val target = result.data.target
 
-                if (
-                    target is
-                            ResolvedLiturgicalItemTarget.Qolo
-                ) {
+                if (target is ResolvedLiturgicalItemTarget.Qolo) {
+                    val effectiveMelody = target.effectiveMelody
+
                     Text(
                         text = target.qolo.name,
                         style = SyriacTextStyles.body()
                     )
 
                     Text(
-                        text =
-                            target.effectiveMelody?.name
-                                ?: "Melody unresolved",
-                        modifier =
-                            Modifier.padding(
-                                top = 6.dp,
-                                bottom = 20.dp
-                            ),
-                        style =
-                            MaterialTheme.typography.titleMedium
+                        text = effectiveMelody?.name ?: "Melody unresolved",
+                        modifier = Modifier.padding(top = 6.dp, bottom = 12.dp),
+                        style = MaterialTheme.typography.titleMedium
                     )
 
+                    val recordingsResult by produceState<Result<List<MediaAsset>>?>(
+                        initialValue = null,
+                        key1 = platform,
+                        key2 = effectiveMelody?.id
+                    ) {
+                        value =
+                            if (effectiveMelody != null) {
+                                platform.content.loadMelodyRecordings(
+                                    effectiveMelody.id
+                                )
+                            } else {
+                                null
+                            }
+                    }
+
+                    when (val recordings = recordingsResult) {
+                        null -> {
+                            if (effectiveMelody != null) {
+                                Text("Loading recordings...")
+                            }
+                        }
+
+                        is Result.Failure -> {
+                            Text(
+                                recordings.error.message
+                                    ?: "Recordings loading failed"
+                            )
+                        }
+
+                        is Result.Success -> {
+                            val firstRecording = recordings.data.firstOrNull()
+
+                            if (firstRecording != null) {
+                                Button(
+                                    enabled = audioService != null,
+                                    onClick = {
+                                        if (audioService != null) {
+                                            pendingAutoPlayId = firstRecording.id
+
+                                            if (
+                                                audioService.load(firstRecording)
+                                                is Result.Failure
+                                            ) {
+                                                pendingAutoPlayId = null
+                                            }
+                                        }
+                                    },
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                ) {
+                                    Text("Play recording")
+                                }
+
+                                if (
+                                    playbackState.mediaAssetId ==
+                                    firstRecording.id
+                                ) {
+                                    Text("Audio: ${playbackState.status}")
+
+                                    playbackState.durationMs?.let { duration ->
+                                        Text("Duration: $duration ms")
+                                    }
+                                }
+                            } else {
+                                Text("No recording available")
+                            }
+                        }
+                    }
+
                     if (target.verses.isEmpty()) {
-                        Text(
-                            text =
-                                "No verses available"
-                        )
+                        Text("No verses available")
                     } else {
                         LazyColumn(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f),
                             verticalArrangement =
-                                Arrangement.spacedBy(
-                                    12.dp
-                                )
+                                Arrangement.spacedBy(12.dp)
                         ) {
-                            items(
-                                target.verses
-                            ) { verse ->
+                            items(target.verses) { verse ->
                                 Column(
-                                    modifier =
-                                        Modifier.fillMaxWidth()
+                                    modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    verse.petgomo?.let {
-                                            petgomo ->
+                                    verse.petgomo?.let { petgomo ->
                                         Text(
-                                            text =
-                                                petgomo.syriac,
+                                            text = petgomo.syriac,
                                             modifier = Modifier.fillMaxWidth(),
                                             style = SyriacTextStyles.body()
                                         )
                                     }
 
                                     Text(
-                                        text =
-                                            verse.text.syriac,
+                                        text = verse.text.syriac,
                                         modifier = Modifier.fillMaxWidth(),
                                         style = SyriacTextStyles.body()
                                     )
-
-
                                 }
                             }
                         }
                     }
                 } else {
-                    Text(
-                        text =
-                            "Selected liturgical item is not a Qolo."
-                    )
+                    Text("Selected liturgical item is not a Qolo.")
                 }
             }
         }
 
         Button(
-            onClick = onBack,
-            modifier =
-                Modifier.padding(
-                    top = 24.dp
-                )
+            onClick = {
+                audioService?.stop()
+                onBack()
+            },
+            modifier = Modifier.padding(top = 24.dp)
         ) {
             Text("Back")
         }
     }
+}
+
+@Composable
+private fun rememberPlaybackState(
+    audioService: AudioService?
+): PlaybackState {
+    if (audioService == null) {
+        return PlaybackState()
+    }
+
+    val state by audioService.state.collectAsState()
+    return state
 }
 
 @Composable

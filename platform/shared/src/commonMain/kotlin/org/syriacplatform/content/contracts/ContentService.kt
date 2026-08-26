@@ -1,9 +1,11 @@
 package org.syriacplatform.content.contracts
 
 import org.syriacplatform.common.result.Result
+import org.syriacplatform.common.types.MelodyId
 import org.syriacplatform.common.types.OccasionId
 import org.syriacplatform.common.types.QoloId
 import org.syriacplatform.content.models.EntryPoint
+import org.syriacplatform.content.models.MediaAsset
 import org.syriacplatform.content.models.Occasion
 import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.runtime.RuntimeEntryPoint
@@ -40,4 +42,8 @@ interface ContentService : PlatformService {
     suspend fun loadLiturgicalItem(
         liturgicalItemId: LiturgicalItemId
     ): Result<ResolvedLiturgicalItem>
+
+    suspend fun loadMelodyRecordings(
+        melodyId: MelodyId
+    ): Result<List<MediaAsset>>
 }
