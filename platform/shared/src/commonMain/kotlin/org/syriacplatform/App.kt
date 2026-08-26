@@ -1114,7 +1114,8 @@ private fun HymnDetailsScreen(
                         is Result.Success -> {
                             val firstRecording = recordings.data.firstOrNull()
 
-                            if (firstRecording != null) {                                when (
+                            if (firstRecording != null) {
+                                when (
                                     val status =
                                         playbackState.status
                                 ) {
