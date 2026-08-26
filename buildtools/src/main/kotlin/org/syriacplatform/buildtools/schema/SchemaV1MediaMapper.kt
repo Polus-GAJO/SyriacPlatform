@@ -39,7 +39,8 @@ class SchemaV1MediaMapper {
             id = source.id,
             mediaType = source.mediaType,
             sourceRelativePath =
-                source.sourceRelativePath
+                source.sourceRelativePath,
+            performer = source.performer
         )
     }
 

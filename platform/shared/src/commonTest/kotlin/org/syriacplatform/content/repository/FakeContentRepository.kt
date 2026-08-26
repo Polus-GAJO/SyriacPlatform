@@ -32,6 +32,26 @@ class FakeContentRepository : ContentRepository {
         )
     )
 
+    private val melodyRecordings =
+        mapOf(
+            MelodyId(1067L) to
+                listOf(
+                    MediaAsset(
+                        id = MediaAssetId(370L),
+                        type = "AUDIO",
+                        path =
+                            "media/audio/melodies/media-000370.mp3",
+                        performer = "ط±ظˆظپظˆ ط¹ط·ط§ظ„ظ„ظ‡"
+                    ),
+                    MediaAsset(
+                        id = MediaAssetId(371L),
+                        type = "AUDIO",
+                        path =
+                            "media/audio/melodies/media-000371.m4a",
+                        performer = "ظٹط§ط³ط± ط¹ط·ط§ظ„ظ„ظ‡"
+                    )
+                )
+        )
     private val occasion =
         Occasion(
             id = OccasionId(1),
@@ -156,12 +176,19 @@ class FakeContentRepository : ContentRepository {
     override suspend fun loadMelodyRecordings(
         id: MelodyId
     ): Result<List<MediaAsset>> {
-        return Result.Failure(
-            PlatformError(
-                code = ErrorCode.CONTENT_NOT_FOUND,
-                message =
-                    "Melody was not found: ${id.value}"
+        val recordings =
+            melodyRecordings[id]
+
+        return if (recordings != null) {
+            Result.Success(recordings)
+        } else {
+            Result.Failure(
+                PlatformError(
+                    code = ErrorCode.CONTENT_NOT_FOUND,
+                    message =
+                        "Melody was not found: ${id.value}"
+                )
             )
-        )
+        }
     }
 }

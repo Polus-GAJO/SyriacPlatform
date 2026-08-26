@@ -225,7 +225,8 @@ class SchemaV1PreviewPackageAssembler {
                         mediaType = asset.mediaType,
                         path =
                             "media/" +
-                                    asset.sourceRelativePath
+                                    asset.sourceRelativePath,
+                        performer = asset.performer
                     )
                 }
         )

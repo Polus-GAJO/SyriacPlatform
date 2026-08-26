@@ -13,5 +13,6 @@ import org.syriacplatform.common.types.MediaAssetId
 data class MediaAsset(
     val id: MediaAssetId,
     val type: String,
-    val path: String
+    val path: String,
+    val performer: String? = null
 )

@@ -29,7 +29,8 @@ data class SchemaV1PreviewPackage(
 data class SchemaV1PackageMediaAsset(
     val id: Long,
     val mediaType: String,
-    val path: String
+    val path: String,
+    val performer: String? = null
 )
 
 data class SchemaV1PreviewManifest(

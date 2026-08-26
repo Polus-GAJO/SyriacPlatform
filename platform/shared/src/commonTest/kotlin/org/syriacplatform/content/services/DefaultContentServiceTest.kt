@@ -7,6 +7,8 @@ import kotlinx.coroutines.test.runTest
 import org.syriacplatform.common.result.Result
 import org.syriacplatform.common.types.EntryPointId
 import org.syriacplatform.common.types.OccasionId
+import org.syriacplatform.common.types.MediaAssetId
+import org.syriacplatform.common.types.MelodyId
 import org.syriacplatform.content.repository.FakeContentRepository
 import org.syriacplatform.content.runtime.RuntimeEntryPoint
 import org.syriacplatform.content.runtime.RuntimeOccasion
@@ -115,6 +117,43 @@ class DefaultContentServiceTest {
             assertEquals(
                 OccasionId(1),
                 success.data.single().id
+            )
+        }
+
+    @Test
+    fun loadMelodyRecordingsPreservesAllRecordingsAndPerformers() =
+        runTest {
+            val result =
+                service.loadMelodyRecordings(
+                    MelodyId(1067L)
+                )
+
+            val success =
+                assertIs<
+                        Result.Success<List<org.syriacplatform.content.models.MediaAsset>>
+                        >(
+                    result
+                )
+
+            assertEquals(
+                2,
+                success.data.size
+            )
+
+            assertEquals(
+                listOf(
+                    MediaAssetId(370L),
+                    MediaAssetId(371L)
+                ),
+                success.data.map { it.id }
+            )
+
+            assertEquals(
+                listOf(
+                    "ط±ظˆظپظˆ ط¹ط·ط§ظ„ظ„ظ‡",
+                    "ظٹط§ط³ط± ط¹ط·ط§ظ„ظ„ظ‡"
+                ),
+                success.data.map { it.performer }
             )
         }
 }

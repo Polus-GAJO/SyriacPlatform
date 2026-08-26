@@ -26,7 +26,10 @@ class MediaSourceMapper {
         return MediaAssetSource(
             id = row.requiredLong("MediaAssetID"),
             mediaType = mediaType,
-            sourceRelativePath = relativePath
+            sourceRelativePath = relativePath,
+            performer = row["Performer"]
+                ?.trim()
+                ?.takeIf { it.isNotEmpty() }
         )
     }
 

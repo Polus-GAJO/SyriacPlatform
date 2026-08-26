@@ -3,7 +3,8 @@ package org.syriacplatform.buildtools.schema
 data class SchemaV1MediaAsset(
     val id: Long,
     val mediaType: String,
-    val sourceRelativePath: String
+    val sourceRelativePath: String,
+    val performer: String? = null
 )
 
 data class SchemaV1MelodyMedia(

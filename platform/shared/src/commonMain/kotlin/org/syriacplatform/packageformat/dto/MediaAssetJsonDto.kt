@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 internal data class MediaAssetJsonDto(
     val id: Long,
     val type: String,
-    val path: String
+    val path: String,
+    val performer: String? = null
 )

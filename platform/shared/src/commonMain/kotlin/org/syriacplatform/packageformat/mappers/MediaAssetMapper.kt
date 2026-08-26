@@ -10,7 +10,8 @@ internal fun MediaAssetJsonDto.toDomain(): Result<MediaAsset> {
         MediaAsset(
             id = MediaAssetId(id),
             type = type,
-            path = path
+            path = path,
+            performer = performer
         )
     )
 }

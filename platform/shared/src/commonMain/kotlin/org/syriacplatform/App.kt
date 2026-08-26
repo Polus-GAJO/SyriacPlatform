@@ -1040,6 +1040,9 @@ private fun HymnDetailsScreen(
         mutableStateOf(0L)
     }
 
+    var selectedRecordingId by remember(liturgicalItemId) {
+        mutableStateOf<MediaAssetId?>(null)
+    }
     LaunchedEffect(
         playbackState.positionMs,
         playbackState.mediaAssetId,
@@ -1129,9 +1132,94 @@ private fun HymnDetailsScreen(
                         }
 
                         is Result.Success -> {
-                            val firstRecording = recordings.data.firstOrNull()
+                            val availableRecordings =
+                                recordings.data
 
-                            if (firstRecording != null) {
+                            val selectedRecording =
+                                availableRecordings
+                                    .firstOrNull { recording ->
+                                        recording.id ==
+                                            selectedRecordingId
+                                    }
+                                    ?: availableRecordings.firstOrNull()
+
+                            LaunchedEffect(
+                                availableRecordings,
+                                selectedRecordingId
+                            ) {
+                                if (
+                                    selectedRecordingId == null &&
+                                    selectedRecording != null
+                                ) {
+                                    selectedRecordingId =
+                                        selectedRecording.id
+                                }
+                            }
+
+                            if (availableRecordings.size > 1) {
+                                Text(
+                                    text = "Recordings",
+                                    modifier =
+                                        Modifier.padding(
+                                            bottom = 8.dp
+                                        ),
+                                    style =
+                                        MaterialTheme.typography.titleSmall
+                                )
+
+                                availableRecordings.forEach {
+                                        recording ->
+
+                                    val performerName =
+                                        recording.performer
+                                            ?.takeIf {
+                                                it.isNotBlank()
+                                            }
+                                            ?: "Recording ${recording.id.value}"
+
+                                    Button(
+                                        enabled =
+                                            audioService != null,
+                                        onClick = {
+                                            if (
+                                                selectedRecordingId !=
+                                                recording.id
+                                            ) {
+                                                pendingAutoPlayId =
+                                                    null
+
+                                                audioService?.stop()
+
+                                                selectedRecordingId =
+                                                    recording.id
+
+                                                seekPositionMs = 0L
+                                                isSeeking = false
+                                            }
+                                        },
+                                        modifier =
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .padding(
+                                                    bottom = 6.dp
+                                                )
+                                    ) {
+                                        Text(
+                                            text =
+                                                if (
+                                                    selectedRecording?.id ==
+                                                    recording.id
+                                                ) {
+                                                    "[Selected] $performerName"
+                                                } else {
+                                                    performerName
+                                                }
+                                        )
+                                    }
+                                }
+                            }
+
+                            if (selectedRecording != null) {
                                 when (
                                     val status =
                                         playbackState.status
@@ -1174,7 +1262,7 @@ private fun HymnDetailsScreen(
                                             enabled =
                                                 audioService != null &&
                                                 playbackState.mediaAssetId ==
-                                                    firstRecording.id,
+                                                    selectedRecording.id,
                                             onClick = {
                                                 audioService?.play()
                                             },
@@ -1211,11 +1299,11 @@ private fun HymnDetailsScreen(
                                                         null
                                                 ) {
                                                     pendingAutoPlayId =
-                                                        firstRecording.id
+                                                        selectedRecording.id
 
                                                     if (
                                                         audioService.load(
-                                                            firstRecording
+                                                            selectedRecording
                                                         )
                                                         is Result.Failure
                                                     ) {
@@ -1236,7 +1324,7 @@ private fun HymnDetailsScreen(
 
                                 if (
                                     playbackState.mediaAssetId ==
-                                    firstRecording.id &&
+                                    selectedRecording.id &&
                                     playbackState.status != PlaybackStatus.Idle &&
                                     playbackState.status != PlaybackStatus.Ended &&
                                     playbackState.status != PlaybackStatus.Error
@@ -1260,7 +1348,7 @@ private fun HymnDetailsScreen(
 
                                 if (
                                     playbackState.mediaAssetId ==
-                                    firstRecording.id
+                                    selectedRecording.id
                                 ) {
                                     Text("Audio: ${playbackState.status}")
 

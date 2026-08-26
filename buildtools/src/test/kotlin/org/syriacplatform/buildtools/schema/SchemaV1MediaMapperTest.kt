@@ -23,7 +23,8 @@ class SchemaV1MediaMapperTest {
                             id = 7L,
                             mediaType = "AUDIO",
                             sourceRelativePath =
-                                "audio/melodies/media-000007.mp3"
+                                "audio/melodies/media-000007.mp3",
+                            performer = "Test Performer"
                         ),
                         MediaAssetSource(
                             id = 8L,
@@ -59,6 +60,15 @@ class SchemaV1MediaMapperTest {
         assertEquals(
             2,
             canonical.melodyMedia.size
+        )
+
+        assertEquals(
+            "Test Performer",
+            canonical.mediaAssets
+                .first {
+                    it.id == 7L
+                }
+                .performer
         )
 
         assertTrue(

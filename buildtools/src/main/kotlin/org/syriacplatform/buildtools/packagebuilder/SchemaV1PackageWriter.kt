@@ -557,6 +557,10 @@ class SchemaV1PackageWriter {
             put("id", item.id)
             put("type", item.mediaType)
             put("path", item.path)
+            putNullableString(
+                "performer",
+                item.performer
+            )
         }
     }
 
