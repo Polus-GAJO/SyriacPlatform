@@ -2572,3 +2572,131 @@ The runtime audio architecture remains deliberately incomplete in the following 
 - timing/segment-driven verse synchronization.
 
 These are follow-on requirements and must extend the verified path rather than bypass it.
+
+------------------------------------------------------------------------
+
+<!-- AUDIO-DECISIONS-066-067-2026-08-27 -->
+
+# Decision 066
+
+## Performer Is Optional Descriptive Media Metadata
+
+### Decision
+
+`MediaAsset` may carry an optional `performer` string for human-readable identification of a recording.
+
+The performer string does not participate in `MediaAssetId` identity and does not require a separate performer entity at the current stage.
+
+### Reason
+
+The immediate real requirement is to distinguish multiple recordings of the same Melody for application selection.
+
+A free text performer value is sufficient for the verified data and avoids introducing an identity/catalog subsystem before a real requirement exists.
+
+If two performers later require disambiguation, the authored display value may include additional descriptive information such as a year.
+
+### Impact
+
+The verified path preserves `performer` through:
+
+```text
+Author Database
+    -> controlled Media export
+    -> Build Tools source/canonical/package models
+    -> media-assets.json
+    -> Core MediaAsset
+    -> ContentService
+    -> Reference Application
+```
+
+The field remains nullable so older or unnamed media assets remain valid.
+
+------------------------------------------------------------------------
+
+# Decision 067
+
+## Multiple Melody Recordings Are Selected Explicitly by the Application
+
+### Decision
+
+When the resolved effective Melody has more than one recording, the application presents the available recordings and allows the user to choose the active `MediaAsset`.
+
+The current Reference Application uses performer metadata as the human-readable choice label when available.
+
+### Reason
+
+`Melody.recordingIds` is already an ordered list and `ContentService.loadMelodyRecordings(...)` already returns all corresponding `MediaAsset` values.
+
+Selecting only the first recording would discard valid authored alternatives.
+
+The AudioService should not choose among Melody recordings because interpreting Melody relationships belongs to content/runtime/application selection, not playback execution.
+
+### Impact
+
+The verified selection path is:
+
+```text
+Resolved contextual Qolo
+    -> effectiveMelody
+    -> ContentService.loadMelodyRecordings(...)
+    -> ordered List<MediaAsset>
+    -> user selects recording
+    -> selected MediaAsset
+    -> AudioService
+```
+
+For one recording, the existing simple playback behavior remains.
+
+For multiple recordings:
+
+- the first item is the initial selection;
+- performer choices are displayed;
+- changing selection stops previous playback;
+- changing selection does not automatically start playback;
+- the existing Play / Pause / Stop / Seek behavior operates on the selected recording.
+
+Occasion 107 / Melody 1067 was the first real end-to-end verification case:
+
+```text
+MediaAsset 370 -> روفو عطالله
+MediaAsset 371 -> ياسر عطالله
+```
+
+Manual Android verification confirmed smooth switching and correct playback controls for both recordings.
+
+This decision supersedes the temporary statement in Decision 065 that the UI uses the first available recording as the final behavior. The first recording remains only the initial selection when several are available.
+
+------------------------------------------------------------------------
+
+## Phase 9 Pause Checkpoint
+
+Verified implementation baseline:
+
+```text
+eda3274
+```
+
+Before the development pause, all of the following were verified:
+
+```text
+stable playback commands
+continuous Android position reporting
+state-aware playback controls
+seek bar
+performer metadata
+multiple recordings per Melody
+explicit recording selection
+Android real-content execution
+```
+
+Verification passed:
+
+```text
+:shared:allTests
+:shared:check
+:androidApp:assembleDebug
+```
+
+The next engineering decision should address `AudioService` lifecycle and ownership.
+
+The existing platform-neutral playback contracts and the now-verified multiple-recording behavior should be preserved while that ownership boundary is finalized.

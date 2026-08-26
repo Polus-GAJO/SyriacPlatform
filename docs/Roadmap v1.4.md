@@ -945,3 +945,55 @@ Priority order:
 The Reference Application should continue to act as a real-content verification surface while these contracts stabilize.
 
 Production styling remains secondary to correct reusable platform behavior.
+
+------------------------------------------------------------------------
+
+<!-- PHASE-9-AUDIO-STABILIZATION-ROADMAP-2026-08-27 -->
+
+# Roadmap Update --- 2026-08-27
+
+## Verified baseline
+
+```text
+eda3274
+```
+
+The Phase 9 stabilization priorities documented on 2026-08-26 have advanced substantially.
+
+The following items are now complete and verified:
+
+```text
+1. stable Play / Pause / Stop behavior       COMPLETE
+2. continuous position reporting             COMPLETE
+3. seek interaction                          COMPLETE
+4. multiple-recording selection policy       COMPLETE
+5. performer metadata transport/display      COMPLETE
+```
+
+Real-content verification used Occasion 107, Melody 1067, with two distinct recordings and two performer names.
+
+## Immediate next milestone
+
+The next Phase 9 milestone is now:
+
+> Final AudioService lifecycle / ownership integration.
+
+The current Android Activity-owned wiring is an explicit intermediate boundary and should be reviewed without weakening the platform-neutral `AudioService` / `AudioPlayerBackend` separation.
+
+The intended near-term order is:
+
+```text
+1. finalize AudioService lifecycle / ownership
+2. strengthen focused lifecycle/integration verification
+3. later add iOS playback backend
+4. later add queue / Play All behavior
+5. later add occurrence-level PERFORMANCE media
+6. later integrate MediaTimingSet / MediaSegment
+7. later add authoritative verse synchronization
+```
+
+The verified performer-based multiple-recording selection should remain intact while lifecycle ownership is changed.
+
+Production UI styling is still not the immediate milestone.
+
+Day-aware contextual organization remains deferred as previously documented and is not superseded by this update.

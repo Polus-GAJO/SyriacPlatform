@@ -2,11 +2,11 @@
 
 **Document:** CurrentState\
 **Status:** Active implementation reference\
-**Last updated:** 2026-08-26\
+**Last updated:** 2026-08-27\
 **Repository:** SyriacPlatform\
 **Branch:** `main`\
-**Current milestone:** Phase 9 Runtime Audio Integration --- real-content Android playback verified\
-**Verified functional milestone:** `4e0e599`\
+**Current milestone:** Phase 9 Runtime Audio Integration --- playback controls, seeking, performer metadata, and multiple-recording selection verified\
+**Verified functional milestone:** `eda3274`\
 **Documentation correction follows:** `3ca4c6b`
 
 ------------------------------------------------------------------------
@@ -2318,3 +2318,278 @@ real Melody recording match     verified
 ```
 
 The next work should improve reusable playback behavior rather than create a second audio-loading path.
+
+------------------------------------------------------------------------
+
+<!-- PHASE-9-AUDIO-PAUSE-CHECKPOINT-2026-08-27 -->
+
+# 19. Phase 9 Audio Stabilization and Multiple-Recording Checkpoint (2026-08-27)
+
+This section is the authoritative restart checkpoint for the current development pause.
+
+Verified implementation baseline:
+
+```text
+eda3274
+```
+
+The earlier real-content Android playback path remains intact and has now been extended through application-facing playback stabilization and explicit multiple-recording selection.
+
+## 19.1 Playback command semantics
+
+`DefaultAudioService` now has verified stable command behavior:
+
+```text
+play while Playing  -> success without duplicate backend play
+pause while Paused  -> success without duplicate backend pause
+stop while Idle     -> success without backend stop
+play after Ended    -> seek(0) then play
+```
+
+Focused service tests, `:shared:allTests`, and `:shared:check` passed after this stabilization.
+
+Representative implementation milestone:
+
+```text
+b376a09  Stabilize audio playback command semantics
+```
+
+## 19.2 Continuous Android playback position
+
+`AndroidAudioPlayerBackend` now reports playback position continuously while Playing.
+
+Verified behavior:
+
+```text
+Playing -> immediate position + periodic updates
+Pause   -> final position, polling stops
+Buffer  -> polling stops until Playing resumes
+Seek    -> current native position emitted immediately
+Ended   -> final position, polling stops
+Error   -> polling stops
+Stop    -> polling stops
+Release -> polling stops
+```
+
+The current Android polling interval is 250 ms.
+
+The Reference Application displays live `PlaybackState.positionMs` and the value was manually verified to increase during playback, stop during Pause, resume during Play, and return to 0 after Stop.
+
+Representative milestones:
+
+```text
+10738f7  Add continuous Android audio position reporting
+e0a8b92  Show live audio playback position
+```
+
+## 19.3 Application-facing playback controls
+
+`HYMN_DETAILS` now provides state-aware Play / Pause / Stop controls.
+
+Verified behavior:
+
+```text
+Idle / Error -> Play loads the selected recording and auto-plays
+Loading      -> disabled Loading state
+Ready        -> Play
+Playing      -> Pause + Stop
+Paused       -> Play + Stop
+Ended        -> replay is available; obsolete Stop is not retained
+```
+
+Manual Android verification confirmed:
+
+- Pause freezes playback position;
+- Play resumes from the paused position;
+- Stop returns position to 0;
+- replay after Stop starts correctly.
+
+Representative milestones:
+
+```text
+1eb943c  Add audio playback controls to hymn details
+d00d8cc  Fix audio controls formatting
+```
+
+## 19.4 Seek bar
+
+`HYMN_DETAILS` now exposes a seek slider driven by canonical `PlaybackState`.
+
+The slider uses local drag state while the user is dragging so native position updates do not fight the thumb.
+
+When dragging finishes, `seekTo(...)` is issued once.
+
+Manual Android verification confirmed seeking while both Playing and Paused:
+
+- Playing -> audio jumps to the selected position and continues;
+- Paused  -> position changes while playback remains paused;
+- the slider direction is left-to-right;
+- end-of-recording control state was verified and cleaned up.
+
+Representative milestones:
+
+```text
+43a9040  Add audio seek bar to hymn details
+1e2590e  Clean up audio seek bar formatting
+```
+
+## 19.5 Performer metadata
+
+A real multiple-recording case was selected from Occasion 107.
+
+The Author Database `MediaAsset` source now carries optional descriptive performer metadata.
+
+The verified source values are:
+
+```text
+MediaAsset 370 -> روفو عطالله
+MediaAsset 371 -> ياسر عطالله
+```
+
+Both recordings belong to:
+
+```text
+Melody 1067
+Qolo 46
+```
+
+The two physical package resources are:
+
+```text
+370 -> media/audio/melodies/media-000370.mp3
+371 -> media/audio/melodies/media-000371.m4a
+```
+
+`performer` is optional metadata. It does not participate in MediaAsset identity.
+
+The verified transport path is:
+
+```text
+Author Database MediaAsset.Performer
+    -> MediaAsset.csv
+    -> MediaAssetSource
+    -> Schema-v1 canonical/package media
+    -> content/media-assets.json
+    -> MediaAssetJsonDto
+    -> MediaAsset
+    -> runtime/service/UI
+```
+
+UTF-8 Arabic performer names were verified directly in generated `media-assets.json`.
+
+## 19.6 Multiple recordings for one Melody
+
+The existing content API already supported:
+
+```text
+ContentService.loadMelodyRecordings(MelodyId)
+    -> List<MediaAsset>
+```
+
+No new service contract was required.
+
+A regression fixture verifies that Melody 1067 returns both recordings in authored order:
+
+```text
+370 -> روفو عطالله
+371 -> ياسر عطالله
+```
+
+The service/runtime path preserves all recordings and performer metadata.
+
+## 19.7 Explicit recording selection in HYMN_DETAILS
+
+The earlier temporary policy:
+
+```text
+first available recording
+```
+
+has been replaced for multi-recording Melodies by explicit user selection.
+
+Current behavior:
+
+- one recording -> the existing playback flow remains simple;
+- multiple recordings -> performer choices are displayed;
+- the first recording is the initial selection;
+- selecting another performer changes the active `MediaAsset`;
+- previous playback is stopped before switching;
+- selection itself does not auto-play;
+- Play / Pause / Stop / Seek operate on the selected recording.
+
+Manual Android verification with Occasion 107 and Melody 1067 confirmed that switching between the two performer recordings is smooth and that all playback controls continue to work correctly.
+
+## 19.8 Verification status at pause
+
+Immediately before this checkpoint, the implementation passed:
+
+```text
+:shared:allTests
+:shared:check
+:androidApp:assembleDebug
+```
+
+Manual Android verification also passed for:
+
+```text
+Occasion 107
+Melody 1067
+two recordings
+two performer names
+recording switching
+Play
+Pause
+Stop
+continuous position
+Seek
+replay
+```
+
+Occasion 2 was rebuilt when the generated integration-test baseline had become stale; its package/runtime integration tests returned to green. That failure was unrelated to `performer`.
+
+## 19.9 Current architectural boundary
+
+The following Phase 9 items are now considered implemented and verified:
+
+```text
+real contextual Melody -> recording playback
+stable Play / Pause / Stop semantics
+continuous Android position reporting
+live position presentation
+seek bar
+optional performer metadata
+multiple recordings per Melody
+explicit performer-based recording selection
+```
+
+The next deliberate Phase 9 task after the pause is:
+
+> Finalize AudioService lifecycle / ownership integration.
+
+The current intermediate ownership remains:
+
+```text
+MainActivity
+    -> constructs AndroidAudioPlayerBackend
+    -> constructs/initializes AudioService
+    -> passes AudioService into shared App
+```
+
+This should be reviewed before expanding into queue / Play All, iOS playback, PERFORMANCE media, or timing/segment synchronization.
+
+## 19.10 Restart procedure
+
+When development resumes:
+
+```text
+1. Read this section of CurrentState.md.
+2. Confirm main is at or beyond eda3274.
+3. Run :shared:allTests.
+4. Run :shared:check.
+5. Run :androidApp:assembleDebug.
+6. If a visual smoke test is desired, synchronize Occasion 107.
+7. Verify Melody 1067 still exposes both performer recordings.
+8. Resume with AudioService lifecycle / ownership integration.
+```
+
+Do not redesign the recording-selection contract on restart unless a new real requirement demands it. The current multiple-recording path is already verified end-to-end.
