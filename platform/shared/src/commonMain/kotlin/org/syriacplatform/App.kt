@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -1033,7 +1034,26 @@ private fun HymnDetailsScreen(
         mutableStateOf<MediaAssetId?>(null)
     }
 
+
+    var isSeeking by remember(liturgicalItemId) {
+        mutableStateOf(false)
+    }
+
+    var seekPositionMs by remember(liturgicalItemId) {
+        mutableStateOf(0L)
+    }
+
     LaunchedEffect(
+        playbackState.positionMs,
+        playbackState.mediaAssetId,
+        isSeeking
+    ) {
+        if (!isSeeking) {
+            seekPositionMs =
+                playbackState.positionMs
+        }
+    }
+LaunchedEffect(
         playbackState.status,
         playbackState.mediaAssetId,
         pendingAutoPlayId,
@@ -1220,8 +1240,9 @@ private fun HymnDetailsScreen(
                                 if (
                                     playbackState.mediaAssetId ==
                                     firstRecording.id &&
-                                    playbackState.status !=
-                                        PlaybackStatus.Idle
+                                    playbackState.status != PlaybackStatus.Idle &&
+                                    playbackState.status != PlaybackStatus.Ended &&
+                                    playbackState.status != PlaybackStatus.Error
                                 ) {
                                     Button(
                                         enabled =
@@ -1251,9 +1272,66 @@ private fun HymnDetailsScreen(
                                         "Position: ${playbackState.positionMs} ms"
                                     )
 
-                                    playbackState.durationMs?.let { duration ->
-                                        Text("Duration: $duration ms")
-                                    }
+
+                                    playbackState.durationMs
+                                        ?.takeIf { duration ->
+                                            duration > 0L
+                                        }
+                                        ?.let { duration ->
+                                            val sliderValue =
+                                                seekPositionMs
+                                                    .coerceIn(
+                                                        0L,
+                                                        duration
+                                                    )
+                                                    .toFloat()
+
+                                            Slider(
+                                                value =
+                                                    sliderValue,
+                                                onValueChange = {
+                                                        value ->
+                                                    isSeeking =
+                                                        true
+
+                                                    seekPositionMs =
+                                                        value
+                                                            .toLong()
+                                                            .coerceIn(
+                                                                0L,
+                                                                duration
+                                                            )
+                                                },
+                                                onValueChangeFinished = {
+                                                    audioService?.seekTo(
+                                                        seekPositionMs
+                                                            .coerceIn(
+                                                                0L,
+                                                                duration
+                                                            )
+                                                    )
+
+                                                    isSeeking =
+                                                        false
+                                                },
+                                                valueRange =
+                                                    0f..duration.toFloat(),
+                                                enabled =
+                                                    audioService != null &&
+                                                    playbackState.status !=
+                                                        PlaybackStatus.Loading &&
+                                                    playbackState.status !=
+                                                        PlaybackStatus.Error &&
+                                                    playbackState.status !=
+                                                        PlaybackStatus.Idle,
+                                                modifier =
+                                                    Modifier.fillMaxWidth()
+                                            )
+
+                                            Text(
+                                                "Duration: $duration ms"
+                                            )
+                                        }
                                 }
                             } else {
                                 Text("No recording available")
