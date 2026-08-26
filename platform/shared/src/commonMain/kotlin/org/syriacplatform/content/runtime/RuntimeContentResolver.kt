@@ -4,11 +4,14 @@ import org.syriacplatform.common.result.Result
 import org.syriacplatform.common.types.EntryPointId
 import org.syriacplatform.common.types.ErrorCode
 import org.syriacplatform.common.types.LiturgicalItemId
+import org.syriacplatform.common.types.MediaAssetId
+import org.syriacplatform.common.types.MelodyId
 import org.syriacplatform.common.types.OccasionId
 import org.syriacplatform.common.types.PlatformError
 import org.syriacplatform.common.types.PrayerSequenceId
 import org.syriacplatform.content.models.EntryPointTarget
 import org.syriacplatform.content.models.LiturgicalItemTarget
+import org.syriacplatform.content.models.MediaAsset
 
 /**
  * يحل العلاقات القانونية داخل Runtime اعتمادًا
@@ -18,6 +21,62 @@ class RuntimeContentResolver(
     private val store: RuntimeContentStore
 ) {
 
+
+    fun resolveMediaAsset(
+        id: MediaAssetId
+    ): Result<MediaAsset> {
+        val mediaAsset =
+            store.index.mediaAssetsById[id]
+                ?: return notFound(
+                    "MediaAsset",
+                    id.value
+                )
+
+        return Result.Success(
+            mediaAsset
+        )
+    }
+
+    fun resolveMelodyRecordings(
+        id: MelodyId
+    ): Result<List<MediaAsset>> {
+        val melody =
+            store.index.melodiesById[id]
+                ?: return notFound(
+                    "Melody",
+                    id.value
+                )
+
+        val recordings =
+            mutableListOf<MediaAsset>()
+
+        /*
+         * Preserve the canonical recordingIds order.
+         * Package Validation guarantees these references,
+         * but Runtime still fails safely if a store is built
+         * from invalid data in tests or future tooling.
+         */
+        melody.recordingIds.forEach { mediaAssetId ->
+            when (
+                val result =
+                    resolveMediaAsset(
+                        mediaAssetId
+                    )
+            ) {
+                is Result.Success ->
+                    recordings.add(
+                        result.data
+                    )
+
+                is Result.Failure ->
+                    return result
+            }
+        }
+
+        return Result.Success(
+            recordings
+        )
+    }
     fun resolveEntryPoint(
         id: EntryPointId
     ): Result<RuntimeEntryPoint> {

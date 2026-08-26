@@ -4,11 +4,14 @@ import org.syriacplatform.common.result.Result
 import org.syriacplatform.common.types.EntryPointId
 import org.syriacplatform.common.types.ErrorCode
 import org.syriacplatform.common.types.GroupId
+import org.syriacplatform.common.types.MediaAssetId
+import org.syriacplatform.common.types.MelodyId
 import org.syriacplatform.common.types.OccasionId
 import org.syriacplatform.common.types.PlatformError
 import org.syriacplatform.common.types.QoloId
 import org.syriacplatform.content.models.EntryPoint
 import org.syriacplatform.content.models.EntryPointTarget
+import org.syriacplatform.content.models.MediaAsset
 import org.syriacplatform.content.models.Occasion
 import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.runtime.RuntimeEntryPoint
@@ -135,6 +138,29 @@ class FakeContentRepository : ContentRepository {
                 code = ErrorCode.CONTENT_NOT_FOUND,
                 message =
                     "LiturgicalItem was not found: ${id.value}"
+            )
+        )
+    }
+    override suspend fun loadMediaAsset(
+        id: MediaAssetId
+    ): Result<MediaAsset> {
+        return Result.Failure(
+            PlatformError(
+                code = ErrorCode.CONTENT_NOT_FOUND,
+                message =
+                    "MediaAsset was not found: ${id.value}"
+            )
+        )
+    }
+
+    override suspend fun loadMelodyRecordings(
+        id: MelodyId
+    ): Result<List<MediaAsset>> {
+        return Result.Failure(
+            PlatformError(
+                code = ErrorCode.CONTENT_NOT_FOUND,
+                message =
+                    "Melody was not found: ${id.value}"
             )
         )
     }

@@ -1,9 +1,12 @@
 package org.syriacplatform.content.repository
 
 import org.syriacplatform.common.result.Result
+import org.syriacplatform.common.types.MediaAssetId
+import org.syriacplatform.common.types.MelodyId
 import org.syriacplatform.common.types.OccasionId
 import org.syriacplatform.common.types.QoloId
 import org.syriacplatform.content.models.EntryPoint
+import org.syriacplatform.content.models.MediaAsset
 import org.syriacplatform.content.models.Occasion
 import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.runtime.RuntimeEntryPoint
@@ -36,4 +39,12 @@ interface ContentRepository {
     suspend fun loadLiturgicalItem(
         id: LiturgicalItemId
     ): Result<ResolvedLiturgicalItem>
+
+    suspend fun loadMediaAsset(
+        id: MediaAssetId
+    ): Result<MediaAsset>
+
+    suspend fun loadMelodyRecordings(
+        id: MelodyId
+    ): Result<List<MediaAsset>>
 }

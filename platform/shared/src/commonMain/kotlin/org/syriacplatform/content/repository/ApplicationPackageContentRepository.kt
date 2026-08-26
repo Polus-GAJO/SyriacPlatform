@@ -9,11 +9,14 @@ import org.syriacplatform.packageformat.loading.ApplicationPackageLoader
 import org.syriacplatform.packageformat.loading.PackageLoadResult
 import org.syriacplatform.packagevalidation.compatibility.CoreCompatibility
 import org.syriacplatform.content.runtime.RuntimeContentStore
+import org.syriacplatform.common.types.MediaAssetId
+import org.syriacplatform.common.types.MelodyId
 import org.syriacplatform.common.types.OccasionId
 import org.syriacplatform.content.runtime.RuntimeContentResolver
 import org.syriacplatform.content.runtime.RuntimeEntryPoint
 import org.syriacplatform.content.runtime.RuntimeOccasion
 import org.syriacplatform.content.models.EntryPoint
+import org.syriacplatform.content.models.MediaAsset
 import org.syriacplatform.content.models.Occasion
 import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.content.runtime.ResolvedLiturgicalItem
@@ -224,6 +227,41 @@ class ApplicationPackageContentRepository(
                     )
 
                 resolver.resolveLiturgicalItem(id)
+            }
+
+            is Result.Failure ->
+                storeResult
+        }
+    }
+    override suspend fun loadMediaAsset(
+        id: MediaAssetId
+    ): Result<MediaAsset> {
+        return when (
+            val storeResult =
+                loadStore()
+        ) {
+            is Result.Success -> {
+                RuntimeContentResolver(
+                    store = storeResult.data
+                ).resolveMediaAsset(id)
+            }
+
+            is Result.Failure ->
+                storeResult
+        }
+    }
+
+    override suspend fun loadMelodyRecordings(
+        id: MelodyId
+    ): Result<List<MediaAsset>> {
+        return when (
+            val storeResult =
+                loadStore()
+        ) {
+            is Result.Success -> {
+                RuntimeContentResolver(
+                    store = storeResult.data
+                ).resolveMelodyRecordings(id)
             }
 
             is Result.Failure ->
