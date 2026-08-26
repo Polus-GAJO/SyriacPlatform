@@ -2337,3 +2337,238 @@ A melody recording and a complete liturgical performance are different domain re
 The currently completed Build Tools vertical slice implements melody `RECORDING`.
 
 Occurrence-level `PERFORMANCE` and timing/segment integration remain future work.
+------------------------------------------------------------------------
+
+<!-- AUDIO-RUNTIME-DECISIONS-060-065 -->
+
+# Decision 060
+
+## Packaged Media Is Canonical Runtime Content
+
+### Decision
+
+`MediaAsset` and Melody `recordingIds` are loaded, validated, indexed, and resolved through the existing Application Package and runtime content architecture.
+
+Audio media must not be loaded through an application-specific side channel.
+
+### Reason
+
+The platform already has one authoritative path for canonical content:
+
+```text
+Application Package
+    -> validation
+    -> RuntimeContent
+    -> RuntimeContentIndex
+    -> RuntimeContentResolver
+    -> repository/service APIs
+```
+
+Creating a second media-loading path would bypass package validation and separate media identity from the content relationships that select it.
+
+### Impact
+
+The Core now includes canonical MediaAsset ingestion and runtime lookup.
+
+Melody recording resolution is available through runtime/repository/service APIs.
+
+Applications request recordings through content identity rather than opening package JSON or selecting physical files directly.
+
+------------------------------------------------------------------------
+
+# Decision 061
+
+## Media Resource Resolution Is Separate from Playback
+
+### Decision
+
+Canonical `MediaAsset` identity and package-relative path resolution are separated from native playback through `MediaResourceResolver`.
+
+### Reason
+
+A MediaAsset is a logical package resource.
+
+A native playback engine requires a platform-usable resource reference such as a URI.
+
+These are different responsibilities and may vary independently across embedded, local-cache, remote, or hybrid distribution strategies.
+
+### Impact
+
+The current embedded-package path is:
+
+```text
+MediaAsset.path
+    -> ComposeResourceMediaResourceResolver
+    -> Res.getUri(...)
+    -> MediaResource.uri
+```
+
+`AudioPlayerBackend` consumes `MediaResource`.
+
+Future iOS, remote, cached, or hybrid resolvers may be introduced without changing canonical MediaAsset identity.
+
+------------------------------------------------------------------------
+
+# Decision 062
+
+## AudioService Owns Canonical Playback State; Native Backends Execute Playback
+
+### Decision
+
+`DefaultAudioService` owns command validation and canonical observable `PlaybackState`.
+
+`AudioPlayerBackend` executes platform playback operations.
+
+### Reason
+
+Shared application logic must not depend on ExoPlayer, AVFoundation, or another platform-specific player API.
+
+At the same time, native playback engines must retain control over actual device playback.
+
+### Impact
+
+The shared Audio domain exposes:
+
+```text
+AudioService
+PlaybackState
+PlaybackStatus
+AudioPlayerBackend
+```
+
+Android-specific Media3 types remain outside `commonMain`.
+
+The same service contract can later be backed by an iOS implementation.
+
+------------------------------------------------------------------------
+
+# Decision 063
+
+## Native Playback Readiness Is Asynchronous
+
+### Decision
+
+A successful backend command does not itself prove that the native player has reached the requested playback state.
+
+Native state transitions are reported through `AudioPlayerEvent`.
+
+### Reason
+
+Real playback engines prepare media asynchronously.
+
+Treating `prepare()` return as immediate `Ready` would make Core state incorrect and would prevent reliable handling of duration, end-of-media, and asynchronous player errors.
+
+### Impact
+
+The state path is:
+
+```text
+load(MediaAsset)
+    -> Loading
+    -> backend prepare accepted
+    -> AudioPlayerEvent.Ready(duration)
+    -> Ready
+```
+
+Likewise, actual backend events drive:
+
+```text
+Playing
+Paused
+Ended
+Error
+```
+
+A playback error changes `PlaybackStatus` without permanently destroying the AudioService lifecycle state.
+
+------------------------------------------------------------------------
+
+# Decision 064
+
+## Android Playback Uses Media3 Behind the Platform Boundary
+
+### Decision
+
+The verified Android backend is implemented with AndroidX Media3 / ExoPlayer inside `androidApp`.
+
+### Reason
+
+Media3 provides the native Android playback lifecycle required by the platform while preserving a clean separation from shared Core contracts.
+
+### Impact
+
+`AndroidAudioPlayerBackend` is platform-specific.
+
+Media3 is an Android dependency only.
+
+No Android Media3 type is exposed by `AudioService`, `MediaResource`, or other common contracts.
+
+The Android backend translates native callbacks into `AudioPlayerEvent`.
+
+------------------------------------------------------------------------
+
+# Decision 065
+
+## Recording Selection Follows the Resolved Effective Melody
+
+### Decision
+
+Application playback for a contextual hymn derives recording availability from the hymn's resolved `effectiveMelody`.
+
+The application must not hard-code a MediaAsset identity as the production selection path.
+
+### Reason
+
+The Author Database and Build Tools determine the canonical Melody relationships.
+
+The runtime already resolves the effective Melody for the contextual hymn occurrence.
+
+AudioService must play the MediaAsset selected by content/runtime resolution rather than interpreting liturgical relationships itself.
+
+### Impact
+
+The verified application path is:
+
+```text
+ResolvedLiturgicalItemTarget.Qolo
+    -> effectiveMelody.id
+    -> ContentService.loadMelodyRecordings(...)
+    -> MediaAsset
+    -> AudioService
+```
+
+A temporary hard-coded MediaAsset smoke test was used only to verify the first Android backend and was then removed.
+
+Manual Android verification confirmed that the recording selected by this real-content path matches the Melody represented in the Author Database.
+
+The current UI uses the first available recording as the initial verified behavior.
+
+A future explicit policy is still required when more than one recording is available.
+
+------------------------------------------------------------------------
+
+## Runtime Audio Verification Baseline
+
+The real-content Android playback milestone is:
+
+```text
+4e0e599
+```
+
+The supporting Android backend milestone is:
+
+```text
+f707940
+```
+
+The runtime audio architecture remains deliberately incomplete in the following areas:
+
+- final AudioService registration/ownership through PlatformContext;
+- continuous playback-position reporting;
+- multiple-recording selection policy;
+- queue / Play All;
+- iOS backend;
+- occurrence-level PERFORMANCE media;
+- timing/segment-driven verse synchronization.
+
+These are follow-on requirements and must extend the verified path rather than bypass it.

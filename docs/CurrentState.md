@@ -2,11 +2,11 @@
 
 **Document:** CurrentState\
 **Status:** Active implementation reference\
-**Last updated:** 2026-08-18\
+**Last updated:** 2026-08-26\
 **Repository:** SyriacPlatform\
 **Branch:** `main`\
-**Current milestone:** Phase 7 real-content vertical slice completed\
-**Verified functional milestone:** `06d10ee`\
+**Current milestone:** Phase 9 Runtime Audio Integration --- real-content Android playback verified\
+**Verified functional milestone:** `4e0e599`\
 **Documentation correction follows:** `3ca4c6b`
 
 ------------------------------------------------------------------------
@@ -1928,6 +1928,393 @@ Current Author Database
 
 ## 17.5 Current boundary
 
-The Build Tools / Application Package side of melody audio is implemented and verified. Runtime media loading and playback are not yet implemented.
+The Build Tools / Application Package side of melody audio is implemented and verified. Core/runtime media ingestion, validation, lookup, resource resolution, reusable playback state, and Android playback are now also implemented and verified; the details are recorded in the following update.
 
 Occurrence-level `PERFORMANCE` integration and `MediaTimingSet` / `MediaSegment` / `ExistsInTextMediaSegment` package/runtime behavior remain future work.
+------------------------------------------------------------------------
+
+<!-- RUNTIME-AUDIO-ANDROID-VERIFIED-2026-08-26 -->
+
+# 18. Verified Core / Runtime / Android Audio Integration (2026-08-26)
+
+Phase 9 has now crossed the Core/runtime boundary and reached verified real-content playback on Android.
+
+The verified end-to-end path is:
+
+```text
+Author Database
+        â†“
+Occasion + Media Export
+        â†“
+Build Tools
+        â†“
+recordingIds + media-assets.json
+        â†“
+physical packaged media
+        â†“
+ApplicationPackageLoader
+        â†“
+MediaAsset + Melody.recordingIds
+        â†“
+Package Validation
+        â†“
+RuntimeContent / RuntimeContentIndex
+        â†“
+ContentRepository / RuntimeContentResolver
+        â†“
+ContentService.loadMelodyRecordings(...)
+        â†“
+effectiveMelody.id from the contextual hymn
+        â†“
+MediaAsset
+        â†“
+ComposeResourceMediaResourceResolver
+        â†“
+MediaResource URI
+        â†“
+DefaultAudioService
+        â†“
+AndroidAudioPlayerBackend
+        â†“
+Media3 / ExoPlayer
+        â†“
+audible playback
+```
+
+## 18.1 Core media ingestion
+
+The Core now loads packaged media metadata as canonical runtime content.
+
+Implemented support includes:
+
+```text
+MediaAsset
+MediaAssetJsonDto
+MediaAssetMapper
+Melody.recordingIds
+PackagePaths.MEDIA_ASSETS
+ParsedApplicationPackage.mediaAssets
+RuntimeContent.mediaAssets
+RuntimeContentIndex media lookup
+```
+
+The package loader recognizes `content/media-assets.json` and preserves melody recording references through the Core.
+
+The generated Occasion 2 package was used as the real integration fixture. It contains:
+
+```text
+51 LiturgicalItems
+13 MediaAssets
+13 physical media files
+```
+
+## 18.2 Media package validation
+
+Media validation is part of normal package validation.
+
+The implemented validation rules cover:
+
+- MediaAsset canonical-ID uniqueness;
+- melody recording references;
+- consistency between recording declarations and referenced MediaAssets;
+- package-relative media paths;
+- invalid or unavailable media-reference states detectable at package-validation time.
+
+Media validation is not delegated to the playback backend.
+
+The playback layer may still report physical runtime failures, but structurally invalid package media must be rejected earlier.
+
+## 18.3 Runtime media lookup
+
+Runtime media lookup is exposed through the content architecture.
+
+The repository/runtime APIs include:
+
+```text
+loadMediaAsset(MediaAssetId)
+loadMelodyRecordings(MelodyId)
+
+resolveMediaAsset(MediaAssetId)
+resolveMelodyRecordings(MelodyId)
+```
+
+`ContentService` now exposes:
+
+```text
+loadMelodyRecordings(MelodyId)
+```
+
+for application-facing content traversal.
+
+This preserves the responsibility boundary:
+
+```text
+Content/runtime
+    -> decides which MediaAsset belongs to the selected content
+
+AudioService
+    -> plays the MediaAsset it receives
+```
+
+AudioService does not interpret Qolo, Melody, LiturgicalItem, Text, or Petgomo relationships.
+
+## 18.4 Audio domain contracts
+
+The shared Core now contains reusable audio contracts and state.
+
+Implemented structures include:
+
+```text
+AudioService
+MediaResourceResolver
+AudioPlayerBackend
+
+MediaResource
+PlaybackState
+PlaybackStatus
+AudioPlayerEvent
+```
+
+`DefaultAudioService` is platform-neutral.
+
+It owns command validation and canonical observable playback state.
+
+The native backend performs actual playback operations.
+
+## 18.5 Asynchronous player state
+
+Native player readiness is asynchronous.
+
+Therefore:
+
+```text
+load(MediaAsset)
+        â†“
+PlaybackStatus.Loading
+        â†“
+backend prepare
+        â†“
+AudioPlayerEvent.Ready(durationMs)
+        â†“
+PlaybackStatus.Ready
+```
+
+Likewise, actual native-player events drive:
+
+```text
+Playing
+Paused
+Ended
+Error
+```
+
+A successful command call means that the backend accepted the command; it does not fabricate a native playback state before the player reports it.
+
+The service lifecycle remains recoverable after a playback failure:
+
+```text
+RuntimeState.Ready
+```
+
+can coexist with:
+
+```text
+PlaybackStatus.Error
+```
+
+so another media resource may subsequently be loaded.
+
+## 18.6 Media resource resolution
+
+Canonical package media paths remain independent from playback-engine details.
+
+`ComposeResourceMediaResourceResolver` maps:
+
+```text
+MediaAsset.path
+    = media/audio/...
+
+to:
+
+files/media/audio/...
+    â†“
+Res.getUri(...)
+    â†“
+MediaResource.uri
+```
+
+The resolver does not load complete audio binaries into Core memory.
+
+Resource resolution and playback are separate responsibilities.
+
+This allows future Android, iOS, desktop, local, remote, or hybrid strategies without changing canonical media identity.
+
+## 18.7 Android playback backend
+
+Android now has a real platform implementation:
+
+```text
+AndroidAudioPlayerBackend
+```
+
+implemented with:
+
+```text
+AndroidX Media3 / ExoPlayer
+```
+
+The dependency is isolated to `androidApp`.
+
+No Android type is introduced into `shared/commonMain`.
+
+The backend translates player callbacks into Core events including:
+
+```text
+Ready(durationMs)
+Playing
+Paused
+Ended
+Error
+```
+
+It also provides Android-side player release behavior.
+
+The verified Android backend milestone is:
+
+```text
+f707940
+```
+
+## 18.8 Real-content application playback
+
+The temporary hard-coded audio smoke harness was removed after verification.
+
+The Reference Application now derives playback from the real contextual hymn:
+
+```text
+ResolvedLiturgicalItemTarget.Qolo
+        â†“
+effectiveMelody
+        â†“
+effectiveMelody.id
+        â†“
+ContentService.loadMelodyRecordings(...)
+        â†“
+first available MediaAsset
+        â†“
+AudioService.load(...)
+        â†“
+AudioService.play()
+```
+
+The UI does not contain a hard-coded MediaAsset identity for the verified production path.
+
+Manual verification established all of the following:
+
+1. the original Reference Application navigation was restored;
+2. the hymn-details screen displayed `Play recording`;
+3. playback started successfully;
+4. the played recording matched the effective Melody represented in the Author Database.
+
+The verified real-content playback milestone is:
+
+```text
+4e0e599
+```
+
+## 18.9 Verification
+
+The completed path passed:
+
+```text
+:shared:allTests
+:shared:check
+:androidApp:assembleDebug
+```
+
+as well as manual Android execution and audible playback verification.
+
+The real Occasion 2 media package was synchronized into the local Reference Application resources for runtime testing.
+
+Those generated package/media files are development build output and were intentionally kept separate from the code commits.
+
+## 18.10 Current Phase 9 boundary
+
+The following are now implemented and verified:
+
+```text
+Author Database media relationships
+Build Tools media export and packaging
+physical selected-media packaging
+Core MediaAsset ingestion
+media package validation
+runtime media lookup
+Melody -> recording MediaAsset resolution
+Compose resource URI resolution
+platform-neutral AudioService contracts
+observable playback state
+asynchronous backend event bridge
+Android Media3 / ExoPlayer backend
+real contextual Melody -> recording playback
+```
+
+Phase 9 remains active.
+
+Important remaining work includes:
+
+- stabilize application-facing Play / Pause / Stop controls;
+- expose useful continuous playback-position updates;
+- define behavior when a Melody has more than one recording;
+- decide the final AudioService ownership / bootstrap integration point;
+- strengthen lifecycle handling beyond the current Android activity owner;
+- add additional focused runtime/player integration tests where practical;
+- implement an iOS backend during the planned cross-platform phase;
+- later implement occurrence-level `PERFORMANCE` media;
+- later integrate authoritative timing sets, segments, and verse synchronization;
+- later implement queue / Play All behavior from application requirements.
+
+The current Android wiring deliberately does not yet register AudioService in `PlatformContext`.
+
+`MainActivity` constructs the Android backend and passes an initialized `AudioService` into the shared `App` entry point.
+
+This is an explicit intermediate boundary while the playback contract is stabilized, not a final statement that Audio must remain outside the platform service context.
+
+## 18.11 Representative implementation commits
+
+The runtime audio implementation was developed through small verified commits, including:
+
+```text
+4298f01  Integrate media assets into Core runtime ingestion
+fad9df7  Fix UTF-8 encoding in Core media files
+556a41f  Add Core media package validation
+92dd2a0  Add runtime media lookup APIs
+e789c9a  Add Core audio domain contracts
+e70cd6c  Add default audio service state machine
+bb3e7d9  Add audio player backend boundary
+16526ad  Add Compose resource media resolver
+f67d438  Add asynchronous audio backend events
+f707940  Add Android Media3 audio backend
+4e0e599  Wire runtime melody recordings to Android audio playback
+```
+
+These commits build on the previously verified Author Database / Build Tools media milestone:
+
+```text
+40acabd  Integrate audio media into Author Database and Build Tools
+```
+
+## 18.12 Restart point
+
+The next development session should treat this as established:
+
+```text
+real package media              verified
+Core media ingestion            verified
+Core media validation           verified
+runtime media lookup            verified
+content-driven recording lookup verified
+Android native playback         verified
+real Melody recording match     verified
+```
+
+The next work should improve reusable playback behavior rather than create a second audio-loading path.

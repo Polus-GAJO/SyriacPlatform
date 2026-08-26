@@ -380,7 +380,7 @@ packages without Occasion-specific mapper code or manual JSON editing.
 
 # Phase 9 --- Audio Integration
 
-**Status:** In Progress --- Build/Package Vertical Slice Completed and Verified
+**Status:** In Progress --- Real-Content Android Playback Vertical Slice Completed and Verified
 
 ## Objective
 
@@ -388,67 +388,87 @@ Integrate audio as a reusable platform capability connected to canonical content
 
 ## Completed --- Author Database and Build Tools
 
--   Created the Author Database physical media tables, indexes, and relationships.
--   Established `RECORDING` and `PERFORMANCE` role semantics.
--   Audited, dry-ran, migrated, and verified useful legacy audio links.
--   Added official Media export support to `modSchemaExporter.bas`.
--   Regenerated the version-controlled Author Database schema snapshot.
--   Added Build Tools media source models, loader, mapper, canonical media models, and package media selection.
--   Made `MelodyMedia` authoritative over legacy `Melody.Record` in media-aware builds.
--   Added `recordingIds[]` to package melody data.
--   Added `media-assets.json`.
--   Added package-relative media paths.
--   Added selective copying of physical media.
--   Added a media-aware Occasion package build entry point while preserving legacy non-media compatibility.
--   Added automated tests for source loading, mapping, relationships, canonical media, package selection, package emission, physical copying, and CLI arguments.
--   Freshly exported Occasion 2 from the current Access Author Database.
--   Rebuilt Occasion 2 through the complete media-aware pipeline.
--   Verified 13 packaged MediaAssets and 13 physical media files with no broken references or missing files.
+- Created the Author Database physical media tables, indexes, and relationships.
+- Established `RECORDING` and `PERFORMANCE` role semantics.
+- Audited, dry-ran, migrated, and verified useful legacy audio links.
+- Added official Media export support to `modSchemaExporter.bas`.
+- Regenerated the version-controlled Author Database schema snapshot.
+- Added Build Tools media source models, loader, mapper, canonical media models, and package media selection.
+- Made `MelodyMedia` authoritative over legacy `Melody.Record` in media-aware builds.
+- Added `recordingIds[]` to package melody data.
+- Added `media-assets.json`.
+- Added package-relative media paths.
+- Added selective copying of physical media.
+- Added a media-aware Occasion package build entry point while preserving legacy non-media compatibility.
+- Freshly exported and rebuilt Occasion 2 through the complete media-aware pipeline.
+- Verified 13 packaged MediaAssets and 13 physical media files with no broken references or missing files.
 
-## Verified Build/Package Path
+## Completed --- Core / Runtime / Android Playback
+
+- Added Core `MediaAsset` ingestion through the Application Package loader.
+- Added media package validation and canonical-ID validation.
+- Added runtime lookup for MediaAssets and Melody recordings.
+- Added reusable `AudioService`, `MediaResourceResolver`, and `AudioPlayerBackend` contracts.
+- Added observable `PlaybackState` / `PlaybackStatus`.
+- Added asynchronous `AudioPlayerEvent` handling so native readiness is not fabricated synchronously.
+- Added `ComposeResourceMediaResourceResolver` using package-relative Compose resource URIs.
+- Added Android Media3 / ExoPlayer backend isolated to `androidApp`.
+- Exposed Melody recording lookup through `ContentService`.
+- Wired `HYMN_DETAILS` to `effectiveMelody.id -> loadMelodyRecordings(...)`.
+- Removed the temporary hard-coded MediaAsset playback proof after verification.
+- Verified audible real-content playback on Android.
+- Verified that the played recording matches the effective Melody represented in the Author Database.
+- Verified `:shared:allTests`, `:shared:check`, and `:androidApp:assembleDebug`.
+
+## Verified Runtime Playback Path
 
 ```text
-Author Database
-        v
-Occasion + Media Export
-        v
-Build Tools
-        v
-Canonical Media
-        v
-Package-specific Media Selection
-        v
-recordingIds + media-assets.json
-        v
-Physical packaged media
+contextual hymn
+        â†“
+effectiveMelody.id
+        â†“
+ContentService.loadMelodyRecordings(...)
+        â†“
+MediaAsset
+        â†“
+ComposeResourceMediaResourceResolver
+        â†“
+DefaultAudioService
+        â†“
+AndroidAudioPlayerBackend
+        â†“
+Media3 / ExoPlayer
+        â†“
+audible playback
 ```
 
-## Next Work --- Runtime Audio Integration
+## Next Work --- Playback Stabilization
 
--   Load packaged MediaAssets through the Core/runtime path.
--   Resolve `recordingIds` to package-relative media resources.
--   Introduce reusable playback service behavior.
--   Implement Play/Pause.
--   Implement Seek.
--   Expose playback state.
--   Define application-facing selection behavior when more than one recording exists.
+- Stabilize application-facing Play / Pause / Stop behavior.
+- Add useful continuous playback-position reporting.
+- Define selection behavior when a Melody has more than one recording.
+- Decide the final AudioService ownership / PlatformContext integration point.
+- Strengthen Android lifecycle handling around the player owner.
+- Add additional focused integration tests where practical.
+- Preserve the current content-driven media-selection path; do not introduce direct file-ID selection in application code.
 
 ## Deferred Within Audio Integration
 
--   Occurrence-level `PERFORMANCE` package/runtime integration.
--   `MediaTimingSet`, `MediaSegment`, and `ExistsInTextMediaSegment`.
--   Verse synchronization once authoritative timing data is populated.
--   Author Database form/workflow modernization for future media editing.
--   Equivalent media migration for notation images.
+- Occurrence-level `PERFORMANCE` package/runtime integration.
+- `MediaTimingSet`, `MediaSegment`, and `ExistsInTextMediaSegment`.
+- Verse synchronization once authoritative timing data is populated.
+- Author Database form/workflow modernization for future media editing.
+- Equivalent media migration for notation images.
+- iOS native playback backend until the planned cross-platform phase.
+- Queue / Play All behavior until playback contracts are stabilized.
 
 ## Output
 
-The completed portion establishes the Author Database -> Build Tools -> Application Package side of audio.
+The verified Phase 9 path now extends from the Author Database through Build Tools, the Application Package, Core/runtime media resolution, and real Android playback.
 
-Phase 9 remains active until Core/runtime media resolution and reusable playback are implemented.
+Phase 9 remains active while reusable playback behavior, lifecycle ownership, multiple-recording selection, position reporting, and later cross-platform playback are stabilized.
 
 ------------------------------------------------------------------------
-
 # Phase 10 --- Search Domain
 
 **Status:** Planned
@@ -876,3 +896,52 @@ Deferral does not mean that `DayN` is semantically unimportant.
 
 It means only that the broader contextual organization model will be
 designed in a later dedicated stage.
+------------------------------------------------------------------------
+
+<!-- PHASE-9-RUNTIME-AUDIO-UPDATE-2026-08-26 -->
+
+# Roadmap Update --- 2026-08-26
+
+## Current verified baseline
+
+```text
+4e0e599
+```
+
+Phase 9 has reached a new verified milestone:
+
+> Real-content Melody recording playback through the existing package/runtime architecture on Android.
+
+This milestone does not create a parallel media path.
+
+The application uses the same canonical content chain already established by the platform:
+
+```text
+Author Database relationship
+    -> package recordingIds
+    -> Core MediaAsset
+    -> runtime Melody lookup
+    -> AudioService
+    -> platform backend
+```
+
+## Immediate next milestone
+
+The immediate Phase 9 objective is now playback stabilization rather than first playback.
+
+Priority order:
+
+```text
+1. stable Play / Pause / Stop behavior
+2. continuous position reporting
+3. multiple-recording selection policy
+4. final AudioService lifecycle / ownership integration
+5. focused integration verification
+6. later iOS backend
+7. later queue / Play All
+8. later PERFORMANCE and timing/segment integration
+```
+
+The Reference Application should continue to act as a real-content verification surface while these contracts stabilize.
+
+Production styling remains secondary to correct reusable platform behavior.
