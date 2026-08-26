@@ -1114,24 +1114,129 @@ private fun HymnDetailsScreen(
                         is Result.Success -> {
                             val firstRecording = recordings.data.firstOrNull()
 
-                            if (firstRecording != null) {
-                                Button(
-                                    enabled = audioService != null,
-                                    onClick = {
-                                        if (audioService != null) {
-                                            pendingAutoPlayId = firstRecording.id
-
-                                            if (
-                                                audioService.load(firstRecording)
-                                                is Result.Failure
-                                            ) {
-                                                pendingAutoPlayId = null
-                                            }
-                                        }
-                                    },
-                                    modifier = Modifier.padding(bottom = 8.dp)
+                            if (firstRecording != null) {                                when (
+                                    val status =
+                                        playbackState.status
                                 ) {
-                                    Text("Play recording")
+                                    PlaybackStatus.Playing -> {
+                                        Button(
+                                            enabled =
+                                                audioService != null,
+                                            onClick = {
+                                                audioService?.pause()
+                                            },
+                                            modifier =
+                                                Modifier.padding(
+                                                    bottom = 8.dp
+                                                )
+                                        ) {
+                                            Text("Pause")
+                                        }
+                                    }
+
+                                    PlaybackStatus.Paused -> {
+                                        Button(
+                                            enabled =
+                                                audioService != null,
+                                            onClick = {
+                                                audioService?.play()
+                                            },
+                                            modifier =
+                                                Modifier.padding(
+                                                    bottom = 8.dp
+                                                )
+                                        ) {
+                                            Text("Play")
+                                        }
+                                    }
+
+                                    PlaybackStatus.Ready,
+                                    PlaybackStatus.Ended -> {
+                                        Button(
+                                            enabled =
+                                                audioService != null &&
+                                                playbackState.mediaAssetId ==
+                                                    firstRecording.id,
+                                            onClick = {
+                                                audioService?.play()
+                                            },
+                                            modifier =
+                                                Modifier.padding(
+                                                    bottom = 8.dp
+                                                )
+                                        ) {
+                                            Text("Play")
+                                        }
+                                    }
+
+                                    PlaybackStatus.Loading -> {
+                                        Button(
+                                            enabled = false,
+                                            onClick = {},
+                                            modifier =
+                                                Modifier.padding(
+                                                    bottom = 8.dp
+                                                )
+                                        ) {
+                                            Text("Loading...")
+                                        }
+                                    }
+
+                                    PlaybackStatus.Error,
+                                    PlaybackStatus.Idle -> {
+                                        Button(
+                                            enabled =
+                                                audioService != null,
+                                            onClick = {
+                                                if (
+                                                    audioService !=
+                                                        null
+                                                ) {
+                                                    pendingAutoPlayId =
+                                                        firstRecording.id
+
+                                                    if (
+                                                        audioService.load(
+                                                            firstRecording
+                                                        )
+                                                        is Result.Failure
+                                                    ) {
+                                                        pendingAutoPlayId =
+                                                            null
+                                                    }
+                                                }
+                                            },
+                                            modifier =
+                                                Modifier.padding(
+                                                    bottom = 8.dp
+                                                )
+                                        ) {
+                                            Text("Play recording")
+                                        }
+                                    }
+                                }
+
+                                if (
+                                    playbackState.mediaAssetId ==
+                                    firstRecording.id &&
+                                    playbackState.status !=
+                                        PlaybackStatus.Idle
+                                ) {
+                                    Button(
+                                        enabled =
+                                            audioService != null,
+                                        onClick = {
+                                            pendingAutoPlayId =
+                                                null
+                                            audioService?.stop()
+                                        },
+                                        modifier =
+                                            Modifier.padding(
+                                                bottom = 8.dp
+                                            )
+                                    ) {
+                                        Text("Stop")
+                                    }
                                 }
 
                                 if (
