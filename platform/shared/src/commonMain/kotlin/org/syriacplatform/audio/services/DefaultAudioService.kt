@@ -3,6 +3,7 @@ package org.syriacplatform.audio.services
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.syriacplatform.audio.contracts.AudioPlayerBackend
 import org.syriacplatform.audio.contracts.AudioService
 import org.syriacplatform.audio.contracts.MediaResourceResolver
 import org.syriacplatform.audio.models.MediaResource
@@ -18,12 +19,14 @@ import org.syriacplatform.kernel.ServiceMetadata
 /**
  * Platform-neutral AudioService state machine.
  *
- * This implementation validates playback intent and owns observable
- * playback state, but deliberately does not invoke a native player.
- * Native playback integration will be added behind a separate boundary.
+ * MediaResourceResolver converts canonical package metadata into a
+ * playable resource reference. AudioPlayerBackend executes the actual
+ * player commands. This service owns command validation and the
+ * canonical PlaybackState exposed to the rest of Core.
  */
 class DefaultAudioService(
-    private val resourceResolver: MediaResourceResolver
+    private val resourceResolver: MediaResourceResolver,
+    private val playerBackend: AudioPlayerBackend
 ) : AudioService {
 
     override val metadata =
@@ -62,24 +65,47 @@ class DefaultAudioService(
             return readiness
         }
 
+        val resource =
+            when (
+                val resolution =
+                    resourceResolver.resolve(
+                        mediaAsset
+                    )
+            ) {
+                is Result.Success ->
+                    resolution.data
+
+                is Result.Failure -> {
+                    currentResource = null
+
+                    _state.value =
+                        PlaybackState(
+                            status =
+                                PlaybackStatus.Error,
+                            mediaAssetId =
+                                mediaAsset.id
+                        )
+
+                    return resolution
+                }
+            }
+
         return when (
-            val resolution =
-                resourceResolver.resolve(
-                    mediaAsset
+            val preparation =
+                playerBackend.prepare(
+                    resource
                 )
         ) {
             is Result.Success -> {
                 currentResource =
-                    resolution.data
+                    resource
 
                 _state.value =
                     PlaybackState(
                         status =
                             PlaybackStatus.Ready,
                         mediaAssetId =
-                            mediaAsset.id,
-                        positionMs = 0L,
-                        durationMs = null
+                            mediaAsset.id
                     )
 
                 Result.Success(Unit)
@@ -93,12 +119,10 @@ class DefaultAudioService(
                         status =
                             PlaybackStatus.Error,
                         mediaAssetId =
-                            mediaAsset.id,
-                        positionMs = 0L,
-                        durationMs = null
+                            mediaAsset.id
                     )
 
-                resolution
+                preparation
             }
         }
     }
@@ -129,13 +153,25 @@ class DefaultAudioService(
             )
         }
 
-        _state.value =
-            current.copy(
-                status =
-                    PlaybackStatus.Playing
-            )
+        return when (
+            val result =
+                playerBackend.play()
+        ) {
+            is Result.Success -> {
+                _state.value =
+                    current.copy(
+                        status =
+                            PlaybackStatus.Playing
+                    )
 
-        return Result.Success(Unit)
+                Result.Success(Unit)
+            }
+
+            is Result.Failure ->
+                failPlayback(
+                    result
+                )
+        }
     }
 
     override fun pause(): Result<Unit> {
@@ -158,13 +194,25 @@ class DefaultAudioService(
             )
         }
 
-        _state.value =
-            current.copy(
-                status =
-                    PlaybackStatus.Paused
-            )
+        return when (
+            val result =
+                playerBackend.pause()
+        ) {
+            is Result.Success -> {
+                _state.value =
+                    current.copy(
+                        status =
+                            PlaybackStatus.Paused
+                    )
 
-        return Result.Success(Unit)
+                Result.Success(Unit)
+            }
+
+            is Result.Failure ->
+                failPlayback(
+                    result
+                )
+        }
     }
 
     override fun stop(): Result<Unit> {
@@ -175,11 +223,24 @@ class DefaultAudioService(
             return readiness
         }
 
-        currentResource = null
-        _state.value =
-            PlaybackState()
+        return when (
+            val result =
+                playerBackend.stop()
+        ) {
+            is Result.Success -> {
+                currentResource = null
 
-        return Result.Success(Unit)
+                _state.value =
+                    PlaybackState()
+
+                Result.Success(Unit)
+            }
+
+            is Result.Failure ->
+                failPlayback(
+                    result
+                )
+        }
     }
 
     override fun seekTo(
@@ -216,13 +277,27 @@ class DefaultAudioService(
             )
         }
 
-        _state.value =
-            current.copy(
-                positionMs =
+        return when (
+            val result =
+                playerBackend.seekTo(
                     positionMs
-            )
+                )
+        ) {
+            is Result.Success -> {
+                _state.value =
+                    current.copy(
+                        positionMs =
+                            positionMs
+                    )
 
-        return Result.Success(Unit)
+                Result.Success(Unit)
+            }
+
+            is Result.Failure ->
+                failPlayback(
+                    result
+                )
+        }
     }
 
     private fun requireReadyService(): Result<Unit> {
@@ -236,6 +311,18 @@ class DefaultAudioService(
         }
 
         return Result.Success(Unit)
+    }
+
+    private fun failPlayback(
+        failure: Result.Failure
+    ): Result.Failure {
+        _state.value =
+            _state.value.copy(
+                status =
+                    PlaybackStatus.Error
+            )
+
+        return failure
     }
 
     private fun invalidState(
