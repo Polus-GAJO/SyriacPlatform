@@ -416,6 +416,74 @@ class DefaultAudioServiceTest {
             backend.commands
         )
     }
+    @Test
+    fun successiveBackendPositionEventsUpdateObservableState() {
+        val backend =
+            RecordingBackend()
+
+        val service =
+            service(backend)
+
+        service.initialize()
+
+        assertIs<Result.Success<Unit>>(
+            service.load(
+                mediaAsset(40L)
+            )
+        )
+
+        backend.emit(
+            AudioPlayerEvent.Ready(
+                60_000L
+            )
+        )
+
+        assertIs<Result.Success<Unit>>(
+            service.play()
+        )
+
+        backend.emit(
+            AudioPlayerEvent.Playing
+        )
+
+        backend.emit(
+            AudioPlayerEvent.PositionChanged(
+                250L
+            )
+        )
+
+        assertEquals(
+            250L,
+            service.state.value.positionMs
+        )
+
+        backend.emit(
+            AudioPlayerEvent.PositionChanged(
+                500L
+            )
+        )
+
+        assertEquals(
+            500L,
+            service.state.value.positionMs
+        )
+
+        backend.emit(
+            AudioPlayerEvent.PositionChanged(
+                750L
+            )
+        )
+
+        assertEquals(
+            750L,
+            service.state.value.positionMs
+        )
+
+        assertEquals(
+            PlaybackStatus.Playing,
+            service.state.value.status
+        )
+    }
     private fun service(backend: AudioPlayerBackend) =
         DefaultAudioService(SuccessfulResolver(), backend)
 

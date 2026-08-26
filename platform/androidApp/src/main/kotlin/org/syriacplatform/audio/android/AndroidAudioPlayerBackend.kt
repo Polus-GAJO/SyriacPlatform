@@ -1,6 +1,8 @@
 package org.syriacplatform.audio.android
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
@@ -32,6 +34,33 @@ class AndroidAudioPlayerBackend(
     private var pausePending =
         false
 
+    private val positionHandler =
+        Handler(
+            Looper.getMainLooper()
+        )
+
+    private var positionUpdatesActive =
+        false
+
+    private val positionUpdateRunnable =
+        object : Runnable {
+            override fun run() {
+                if (
+                    !positionUpdatesActive ||
+                    !player.isPlaying
+                ) {
+                    return
+                }
+
+                emitCurrentPosition()
+
+                positionHandler.postDelayed(
+                    this,
+                    POSITION_UPDATE_INTERVAL_MS
+                )
+            }
+        }
+
     init {
         player.addListener(
             object : Player.Listener {
@@ -58,6 +87,9 @@ class AndroidAudioPlayerBackend(
                             pausePending =
                                 false
 
+                            stopPositionUpdates()
+                            emitCurrentPosition()
+
                             eventListener?.invoke(
                                 AudioPlayerEvent.Ended
                             )
@@ -76,8 +108,12 @@ class AndroidAudioPlayerBackend(
                             AudioPlayerEvent.Playing
                         )
 
+                        startPositionUpdates()
+
                         return
                     }
+
+                    stopPositionUpdates()
 
                     if (
                         pausePending &&
@@ -86,6 +122,8 @@ class AndroidAudioPlayerBackend(
                     ) {
                         pausePending =
                             false
+
+                        emitCurrentPosition()
 
                         eventListener?.invoke(
                             AudioPlayerEvent.Paused
@@ -101,6 +139,8 @@ class AndroidAudioPlayerBackend(
 
                     pausePending =
                         false
+
+                    stopPositionUpdates()
 
                     eventListener?.invoke(
                         AudioPlayerEvent.Error(
@@ -138,6 +178,8 @@ class AndroidAudioPlayerBackend(
 
             awaitingInitialReady =
                 true
+
+            stopPositionUpdates()
 
             player.stop()
             player.clearMediaItems()
@@ -188,6 +230,8 @@ class AndroidAudioPlayerBackend(
             pausePending =
                 false
 
+            stopPositionUpdates()
+
             player.stop()
             player.clearMediaItems()
         }
@@ -202,14 +246,56 @@ class AndroidAudioPlayerBackend(
             player.seekTo(
                 positionMs
             )
+
+            emitCurrentPosition()
         }
     }
 
     fun release() {
+        stopPositionUpdates()
+
         eventListener =
             null
 
         player.release()
+    }
+
+    private fun startPositionUpdates() {
+        if (positionUpdatesActive) {
+            return
+        }
+
+        positionUpdatesActive =
+            true
+
+        emitCurrentPosition()
+
+        positionHandler.postDelayed(
+            positionUpdateRunnable,
+            POSITION_UPDATE_INTERVAL_MS
+        )
+    }
+
+    private fun stopPositionUpdates() {
+        positionUpdatesActive =
+            false
+
+        positionHandler.removeCallbacks(
+            positionUpdateRunnable
+        )
+    }
+
+    private fun emitCurrentPosition() {
+        val positionMs =
+            player.currentPosition
+                .coerceAtLeast(0L)
+
+        eventListener?.invoke(
+            AudioPlayerEvent.PositionChanged(
+                positionMs =
+                    positionMs
+            )
+        )
     }
 
     private fun normalizedDuration(): Long? {
@@ -250,5 +336,10 @@ class AndroidAudioPlayerBackend(
                 )
             )
         }
+    }
+
+    private companion object {
+        const val POSITION_UPDATE_INTERVAL_MS =
+            250L
     }
 }
