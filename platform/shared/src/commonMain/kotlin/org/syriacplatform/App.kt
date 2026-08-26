@@ -773,7 +773,6 @@ private fun ResolvedLiturgicalItemView(
                 }
             }
 
-
           }
 
         is ResolvedLiturgicalItemTarget.UnresolvedQolo -> {
@@ -827,7 +826,6 @@ private fun ResolvedLiturgicalItemView(
         }
     }
 }
-
 
 @Composable
 private fun QoloDetailsScreen(
@@ -1034,7 +1032,6 @@ private fun HymnDetailsScreen(
         mutableStateOf<MediaAssetId?>(null)
     }
 
-
     var isSeeking by remember(liturgicalItemId) {
         mutableStateOf(false)
     }
@@ -1053,7 +1050,7 @@ private fun HymnDetailsScreen(
                 playbackState.positionMs
         }
     }
-LaunchedEffect(
+    LaunchedEffect(
         playbackState.status,
         playbackState.mediaAssetId,
         pendingAutoPlayId,
@@ -1267,11 +1264,9 @@ LaunchedEffect(
                                 ) {
                                     Text("Audio: ${playbackState.status}")
 
-
                                     Text(
                                         "Position: ${playbackState.positionMs} ms"
                                     )
-
 
                                     playbackState.durationMs
                                         ?.takeIf { duration ->
