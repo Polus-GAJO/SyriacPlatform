@@ -1140,6 +1140,11 @@ private fun HymnDetailsScreen(
                                 ) {
                                     Text("Audio: ${playbackState.status}")
 
+
+                                    Text(
+                                        "Position: ${playbackState.positionMs} ms"
+                                    )
+
                                     playbackState.durationMs?.let { duration ->
                                         Text("Duration: $duration ms")
                                     }
