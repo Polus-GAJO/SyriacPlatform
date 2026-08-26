@@ -2,6 +2,7 @@ package org.syriacplatform.packagevalidation
 
 import org.syriacplatform.content.models.EntryPoint
 import org.syriacplatform.content.models.LiturgicalItem
+import org.syriacplatform.content.models.MediaAsset
 import org.syriacplatform.content.models.Melody
 import org.syriacplatform.content.models.MelodyQintoAssignment
 import org.syriacplatform.content.models.Occasion
@@ -60,7 +61,8 @@ object PackageValidationTestFixture {
             melodies = true,
             qintos = true,
             petgomos = true,
-            melodyQintoAssignments = true
+            melodyQintoAssignments = true,
+            mediaAssets = true
         )
     }
     fun packageWith(
@@ -77,7 +79,8 @@ object PackageValidationTestFixture {
         qolos: List<Qolo> = emptyList(),
         melodies: List<Melody> = emptyList(),
         qintos: List<Qinto> = emptyList(),
-        melodyQintoAssignments: List<MelodyQintoAssignment> = emptyList()
+        melodyQintoAssignments: List<MelodyQintoAssignment> = emptyList(),
+        mediaAssets: List<MediaAsset> = emptyList()
     ): ParsedApplicationPackage {
         return ParsedApplicationPackage(
             manifest = manifest,
@@ -92,7 +95,8 @@ object PackageValidationTestFixture {
             qolos = qolos,
             melodies = melodies,
             qintos = qintos,
-            melodyQintoAssignments = melodyQintoAssignments
+            melodyQintoAssignments = melodyQintoAssignments,
+            mediaAssets = mediaAssets
         )
     }
 }

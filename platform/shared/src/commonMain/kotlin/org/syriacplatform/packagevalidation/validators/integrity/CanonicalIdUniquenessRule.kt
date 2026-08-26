@@ -67,6 +67,11 @@ class CanonicalIdUniquenessRule :
             )
 
             checkDuplicates(
+                collectionName = "mediaAssets",
+                ids = value.mediaAssets.map { it.id.value }
+            )
+
+            checkDuplicates(
                 collectionName = "qintos",
                 ids = value.qintos.map { it.id.value }
             )

@@ -5,6 +5,7 @@ import org.syriacplatform.packagevalidation.compatibility.CoreCompatibility
 import org.syriacplatform.packagevalidation.validators.CompatibilityValidator
 import org.syriacplatform.packagevalidation.validators.IntegrityValidator
 import org.syriacplatform.packagevalidation.validators.ManifestValidator
+import org.syriacplatform.packagevalidation.validators.MediaValidator
 import org.syriacplatform.packagevalidation.validators.ReferenceValidator
 import org.syriacplatform.packagevalidation.validators.SemanticValidator
 import org.syriacplatform.packagevalidation.validators.ProfileValidator
@@ -31,6 +32,8 @@ class PackageValidator(
         ReferenceValidator(),
     private val integrityValidator: IntegrityValidator =
         IntegrityValidator(),
+    private val mediaValidator: MediaValidator =
+        MediaValidator(),
     private val semanticValidator: SemanticValidator =
         SemanticValidator()
 ) {
@@ -65,6 +68,12 @@ class PackageValidator(
 
             addAll(
                 integrityValidator.validate(
+                    value
+                )
+            )
+
+            addAll(
+                mediaValidator.validate(
                     value
                 )
             )
