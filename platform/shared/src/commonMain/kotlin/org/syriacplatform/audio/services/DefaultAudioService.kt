@@ -77,46 +77,135 @@ class DefaultAudioService(
     override fun play(): Result<Unit> {
         val readiness = requireReadyService()
         if (readiness is Result.Failure) return readiness
-        if (currentResource == null) return invalidState("Audio play requires a loaded media resource.")
 
-        val s = _state.value.status
-        if (s != PlaybackStatus.Ready && s != PlaybackStatus.Paused) {
-            return invalidState("Audio cannot play from state $s.")
+        if (currentResource == null) {
+            return invalidState(
+                "Audio play requires a loaded media resource."
+            )
         }
 
-        return when (val r = playerBackend.play()) {
-            is Result.Success -> Result.Success(Unit)
-            is Result.Failure -> failPlayback(r)
+        val current =
+            _state.value
+
+        if (
+            current.status ==
+            PlaybackStatus.Playing
+        ) {
+            return Result.Success(Unit)
+        }
+
+        if (
+            current.status ==
+            PlaybackStatus.Ended
+        ) {
+            when (
+                val seekResult =
+                    playerBackend.seekTo(0L)
+            ) {
+                is Result.Success -> {
+                    _state.value =
+                        current.copy(
+                            positionMs = 0L
+                        )
+                }
+
+                is Result.Failure ->
+                    return failPlayback(
+                        seekResult
+                    )
+            }
+        } else if (
+            current.status !=
+                PlaybackStatus.Ready &&
+            current.status !=
+                PlaybackStatus.Paused
+        ) {
+            return invalidState(
+                "Audio cannot play from state ${current.status}."
+            )
+        }
+
+        return when (
+            val result =
+                playerBackend.play()
+        ) {
+            is Result.Success ->
+                Result.Success(Unit)
+
+            is Result.Failure ->
+                failPlayback(
+                    result
+                )
         }
     }
-
     override fun pause(): Result<Unit> {
         val readiness = requireReadyService()
         if (readiness is Result.Failure) return readiness
-        if (_state.value.status != PlaybackStatus.Playing) {
-            return invalidState("Audio can pause only while playing.")
+
+        val status =
+            _state.value.status
+
+        if (
+            status ==
+            PlaybackStatus.Paused
+        ) {
+            return Result.Success(Unit)
         }
 
-        return when (val r = playerBackend.pause()) {
-            is Result.Success -> Result.Success(Unit)
-            is Result.Failure -> failPlayback(r)
+        if (
+            status !=
+            PlaybackStatus.Playing
+        ) {
+            return invalidState(
+                "Audio can pause only while playing."
+            )
+        }
+
+        return when (
+            val result =
+                playerBackend.pause()
+        ) {
+            is Result.Success ->
+                Result.Success(Unit)
+
+            is Result.Failure ->
+                failPlayback(
+                    result
+                )
         }
     }
-
     override fun stop(): Result<Unit> {
         val readiness = requireReadyService()
         if (readiness is Result.Failure) return readiness
 
-        return when (val r = playerBackend.stop()) {
+        if (
+            currentResource == null &&
+            _state.value.status ==
+                PlaybackStatus.Idle
+        ) {
+            return Result.Success(Unit)
+        }
+
+        return when (
+            val result =
+                playerBackend.stop()
+        ) {
             is Result.Success -> {
-                currentResource = null
-                _state.value = PlaybackState()
+                currentResource =
+                    null
+
+                _state.value =
+                    PlaybackState()
+
                 Result.Success(Unit)
             }
-            is Result.Failure -> failPlayback(r)
+
+            is Result.Failure ->
+                failPlayback(
+                    result
+                )
         }
     }
-
     override fun seekTo(positionMs: Long): Result<Unit> {
         val readiness = requireReadyService()
         if (readiness is Result.Failure) return readiness

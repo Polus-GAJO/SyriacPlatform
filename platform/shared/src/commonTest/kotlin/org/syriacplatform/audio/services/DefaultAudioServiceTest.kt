@@ -158,6 +158,264 @@ class DefaultAudioServiceTest {
         assertEquals(listOf("prepare:21"), backend.commands)
     }
 
+    @Test
+    fun repeatedPlayWhilePlayingIsSuccessfulNoOp() {
+        val backend =
+            RecordingBackend()
+
+        val service =
+            service(backend)
+
+        service.initialize()
+
+        assertIs<Result.Success<Unit>>(
+            service.load(
+                mediaAsset(30L)
+            )
+        )
+
+        backend.emit(
+            AudioPlayerEvent.Ready(
+                30_000L
+            )
+        )
+
+        assertIs<Result.Success<Unit>>(
+            service.play()
+        )
+
+        backend.emit(
+            AudioPlayerEvent.Playing
+        )
+
+        val commandsBeforeRepeatedPlay =
+            backend.commands.toList()
+
+        assertIs<Result.Success<Unit>>(
+            service.play()
+        )
+
+        assertEquals(
+            commandsBeforeRepeatedPlay,
+            backend.commands
+        )
+        assertEquals(
+            PlaybackStatus.Playing,
+            service.state.value.status
+        )
+    }
+
+    @Test
+    fun repeatedPauseWhilePausedIsSuccessfulNoOp() {
+        val backend =
+            RecordingBackend()
+
+        val service =
+            service(backend)
+
+        service.initialize()
+
+        assertIs<Result.Success<Unit>>(
+            service.load(
+                mediaAsset(31L)
+            )
+        )
+
+        backend.emit(
+            AudioPlayerEvent.Ready(
+                30_000L
+            )
+        )
+
+        assertIs<Result.Success<Unit>>(
+            service.play()
+        )
+
+        backend.emit(
+            AudioPlayerEvent.Playing
+        )
+
+        assertIs<Result.Success<Unit>>(
+            service.pause()
+        )
+
+        backend.emit(
+            AudioPlayerEvent.Paused
+        )
+
+        val commandsBeforeRepeatedPause =
+            backend.commands.toList()
+
+        assertIs<Result.Success<Unit>>(
+            service.pause()
+        )
+
+        assertEquals(
+            commandsBeforeRepeatedPause,
+            backend.commands
+        )
+        assertEquals(
+            PlaybackStatus.Paused,
+            service.state.value.status
+        )
+    }
+
+    @Test
+    fun repeatedStopWhileIdleIsSuccessfulNoOp() {
+        val backend =
+            RecordingBackend()
+
+        val service =
+            service(backend)
+
+        service.initialize()
+
+        assertIs<Result.Success<Unit>>(
+            service.stop()
+        )
+
+        assertTrue(
+            backend.commands.isEmpty()
+        )
+        assertEquals(
+            PlaybackStatus.Idle,
+            service.state.value.status
+        )
+    }
+
+    @Test
+    fun playAfterEndedSeeksToStartThenReplays() {
+        val backend =
+            RecordingBackend()
+
+        val service =
+            service(backend)
+
+        service.initialize()
+
+        assertIs<Result.Success<Unit>>(
+            service.load(
+                mediaAsset(32L)
+            )
+        )
+
+        backend.emit(
+            AudioPlayerEvent.Ready(
+                30_000L
+            )
+        )
+
+        assertIs<Result.Success<Unit>>(
+            service.play()
+        )
+
+        backend.emit(
+            AudioPlayerEvent.Playing
+        )
+
+        backend.emit(
+            AudioPlayerEvent.PositionChanged(
+                30_000L
+            )
+        )
+
+        backend.emit(
+            AudioPlayerEvent.Ended
+        )
+
+        assertEquals(
+            PlaybackStatus.Ended,
+            service.state.value.status
+        )
+
+        assertIs<Result.Success<Unit>>(
+            service.play()
+        )
+
+        assertEquals(
+            0L,
+            service.state.value.positionMs
+        )
+
+        assertEquals(
+            listOf(
+                "prepare:32",
+                "play",
+                "seek:0",
+                "play"
+            ),
+            backend.commands
+        )
+
+        backend.emit(
+            AudioPlayerEvent.Playing
+        )
+
+        assertEquals(
+            PlaybackStatus.Playing,
+            service.state.value.status
+        )
+    }
+
+    @Test
+    fun replaySeekFailureProducesPlaybackErrorAndDoesNotPlay() {
+        val backend =
+            RecordingBackend(
+                failOn =
+                    "seek"
+            )
+
+        val service =
+            service(backend)
+
+        service.initialize()
+
+        assertIs<Result.Success<Unit>>(
+            service.load(
+                mediaAsset(33L)
+            )
+        )
+
+        backend.emit(
+            AudioPlayerEvent.Ready(
+                30_000L
+            )
+        )
+
+        assertIs<Result.Success<Unit>>(
+            service.play()
+        )
+
+        backend.emit(
+            AudioPlayerEvent.Playing
+        )
+
+        backend.emit(
+            AudioPlayerEvent.Ended
+        )
+
+        val result =
+            assertIs<Result.Failure>(
+                service.play()
+            )
+
+        assertEquals(
+            ErrorCode.AUDIO_ERROR,
+            result.error.code
+        )
+        assertEquals(
+            PlaybackStatus.Error,
+            service.state.value.status
+        )
+        assertEquals(
+            listOf(
+                "prepare:33",
+                "play",
+                "seek:0"
+            ),
+            backend.commands
+        )
+    }
     private fun service(backend: AudioPlayerBackend) =
         DefaultAudioService(SuccessfulResolver(), backend)
 
