@@ -2,11 +2,11 @@
 
 **Document:** CurrentState\
 **Status:** Active implementation reference\
-**Last updated:** 2026-08-27\
+**Last updated:** 2026-09-01\
 **Repository:** SyriacPlatform\
 **Branch:** `main`\
-**Current milestone:** Phase 9 Runtime Audio Integration --- playback controls, seeking, performer metadata, and multiple-recording selection verified\
-**Verified functional milestone:** `eda3274`\
+**Current milestone:** Phase 9 Runtime Audio Integration --- Android reusable audio foundation, lifecycle ownership, performer metadata, and multiple-recording selection verified\
+**Verified functional milestone:** `b56fdea`\
 **Documentation correction follows:** `3ca4c6b`
 
 ------------------------------------------------------------------------
@@ -2593,3 +2593,265 @@ When development resumes:
 ```
 
 Do not redesign the recording-selection contract on restart unless a new real requirement demands it. The current multiple-recording path is already verified end-to-end.
+
+<!-- PHASE-9-LIFECYCLE-AUTHORDB-CHECKPOINT-2026-09-01 -->
+
+------------------------------------------------------------------------
+
+# Phase 9 Completion Checkpoint --- 2026-09-01
+
+This checkpoint supersedes earlier restart statements where they conflict
+with the verified implementation state recorded below.
+
+## Verified repository baseline
+
+```text
+b56fdeacce12c98068e623610e55c3cf9a66c40e
+```
+
+The two latest functional milestones are:
+
+```text
+336be6776870e0ae041ba45d79e59fa4bf48e515
+Integrate audio service lifecycle with platform bootstrap
+
+b56fdeacce12c98068e623610e55c3cf9a66c40e
+Sync performer metadata in author database schema
+```
+
+Both commits are present on `main` and were pushed to `origin/main`.
+
+## AudioService lifecycle and ownership
+
+The temporary Activity-owned AudioService wiring has been replaced by
+platform-owned service lifecycle management.
+
+The verified ownership path is now:
+
+```text
+MainActivity
+    |
+    -> AndroidAudioPlayerBackend
+            |
+            v
+       PlatformDependencies
+            |
+            v
+       DefaultPlatformServices
+            |
+            +-> ContentService
+            +-> NavigationService
+            +-> AudioService
+                    |
+                    v
+              PlatformBootstrap
+                    |
+                    v
+               PlatformKernel
+             initialize / shutdown
+                    |
+                    v
+              PlatformContext
+                    |
+                    v
+                   App
+```
+
+Established rules:
+
+1. Android creates the platform-specific `AndroidAudioPlayerBackend`.
+2. The backend is injected through `PlatformDependencies`.
+3. `DefaultPlatformServices` creates `DefaultAudioService` only when an
+   audio backend is supplied.
+4. `PlatformBootstrap` registers AudioService with the Platform Kernel.
+5. `PlatformContext` exposes the optional AudioService to the
+   application.
+6. `App` consumes the supplied PlatformContext and does not construct a
+   second platform instance internally.
+7. `PlatformContext.shutdown()` delegates to `PlatformKernel.shutdown()`.
+8. `DefaultAudioService.shutdown()` detaches the backend listener,
+   releases the backend, resets playback state, and returns the service
+   runtime state to `NotInitialized`.
+9. Shutdown is idempotent.
+10. Platforms with no audio backend continue to construct a valid
+    PlatformContext with `audio = null`.
+
+The verified platform shutdown path is:
+
+```text
+PlatformContext.shutdown()
+    -> PlatformKernel.shutdown()
+    -> AudioService.shutdown()
+    -> AudioPlayerBackend.release()
+    -> ExoPlayer.release()
+```
+
+## Audio behavior currently verified
+
+The reusable Android audio path now includes:
+
+```text
+content-driven recording resolution
+Play / Pause / Stop command semantics
+continuous position reporting
+seek interaction
+Ended-state replay behavior
+performer metadata
+multiple recordings per Melody
+explicit recording selection
+platform-owned lifecycle
+backend release through platform shutdown
+```
+
+For multiple recordings:
+
+- canonical `Melody.recordingIds` order is preserved;
+- `ContentService.loadMelodyRecordings(...)` returns every recording in
+  that order;
+- the first recording is the initial selection;
+- performer metadata is used as the human-readable selector label when
+  available;
+- selecting another recording stops previous playback;
+- selection itself does not auto-play;
+- Play / Pause / Stop / Seek operate on the selected recording.
+
+The first real multiple-recording verification case remains:
+
+```text
+Occasion 107
+Melody 1067
+
+MediaAsset 370 -> روفو عطالله
+MediaAsset 371 -> ياسر عطالله
+```
+
+Manual Android verification confirmed smooth switching and correct
+playback controls for both recordings.
+
+## Author Database performer synchronization
+
+The authoritative Microsoft Access Author Database now contains:
+
+```text
+MediaAsset.Performer
+Short Text
+size 255
+nullable
+```
+
+The official media export now selects:
+
+```text
+MediaAssetID, MediaType, SourceRelativePath, Performer
+```
+
+`Performer` is preserved through:
+
+```text
+Author Database
+    -> MediaAsset.csv
+    -> Build Tools source model
+    -> Schema-v1 canonical/package model
+    -> media-assets.json
+    -> Core MediaAsset
+    -> ContentService
+    -> Reference Application
+```
+
+The version-controlled Author Database schema snapshot was regenerated
+from the same authoritative database.
+
+Two consecutive executions of `ExportAuthorDatabaseSchema()` produced
+identical SHA-256 values for:
+
+```text
+tables.json
+relationships.json
+indexes.json
+```
+
+This established that the current generated schema snapshot is
+deterministic for the current database state.
+
+The committed snapshot also records the current Access relationship and
+index names and the current `AllowZeroLength` state of existing fields.
+These are schema-state observations, not effects of adding content rows
+to Occasion 107.
+
+## Verification
+
+After lifecycle integration, the following completed successfully:
+
+```text
+:shared:allTests
+:shared:check
+:androidApp:assembleDebug
+```
+
+The Android Reference Application was then manually tested and retained
+the previously verified behavior.
+
+The multiple-recording Occasion 107 path had already passed the same
+shared/build verification and manual Android execution before lifecycle
+ownership was changed.
+
+## Local generated fixture policy
+
+The working tree may intentionally contain generated Occasion 107
+Compose resources under:
+
+```text
+platform/shared/src/commonMain/composeResources/files/
+```
+
+These generated development resources are not part of the functional
+source commits described above and must not be staged accidentally.
+
+Do not use `git add .` while this fixture is present.
+
+## Current restart point
+
+When development resumes:
+
+```text
+1. Read CurrentState.md.
+
+2. Confirm main is at or beyond:
+   b56fdea
+
+3. Preserve the generated Occasion 107 fixture unless deliberately
+   replacing or removing it.
+
+4. Run:
+   :shared:allTests
+   :shared:check
+   :androidApp:assembleDebug
+   before the next architectural commit.
+
+5. Treat the following as complete:
+   - stable playback commands
+   - continuous position reporting
+   - seek behavior
+   - performer metadata transport
+   - multiple-recording selection
+   - AudioService lifecycle / ownership integration
+   - Author Database performer/schema synchronization
+
+6. Do not re-open Day-aware Composition, iOS playback,
+   PERFORMANCE/timing/segment integration, verse synchronization,
+   queue/Play All, or multiple-Melody-per-Qinto behavior unless the
+   next roadmap decision explicitly selects that work.
+```
+
+## Next engineering step
+
+The immediate task is no longer lifecycle ownership.
+
+The next session should select the next implementation milestone from
+the remaining roadmap items deliberately, using the now-stable Phase 9
+Android audio foundation as the baseline.
+
+No parallel playback path or application-specific media architecture
+should be introduced.
+
+------------------------------------------------------------------------

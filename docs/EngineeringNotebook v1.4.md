@@ -1,12 +1,12 @@
 # SyriacPlatform
 
-## Engineering Notebook v1.3
+## Engineering Notebook v1.4
 
 **Status:** Official Engineering Record\
-**Updated:** 2026-08-18\
+**Updated:** 2026-09-01\
 **Repository:** `SyriacPlatform`\
 **Branch:** `main`\
-**Implementation baseline:** `06d10ee`\
+**Implementation baseline:** `b56fdea`\
 **Documentation correction follows:** `3ca4c6b`
 
 ------------------------------------------------------------------------
@@ -2700,3 +2700,222 @@ Verification passed:
 The next engineering decision should address `AudioService` lifecycle and ownership.
 
 The existing platform-neutral playback contracts and the now-verified multiple-recording behavior should be preserved while that ownership boundary is finalized.
+
+<!-- AUDIO-DECISIONS-068-069-2026-09-01 -->
+
+------------------------------------------------------------------------
+
+# Decision 068
+
+## AudioService Lifecycle Is Owned by the Platform Service Graph
+
+### Decision
+
+`AudioService` lifecycle is owned by the platform bootstrap/kernel
+architecture rather than directly by the Android Activity.
+
+The Android application host creates the platform-specific
+`AndroidAudioPlayerBackend` and injects it through
+`PlatformDependencies`.
+
+`DefaultPlatformServices` creates `DefaultAudioService` when an audio
+backend is available.
+
+`PlatformBootstrap` registers the AudioService with `PlatformKernel`.
+
+`PlatformContext.shutdown()` is the application-facing shutdown boundary.
+
+### Reason
+
+The previous Activity-owned service construction was sufficient for
+proving Android playback but left ownership outside the platform service
+architecture.
+
+That intermediate arrangement weakened the intended boundary:
+
+```text
+platform-specific host
+    -> supplies platform-specific dependency
+
+platform
+    -> owns reusable service construction and lifecycle
+```
+
+AudioService already implements `PlatformService`, so its initialization
+and shutdown should follow the same platform lifecycle discipline as
+other services.
+
+### Impact
+
+The verified ownership path is:
+
+```text
+MainActivity
+    -> AndroidAudioPlayerBackend
+    -> PlatformDependencies
+    -> DefaultPlatformServices
+    -> AudioService
+    -> PlatformBootstrap
+    -> PlatformKernel
+    -> PlatformContext
+    -> App
+```
+
+The shutdown path is:
+
+```text
+PlatformContext.shutdown()
+    -> PlatformKernel.shutdown()
+    -> DefaultAudioService.shutdown()
+    -> AudioPlayerBackend.release()
+    -> ExoPlayer.release()
+```
+
+`PlatformService` now has a default `shutdown()` hook.
+
+`PlatformKernel` forwards shutdown to registered services.
+
+`AudioPlayerBackend` has a common `release()` contract.
+
+`DefaultAudioService.shutdown()` detaches its event listener, releases
+the backend, clears loaded-resource state, resets canonical
+`PlaybackState`, and returns its runtime lifecycle state to
+`NotInitialized`.
+
+Repeated shutdown is safe and does not repeatedly release the backend.
+
+Platforms without an audio backend remain valid and expose
+`PlatformContext.audio = null`.
+
+The verified implementation commit is:
+
+```text
+336be6776870e0ae041ba45d79e59fa4bf48e515
+Integrate audio service lifecycle with platform bootstrap
+```
+
+Verification passed:
+
+```text
+:shared:allTests
+:shared:check
+:androidApp:assembleDebug
+```
+
+Manual Android testing confirmed that previously verified playback,
+seeking, performer selection, and multiple-recording behavior remained
+unchanged after lifecycle ownership moved into the platform.
+
+------------------------------------------------------------------------
+
+# Decision 069
+
+## Author Database Schema Snapshot Must Reflect the Authoritative Database State
+
+### Decision
+
+The version-controlled Author Database schema snapshot is regenerated
+from the same authoritative Access database used for current authoring
+and media export.
+
+The optional `MediaAsset.Performer` field and the official media-export
+query are part of that authoritative source state.
+
+Generated `tables.json`, `relationships.json`, and `indexes.json` are
+accepted as a unit when they are reproducible from that database rather
+than manually editing only the newly desired field.
+
+### Reason
+
+Adding `Performer` exposed that the previously committed schema snapshot
+predated other structural state already present in the current Access
+database.
+
+A selective hand-edited snapshot would no longer be an honest export of
+the authoritative schema.
+
+At the same time, generated Access relationship/index names needed to be
+shown stable rather than assumed stable.
+
+Therefore `ExportAuthorDatabaseSchema()` was executed twice without
+modifying the database and SHA-256 hashes were compared.
+
+The hashes were identical for all three generated schema files.
+
+This established deterministic output for the current database state.
+
+### Impact
+
+`MediaAsset` now includes:
+
+```text
+Performer
+Short Text
+size 255
+nullable
+```
+
+The official `ExportMediaAssets` query now exports:
+
+```text
+MediaAssetID, MediaType, SourceRelativePath, Performer
+```
+
+The source/snapshot synchronization commit is:
+
+```text
+b56fdeacce12c98068e623610e55c3cf9a66c40e
+Sync performer metadata in author database schema
+```
+
+The committed snapshot also records the current Access-generated
+relationship/index names and the current `AllowZeroLength` state visible
+in the authoritative database.
+
+These schema changes must not be attributed to adding ordinary content
+rows, such as additional texts in Occasion 107.
+
+Future schema synchronization should follow the same rule:
+
+```text
+authoritative Access schema
+    -> official exporter
+    -> deterministic generated snapshot
+    -> review
+    -> selective Git staging of schema/exporter files
+```
+
+Generated reference-application packages remain a separate development
+fixture and must not be swept into schema commits.
+
+------------------------------------------------------------------------
+
+## Phase 9 Verified Checkpoint
+
+Current repository baseline:
+
+```text
+b56fdeacce12c98068e623610e55c3cf9a66c40e
+```
+
+The reusable Android audio foundation has now verified:
+
+```text
+content-driven MediaAsset resolution
+stable playback command semantics
+continuous position reporting
+seek behavior
+performer metadata
+multiple recordings per Melody
+explicit recording selection
+platform-owned AudioService lifecycle
+backend release through PlatformContext shutdown
+Author Database performer/schema synchronization
+```
+
+The next engineering task is no longer AudioService ownership.
+
+The next implementation milestone must be selected deliberately from the
+remaining Roadmap items while preserving this verified architecture.
+
+------------------------------------------------------------------------

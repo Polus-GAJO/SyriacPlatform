@@ -1,10 +1,10 @@
 # SyriacPlatform
 
-## Roadmap v1.3
+## Roadmap v1.4
 
 **Status:** Official Development Plan\
-**Updated:** 2026-08-18\
-**Verified implementation baseline:** `06d10ee`\
+**Updated:** 2026-09-01\
+**Verified implementation baseline:** `b56fdea`\
 **Documentation correction follows:** `3ca4c6b`
 
 ------------------------------------------------------------------------
@@ -997,3 +997,104 @@ The verified performer-based multiple-recording selection should remain intact w
 Production UI styling is still not the immediate milestone.
 
 Day-aware contextual organization remains deferred as previously documented and is not superseded by this update.
+
+<!-- PHASE-9-LIFECYCLE-COMPLETE-ROADMAP-2026-09-01 -->
+
+------------------------------------------------------------------------
+
+# Roadmap Update --- 2026-09-01
+
+## Verified baseline
+
+```text
+b56fdeacce12c98068e623610e55c3cf9a66c40e
+```
+
+Phase 9 playback stabilization and Android lifecycle ownership have now
+reached a verified reusable-platform checkpoint.
+
+The previously documented immediate priorities are now:
+
+```text
+1. stable Play / Pause / Stop behavior       COMPLETE
+2. continuous position reporting             COMPLETE
+3. seek interaction                          COMPLETE
+4. multiple-recording selection policy       COMPLETE
+5. performer metadata transport/display      COMPLETE
+6. AudioService lifecycle / ownership         COMPLETE
+7. focused lifecycle/integration verification COMPLETE
+```
+
+Lifecycle ownership is no longer Activity-specific.
+
+The application host creates only the platform-specific playback backend.
+The platform service graph owns `DefaultAudioService`, initialization,
+shutdown, and backend release through `PlatformContext` /
+`PlatformKernel`.
+
+The Author Database source and version-controlled schema snapshot are
+also synchronized with the optional `MediaAsset.Performer` metadata used
+by the verified multiple-recording UI.
+
+## Phase 9 current status
+
+**Status:** Reusable Android audio foundation completed and verified for
+the current scope.
+
+The verified scope includes:
+
+```text
+Author Database media relationship
+    -> controlled media export
+    -> Build Tools
+    -> recordingIds + performer metadata
+    -> Application Package
+    -> Core/runtime media lookup
+    -> ContentService
+    -> explicit recording selection
+    -> AudioService
+    -> Android Media3 / ExoPlayer
+    -> platform-owned shutdown
+```
+
+This does not mean every future audio feature is complete.
+
+The following remain deferred or requirement-driven:
+
+- iOS native playback backend;
+- queue / Play All;
+- occurrence-level `PERFORMANCE` media;
+- `MediaTimingSet` / `MediaSegment`;
+- authoritative verse synchronization;
+- broader Author Database media-editing workflow;
+- equivalent notation-image migration.
+
+Day-aware contextual organization remains deferred and is not changed by
+this checkpoint.
+
+The separate case in which one Qinto exposes multiple Melody choices is
+also not part of the completed multiple-recording feature and must not be
+conflated with multiple recordings of one Melody.
+
+## Immediate next milestone
+
+The previous immediate milestone,
+`Final AudioService lifecycle / ownership integration`, is complete.
+
+The next implementation milestone should now be selected explicitly from
+the remaining roadmap requirements rather than inferred automatically.
+
+The selection should preserve these constraints:
+
+```text
+no parallel content-loading path
+no application-specific media identity
+no premature iOS work unless selected deliberately
+no timing/segment implementation before authoritative data requires it
+no Day-aware redesign unless that deferred milestone is explicitly resumed
+```
+
+Until that selection is made, the verified baseline for new work is
+`b56fdea`.
+
+------------------------------------------------------------------------
