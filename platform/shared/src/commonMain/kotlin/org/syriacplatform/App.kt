@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import org.syriacplatform.audio.contracts.AudioService
 import org.syriacplatform.audio.models.PlaybackState
 import org.syriacplatform.audio.models.PlaybackStatus
-import org.syriacplatform.bootstrap.PlatformBootstrap
 import org.syriacplatform.common.result.Result
 import org.syriacplatform.common.types.MediaAssetId
 import org.syriacplatform.common.types.OccasionId
@@ -45,11 +44,9 @@ import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.presentation.theme.SyriacTextStyles
 
 @Composable
-fun App(audioService: AudioService? = null) {
-    val platform = remember {
-        PlatformBootstrap.create()
-    }
-
+fun App(
+    platform: PlatformContext
+) {
     val navigationState by
     platform.navigation.state.collectAsState()
 
@@ -93,7 +90,7 @@ fun App(audioService: AudioService? = null) {
                 if (liturgicalItemId != null) {
                     HymnDetailsScreen(
                         platform = platform,
-                        audioService = audioService,
+                        audioService = platform.audio,
                         liturgicalItemId =
                             liturgicalItemId,
                         onBack = {

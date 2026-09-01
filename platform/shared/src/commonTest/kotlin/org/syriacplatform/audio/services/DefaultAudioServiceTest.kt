@@ -417,6 +417,60 @@ class DefaultAudioServiceTest {
         )
     }
     @Test
+    fun shutdownReleasesBackendOnceAndResetsServiceState() {
+        val backend =
+            RecordingBackend()
+
+        val service =
+            service(backend)
+
+        service.initialize()
+
+        assertIs<Result.Success<Unit>>(
+            service.load(
+                mediaAsset(41L)
+            )
+        )
+
+        backend.emit(
+            AudioPlayerEvent.Ready(
+                60_000L
+            )
+        )
+
+        service.shutdown()
+        service.shutdown()
+
+        assertEquals(
+            RuntimeState.NotInitialized,
+            service.runtimeState
+        )
+        assertEquals(
+            PlaybackStatus.Idle,
+            service.state.value.status
+        )
+        assertEquals(
+            null,
+            service.state.value.mediaAssetId
+        )
+        assertEquals(
+            0L,
+            service.state.value.positionMs
+        )
+        assertEquals(
+            null,
+            service.state.value.durationMs
+        )
+        assertEquals(
+            listOf(
+                "prepare:41",
+                "release"
+            ),
+            backend.commands
+        )
+    }
+
+    @Test
     fun successiveBackendPositionEventsUpdateObservableState() {
         val backend =
             RecordingBackend()
@@ -549,6 +603,11 @@ class DefaultAudioServiceTest {
         override fun seekTo(positionMs: Long): Result<Unit> {
             commands += "seek:$positionMs"
             return resultFor("seek")
+        }
+
+        override fun release() {
+            commands += "release"
+            listener = null
         }
 
         fun emit(event: AudioPlayerEvent) {

@@ -1,5 +1,6 @@
 package org.syriacplatform.bootstrap
 
+import org.syriacplatform.audio.contracts.AudioPlayerBackend
 import org.syriacplatform.content.repository.ContentRepository
 
 /**
@@ -9,5 +10,6 @@ import org.syriacplatform.content.repository.ContentRepository
  * أو الاعتمادات البديلة في الاختبارات.
  */
 data class PlatformDependencies(
-    val contentRepository: ContentRepository
+    val contentRepository: ContentRepository,
+    val audioPlayerBackend: AudioPlayerBackend? = null
 )

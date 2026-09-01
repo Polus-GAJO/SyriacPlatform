@@ -14,4 +14,5 @@ interface AudioPlayerBackend {
     fun pause(): Result<Unit>
     fun stop(): Result<Unit>
     fun seekTo(positionMs: Long): Result<Unit>
+    fun release()
 }

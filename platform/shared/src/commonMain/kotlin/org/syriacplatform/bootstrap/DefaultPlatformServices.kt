@@ -1,5 +1,8 @@
 package org.syriacplatform.bootstrap
 
+import org.syriacplatform.audio.contracts.AudioService
+import org.syriacplatform.audio.resources.ComposeResourceMediaResourceResolver
+import org.syriacplatform.audio.services.DefaultAudioService
 import org.syriacplatform.content.contracts.ContentService
 import org.syriacplatform.content.services.DefaultContentService
 import org.syriacplatform.navigation.contracts.NavigationService
@@ -22,9 +25,20 @@ object DefaultPlatformServices {
         val navigationService: NavigationService =
             DefaultNavigationService()
 
+        val audioService: AudioService? =
+            dependencies.audioPlayerBackend?.let { backend ->
+                DefaultAudioService(
+                    resourceResolver =
+                        ComposeResourceMediaResourceResolver(),
+                    playerBackend =
+                        backend
+                )
+            }
+
         return PlatformServices(
             content = contentService,
-            navigation = navigationService
+            navigation = navigationService,
+            audio = audioService
         )
     }
 }

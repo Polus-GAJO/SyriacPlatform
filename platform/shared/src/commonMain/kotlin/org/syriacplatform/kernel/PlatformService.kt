@@ -21,4 +21,9 @@ interface PlatformService {
      * تهيئة الخدمة.
      */
     fun initialize()
+
+    /**
+     * إنهاء الخدمة وتحرير مواردها إن وجدت.
+     */
+    fun shutdown() = Unit
 }

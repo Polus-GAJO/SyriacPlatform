@@ -1,5 +1,6 @@
 package org.syriacplatform.bootstrap
 
+import org.syriacplatform.audio.contracts.AudioService
 import org.syriacplatform.content.contracts.ContentService
 import org.syriacplatform.context.PlatformContext
 import org.syriacplatform.kernel.PlatformKernel
@@ -43,12 +44,20 @@ object PlatformBootstrap {
             services.navigation
         )
 
+        services.audio?.let { audio ->
+            kernel.registerService(
+                AudioService::class,
+                audio
+            )
+        }
+
         kernel.initialize()
 
         return PlatformContext(
             kernel = kernel,
             content = services.content,
-            navigation = services.navigation
+            navigation = services.navigation,
+            audio = services.audio
         )
     }
 }

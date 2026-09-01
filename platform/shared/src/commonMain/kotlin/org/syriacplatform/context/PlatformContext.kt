@@ -1,5 +1,6 @@
 package org.syriacplatform.context
 
+import org.syriacplatform.audio.contracts.AudioService
 import org.syriacplatform.content.contracts.ContentService
 import org.syriacplatform.kernel.PlatformKernel
 import org.syriacplatform.navigation.contracts.NavigationService
@@ -13,5 +14,10 @@ import org.syriacplatform.navigation.contracts.NavigationService
 class PlatformContext internal constructor(
     internal val kernel: PlatformKernel,
     val content: ContentService,
-    val navigation: NavigationService
-)
+    val navigation: NavigationService,
+    val audio: AudioService? = null
+) {
+    fun shutdown() {
+        kernel.shutdown()
+    }
+}

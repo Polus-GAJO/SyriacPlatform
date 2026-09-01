@@ -1,5 +1,6 @@
 package org.syriacplatform.bootstrap
 
+import org.syriacplatform.audio.contracts.AudioService
 import org.syriacplatform.content.contracts.ContentService
 import org.syriacplatform.navigation.contracts.NavigationService
 
@@ -11,5 +12,6 @@ import org.syriacplatform.navigation.contracts.NavigationService
  */
 data class PlatformServices(
     val content: ContentService,
-    val navigation: NavigationService
+    val navigation: NavigationService,
+    val audio: AudioService? = null
 )

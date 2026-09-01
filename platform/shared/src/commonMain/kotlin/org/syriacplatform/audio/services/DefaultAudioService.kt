@@ -41,6 +41,19 @@ class DefaultAudioService(
         runtimeState = RuntimeState.Ready
     }
 
+    override fun shutdown() {
+        if (runtimeState == RuntimeState.NotInitialized) {
+            return
+        }
+
+        playerBackend.setEventListener(null)
+        playerBackend.release()
+
+        currentResource = null
+        _state.value = PlaybackState()
+        runtimeState = RuntimeState.NotInitialized
+    }
+
     override fun load(mediaAsset: MediaAsset): Result<Unit> {
         val readiness = requireReadyService()
         if (readiness is Result.Failure) return readiness

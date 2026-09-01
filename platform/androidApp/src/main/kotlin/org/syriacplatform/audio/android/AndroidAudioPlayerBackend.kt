@@ -251,7 +251,7 @@ class AndroidAudioPlayerBackend(
         }
     }
 
-    fun release() {
+    override fun release() {
         stopPositionUpdates()
 
         eventListener =

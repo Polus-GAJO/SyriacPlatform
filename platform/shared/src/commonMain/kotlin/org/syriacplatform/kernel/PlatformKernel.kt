@@ -26,6 +26,12 @@ class PlatformKernel(
         }
     }
 
+    fun shutdown() {
+        registry.forEachService { service ->
+            service.shutdown()
+        }
+    }
+
     fun <T : PlatformService> resolveService(
         serviceType: KClass<T>
     ): Result<T> {
