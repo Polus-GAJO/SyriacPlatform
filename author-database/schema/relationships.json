@@ -1,7 +1,97 @@
 ﻿{
   "schemaVersion": 1,
-  "exporterVersion": "1.0",
+  "exporterVersion": "1.1",
   "relationships": [
+    {
+      "name": "{41E1B344-CD09-4951-8A24-35A5E77A9632}",
+      "primaryTable": "MediaTimingSet",
+      "foreignTable": "ExistsInMedia",
+      "referentialIntegrity": true,
+      "cascadeUpdate": false,
+      "cascadeDelete": false,
+      "attributes": 0,
+      "columns": [
+        {
+          "primaryColumn": "MediaTimingSetID",
+          "foreignColumn": "MediaTimingSetID"
+        }
+      ]
+    },
+    {
+      "name": "{66EF6AC1-51E8-4E97-9E47-5A812D7566EF}",
+      "primaryTable": "MediaSegment",
+      "foreignTable": "ExistsInTextMediaSegment",
+      "referentialIntegrity": true,
+      "cascadeUpdate": false,
+      "cascadeDelete": true,
+      "attributes": 4096,
+      "columns": [
+        {
+          "primaryColumn": "MediaSegmentID",
+          "foreignColumn": "MediaSegmentID"
+        }
+      ]
+    },
+    {
+      "name": "{72E61D77-CE5C-44A3-A06C-06EEDCF1C1D7}",
+      "primaryTable": "MediaAsset",
+      "foreignTable": "MediaTimingSet",
+      "referentialIntegrity": true,
+      "cascadeUpdate": false,
+      "cascadeDelete": false,
+      "attributes": 0,
+      "columns": [
+        {
+          "primaryColumn": "MediaAssetID",
+          "foreignColumn": "MediaAssetID"
+        }
+      ]
+    },
+    {
+      "name": "{8B179845-C94B-45C2-8D8B-14009974A3EE}",
+      "primaryTable": "MediaAsset",
+      "foreignTable": "MelodyMedia",
+      "referentialIntegrity": true,
+      "cascadeUpdate": false,
+      "cascadeDelete": false,
+      "attributes": 0,
+      "columns": [
+        {
+          "primaryColumn": "MediaAssetID",
+          "foreignColumn": "MediaAssetID"
+        }
+      ]
+    },
+    {
+      "name": "{C58D5CAE-8F85-4480-8082-781AE0E7D8EB}",
+      "primaryTable": "MediaAsset",
+      "foreignTable": "ExistsInMedia",
+      "referentialIntegrity": true,
+      "cascadeUpdate": false,
+      "cascadeDelete": false,
+      "attributes": 0,
+      "columns": [
+        {
+          "primaryColumn": "MediaAssetID",
+          "foreignColumn": "MediaAssetID"
+        }
+      ]
+    },
+    {
+      "name": "{FCF3BB46-0135-420B-860B-3BA70ED37E3C}",
+      "primaryTable": "MediaTimingSet",
+      "foreignTable": "MediaSegment",
+      "referentialIntegrity": true,
+      "cascadeUpdate": false,
+      "cascadeDelete": true,
+      "attributes": 4096,
+      "columns": [
+        {
+          "primaryColumn": "MediaTimingSetID",
+          "foreignColumn": "MediaTimingSetID"
+        }
+      ]
+    },
     {
       "name": "BooksExistsIn",
       "primaryTable": "Books",
@@ -134,96 +224,6 @@
         {
           "primaryColumn": "LocationN",
           "foreignColumn": "LocationN"
-        }
-      ]
-    },
-    {
-      "name": "MediaAssetExistsInMedia",
-      "primaryTable": "MediaAsset",
-      "foreignTable": "ExistsInMedia",
-      "referentialIntegrity": true,
-      "cascadeUpdate": false,
-      "cascadeDelete": false,
-      "attributes": 0,
-      "columns": [
-        {
-          "primaryColumn": "MediaAssetID",
-          "foreignColumn": "MediaAssetID"
-        }
-      ]
-    },
-    {
-      "name": "MediaAssetMediaTimingSet",
-      "primaryTable": "MediaAsset",
-      "foreignTable": "MediaTimingSet",
-      "referentialIntegrity": true,
-      "cascadeUpdate": false,
-      "cascadeDelete": false,
-      "attributes": 0,
-      "columns": [
-        {
-          "primaryColumn": "MediaAssetID",
-          "foreignColumn": "MediaAssetID"
-        }
-      ]
-    },
-    {
-      "name": "MediaAssetMelodyMedia",
-      "primaryTable": "MediaAsset",
-      "foreignTable": "MelodyMedia",
-      "referentialIntegrity": true,
-      "cascadeUpdate": false,
-      "cascadeDelete": false,
-      "attributes": 0,
-      "columns": [
-        {
-          "primaryColumn": "MediaAssetID",
-          "foreignColumn": "MediaAssetID"
-        }
-      ]
-    },
-    {
-      "name": "MediaSegmentExistsInTextMediaSegment",
-      "primaryTable": "MediaSegment",
-      "foreignTable": "ExistsInTextMediaSegment",
-      "referentialIntegrity": true,
-      "cascadeUpdate": false,
-      "cascadeDelete": true,
-      "attributes": 4096,
-      "columns": [
-        {
-          "primaryColumn": "MediaSegmentID",
-          "foreignColumn": "MediaSegmentID"
-        }
-      ]
-    },
-    {
-      "name": "MediaTimingSetExistsInMedia",
-      "primaryTable": "MediaTimingSet",
-      "foreignTable": "ExistsInMedia",
-      "referentialIntegrity": true,
-      "cascadeUpdate": false,
-      "cascadeDelete": false,
-      "attributes": 0,
-      "columns": [
-        {
-          "primaryColumn": "MediaTimingSetID",
-          "foreignColumn": "MediaTimingSetID"
-        }
-      ]
-    },
-    {
-      "name": "MediaTimingSetMediaSegment",
-      "primaryTable": "MediaTimingSet",
-      "foreignTable": "MediaSegment",
-      "referentialIntegrity": true,
-      "cascadeUpdate": false,
-      "cascadeDelete": true,
-      "attributes": 4096,
-      "columns": [
-        {
-          "primaryColumn": "MediaTimingSetID",
-          "foreignColumn": "MediaTimingSetID"
         }
       ]
     },

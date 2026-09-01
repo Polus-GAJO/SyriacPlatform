@@ -1,6 +1,6 @@
 ﻿{
   "schemaVersion": 1,
-  "exporterVersion": "1.0",
+  "exporterVersion": "1.1",
   "tables": [
     {
       "name": "Books",
@@ -557,6 +557,21 @@
           "validationRule": null,
           "validationText": null,
           "description": null
+        },
+        {
+          "name": "performer",
+          "ordinal": 3,
+          "type": "ShortText",
+          "daoType": 10,
+          "size": 255,
+          "nullable": true,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": true,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
         }
       ]
     },
@@ -686,7 +701,7 @@
           "nullable": true,
           "primaryKey": false,
           "autoIncrement": false,
-          "allowZeroLength": false,
+          "allowZeroLength": true,
           "defaultValue": null,
           "validationRule": null,
           "validationText": null,

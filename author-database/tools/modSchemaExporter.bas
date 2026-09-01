@@ -1289,7 +1289,7 @@ End Sub
 Private Sub ExportMediaAssets(ByVal outputRoot As String)
 
     ExportQueryToCsv _
-        "SELECT MediaAssetID, MediaType, SourceRelativePath " & _
+        "SELECT MediaAssetID, MediaType, SourceRelativePath, Performer " & _
         "FROM MediaAsset ORDER BY MediaAssetID;", _
         outputRoot & "\MediaAsset.csv"
 

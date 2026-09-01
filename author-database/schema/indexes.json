@@ -1,6 +1,6 @@
 ﻿{
   "schemaVersion": 1,
-  "exporterVersion": "1.0",
+  "exporterVersion": "1.1",
   "indexes": [
     {
       "table": "Books",
@@ -244,6 +244,36 @@
     },
     {
       "table": "ExistsInMedia",
+      "name": "{41E1B344-CD09-4951-8A24-35A5E77A9632}",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MediaTimingSetID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsInMedia",
+      "name": "{C58D5CAE-8F85-4480-8082-781AE0E7D8EB}",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MediaAssetID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsInMedia",
       "name": "ExistsInExistsInMedia",
       "primary": false,
       "unique": false,
@@ -290,36 +320,6 @@
     {
       "table": "ExistsInMedia",
       "name": "IX_ExistsInMedia_TimingSetID",
-      "primary": false,
-      "unique": false,
-      "required": false,
-      "ignoreNulls": false,
-      "columns": [
-        {
-          "name": "MediaTimingSetID",
-          "ordinal": 0,
-          "descending": false
-        }
-      ]
-    },
-    {
-      "table": "ExistsInMedia",
-      "name": "MediaAssetExistsInMedia",
-      "primary": false,
-      "unique": false,
-      "required": false,
-      "ignoreNulls": false,
-      "columns": [
-        {
-          "name": "MediaAssetID",
-          "ordinal": 0,
-          "descending": false
-        }
-      ]
-    },
-    {
-      "table": "ExistsInMedia",
-      "name": "MediaTimingSetExistsInMedia",
       "primary": false,
       "unique": false,
       "required": false,
@@ -434,6 +434,21 @@
     },
     {
       "table": "ExistsInTextMediaSegment",
+      "name": "{66EF6AC1-51E8-4E97-9E47-5A812D7566EF}",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MediaSegmentID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsInTextMediaSegment",
       "name": "ExistsInTextExistsInTextMediaSegment",
       "primary": false,
       "unique": false,
@@ -472,21 +487,6 @@
       "columns": [
         {
           "name": "ExistsInTextID",
-          "ordinal": 0,
-          "descending": false
-        }
-      ]
-    },
-    {
-      "table": "ExistsInTextMediaSegment",
-      "name": "MediaSegmentExistsInTextMediaSegment",
-      "primary": false,
-      "unique": false,
-      "required": false,
-      "ignoreNulls": false,
-      "columns": [
-        {
-          "name": "MediaSegmentID",
           "ordinal": 0,
           "descending": false
         }
@@ -589,7 +589,7 @@
     },
     {
       "table": "MediaSegment",
-      "name": "IX_MediaSegment_TimingSetID",
+      "name": "{FCF3BB46-0135-420B-860B-3BA70ED37E3C}",
       "primary": false,
       "unique": false,
       "required": false,
@@ -604,7 +604,7 @@
     },
     {
       "table": "MediaSegment",
-      "name": "MediaTimingSetMediaSegment",
+      "name": "IX_MediaSegment_TimingSetID",
       "primary": false,
       "unique": false,
       "required": false,
@@ -654,7 +654,7 @@
     },
     {
       "table": "MediaTimingSet",
-      "name": "IX_MediaTimingSet_MediaAssetID",
+      "name": "{72E61D77-CE5C-44A3-A06C-06EEDCF1C1D7}",
       "primary": false,
       "unique": false,
       "required": false,
@@ -669,7 +669,7 @@
     },
     {
       "table": "MediaTimingSet",
-      "name": "MediaAssetMediaTimingSet",
+      "name": "IX_MediaTimingSet_MediaAssetID",
       "primary": false,
       "unique": false,
       "required": false,
@@ -819,6 +819,21 @@
     },
     {
       "table": "MelodyMedia",
+      "name": "{8B179845-C94B-45C2-8D8B-14009974A3EE}",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MediaAssetID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MelodyMedia",
       "name": "IX_MelodyMedia_MediaAssetID",
       "primary": false,
       "unique": false,
@@ -842,21 +857,6 @@
       "columns": [
         {
           "name": "MelodyN",
-          "ordinal": 0,
-          "descending": false
-        }
-      ]
-    },
-    {
-      "table": "MelodyMedia",
-      "name": "MediaAssetMelodyMedia",
-      "primary": false,
-      "unique": false,
-      "required": false,
-      "ignoreNulls": false,
-      "columns": [
-        {
-          "name": "MediaAssetID",
           "ordinal": 0,
           "descending": false
         }
