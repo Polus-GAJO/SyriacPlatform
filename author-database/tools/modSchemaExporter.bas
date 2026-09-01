@@ -1669,7 +1669,7 @@ Private Sub ExportMelodies( _
     sqlText = sqlText & "FROM Melody AS M "
     sqlText = sqlText & "INNER JOIN "
     sqlText = sqlText & "("
-    sqlText = sqlText & "SELECT DISTINCT E.QoloN "
+    sqlText = sqlText & "SELECT DISTINCT E.QoloN, E.QintoN "
     sqlText = sqlText & "FROM ExistsIn AS E "
     sqlText = sqlText & "INNER JOIN OccaExis AS OE "
     sqlText = sqlText & "ON E.ID = OE.ExistInID "
@@ -1677,6 +1677,11 @@ Private Sub ExportMelodies( _
     sqlText = sqlText & "AND E.QoloN IS NOT NULL"
     sqlText = sqlText & ") AS X "
     sqlText = sqlText & "ON M.QoloN = X.QoloN "
+    sqlText = sqlText & "AND ("
+    sqlText = sqlText & "X.QintoN IS NULL "
+    sqlText = sqlText & "OR X.QintoN = 0 "
+    sqlText = sqlText & "OR M.QintoN = X.QintoN"
+    sqlText = sqlText & ") "
     sqlText = sqlText & _
         "ORDER BY M.QoloN, M.QintoN, M.MelodyN;"
 
