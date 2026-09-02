@@ -3050,3 +3050,64 @@ That queue must extend the existing content-driven selection path rather
 than create a parallel media-selection mechanism.
 
 ------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+# Decision — Prayer Play All Queue Boundary
+
+## Decision
+
+Prayer Play All is orchestration above the existing `AudioService`.
+
+The queue is built from the ordered resolved contents of one `RuntimePrayerSequence`.
+
+For each playable Qolo occurrence:
+
+1. use `effectiveMelody` when it exists;
+2. otherwise enqueue all author-valid Melody candidates in runtime order;
+3. for each queued Melody, enqueue exactly one recording;
+4. prefer the user's selected recording when applicable, otherwise use the first available recording;
+5. skip a Melody that has no recording.
+
+`PlaybackQueueController` receives already-resolved `PlaybackQueueEntry` values and advances them through the existing single-resource `AudioService`.
+
+## Reason
+
+Prayer Play All is a liturgical/content orchestration concern, while `AudioService` is a reusable playback capability for one `MediaAsset`.
+
+Multiple Melody candidates represent author-valid musical alternatives or sequential parts. In hands-off Prayer Play All, they must not be arbitrarily reduced to one candidate.
+
+Multiple recordings of the same Melody have different semantics: they are alternate performances/recordings, so automatic playback chooses one rather than playing every recording.
+
+Keeping these decisions outside `AudioService` prevents Prayer, Qolo, and Melody semantics from leaking into the audio domain.
+
+## Impact
+
+``` text
+Prayer / ordered resolved liturgical items
+        ↓
+PrayerPlaybackQueueBuilder
+        ↓
+ordered PlaybackQueueEntry list
+        ↓
+PlaybackQueueController
+        ↓
+selected MediaAsset
+        ↓
+AudioService
+        ↓
+Ended
+        ↓
+next queue entry
+```
+
+Interactive Hymn Details may still require explicit Melody selection when multiple candidates exist. Prayer Play All follows the separate hands-off policy of playing all author-valid candidates in order.
+
+Pause/resume preserve queue position. Stop cancels the queue session. Completion occurs after the final queue entry.
+
+Implemented and verified in:
+
+``` text
+4fc1e44 — Add prayer Play All playback queue
+fb78b17 — Remove BOM from App source
+```

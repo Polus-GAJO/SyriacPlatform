@@ -3016,3 +3016,58 @@ verse synchronization, iOS playback, and Day-aware Composition remain
 deferred unless explicitly selected by a later roadmap decision.
 
 ------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+## Prayer Play All Checkpoint — 2026-09-02
+
+**Verified implementation commit:** `4fc1e44`
+**Source cleanup commit:** `fb78b17`
+
+Prayer-scoped continuous playback is now implemented and verified in the Android Reference Application.
+
+Runtime path:
+
+``` text
+RuntimePrayerSequence
+        ↓
+ordered ResolvedLiturgicalItems
+        ↓
+PrayerPlaybackQueueBuilder
+        ↓
+ordered PlaybackQueueEntry list
+        ↓
+PlaybackQueueController
+        ↓
+existing AudioService
+        ↓
+AndroidAudioPlayerBackend
+```
+
+Established behavior:
+
+- Play All operates on one Prayer, not on an entire Occasion.
+- Liturgical item order is preserved.
+- An effective Melody is queued when present.
+- Without an effective Melody, all author-valid Melody candidates are queued in runtime order.
+- Exactly one recording is queued per Melody.
+- A previously selected recording is preferred when applicable; otherwise the first available recording is used.
+- Melodies without recordings are skipped.
+- `AudioService` remains a single-`MediaAsset`, content-agnostic playback service.
+- Pause All, Resume All, Stop All, automatic advancement, and completion are implemented.
+- Opening an individual hymn or leaving the Prayer stops the active queue.
+
+Verification completed:
+
+- `:shared:allTests`
+- `:shared:check`
+- `:androidApp:assembleDebug`
+- manual Android playback across consecutive recordings
+- manual transition across the two valid Melodies of Qolo 224
+- manual skipping of Melodies without recordings
+- manual Pause All / Resume All / Stop All behavior
+- automatic completion after the final queue entry
+
+Focused automated tests cover ordering, multiple Melody candidates, recording preference/fallback, missing recordings, pause/resume, stop, completion, and unrelated playback-state filtering.
+
+The Prayer Play All foundation is complete for the current Android runtime scope.

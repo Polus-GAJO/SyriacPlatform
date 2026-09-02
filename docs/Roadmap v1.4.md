@@ -1148,3 +1148,32 @@ The following remain deferred:
 - unrelated search/user-domain expansion until deliberately selected.
 
 ------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+## Phase 9 Checkpoint — Prayer Play All
+
+**Status:** Completed for current Android runtime scope
+**Verified implementation:** `4fc1e44`
+**Source cleanup:** `fb78b17`
+
+The previously deferred queue / Play All work is now implemented after stabilization of the underlying playback contracts.
+
+Completed:
+
+- prayer-scoped queue construction from ordered `RuntimePrayerSequence` items;
+- sequential playback through `PlaybackQueueController`;
+- all author-valid Melody candidates are played in order when an occurrence has no single effective Melody;
+- exactly one recording is selected per Melody;
+- user-preferred recording is honored when available, otherwise the first recording is used;
+- Melodies without recordings are skipped;
+- Play All / Pause All / Resume All / Stop All are integrated into Prayer Details;
+- individual hymn navigation and Prayer exit stop the active queue;
+- focused queue-builder and queue-controller tests pass;
+- Android build and manual runtime playback are verified.
+
+The queue layer remains above the content-agnostic `AudioService`; Prayer/Qolo/Melody resolution is not moved into the audio service.
+
+Remaining deferred audio work includes occurrence-level `PERFORMANCE` integration, media timing/segments and verse synchronization, notation-image media migration, and the iOS native playback backend at the planned cross-platform stage.
+
+The reusable Android audio foundation, lifecycle ownership, multiple-recording selection, multiple-Melody handling, playback controls/position, and Prayer Play All queue are now verified.
