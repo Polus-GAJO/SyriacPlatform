@@ -2855,3 +2855,164 @@ No parallel playback path or application-specific media architecture
 should be introduced.
 
 ------------------------------------------------------------------------
+
+<!-- MULTIPLE-MELODY-SELECTION-CHECKPOINT-2026-09-02 -->
+
+------------------------------------------------------------------------
+
+# Phase 9 Multiple-Melody Selection Checkpoint --- 2026-09-02
+
+This checkpoint extends the verified Phase 9 Android audio foundation.
+
+## Verified repository baseline
+
+```text
+03014abccd705d38d646637d20523d03797e5be3
+```
+
+The two implementation milestones covered by this checkpoint are:
+
+```text
+88d0efc  Scope occasion melodies by Qinto
+03014ab  Support multiple melody selection in hymn details
+```
+
+Both commits are present on `main` and pushed to `origin/main`.
+
+## Occasion Melody export scoping
+
+The Author Database exporter now scopes Melody export by the contextual
+Qinto relationship carried by `ExistsIn`.
+
+Established export behavior:
+
+```text
+if ExistsIn.QintoN > 0:
+    include Melody rows where:
+        Melody.QoloN  = ExistsIn.QoloN
+        Melody.QintoN = ExistsIn.QintoN
+
+if ExistsIn.QintoN = 0 or Null:
+    include all Melody rows where:
+        Melody.QoloN = ExistsIn.QoloN
+```
+
+`Melody.QintoN = 0` is not automatically added when a concrete
+`ExistsIn.QintoN > 0` is present.
+
+This prevents unrelated Melody variants of the same Qolo from leaking
+into an Occasion package while preserving the deliberately unresolved
+Qinto case.
+
+## Runtime multiple-Melody representation
+
+The existing contextual hymn model already carries:
+
+```text
+effectiveMelodyId: MelodyId?
+melodyCandidateIds: List<MelodyId>
+```
+
+and runtime resolution exposes:
+
+```text
+effectiveMelody: Melody?
+melodyCandidates: List<Melody>
+```
+
+The runtime preserves candidate order and does not choose among multiple
+candidates arbitrarily.
+
+## Application selection behavior
+
+`HYMN_DETAILS` now supports the ambiguous real-content case where a Qolo
+has more than one valid Melody candidate.
+
+Established behavior:
+
+```text
+effective Melody exists
+    -> use it directly
+
+no effective Melody + exactly one candidate
+    -> use the unique candidate
+
+no effective Melody + multiple candidates
+    -> require explicit user selection
+```
+
+For multiple candidates:
+
+- the application presents the Melody choices;
+- no candidate is selected arbitrarily;
+- selecting a Melody stops prior playback;
+- recording selection is reset;
+- seek state is reset;
+- selection itself does not auto-play;
+- the existing recording-selection and Play / Pause / Stop / Seek flow
+  operates on the selected Melody.
+
+## Real verification case
+
+The first verified real multiple-Melody case is:
+
+```text
+Occasion 64
+Qolo 224
+Qinto 2
+
+Melody 294
+Melody 295
+```
+
+The generated package preserves both candidates in
+`melodyCandidateIds`.
+
+Manual Android verification confirmed:
+
+- both Melody names are displayed;
+- neither is chosen automatically;
+- either Melody can be selected;
+- playback controls work after selection;
+- switching Melody preserves the previously established playback
+  semantics.
+
+Verification also passed:
+
+```text
+:shared:allTests
+:shared:check
+:androidApp:assembleDebug
+```
+
+## Current Phase 9 boundary
+
+The reusable Android audio/content-selection path now includes:
+
+```text
+contextual Melody resolution
+multiple Melody candidates
+explicit Melody selection
+multiple recordings per Melody
+explicit recording selection
+Play / Pause / Stop
+continuous position reporting
+Seek
+platform-owned AudioService lifecycle
+Android Media3 / ExoPlayer backend
+```
+
+The next selected Phase 9 milestone is:
+
+```text
+Playback Queue / Play All
+```
+
+This work must extend the existing content-driven playback path rather
+than introduce a second application-specific audio architecture.
+
+Occurrence-level PERFORMANCE media, timing/segment synchronization,
+verse synchronization, iOS playback, and Day-aware Composition remain
+deferred unless explicitly selected by a later roadmap decision.
+
+------------------------------------------------------------------------

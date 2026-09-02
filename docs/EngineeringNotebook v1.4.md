@@ -2919,3 +2919,134 @@ The next implementation milestone must be selected deliberately from the
 remaining Roadmap items while preserving this verified architecture.
 
 ------------------------------------------------------------------------
+
+<!-- DECISION-070-MULTIPLE-MELODY-SELECTION-2026-09-02 -->
+
+------------------------------------------------------------------------
+
+# Decision 070
+
+## Ambiguous Melody Candidates Require Explicit Application Selection
+
+### Decision
+
+When a contextual Qolo resolves to more than one valid Melody candidate
+and no single `effectiveMelody` is established, the application must
+present those candidates and require explicit user selection.
+
+The runtime must preserve the authored candidate set and must not choose
+one arbitrarily.
+
+### Reason
+
+The Author Database and Build Tools establish which Melodies are valid
+for the contextual Qolo/Qinto relationship.
+
+More than one valid candidate is therefore meaningful authored data, not
+an error state and not permission for the application or AudioService to
+select the first item silently.
+
+The responsibility boundary is:
+
+```text
+Author Database / Build Tools
+    -> determine valid contextual Melody candidates
+
+Runtime
+    -> preserve and resolve the candidates
+
+Application
+    -> obtain the user's explicit Melody choice
+
+ContentService
+    -> resolve recordings for the selected Melody
+
+AudioService
+    -> play the selected MediaAsset
+```
+
+AudioService must not interpret Qolo, Qinto, or Melody-candidate
+relationships.
+
+### Export scoping rule
+
+For Occasion export, Melody rows are scoped by the contextual Qinto when
+that Qinto is known:
+
+```text
+ExistsIn.QintoN > 0
+    -> same QoloN and same QintoN only
+
+ExistsIn.QintoN = 0 or Null
+    -> all Melodies for that QoloN
+```
+
+A concrete Qinto must not implicitly receive `Melody.QintoN = 0`
+variants.
+
+### Application behavior
+
+The verified UI policy is:
+
+```text
+effectiveMelody != null
+    -> use effectiveMelody
+
+effectiveMelody == null and one candidate
+    -> use the unique candidate
+
+effectiveMelody == null and multiple candidates
+    -> require explicit selection
+```
+
+Changing the selected Melody:
+
+- stops previous playback;
+- clears pending auto-play;
+- clears the selected recording;
+- resets seek state;
+- does not itself start playback.
+
+After Melody selection, the existing multiple-recording policy from
+Decision 067 remains in force.
+
+### Verification
+
+The first real end-to-end case is:
+
+```text
+Occasion 64
+Qolo 224
+Qinto 2
+Melody candidates: 294, 295
+```
+
+The generated package preserved both candidates. Runtime resolution
+preserved both candidates. Android manual testing verified explicit
+selection and correct playback behavior for either Melody.
+
+The implementation milestones are:
+
+```text
+88d0efc  Scope occasion melodies by Qinto
+03014ab  Support multiple melody selection in hymn details
+```
+
+Verification passed:
+
+```text
+:shared:allTests
+:shared:check
+:androidApp:assembleDebug
+```
+
+### Next consequence
+
+With Melody choice, recording choice, playback controls, seek behavior,
+position reporting, and AudioService lifecycle now stabilized, the next
+selected audio milestone is a reusable Playback Queue / Play All flow.
+
+That queue must extend the existing content-driven selection path rather
+than create a parallel media-selection mechanism.
+
+------------------------------------------------------------------------

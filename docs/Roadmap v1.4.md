@@ -1098,3 +1098,53 @@ Until that selection is made, the verified baseline for new work is
 `b56fdea`.
 
 ------------------------------------------------------------------------
+
+<!-- ROADMAP-MULTIPLE-MELODY-PLAY-ALL-2026-09-02 -->
+
+------------------------------------------------------------------------
+
+# Phase 9 Roadmap Update --- 2026-09-02
+
+**Verified implementation baseline:** `03014abccd705d38d646637d20523d03797e5be3`
+
+The following Phase 9 items are now completed and verified:
+
+- stable Play / Pause / Stop semantics;
+- continuous Android playback-position reporting;
+- seek behavior;
+- performer metadata transport;
+- multiple recordings per Melody;
+- explicit recording selection;
+- platform-owned AudioService lifecycle and backend release;
+- Author Database performer/schema synchronization;
+- Qinto-scoped Occasion Melody export;
+- preservation of multiple Melody candidates for a contextual Qolo;
+- explicit application selection when multiple Melody candidates are
+  valid;
+- Android manual verification of the real Occasion 64 / Qolo 224 /
+  Qinto 2 case.
+
+The active next milestone is:
+
+```text
+Playback Queue / Play All
+```
+
+The first implementation goal is a reusable ordered playback queue that
+can advance to the next playable item after the current item reaches
+`Ended`, while preserving the existing single-recording playback path.
+
+The queue must remain content-driven. It must not hard-code MediaAsset
+identities or bypass Melody and recording resolution.
+
+The following remain deferred:
+
+- Day-aware Composition and Navigation;
+- occurrence-level PERFORMANCE media;
+- MediaTimingSet / MediaSegment integration;
+- verse synchronization;
+- iOS native playback;
+- production UI styling;
+- unrelated search/user-domain expansion until deliberately selected.
+
+------------------------------------------------------------------------
