@@ -110,34 +110,6 @@ tasks.register<JavaExec>(
     )
 }
 
-tasks.register<Sync>(
-    "syncDevelopmentPreviewToReferenceApp"
-) {
-    group = "syriacplatform"
-
-    description =
-        "Builds and copies Occasion $occasionId preview " +
-                "into the Reference Application package resources."
-
-    dependsOn(
-        "buildOccasionPreview"
-    )
-
-    val referencePackageDirectory =
-        layout.projectDirectory.dir(
-            "../platform/shared/src/commonMain/" +
-                    "composeResources/files"
-        )
-
-    from(
-        occasionPreviewDirectory
-    )
-
-    into(
-        referencePackageDirectory
-    )
-}
-
 tasks.test {
     useJUnitPlatform()
 }

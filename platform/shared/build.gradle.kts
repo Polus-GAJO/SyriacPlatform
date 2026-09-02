@@ -53,7 +53,75 @@ dependencies {
     androidRuntimeClasspath(libs.compose.uiTooling)
 }
 
+val buildtoolsProject =
+    project(":buildtools")
+
+val developmentComposeResourcesDirectory =
+    layout.buildDirectory.dir(
+        "generated/developmentComposeResources"
+    )
+
+val prepareDevelopmentContentResources =
+    tasks.register<Sync>(
+        "prepareDevelopmentContentResources"
+    ) {
+        group = "syriacplatform"
+
+        description =
+            "Prepares the generated development content package " +
+                    "as Compose Multiplatform resources."
+
+        dependsOn(
+            buildtoolsProject.tasks.named(
+                "buildOccasionPreview"
+            )
+        )
+
+        val occasionId =
+            providers.gradleProperty(
+                "occasionId"
+            )
+                .orElse("1")
+
+        val occasionPreviewDirectory =
+            buildtoolsProject.layout
+                .buildDirectory
+                .dir(
+                    occasionId.map { id ->
+                        "generated/occasion-$id-preview"
+                    }
+                )
+
+        from(
+            occasionPreviewDirectory
+        ) {
+            into("files")
+        }
+
+        into(
+            developmentComposeResourcesDirectory
+        )
+    }
+
+val developmentContentEnabled =
+    providers.gradleProperty(
+        "occasionId"
+    )
+        .isPresent
+
 compose.resources {
     packageOfResClass = "org.syriacplatform.resources"
     generateResClass = always
+
+    if (developmentContentEnabled) {
+        customDirectory(
+            sourceSetName = "commonMain",
+            directoryProvider =
+                layout.dir(
+                    prepareDevelopmentContentResources.map {
+                        it.destinationDir
+                    }
+                )
+        )
+    }
 }
