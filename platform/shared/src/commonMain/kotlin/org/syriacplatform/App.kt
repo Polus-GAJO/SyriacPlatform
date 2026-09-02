@@ -29,6 +29,7 @@ import org.syriacplatform.audio.models.PlaybackState
 import org.syriacplatform.audio.models.PlaybackStatus
 import org.syriacplatform.common.result.Result
 import org.syriacplatform.common.types.MediaAssetId
+import org.syriacplatform.common.types.MelodyId
 import org.syriacplatform.common.types.OccasionId
 import org.syriacplatform.common.types.QoloId
 import org.syriacplatform.content.models.MediaAsset
@@ -1037,6 +1038,10 @@ private fun HymnDetailsScreen(
         mutableStateOf(0L)
     }
 
+    var selectedMelodyId by remember(liturgicalItemId) {
+        mutableStateOf<MelodyId?>(null)
+    }
+
     var selectedRecordingId by remember(liturgicalItemId) {
         mutableStateOf<MediaAssetId?>(null)
     }
@@ -1088,13 +1093,75 @@ private fun HymnDetailsScreen(
                 if (target is ResolvedLiturgicalItemTarget.Qolo) {
                     val effectiveMelody = target.effectiveMelody
 
+                    val selectedMelody =
+                        effectiveMelody
+                            ?: if (target.melodyCandidates.size == 1) {
+                                target.melodyCandidates.first()
+                            } else {
+                                target.melodyCandidates
+                                    .firstOrNull { melody ->
+                                        melody.id == selectedMelodyId
+                                    }
+                            }
+
                     Text(
                         text = target.qolo.name,
                         style = SyriacTextStyles.body()
                     )
 
+                    if (
+                        effectiveMelody == null &&
+                        target.melodyCandidates.size > 1
+                    ) {
+                        Text(
+                            text = "Melodies",
+                            modifier =
+                                Modifier.padding(
+                                    top = 8.dp,
+                                    bottom = 8.dp
+                                ),
+                            style =
+                                MaterialTheme.typography.titleSmall
+                        )
+
+                        target.melodyCandidates.forEach { melody ->
+                            Button(
+                                onClick = {
+                                    if (selectedMelodyId != melody.id) {
+                                        pendingAutoPlayId = null
+                                        audioService?.stop()
+                                        selectedRecordingId = null
+                                        selectedMelodyId = melody.id
+                                        seekPositionMs = 0L
+                                        isSeeking = false
+                                    }
+                                },
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = 6.dp)
+                            ) {
+                                Text(
+                                    text =
+                                        if (selectedMelodyId == melody.id) {
+                                            "[Selected] ${melody.name}"
+                                        } else {
+                                            melody.name
+                                        },
+                                    style = SyriacTextStyles.body()
+                                )
+                            }
+                        }
+                    }
+
                     Text(
-                        text = effectiveMelody?.name ?: "Melody unresolved",
+                        text =
+                            selectedMelody?.name
+                                ?: if (target.melodyCandidates.isNotEmpty()) {
+                                    "Select a melody"
+                                } else {
+                                    "Melody unresolved"
+                                },
                         modifier = Modifier.padding(top = 6.dp, bottom = 12.dp),
                         style = MaterialTheme.typography.titleMedium
                     )
@@ -1102,12 +1169,12 @@ private fun HymnDetailsScreen(
                     val recordingsResult by produceState<Result<List<MediaAsset>>?>(
                         initialValue = null,
                         key1 = platform,
-                        key2 = effectiveMelody?.id
+                        key2 = selectedMelody?.id
                     ) {
                         value =
-                            if (effectiveMelody != null) {
+                            if (selectedMelody != null) {
                                 platform.content.loadMelodyRecordings(
-                                    effectiveMelody.id
+                                    selectedMelody.id
                                 )
                             } else {
                                 null
@@ -1116,7 +1183,7 @@ private fun HymnDetailsScreen(
 
                     when (val recordings = recordingsResult) {
                         null -> {
-                            if (effectiveMelody != null) {
+                            if (selectedMelody != null) {
                                 Text("Loading recordings...")
                             }
                         }
