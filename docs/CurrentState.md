@@ -2,7 +2,7 @@
 
 **Document:** CurrentState\
 **Status:** Active implementation reference\
-**Last updated:** 2026-09-01\
+**Last updated:** 2026-09-02\
 **Repository:** SyriacPlatform\
 **Branch:** `main`\
 **Current milestone:** Phase 9 Runtime Audio Integration --- Android reusable audio foundation, lifecycle ownership, performer metadata, and multiple-recording selection verified\
@@ -3071,3 +3071,160 @@ Verification completed:
 Focused automated tests cover ordering, multiple Melody candidates, recording preference/fallback, missing recordings, pause/resume, stop, completion, and unrelated playback-state filtering.
 
 The Prayer Play All foundation is complete for the current Android runtime scope.
+
+------------------------------------------------------------------------
+
+# 2026-09-02 Update --- Generated Content Separation and Reference App Development Content
+
+## Generated Content Is No Longer a Source Resource
+
+Generated Application Package content is no longer stored under:
+
+``` text
+platform/shared/src/commonMain/composeResources/files/
+```
+
+The source tree contains software and stable presentation resources, while
+generated package data is produced outside tracked source resources.
+
+The development pipeline is now:
+
+``` text
+Author Database
+        ↓
+Build Tools / Exporter
+        ↓
+Generated Occasion Package
+        ↓
+Build-time Compose Resource Staging
+        ↓
+Reference Application
+```
+
+This preserves the architectural boundary between software and generated
+content.
+
+Generated package files and copied media are build inputs/outputs, not
+canonical source-code resources and not version-controlled application
+content.
+
+## Development Content Configuration
+
+Local Reference Application development uses:
+
+``` text
+development-content.properties
+```
+
+at the repository root.
+
+The local file is intentionally ignored by Git. A tracked template is
+provided as:
+
+``` text
+development-content.properties.example
+```
+
+The current configuration supports:
+
+``` properties
+occasionId=<positive Occasion ID>
+mediaLibraryRoot=<local media library path>
+```
+
+A command-line Gradle property remains an explicit override when needed.
+
+For normal Android Studio development, changing `occasionId` in the local
+configuration selects the Occasion to build and run without copying its
+generated package into the source tree.
+
+## Software-Only Builds Remain Independent
+
+The presence of local development configuration does not make ordinary
+shared-module tests depend on Author Database exports or generated
+content.
+
+Verified:
+
+``` text
+:shared:clean :shared:allTests
+```
+
+completed successfully without executing:
+
+``` text
+:buildtools:buildOccasionPreview
+:shared:prepareDevelopmentContentResources
+```
+
+This is an intentional property of the development architecture.
+
+## Android Reference App Build
+
+When an Android Reference Application build is requested, the local
+development Occasion configuration activates the generated-content path.
+
+The verified build path includes:
+
+``` text
+:buildtools:buildOccasionPreview
+        ↓
+:shared:prepareDevelopmentContentResources
+        ↓
+Compose resource preparation/accessor generation
+        ↓
+:androidApp:assembleDebug
+```
+
+Occasion 64 was used for the verified development run on 2026-09-02.
+
+## Static Resources and Generated Package Staging
+
+Static software resources remain tracked under:
+
+``` text
+platform/shared/src/commonMain/composeResources/
+├── font/
+└── drawable/
+```
+
+Generated package content remains separate.
+
+During an activated Reference Application build,
+`prepareDevelopmentContentResources` creates a build-only staging resource
+tree that combines the static Compose resources with the generated package:
+
+``` text
+shared/build/generated/developmentComposeResources/
+├── font/
+├── drawable/
+└── files/
+    ├── manifest.json
+    ├── content/
+    └── media/
+```
+
+The two resource categories are therefore separate in their authoritative
+source locations and meet only in generated build output.
+
+This staging rule is important because Compose resource accessor generation
+must continue to see static resources such as the Syriac font while the
+generated package is attached for the development build.
+
+## Verification
+
+The separation and development workflow have been verified through:
+
+- byte-for-byte comparison of the previous source package and generated
+  staging package before removal of the source copy;
+- successful shared software-only tests without generated-content tasks;
+- successful generated Occasion package preparation;
+- successful Android application build with automatically selected local
+  development content;
+- successful Android Studio emulator smoke test;
+- verification that the Reference Application content, navigation, and
+  previously working behavior continue to operate after the separation.
+
+The Application Package Schema-v1 contract was not changed by this work.
+The change concerns package supply, development configuration, and build
+resource staging.

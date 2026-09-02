@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.kotlinJvm)
 }
@@ -16,9 +18,31 @@ dependencies {
     )
 }
 
+val developmentContentConfigFile =
+    rootProject.projectDir
+        .parentFile
+        .resolve(
+            "development-content.properties"
+        )
+
+val developmentContentProperties =
+    Properties().apply {
+        if (developmentContentConfigFile.isFile) {
+            developmentContentConfigFile
+                .inputStream()
+                .use(::load)
+        }
+    }
+
+val localOccasionId =
+    developmentContentProperties
+        .getProperty("occasionId")
+        ?.trim()
+        ?.takeIf { it.isNotEmpty() }
+
 val occasionId =
     providers.gradleProperty("occasionId")
-        .orElse("1")
+        .orElse(localOccasionId ?: "1")
         .get()
 
 require(
@@ -27,7 +51,6 @@ require(
 ) {
     "occasionId must be a positive integer."
 }
-
 val occasionSourceDirectory =
     layout.projectDirectory.dir(
         "../author-database/exports/occasion-$occasionId"
@@ -43,6 +66,14 @@ val mediaSourceDirectory =
         "../author-database/exports/media"
     )
 
+val localMediaLibraryRoot =
+    developmentContentProperties
+        .getProperty(
+            "mediaLibraryRoot"
+        )
+        ?.trim()
+        ?.takeIf { it.isNotEmpty() }
+
 val mediaLibraryRoot =
     providers.gradleProperty(
         "mediaLibraryRoot"
@@ -53,10 +84,10 @@ val mediaLibraryRoot =
             )
         )
         .orElse(
-            "D:\\SyriacPlatformMedia"
+            localMediaLibraryRoot
+                ?: "D:\\SyriacPlatformMedia"
         )
         .get()
-
 tasks.register<JavaExec>(
     "buildOccasionPreview"
 ) {

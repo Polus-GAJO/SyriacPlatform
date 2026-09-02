@@ -3,7 +3,7 @@
 ## Roadmap v1.4
 
 **Status:** Official Development Plan\
-**Updated:** 2026-09-01\
+**Updated:** 2026-09-02\
 **Verified implementation baseline:** `b56fdea`\
 **Documentation correction follows:** `3ca4c6b`
 
@@ -1177,3 +1177,149 @@ The queue layer remains above the content-agnostic `AudioService`; Prayer/Qolo/M
 Remaining deferred audio work includes occurrence-level `PERFORMANCE` integration, media timing/segments and verse synchronization, notation-image media migration, and the iOS native playback backend at the planned cross-platform stage.
 
 The reusable Android audio foundation, lifecycle ownership, multiple-recording selection, multiple-Melody handling, playback controls/position, and Prayer Play All queue are now verified.
+
+------------------------------------------------------------------------
+
+# Roadmap Update --- 2026-09-02
+
+This update records implementation completed after the 2026-09-01
+documentation baseline.
+
+## Phase 8 Status Correction
+
+**Status:** Core Generalization and Development Package Workflow Completed;
+broader representative-content coverage remains ongoing.
+
+The earlier Phase 8 plan described explicit Occasion/build configuration
+and reusable package generation as future work. Those foundations are now
+implemented.
+
+Completed capabilities include:
+
+- parameterized Occasion package generation;
+- reusable Build Tools generation without restoring Occasion-specific
+  package data to source resources;
+- local development Occasion selection;
+- media-library configuration;
+- generated package staging for the Android Reference Application;
+- preservation of a software-only shared test path;
+- removal of tracked generated Application Package files from shared source
+  resources;
+- Android Studio development runs using generated content selected at build
+  time.
+
+The current development path is:
+
+``` text
+selected Occasion
+        ↓
+local development configuration
+        ↓
+Author Database export
+        ↓
+Build Tools
+        ↓
+generated Schema-v1 package
+        ↓
+build-time Compose resource staging
+        ↓
+existing Core/runtime
+        ↓
+Reference Application
+```
+
+## Generated Content Separation
+
+Generated Application Package data is now treated as generated build data,
+not source-code resources.
+
+The repository keeps:
+
+``` text
+software
+contracts
+tests
+documentation
+stable UI resources
+```
+
+while generated package content and package media remain outside tracked
+source resources.
+
+This removes the previous development synchronization model in which a
+generated package could be copied into:
+
+``` text
+platform/shared/src/commonMain/composeResources/files/
+```
+
+The Reference Application instead consumes the generated package through a
+build-only staging directory.
+
+## Development Configuration
+
+A local ignored configuration file selects the development Occasion and
+media-library root.
+
+A tracked example configuration documents the expected fields.
+
+This is intentionally a build-time mechanism. A small development chooser
+may be added later if manual editing becomes inconvenient, but it should
+write development configuration rather than turn package selection into
+runtime application state.
+
+## Verified 2026-09-02
+
+The new workflow has been verified with Occasion 64 through:
+
+``` text
+software-only shared tests
+        ↓
+Android Reference App build
+        ↓
+generated-content staging
+        ↓
+Android Studio emulator smoke test
+```
+
+The Reference Application continued to operate with its previously verified
+content and behavior.
+
+## Documentation / Contract Boundary
+
+No Schema-v1 Application Package format change was required.
+
+The completed work changes:
+
+- where generated content lives;
+- how development content is selected;
+- how generated content is supplied to Compose Resources during a Reference
+  Application build.
+
+It does not change the physical package contract.
+
+## Near-Term Engineering Priority
+
+With the generated-content development path established, the next major
+workflow concern can return to authoritative content production and
+maintenance.
+
+The Author Database authoring workflow should be modernized so table
+relationships and media records can be safely created, edited, and removed
+through controlled forms/workflows rather than depending on manual physical
+data management.
+
+Media authoring work should distinguish:
+
+``` text
+relationship removal
+database MediaAsset deletion
+physical media-file deletion
+physical media-file replacement
+```
+
+because these operations have different integrity consequences.
+
+Search Domain work remains planned and should continue to be driven by
+representative real-content requirements rather than by the old embedded
+sample-package workflow.

@@ -30,3 +30,6 @@ desktop.ini
 *.temp
 # Author Database generated exports
 author-database/exports/
+
+# Local development content configuration
+/development-content.properties

@@ -3,7 +3,7 @@
 ## Engineering Notebook v1.4
 
 **Status:** Official Engineering Record\
-**Updated:** 2026-09-01\
+**Updated:** 2026-09-02\
 **Repository:** `SyriacPlatform`\
 **Branch:** `main`\
 **Implementation baseline:** `b56fdea`\
@@ -3111,3 +3111,129 @@ Implemented and verified in:
 4fc1e44 — Add prayer Play All playback queue
 fb78b17 — Remove BOM from App source
 ```
+
+------------------------------------------------------------------------
+
+# Decision --- Generated Content Must Remain Outside Source Resources
+
+**Date:** 2026-09-02
+
+## Decision
+
+Generated Application Package content and copied package media must not be
+stored as tracked resources under the shared source tree.
+
+The authoritative development flow is:
+
+``` text
+Author Database
+        ↓
+Build Tools
+        ↓
+Generated Content Package
+        ↓
+Build-time staging
+        ↓
+Reference Application
+```
+
+Stable software resources such as fonts and drawables remain source
+resources. Generated liturgical content remains generated data.
+
+## Reason
+
+The generated package is derived from the Author Database and Build Tools.
+Keeping a generated copy inside `src` creates two apparent authorities for
+the same content and risks stale data being committed with software changes.
+
+Separating generated content from source resources provides a clearer
+boundary:
+
+``` text
+Git / source tree
+    = software, contracts, tests, documentation, stable UI resources
+
+Author Database + media library
+    = authoritative authored content and physical media
+
+build/
+    = generated package and development resource staging
+```
+
+## Development Configuration Decision
+
+The Reference Application needs a convenient way to select real content
+during development without reintroducing generated data into Git.
+
+A repository-root local file is therefore used:
+
+``` text
+development-content.properties
+```
+
+It is ignored by Git. A tracked example file documents the supported
+settings.
+
+The selected `occasionId` is a build-time concern, not an in-application
+runtime selection. The Reference Application therefore does not own an
+Occasion-selection screen for choosing which package is compiled into a
+development build.
+
+An explicit Gradle `occasionId` property may still override the local
+configuration for command-line or controlled build use.
+
+## Software-Only Build Isolation
+
+Local development configuration must not cause ordinary shared-module tests
+to require Author Database exports or the media library.
+
+Generated development content is activated for the Android Reference
+Application build, or when explicitly requested through the Gradle
+Occasion property.
+
+This preserves the ability to test the platform software independently of
+local authored data.
+
+## Compose Resource Staging
+
+Compose Multiplatform resource generation requires static resource
+accessors and generated package files to be visible in the activated
+development resource tree.
+
+The build therefore stages:
+
+``` text
+src/commonMain/composeResources/
+        +
+generated Occasion package -> files/
+        ↓
+build/generated/developmentComposeResources/
+```
+
+This is a build-output merge only.
+
+It does not make generated content a source resource and does not move
+static software resources out of their tracked source location.
+
+## Impact
+
+- Generated package data is no longer committed as shared source resources.
+- The Author Database / Build Tools path remains authoritative for generated
+  application content.
+- Developers select the Reference App Occasion through local build
+  configuration.
+- Shared software tests remain usable without generated development data.
+- Android Studio Run can build and stage the selected real Occasion
+  automatically.
+- Static fonts and drawables remain version-controlled software resources.
+- The Application Package physical contract is unchanged.
+- A future development chooser may edit the local configuration, but package
+  selection remains a build-time responsibility rather than application UI
+  state.
+
+## Verification
+
+The architecture was verified with Occasion 64 through Gradle build tasks
+and a successful Android Studio emulator run. Existing Reference Application
+behavior continued to operate after removal of the tracked generated package
+from `src`.

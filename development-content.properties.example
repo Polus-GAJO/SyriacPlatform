@@ -1,0 +1,6 @@
+# Local development content configuration template.
+# Copy this file to development-content.properties and adjust the values.
+# The local file is intentionally ignored by Git.
+
+occasionId=1
+mediaLibraryRoot=D:/SyriacPlatformMedia
