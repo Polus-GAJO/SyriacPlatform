@@ -1,4 +1,4 @@
-package org.syriacplatform
+﻿package org.syriacplatform
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +14,8 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,6 +29,10 @@ import androidx.compose.ui.unit.dp
 import org.syriacplatform.audio.contracts.AudioService
 import org.syriacplatform.audio.models.PlaybackState
 import org.syriacplatform.audio.models.PlaybackStatus
+import org.syriacplatform.audio.queue.PlaybackQueueController
+import org.syriacplatform.audio.queue.PlaybackQueueState
+import org.syriacplatform.audio.queue.PlaybackQueueStatus
+import org.syriacplatform.audio.queue.PrayerPlaybackQueueBuilder
 import org.syriacplatform.common.result.Result
 import org.syriacplatform.common.types.MediaAssetId
 import org.syriacplatform.common.types.MelodyId
@@ -43,6 +49,8 @@ import org.syriacplatform.navigation.AppDestination
 import org.syriacplatform.common.types.PrayerSequenceId
 import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.presentation.theme.SyriacTextStyles
+import kotlinx.coroutines.launch
+
 
 @Composable
 fun App(
@@ -66,6 +74,14 @@ fun App(
     var selectedQoloId by remember {
         mutableStateOf<QoloId?>(null)
     }
+
+    val preferredRecordingIds =
+        remember {
+            mutableStateMapOf<
+                MelodyId,
+                MediaAssetId
+            >()
+        }
 
     MaterialTheme {
         when (navigationState.currentDestination) {
@@ -94,6 +110,16 @@ fun App(
                         audioService = platform.audio,
                         liturgicalItemId =
                             liturgicalItemId,
+                        preferredRecordingIds =
+                            preferredRecordingIds,
+                        onRecordingSelected = {
+                                melodyId,
+                                recordingId ->
+                            preferredRecordingIds[
+                                melodyId
+                            ] =
+                                recordingId
+                        },
                         onBack = {
                             selectedLiturgicalItemId =
                                 null
@@ -159,6 +185,8 @@ fun App(
                         platform = platform,
                         occasionId = selectedOccasionId,
                         prayerSequenceId = prayerSequenceId,
+                        preferredRecordingIds =
+                            preferredRecordingIds,
                         onOpenHymn = { liturgicalItemId ->
                             selectedLiturgicalItemId =
                                 liturgicalItemId
@@ -530,9 +558,53 @@ private fun PrayerDetailsScreen(
     platform: PlatformContext,
     occasionId: OccasionId?,
     prayerSequenceId: PrayerSequenceId,
+    preferredRecordingIds:
+        Map<MelodyId, MediaAssetId>,
     onOpenHymn: (LiturgicalItemId) -> Unit,
     onBack: () -> Unit
 ) {
+    val audioService =
+        platform.audio
+
+    val playbackState =
+        rememberPlaybackState(
+            audioService
+        )
+
+    val queueController =
+        remember(audioService) {
+            audioService?.let {
+                PlaybackQueueController(
+                    it
+                )
+            }
+        }
+
+    val queueState =
+        rememberPlaybackQueueState(
+            queueController
+        )
+
+    val coroutineScope =
+        rememberCoroutineScope()
+
+    var playAllMessage by
+        remember(
+            prayerSequenceId
+        ) {
+            mutableStateOf<String?>(null)
+        }
+
+    LaunchedEffect(
+        playbackState,
+        queueController
+    ) {
+        queueController
+            ?.handlePlaybackState(
+                playbackState
+            )
+    }
+
     val occasionResult by
     produceState<Result<RuntimeOccasion>?>(
         initialValue = null,
@@ -608,6 +680,178 @@ private fun PrayerDetailsScreen(
                         )
                     }
 
+                    Button(
+                        enabled =
+                            queueController != null &&
+                            queueState.status !=
+                                PlaybackQueueStatus.Loading &&
+                            queueState.status !=
+                                PlaybackQueueStatus.Playing,
+                        onClick = {
+                            playAllMessage = null
+
+                            coroutineScope.launch {
+                                when (
+                                    val buildResult =
+                                        PrayerPlaybackQueueBuilder(
+                                            platform.content
+                                        ).build(
+                                            sequence =
+                                                sequence,
+                                            preferredRecordingIds =
+                                                preferredRecordingIds
+                                        )
+                                ) {
+                                    is Result.Failure -> {
+                                        playAllMessage =
+                                            buildResult
+                                                .error
+                                                .message
+                                                ?: "Play All queue build failed"
+                                    }
+
+                                    is Result.Success -> {
+                                        val entries =
+                                            buildResult.data
+
+                                        if (entries.isEmpty()) {
+                                            playAllMessage =
+                                                "No recordings available for this prayer"
+                                        } else {
+                                            when (
+                                                val startResult =
+                                                    queueController
+                                                        ?.start(
+                                                            entries
+                                                        )
+                                            ) {
+                                                null -> {
+                                                    playAllMessage =
+                                                        "Audio service unavailable"
+                                                }
+
+                                                is Result.Failure -> {
+                                                    playAllMessage =
+                                                        startResult
+                                                            .error
+                                                            .message
+                                                            ?: "Play All failed"
+                                                }
+
+                                                is Result.Success -> {
+                                                    playAllMessage =
+                                                        null
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        modifier =
+                            Modifier.padding(
+                                top = 12.dp,
+                                bottom = 8.dp
+                            )
+                    ) {
+                        Text("Play All")
+                    }
+
+                    when (queueState.status) {
+                        PlaybackQueueStatus.Playing -> {
+                            Button(
+                                onClick = {
+                                    queueController?.pause()
+                                },
+                                modifier =
+                                    Modifier.padding(
+                                        bottom = 8.dp
+                                    )
+                            ) {
+                                Text("Pause All")
+                            }
+                        }
+
+                        PlaybackQueueStatus.Paused -> {
+                            Button(
+                                onClick = {
+                                    queueController?.resume()
+                                },
+                                modifier =
+                                    Modifier.padding(
+                                        bottom = 8.dp
+                                    )
+                            ) {
+                                Text("Resume All")
+                            }
+                        }
+
+                        PlaybackQueueStatus.Loading -> {
+                            Text(
+                                "Play All: Loading..."
+                            )
+                        }
+
+                        PlaybackQueueStatus.Completed -> {
+                            Text(
+                                "Play All: Completed"
+                            )
+                        }
+
+                        PlaybackQueueStatus.Error -> {
+                            Text(
+                                "Play All: Error"
+                            )
+                        }
+
+                        PlaybackQueueStatus.Idle -> Unit
+                    }
+
+                    if (
+                        queueState.status ==
+                            PlaybackQueueStatus.Loading ||
+                        queueState.status ==
+                            PlaybackQueueStatus.Playing ||
+                        queueState.status ==
+                            PlaybackQueueStatus.Paused
+                    ) {
+                        val currentNumber =
+                            queueState.currentIndex
+                                ?.plus(1)
+
+                        if (currentNumber != null) {
+                            Text(
+                                "Play All item: " +
+                                    "$currentNumber / " +
+                                    "${queueState.entries.size}"
+                            )
+                        }
+
+                        Button(
+                            onClick = {
+                                playAllMessage = null
+                                queueController?.stop()
+                            },
+                            modifier =
+                                Modifier.padding(
+                                    bottom = 8.dp
+                                )
+                        ) {
+                            Text("Stop All")
+                        }
+                    }
+
+                    playAllMessage?.let {
+                            message ->
+                        Text(
+                            text = message,
+                            modifier =
+                                Modifier.padding(
+                                    bottom = 8.dp
+                                )
+                        )
+                    }
+
                     if (sequence.items.isEmpty()) {
                         Text(
                             text =
@@ -627,8 +871,13 @@ private fun PrayerDetailsScreen(
                                     item ->
                                 ResolvedLiturgicalItemView(
                                     item = item,
-                                    onOpenHymn =
-                                        onOpenHymn
+                                    onOpenHymn = {
+                                            liturgicalItemId ->
+                                        queueController?.stop()
+                                        onOpenHymn(
+                                            liturgicalItemId
+                                        )
+                                    }
                                 )
                             }
                         }
@@ -638,7 +887,10 @@ private fun PrayerDetailsScreen(
         }
 
         Button(
-            onClick = onBack,
+            onClick = {
+                queueController?.stop()
+                onBack()
+            },
             modifier =
                 Modifier.padding(
                     top = 24.dp
@@ -1014,6 +1266,10 @@ private fun HymnDetailsScreen(
     platform: PlatformContext,
     audioService: AudioService?,
     liturgicalItemId: LiturgicalItemId,
+    preferredRecordingIds:
+        Map<MelodyId, MediaAssetId>,
+    onRecordingSelected:
+        (MelodyId, MediaAssetId) -> Unit,
     onBack: () -> Unit
 ) {
     val itemResult by produceState<Result<ResolvedLiturgicalItem>?>(
@@ -1199,13 +1455,31 @@ private fun HymnDetailsScreen(
                             val availableRecordings =
                                 recordings.data
 
+                            val preferredRecordingId =
+                                selectedMelody
+                                    ?.id
+                                    ?.let {
+                                        melodyId ->
+                                        preferredRecordingIds[
+                                            melodyId
+                                        ]
+                                    }
+
                             val selectedRecording =
                                 availableRecordings
-                                    .firstOrNull { recording ->
+                                    .firstOrNull {
+                                            recording ->
                                         recording.id ==
                                             selectedRecordingId
                                     }
-                                    ?: availableRecordings.firstOrNull()
+                                    ?: availableRecordings
+                                        .firstOrNull {
+                                                recording ->
+                                            recording.id ==
+                                                preferredRecordingId
+                                        }
+                                    ?: availableRecordings
+                                        .firstOrNull()
 
                             LaunchedEffect(
                                 availableRecordings,
@@ -1217,6 +1491,14 @@ private fun HymnDetailsScreen(
                                 ) {
                                     selectedRecordingId =
                                         selectedRecording.id
+
+                                    selectedMelody?.let {
+                                            melody ->
+                                        onRecordingSelected(
+                                            melody.id,
+                                            selectedRecording.id
+                                        )
+                                    }
                                 }
                             }
 
@@ -1256,6 +1538,14 @@ private fun HymnDetailsScreen(
 
                                                 selectedRecordingId =
                                                     recording.id
+
+                                                selectedMelody?.let {
+                                                    melody ->
+                                                    onRecordingSelected(
+                                                        melody.id,
+                                                        recording.id
+                                                    )
+                                                }
 
                                                 seekPositionMs = 0L
                                                 isSeeking = false
@@ -1533,6 +1823,20 @@ private fun HymnDetailsScreen(
             Text("Back")
         }
     }
+}
+
+@Composable
+private fun rememberPlaybackQueueState(
+    controller: PlaybackQueueController?
+): PlaybackQueueState {
+    if (controller == null) {
+        return PlaybackQueueState()
+    }
+
+    val state by
+        controller.state.collectAsState()
+
+    return state
 }
 
 @Composable
