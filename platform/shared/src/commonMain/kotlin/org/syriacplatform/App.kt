@@ -1,4 +1,4 @@
-﻿package org.syriacplatform
+package org.syriacplatform
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
