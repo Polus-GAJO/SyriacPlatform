@@ -28,9 +28,9 @@ class MediaSourceRelationshipsTest {
                 .resolve("MelodyMedia.csv")
                 .writeText(
                     """
-                    "MelodyMediaID","MelodyN","MediaAssetID","Role","Sort"
-                    "1","424","7","RECORDING","1"
-                    "2","2030","7","RECORDING","1"
+                    "MelodyMediaID","MelodyN","MediaAssetID","Role","Sort","publicationStatus"
+                    "1","424","7","RECORDING","1","PUBLISHED"
+                    "2","2030","7","RECORDING","1","PUBLISHED"
                     """.trimIndent() + "\n"
                 )
 

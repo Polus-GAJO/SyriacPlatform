@@ -180,13 +180,13 @@ class OccasionPackageBuilderMediaTest {
         val relations =
             buildString {
                 appendLine(
-                    "\"MelodyMediaID\",\"MelodyN\",\"MediaAssetID\",\"Role\",\"Sort\""
+                    "\"MelodyMediaID\",\"MelodyN\",\"MediaAssetID\",\"Role\",\"Sort\",\"publicationStatus\""
                 )
 
                 source.melodies
                     .forEachIndexed { index, melody ->
                         appendLine(
-                            "\"${index + 1}\",\"${melody.id}\",\"1\",\"RECORDING\",\"1\""
+                            "\"${index + 1}\",\"${melody.id}\",\"1\",\"RECORDING\",\"1\",\"PUBLISHED\""
                         )
                     }
             }

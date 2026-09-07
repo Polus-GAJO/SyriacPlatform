@@ -572,6 +572,21 @@
           "validationRule": null,
           "validationText": null,
           "description": null
+        },
+        {
+          "name": "Description",
+          "ordinal": 4,
+          "type": "ShortText",
+          "daoType": 10,
+          "size": 255,
+          "nullable": true,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
         }
       ]
     },
@@ -913,6 +928,21 @@
           "allowZeroLength": false,
           "defaultValue": null,
           "validationRule": null,
+          "validationText": null,
+          "description": null
+        },
+        {
+          "name": "publicationStatus",
+          "ordinal": 5,
+          "type": "ShortText",
+          "daoType": 10,
+          "size": 20,
+          "nullable": false,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": "In (\"PUBLISHED\",\"ARCHIVE\")",
           "validationText": null,
           "description": null
         }

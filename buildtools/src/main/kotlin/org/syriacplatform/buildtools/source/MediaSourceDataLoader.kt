@@ -33,9 +33,13 @@ class MediaSourceDataLoader(
             readRows(
                 directory = directory,
                 fileName = "MelodyMedia.csv"
-            ).map(
-                mapper::toMelodyMedia
             )
+                .filter(
+                    ::isPublishedMelodyMedia
+                )
+                .map(
+                    mapper::toMelodyMedia
+                )
 
         validateUniqueMediaAssetIds(
             mediaAssets
@@ -58,6 +62,33 @@ class MediaSourceDataLoader(
             mediaAssets = mediaAssets,
             melodyMedia = melodyMedia
         )
+    }
+
+    private fun isPublishedMelodyMedia(
+        row: CsvRow
+    ): Boolean {
+        val publicationStatus =
+            row["publicationStatus"]
+                ?.trim()
+                ?.takeIf {
+                    it.isNotEmpty()
+                }
+
+        require(
+            publicationStatus != null
+        ) {
+            "MelodyMedia ${row["MelodyMediaID"]} must have " +
+                    "PublicationStatus."
+        }
+
+        require(
+            publicationStatus in SUPPORTED_PUBLICATION_STATUSES
+        ) {
+            "MelodyMedia ${row["MelodyMediaID"]} has unsupported " +
+                    "PublicationStatus '$publicationStatus'."
+        }
+
+        return publicationStatus == PUBLISHED_STATUS
     }
 
     private fun readRows(
@@ -136,6 +167,17 @@ class MediaSourceDataLoader(
             "MediaAsset.csv contains duplicate SourceRelativePath " +
                     "values: ${duplicatePaths.joinToString()}"
         }
+    }
+
+    private companion object {
+        const val PUBLISHED_STATUS =
+            "PUBLISHED"
+
+        val SUPPORTED_PUBLICATION_STATUSES =
+            setOf(
+                PUBLISHED_STATUS,
+                "ARCHIVE"
+            )
     }
 
     private fun validateMediaAssetReferences(
