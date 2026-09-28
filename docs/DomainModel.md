@@ -589,24 +589,78 @@ This assignment alone does not always select one unique melody, because one Qint
 
 For current prayer applications, final media and presentation choices may be pre-resolved by the Build Tools.
 
-### 5.15 AudioRecording
+### 5.15 MediaAsset and AudioRecording
 
-`AudioRecording` represents reusable audio media.
+`MediaAsset` represents a reusable media resource independently of the
+liturgical context in which it is used.
 
-For the current application scope, recordings are associated primarily with prayers:
+`AudioRecording` is the audio specialization relevant to playback. A
+recording is not conceptually owned by one prayer, LiturgicalItem, or
+TextOccurrence merely because it is used there.
+
+The same recording may be associated with more than one liturgical
+occurrence when the performed content and its segmentation are the same.
+
+Conceptually:
 
 ```text
-Prayer
-└── AudioRecording
+MediaAsset / AudioRecording
+        ↓
+RecordingUse
+        ↓
+LiturgicalItem
 ```
 
-A prayer may have one or more recordings, depending on language, performer, edition, quality, or future media requirements.
+A `RecordingUse` expresses that a recording is used for a particular
+liturgical occurrence. It may also carry occurrence-specific concerns
+such as authored order or publication state without duplicating the
+underlying media resource.
 
-The current model must not assume that each stanza or each LiturgicalItem necessarily has an independent recording.
+A LiturgicalItem may have zero, one, or several recordings, for example
+different performers or editions. Textual content remains valid when no
+recording exists unless a particular application explicitly requires
+audio.
 
-Future applications may introduce more precise recording scopes without invalidating the existing concept.
+The domain must not assume one physical audio file per stanza. A longer
+recording may cover an ordered sequence of TextOccurrences and expose
+individual text playback through reusable timing segmentation.
 
-### 5.16 MusicalNotation
+### 5.16 MediaTimingSet and MediaSegment
+
+A `MediaTimingSet` represents one reusable segmentation of a recording.
+
+A `MediaSegment` represents one ordered playable interval within that
+segmentation.
+
+Conceptually:
+
+```text
+AudioRecording
+      ↓
+MediaTimingSet
+      ↓
+ordered MediaSegments
+      ↓
+TextOccurrence mappings
+```
+
+The segment-to-text relationship is based on `TextOccurrence`, not on
+the reusable `Text` identity. This is necessary because the same Text
+may occur in different liturgical contexts while timing belongs to the
+performed occurrence.
+
+Several RecordingUses may share one MediaTimingSet when they genuinely
+reuse the same recording and the same text segmentation.
+
+Timing is structurally dependent on the sequence of TextOccurrences it
+describes. If that structure changes, the old segmentation may no longer
+be valid and must be rebuilt rather than silently reinterpreted.
+
+The domain concept is elapsed media time. The unit and serialization
+used by an authoring database, package format, or player are
+implementation concerns and are not prescribed here.
+
+### 5.17 MusicalNotation
 
 `MusicalNotation` represents a musical score or notation resource.
 
@@ -643,7 +697,12 @@ Qolo 1 ───── 1..* Melody
 Melody * ───── * Qinto
 MelodyQintoAssignment resolves the many-to-many relationship
 
-Prayer 1 ───── 0..* AudioRecording
+LiturgicalItem 1 ───── 0..* RecordingUse
+RecordingUse * ───── 1 AudioRecording
+AudioRecording 1 ───── 0..* MediaTimingSet
+MediaTimingSet 1 ───── 1..* MediaSegment
+MediaSegment * ───── * TextOccurrence mapping
+
 LiturgicalItem 1 ───── 0..* MusicalNotation reference
 ```
 
@@ -895,6 +954,12 @@ The following invariants must be enforced by authoring validation, Build Tools, 
 
 - A missing recording or notation must not invalidate textual content unless a specific application declares that media mandatory.
 - Media references must identify valid packaged assets.
+- A reusable recording must not be duplicated merely because it is used in more than one liturgical occurrence.
+- A recording use identifies contextual use; it does not redefine the identity of the underlying media asset.
+- Segment timing maps to contextual TextOccurrences, not directly to reusable Text identities.
+- A shared timing set is valid only while all uses that share it correspond to the same recording and segmentation.
+- Structural changes to the mapped TextOccurrence sequence require the affected timing segmentation to be invalidated or rebuilt.
+- Media timing is a domain concept independent of a particular player API, codec, bitrate mode, authoring storage representation, or platform.
 - The application must not present a user choice when the liturgical result has already been explicitly prescribed.
 
 ---
@@ -983,6 +1048,8 @@ The current baseline does not yet fully define:
 - the mathematical calculation of date-dependent Qinto;
 - the exact asset file format for notation;
 - the exact audio edition and performer metadata model;
+- the physical timing representation used by packages or runtime players;
+- codec, bitrate, seeking implementation, and platform-specific playback APIs;
 - the final JSON schema;
 - Kotlin data classes;
 - database persistence strategy;
@@ -1009,7 +1076,11 @@ These are future design layers built on this domain baseline.
 | القينة | `Qinto` | Liturgical tonal/modal selection |
 | اللحن المسمّى | `Melody` | Distinct mnemonic melody identity |
 | علاقة اللحن بالقينة | `MelodyQintoAssignment` | Many-to-many assignment with optional role |
-| التسجيل | `AudioRecording` | Audio media, currently prayer-oriented |
+| الأصل الإعلامي | `MediaAsset` | Reusable logical media resource |
+| التسجيل | `AudioRecording` | Reusable audio media resource |
+| استعمال التسجيل | `RecordingUse` | Contextual use of a recording by a LiturgicalItem |
+| مجموعة التوقيت | `MediaTimingSet` | Reusable segmentation of one recording |
+| المقطع الزمني | `MediaSegment` | One ordered playable interval mapped to a TextOccurrence |
 | النوتة | `MusicalNotation` | Musical notation resource |
 | الترجمة | `Translation` | Language-specific translation of Text or Petgomo |
 
