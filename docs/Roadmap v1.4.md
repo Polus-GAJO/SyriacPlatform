@@ -3,9 +3,9 @@
 ## Roadmap v1.4
 
 **Status:** Official Development Plan\
-**Updated:** 2026-09-02\
+**Updated:** 2026-09-28\
 **Verified implementation baseline:** `b56fdea`\
-**Documentation correction follows:** `3ca4c6b`
+**Author Database schema checkpoint:** `d4cd41b`
 
 ------------------------------------------------------------------------
 
@@ -1323,3 +1323,241 @@ because these operations have different integrity consequences.
 Search Domain work remains planned and should continue to be driven by
 representative real-content requirements rather than by the old embedded
 sample-package workflow.
+
+
+
+------------------------------------------------------------------------
+
+<!-- PHASE-9-PERFORMANCE-TIMING-AUTHORING-ROADMAP-2026-09-28 -->
+
+# Roadmap Update --- 2026-09-28
+
+## Author Database media-authoring milestone completed
+
+The near-term Author Database workflow priority recorded on 2026-09-02
+has now been completed for the current PERFORMANCE-recording and timing
+scope.
+
+The following authoring capabilities are implemented and manually
+verified:
+
+- controlled creation and reuse of central `MediaAsset` records;
+- contextual `ExistsInMedia` relationships with
+  `Role = PERFORMANCE`;
+- required PERFORMANCE publication state using `PUBLISHED` /
+  `ARCHIVE`;
+- media duplicate protection through required unique
+  `MediaAsset.ContentHash`;
+- recording replacement while preserving the logical MediaAsset and
+  correct media-library folder;
+- recording relationship deletion with shared-resource checks;
+- physical media deletion only when the MediaAsset is no longer used;
+- ordering and movement of contextual recording relationships;
+- linking an existing recording to another valid liturgical occurrence;
+- manual creation and editing of reusable `MediaTimingSet` /
+  `MediaSegment` timing;
+- contextual `ExistsInText` to MediaSegment mapping;
+- shared timing-set reuse;
+- automatic invalidation of affected timing when contextual text
+  structure is added or deleted;
+- preservation of recordings and physical media during timing
+  invalidation;
+- cleanup of timing data when its final applicable recording use is
+  removed;
+- text-level timed preview from the Author Database;
+- explicit selection among multiple PERFORMANCE recordings during
+  authoring preview.
+
+The authoritative schema snapshot for this checkpoint is:
+
+``` text
+d4cd41b  Update Author Database schema snapshot
+```
+
+The source authoring milestone is therefore no longer an open prerequisite
+for deciding how PERFORMANCE/timing enters the platform.
+
+## Phase 9 status after Author Database timing work
+
+The already verified runtime audio foundation remains unchanged:
+
+``` text
+Application Package MediaAsset
+        ↓
+Core/runtime media resolution
+        ↓
+content-driven recording selection
+        ↓
+AudioService
+        ↓
+platform playback backend
+        ↓
+Android Media3 / ExoPlayer
+```
+
+Completed runtime capabilities continue to include:
+
+- canonical MediaAsset ingestion and validation;
+- Melody recording resolution;
+- multiple Melody candidates and explicit Melody selection;
+- multiple recordings and explicit recording selection;
+- platform-owned AudioService lifecycle;
+- Play / Pause / Stop / Seek;
+- continuous playback position;
+- Prayer Play All queue and orchestration.
+
+The newly completed Author Database work does not replace any of these
+layers.
+
+## Completed source side / remaining platform side
+
+The PERFORMANCE/timing feature now has a clear implementation boundary.
+
+### Completed and verified in the Author Database
+
+``` text
+ExistsInMedia PERFORMANCE authoring
+MediaTimingSet authoring
+MediaSegment authoring
+ExistsInTextMediaSegment mapping
+shared timing semantics
+timing invalidation
+recording/timing cleanup
+text-level timed authoring preview
+```
+
+### Not yet implemented through package/runtime
+
+``` text
+PERFORMANCE projection from Author Database export into canonical package data
+MediaTimingSet package representation
+MediaSegment package representation
+TextOccurrence-to-segment package representation
+package validation for PERFORMANCE/timing relationships
+Core/runtime ingestion of occurrence recordings
+runtime resolution of PERFORMANCE recording by LiturgicalItem
+runtime resolution of a TextOccurrence segment
+interval playback through the existing AudioService/backend architecture
+optional verse synchronization behavior
+```
+
+This distinction is intentional. Author Database completion must not be
+mistaken for runtime completion.
+
+## Next selected Phase 9 milestone
+
+The next platform milestone is:
+
+> **PERFORMANCE Media and Timing Package/Runtime Integration**
+
+The implementation should proceed incrementally through the existing
+architecture rather than jump directly to UI synchronization.
+
+Recommended order:
+
+``` text
+1. Review controlled media export for current PERFORMANCE/timing fields
+2. Define/extend canonical Build Tools source models
+3. Define Schema-v1 package representation for occurrence recordings and timing
+4. Add deterministic package mapping/selection
+5. Add package validation and reference validation
+6. Add Core DTO/domain ingestion
+7. Add runtime indexes/resolution APIs
+8. Resolve LiturgicalItem -> PERFORMANCE recording
+9. Resolve TextOccurrence -> MediaSegment
+10. Add interval playback through the existing AudioService boundary
+11. Verify with real Author Database content
+12. Only then add verse-level UI playback/synchronization behavior
+```
+
+Each step should be covered by focused tests before advancing to the
+next layer.
+
+## Architectural constraints for the next milestone
+
+PERFORMANCE/timing integration must preserve the established decisions:
+
+- do not create a second media-loading path;
+- do not create a second native audio backend;
+- do not make the UI traverse Author Database relationships;
+- do not identify timed text by reusable `TextID`;
+- preserve contextual TextOccurrence identity;
+- preserve reusable MediaAsset identity;
+- preserve shared timing-set semantics where the source legitimately
+  shares one segmentation;
+- convert the Author Database timing representation explicitly rather
+  than assuming its `StartMs` / `EndMs` Long values are already
+  canonical elapsed milliseconds;
+- keep MCI and the Access CBR preview convention outside the runtime
+  architecture;
+- keep `AudioService` content-agnostic;
+- keep Prayer Play All behavior intact unless an explicit later
+  requirement extends its queue semantics.
+
+## Acceptance criteria for PERFORMANCE/timing integration
+
+The milestone is complete only when a real generated package can prove
+the full path:
+
+``` text
+Author Database PERFORMANCE relationship
+        ↓
+controlled export
+        ↓
+Build Tools canonical mapping
+        ↓
+Application Package
+        ↓
+Core/runtime validation and resolution
+        ↓
+LiturgicalItem recording selection
+        ↓
+TextOccurrence segment resolution
+        ↓
+existing AudioService/backend
+        ↓
+play from authoritative segment start
+        ↓
+stop at authoritative segment end
+```
+
+Verification must include at least:
+
+- a PERFORMANCE recording attached to a real LiturgicalItem;
+- valid package references for its MediaAsset and timing data;
+- more than one text segment;
+- correct contextual TextOccurrence mapping;
+- correct conversion to elapsed runtime time;
+- segment start and end playback behavior;
+- no regression in existing Melody recording playback;
+- no regression in Prayer Play All;
+- shared timing behavior where representative source data uses it.
+
+## Work that remains deferred
+
+The following remain outside this immediate milestone unless a concrete
+requirement changes priority:
+
+- automatic visual verse highlighting beyond the first verified
+  segment-playback path;
+- iOS native audio backend and cross-platform playback verification;
+- notation-image media migration;
+- Search Domain implementation;
+- User Domain implementation;
+- production UI styling;
+- broader cloud/remote media distribution;
+- Day-aware Composition unless selected again by representative
+  application requirements.
+
+## Restart point
+
+After documentation synchronization, development should resume at the
+first step of **PERFORMANCE Media and Timing Package/Runtime
+Integration**:
+
+> Review the current controlled media export and existing Schema-v1 media
+> contract, then design the smallest compatible package extension for
+> `ExistsInMedia` PERFORMANCE relationships and reusable timing.
+
+The existing Phase 9 audio architecture is the baseline. It should be
+extended, not replaced.
