@@ -3,11 +3,11 @@
 ## Engineering Notebook v1.4
 
 **Status:** Official Engineering Record\
-**Updated:** 2026-09-02\
+**Updated:** 2026-09-28\
 **Repository:** `SyriacPlatform`\
 **Branch:** `main`\
 **Implementation baseline:** `b56fdea`\
-**Documentation correction follows:** `3ca4c6b`
+**Author Database schema checkpoint:** `d4cd41b`
 
 ------------------------------------------------------------------------
 
@@ -3237,3 +3237,367 @@ The architecture was verified with Occasion 64 through Gradle build tasks
 and a successful Android Studio emulator run. Existing Reference Application
 behavior continued to operate after removal of the tracked generated package
 from `src`.
+
+
+
+------------------------------------------------------------------------
+
+<!-- AUTHOR-DB-PERFORMANCE-TIMING-DECISIONS-2026-09-28 -->
+
+# Decision 071
+
+## Contextual Recordings Use Reusable Media Assets
+
+### Decision
+
+A complete liturgical performance is attached to a contextual
+`LiturgicalItem` occurrence through a recording-use relationship rather
+than by making the physical recording belong exclusively to that
+occurrence.
+
+In the current Author Database this relationship is implemented by:
+
+``` text
+ExistsIn
+    -> ExistsInMedia (Role = PERFORMANCE)
+    -> MediaAsset
+```
+
+The same `MediaAsset` may be referenced by several `ExistsInMedia`
+rows when the recording is genuinely the same reusable performance.
+
+### Reason
+
+Physical media identity and liturgical usage are different concerns.
+
+Duplicating a MediaAsset for every liturgical occurrence would duplicate
+the same resource, complicate file lifecycle management, and make shared
+timing unnecessarily difficult.
+
+This follows the same architectural principle already used for melody
+recordings: relationships describe usage while `MediaAsset` identifies
+the reusable media resource.
+
+### Impact
+
+`ExistsInMedia` carries contextual concerns such as authored order,
+role, publication state, and timing-set reference.
+
+For PERFORMANCE media, `publicationStatus` is required and currently
+uses `PUBLISHED` or `ARCHIVE`.
+
+Deleting one usage must not destroy a MediaAsset still used elsewhere.
+
+The Author Database schema also uses required unique
+`MediaAsset.ContentHash` metadata for duplicate protection; the hash
+does not replace `MediaAssetID` as logical relationship identity.
+
+
+------------------------------------------------------------------------
+
+# Decision 072
+
+## Recording Timing Is a Reusable Segmentation
+
+### Decision
+
+Text-level timing is modeled as a reusable segmentation of a recording:
+
+``` text
+MediaAsset
+    -> MediaTimingSet
+    -> ordered MediaSegment
+    -> ExistsInTextMediaSegment
+    -> ExistsInText
+```
+
+An `ExistsInMedia` recording use references one timing set when timing
+is available. Several recording uses may share that timing set only when
+they use the same recording and the same segmentation.
+
+The text-side mapping uses the contextual occurrence
+`ExistsInText.ID`, not reusable `TextID`.
+
+### Reason
+
+Timing describes where a performed occurrence appears inside one
+recording. It therefore belongs to neither the reusable Text alone nor
+the liturgical occurrence alone.
+
+Separating the reusable segmentation from its consumers allows one
+authoritative timing map to serve several legitimate uses of the same
+performance.
+
+Using `TextID` would be incorrect because the same reusable Text may
+occur in different liturgical contexts with different performance
+relationships.
+
+### Impact
+
+`MediaSegment.Sequence` defines segment order.
+
+`StartMs` and `EndMs` are nullable in the Author Database so timing
+may be authored progressively.
+
+A timing structure can therefore exist before actual timing values have
+been entered. Authoring logic distinguishes this from a timing set that
+already contains real Start/End values.
+
+
+------------------------------------------------------------------------
+
+# Decision 073
+
+## Structural Text Changes Invalidate Recording Segmentation
+
+### Decision
+
+Adding or deleting a contextual text occurrence invalidates timing
+segmentation associated with that text structure.
+
+When a timing set is shared, invalidation applies to every recording use
+that references that timing set.
+
+Invalidation removes the timing structure but preserves the recording
+relationship, MediaAsset, and physical audio file.
+
+Direct correction of `SortInPra` does not automatically invalidate
+timing. Petgomo assignment also does not invalidate timing.
+
+### Reason
+
+A timing map is meaningful only relative to the sequence of contextual
+text occurrences for which it was authored.
+
+Keeping an old segmentation after adding or deleting a verse would
+silently associate timestamps with the wrong textual structure.
+
+A shared timing set is one authoritative segmentation. It cannot remain
+valid for one consumer while the same shared object is considered
+invalid for another.
+
+By contrast, an author may correct an erroneous sort value without
+changing the actual performed/text segmentation. Automatically deleting
+timing on every sort edit would therefore destroy valid authoring work.
+
+Petgomo assignment does not alter the recorded stanza segmentation.
+
+### Impact
+
+The verified Author Database workflow warns the author when actual
+timing values exist before a structural text edit.
+
+When the edit proceeds:
+
+1. all `ExistsInMedia` references to the affected timing set are
+   detached;
+2. the `MediaTimingSet` is deleted;
+3. relational cascade removes its MediaSegments and text-segment
+   mappings;
+4. recordings and physical media remain intact.
+
+The same rule is used whether the timing set has one consumer or several.
+
+
+------------------------------------------------------------------------
+
+# Decision 074
+
+## Recording Deletion Must Respect Shared Ownership and Remove Orphan Timing
+
+### Decision
+
+Deleting a recording-use relationship removes only resources that are no
+longer legitimately referenced.
+
+Timing associated exclusively with the deleted final use must not remain
+as orphan authoring data.
+
+A MediaAsset and its physical file are deleted only when no remaining
+media relationship requires them.
+
+### Reason
+
+The media model deliberately supports reuse.
+
+Unconditionally deleting the underlying file would break other
+liturgical or melody relationships. Conversely, retaining timing sets
+after their final relevant recording relationship disappears would leave
+invalid authoring state.
+
+### Impact
+
+Deletion logic checks remaining references before deciding whether the
+MediaAsset/file can be removed.
+
+This lifecycle was manually verified for both shared and final-use
+cases.
+
+
+------------------------------------------------------------------------
+
+# Decision 075
+
+## Access Timing Storage Is an Authoring Representation, Not the Platform Time Contract
+
+### Decision
+
+The current Access timing fields retain their historical names
+`StartMs` and `EndMs`, but their stored Long values are interpreted
+as display-shaped `MMSSmmm`, not as canonical elapsed milliseconds.
+
+Example:
+
+``` text
+319104 -> 03:19.104 -> 199104 elapsed milliseconds
+420690 -> 04:20.690 -> 260690 elapsed milliseconds
+```
+
+The Author Database playback helper converts the stored representation
+to elapsed milliseconds before seeking.
+
+The platform domain treats timing as elapsed media time. Build/package
+code must convert source representation explicitly when its contract
+requires canonical milliseconds.
+
+### Reason
+
+Manual Access entry is optimized around the human-readable
+`MM:SS.mmm` form. Changing the existing storage representation solely
+to match the field name would require unnecessary data migration and
+risk working authoring behavior.
+
+At the same time, silently treating `MMSSmmm` as milliseconds produces
+incorrect playback positions.
+
+The source representation and the platform/runtime time contract must
+therefore remain explicitly separated.
+
+### Impact
+
+Author Database code may preserve the current storage convention.
+
+Build Tools must not copy these numeric values into a millisecond-based
+package field without conversion.
+
+Future platform storage is free to use canonical elapsed milliseconds or
+another explicitly specified representation without changing the domain
+model.
+
+
+------------------------------------------------------------------------
+
+# Decision 076
+
+## Access Timed Preview Uses MCI with a CBR Authoring Convention, Not a Platform Codec Rule
+
+### Decision
+
+The current Access authoring preview continues to use Windows MCI because
+it is simple, already integrated, and adequate for the authoring task
+when timed MP3 material is exported as Constant Bit Rate.
+
+The verified timed-preview convention is:
+
+``` text
+MP3
+44100 Hz
+Constant Bit Rate (CBR)
+192 kbps
+```
+
+This convention applies to the Access/MCI preview workflow only.
+
+It is not a SyriacPlatform domain rule, Application Package rule, or
+permanent runtime codec requirement.
+
+### Reason
+
+Real testing showed that an original MP3 could follow the authored
+timestamps while a newly exported Audacity Preset/Standard VBR file
+produced progressively inaccurate MCI seeking.
+
+Exporting the test material as CBR corrected the observed seeking
+problem.
+
+Replacing the Access player at this stage would add implementation
+complexity without improving the authoritative content model.
+
+The production platform already has a modern playback boundary:
+platform-neutral `AudioService` plus platform-specific backends such as
+Android Media3 / ExoPlayer. It must not inherit a limitation of the
+legacy Access preview mechanism.
+
+### Impact
+
+Authoring staff can use the verified CBR convention when precise
+text-level preview is required in Access.
+
+VBR is not classified as invalid media by the domain.
+
+MCI does not enter Core contracts, package identity, or runtime media
+architecture.
+
+A future Author Database preview implementation may replace MCI without
+requiring a domain or package migration.
+
+
+------------------------------------------------------------------------
+
+# Decision 077
+
+## PERFORMANCE Timing Must Extend the Existing Runtime Media Architecture
+
+### Decision
+
+When occurrence-level PERFORMANCE recordings and text timing are brought
+into Build Tools and runtime, they must extend the existing canonical
+media path rather than introduce a second playback architecture.
+
+The existing boundaries remain authoritative:
+
+``` text
+content/runtime resolves media relationships
+        ->
+MediaAsset
+        ->
+AudioService
+        ->
+platform playback backend
+```
+
+Timing/segment resolution belongs above the native player boundary.
+
+### Reason
+
+Phase 9 already established canonical MediaAsset ingestion, content-based
+recording resolution, platform-owned AudioService lifecycle, Android
+Media3 playback, recording selection, and Prayer Play All.
+
+PERFORMANCE media changes how content selects a MediaAsset and which
+interval is requested; it does not create a different kind of playback
+engine.
+
+A parallel PERFORMANCE player would duplicate lifecycle, state, error,
+resource-resolution, and native backend behavior.
+
+### Impact
+
+The newly verified Author Database timing model is a source-model
+checkpoint, not permission to bypass existing Core media contracts.
+
+Future implementation should add explicit package/runtime representations
+for:
+
+``` text
+ExistsInMedia PERFORMANCE semantics
+MediaTimingSet
+MediaSegment
+TextOccurrence-to-segment mapping
+```
+
+and then expose resolved interval playback through the established media
+architecture.
+
+Verse synchronization and interval playback remain future runtime work
+until deliberately selected in the Roadmap.
