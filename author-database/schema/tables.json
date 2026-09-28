@@ -312,6 +312,21 @@
           "validationRule": null,
           "validationText": null,
           "description": null
+        },
+        {
+          "name": "publicationStatus",
+          "ordinal": 6,
+          "type": "ShortText",
+          "daoType": 10,
+          "size": 20,
+          "nullable": false,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": "In (\"PUBLISHED\",\"ARCHIVE\")",
+          "validationText": null,
+          "description": null
         }
       ]
     },
@@ -587,6 +602,21 @@
           "validationRule": null,
           "validationText": null,
           "description": null
+        },
+        {
+          "name": "ContentHash",
+          "ordinal": 5,
+          "type": "ShortText",
+          "daoType": 10,
+          "size": 64,
+          "nullable": false,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
         }
       ]
     },
@@ -646,13 +676,13 @@
           "type": "Long",
           "daoType": 4,
           "size": 4,
-          "nullable": false,
+          "nullable": true,
           "primaryKey": false,
           "autoIncrement": false,
           "allowZeroLength": false,
           "defaultValue": null,
           "validationRule": ">=0",
-          "validationText": "StartMs must be zero or greater.",
+          "validationText": null,
           "description": null
         },
         {
@@ -661,7 +691,7 @@
           "type": "Long",
           "daoType": 4,
           "size": 4,
-          "nullable": false,
+          "nullable": true,
           "primaryKey": false,
           "autoIncrement": false,
           "allowZeroLength": false,

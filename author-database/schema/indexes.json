@@ -574,6 +574,21 @@
     },
     {
       "table": "MediaAsset",
+      "name": "ContentHash",
+      "primary": false,
+      "unique": true,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "ContentHash",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MediaAsset",
       "name": "PK_MediaAsset",
       "primary": true,
       "unique": true,
