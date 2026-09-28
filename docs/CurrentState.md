@@ -2,12 +2,12 @@
 
 **Document:** CurrentState\
 **Status:** Active implementation reference\
-**Last updated:** 2026-09-02\
+**Last updated:** 2026-09-28\
 **Repository:** SyriacPlatform\
 **Branch:** `main`\
-**Current milestone:** Phase 9 Runtime Audio Integration --- Android reusable audio foundation, lifecycle ownership, performer metadata, and multiple-recording selection verified\
+**Current milestone:** Phase 9 Runtime Audio Integration --- Android reusable audio/play-all foundation verified; Author Database PERFORMANCE recording and reusable timing authoring verified\
 **Verified functional milestone:** `b56fdea`\
-**Documentation correction follows:** `3ca4c6b`
+**Author Database schema checkpoint:** `d4cd41b`
 
 ------------------------------------------------------------------------
 
@@ -3228,3 +3228,270 @@ The separation and development workflow have been verified through:
 The Application Package Schema-v1 contract was not changed by this work.
 The change concerns package supply, development configuration, and build
 resource staging.
+
+
+
+------------------------------------------------------------------------
+
+# 2026-09-28 Update --- Author Database PERFORMANCE Recordings and Timing Authoring
+
+## Scope of this checkpoint
+
+The Author Database now has a verified authoring workflow for complete
+liturgical-occurrence recordings (`PERFORMANCE`) and reusable text-level
+timing.
+
+This checkpoint is deliberately separated from the already verified
+runtime Melody-recording path. It establishes the source-authoring facts
+that the next Build Tools / package / runtime work can consume; it does
+not claim that occurrence-level PERFORMANCE timing is already available
+in the Android runtime.
+
+The machine-readable Author Database schema was refreshed and committed
+at:
+
+``` text
+d4cd41b  Update Author Database schema snapshot
+```
+
+The mapping and domain documentation were then synchronized with the
+verified implementation.
+
+## Authoritative recording relationships
+
+The Author Database now uses the central `MediaAsset` model for both
+melody recordings and contextual liturgical performances.
+
+``` text
+Melody
+  -> MelodyMedia (Role = RECORDING)
+  -> MediaAsset
+
+ExistsIn
+  -> ExistsInMedia (Role = PERFORMANCE)
+  -> MediaAsset
+```
+
+For `ExistsInMedia`, `publicationStatus` is required and currently
+accepts:
+
+``` text
+PUBLISHED
+ARCHIVE
+```
+
+A MediaAsset may be reused by more than one liturgical occurrence when
+the same recording is valid in those contexts. The physical file is not
+duplicated merely because several relationships use it.
+
+The current schema also contains required
+`MediaAsset.ContentHash` with a unique index for authoring-side
+duplicate protection.
+
+## Reusable timing structure
+
+The implemented timing model is:
+
+``` text
+ExistsInMedia
+      |
+      +---- MediaTimingSet
+                |
+                +---- ordered MediaSegment
+                           |
+                           +---- ExistsInTextMediaSegment
+                                      |
+                                      +---- ExistsInText
+```
+
+Established semantics:
+
+- one `ExistsInMedia` recording references at most one timing set;
+- one timing set belongs to one `MediaAsset`;
+- several `ExistsInMedia` rows may share a timing set when they use
+  the same recording and segmentation;
+- `MediaSegment.Sequence` preserves segment order;
+- `StartMs` and `EndMs` are nullable, allowing incomplete timing
+  authoring;
+- the text mapping uses `ExistsInText.ID`, not reusable `TextID`;
+- timing identity therefore follows the contextual text occurrence.
+
+The Access timing form is verified with the correct number of text
+segments for the selected recording. Timing values can be entered
+manually, cleared back to Null, and completed progressively.
+
+Entering an End value copies it to the next segment Start only when that
+next Start is Null. Existing authored Start values are not overwritten.
+
+## Current Access timing representation
+
+Despite the historical field names `StartMs` and `EndMs`, the current
+Access authoring database does not store canonical elapsed milliseconds.
+
+The Long value preserves the manually entered display shape
+`MM:SS.mmm` as numeric `MMSSmmm`.
+
+Verified example:
+
+``` text
+stored 319104 -> 03:19.104 -> elapsed 199104 ms
+stored 420690 -> 04:20.690 -> elapsed 260690 ms
+```
+
+The Access playback helper converts this representation to true elapsed
+milliseconds before seeking.
+
+This is an Author Database implementation detail. It must not be
+silently treated as canonical milliseconds by Build Tools.
+
+## Timing invalidation when text structure changes
+
+Timing segmentation depends on the structure of contextual text
+occurrences.
+
+The verified authoring rule is:
+
+``` text
+Add ExistsInText    -> invalidate affected timing
+Delete ExistsInText -> invalidate affected timing
+Edit SortInPra      -> do not automatically invalidate timing
+Petgomo assignment  -> do not invalidate timing
+```
+
+When actual Start/End timing values exist, the author receives a warning
+before a structural text edit proceeds.
+
+Invalidation of a shared timing set:
+
+1. detaches every `ExistsInMedia` row referencing that timing set;
+2. deletes the `MediaTimingSet`;
+3. relational cascade removes its segments and text-segment mappings;
+4. preserves the recording relationships;
+5. preserves the `MediaAsset`;
+6. preserves the physical audio file.
+
+This behavior was manually verified both for a single recording use and
+for a timing set shared by several liturgical occurrences.
+
+The distinction between an empty timing structure and actual authored
+timing is also explicit: a timing set may exist with all Start/End
+values Null, while the user warning is concerned with real entered
+timing data.
+
+## Recording deletion lifecycle
+
+Recording deletion now respects shared-media ownership.
+
+When one of several relationships to the same recording is removed, the
+remaining uses and physical media are retained.
+
+When the last applicable use is removed, associated timing data is
+cleaned up and the MediaAsset/physical file is deleted only when no
+other media relationship still requires it.
+
+This prevents orphan timing data without destroying legitimately shared
+media.
+
+## Authoring text-level playback
+
+The Author Database now has verified text/verse preview playback.
+
+The general playback operation identifies:
+
+``` text
+ExistsInMediaID
++
+ExistsInText.ID
+```
+
+and resolves the corresponding MediaAsset and MediaSegment through the
+authoritative relationships.
+
+`TextID` is intentionally not used as the playback occurrence
+identity, and editable `SortInPra` is not used as the timing key.
+
+The `TextsForQolo` authoring form now supports:
+
+- selection among available PERFORMANCE recordings;
+- playback of the current text occurrence using its authored segment;
+- switching between recordings;
+- stopping timed playback.
+
+## Access preview player and MP3 seeking
+
+The current Author Database preview uses the legacy Windows MCI API.
+
+Testing with real timed material established that Audacity
+Preset/Standard variable-bit-rate MP3 exports can seek inaccurately
+through MCI, with error becoming noticeable farther into the recording.
+
+A controlled Constant Bit Rate export corrected the observed problem.
+
+The verified convention for recordings requiring precise timing preview
+in the current Access tool is therefore:
+
+``` text
+MP3
+44100 Hz
+Constant Bit Rate (CBR)
+192 kbps
+```
+
+This convention belongs only to the current Access/MCI authoring preview.
+It is not a SyriacPlatform domain requirement and does not constrain the
+modern runtime playback architecture. Android runtime audio continues to
+use its existing Media3 / ExoPlayer backend.
+
+## Verified boundary after this checkpoint
+
+The following are now established and verified in the Author Database:
+
+``` text
+central MediaAsset reuse
+MelodyMedia RECORDING relationships
+ExistsInMedia PERFORMANCE relationships
+publication status
+media content-hash uniqueness
+manual reusable timing sets
+ordered timing segments
+TextOccurrence-to-segment mapping
+shared timing-set semantics
+timing invalidation on structural text changes
+timing cleanup during recording deletion
+text-level authoring preview playback
+CBR convention for reliable Access/MCI timed preview
+```
+
+The existing platform/runtime baseline remains verified for Melody
+recordings, recording selection, AudioService lifecycle, Android
+playback, seek, and Prayer Play All.
+
+The following remains deliberately unimplemented at the package/runtime
+boundary:
+
+``` text
+ExistsInMedia PERFORMANCE package projection
+MediaTimingSet package projection
+MediaSegment package projection
+ExistsInTextMediaSegment package projection
+runtime occurrence-recording resolution
+runtime text/verse segment playback
+runtime verse synchronization
+```
+
+These should extend the existing content-driven media architecture rather
+than create a parallel playback system.
+
+## Current restart point
+
+The next platform work should begin from the stable Phase 9 audio
+foundation and the newly verified Author Database PERFORMANCE/timing
+source model.
+
+Before implementation, the remaining official documentation should be
+synchronized, especially the Engineering Notebook and Roadmap. The next
+runtime milestone should then be selected explicitly from the roadmap.
+
+No redesign of the existing Melody recording, recording-selection,
+AudioService, or Prayer Play All paths is required merely to introduce
+PERFORMANCE/timing support.
