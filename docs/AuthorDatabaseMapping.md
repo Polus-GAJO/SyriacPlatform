@@ -1,8 +1,8 @@
 # SyriacPlatform --- Author Database Mapping
 
 **Status:** Engineering Reference --- Phase 7\
-**Version:** 1.1-draft\
-**Baseline:** verified implementation `06d10ee`; documentation correction follows `3ca4c6b`\
+**Version:** 1.2-draft\
+**Baseline:** Author Database schema snapshot `d4cd41b`; media/timing authoring implementation verified through 2026-09-28\
 **Scope:** Author Database → Build Tools → Application Package Schema v1
 
 ------------------------------------------------------------------------
@@ -150,7 +150,19 @@ The current representative slice is `OccN = 1`.
 
   `MNMelody`                          Future notation/media relationship
 
-  `RofMP3`                            Future audio/media source
+  `MediaAsset`                        Canonical authoring media resource
+
+  `MelodyMedia`                        Melody-to-media relationship; `Role = RECORDING` for melody recordings
+
+  `ExistsInMedia`                      Liturgical occurrence-to-media relationship; `Role = PERFORMANCE` for contextual recordings
+
+  `MediaTimingSet`                     Reusable timing set for one MediaAsset
+
+  `MediaSegment`                       Ordered timing segments within a MediaTimingSet
+
+  `ExistsInTextMediaSegment`           Maps contextual text occurrences to reusable MediaSegments
+
+  `RofMP3`                            Legacy audio migration source; not authoritative for new media authoring
   -----------------------------------------------------------------------
 
 ### 4.4 Derived, temporary, operational, or excluded data
@@ -1154,14 +1166,27 @@ MediaSegment
 â””â”€â”€ EndMs
 ```
 
-Timing values are stored as integer milliseconds.
+In the current Access Author Database, `StartMs` and `EndMs` are nullable
+Long values entered and displayed as `MM:SS.mmm`. The stored numeric
+representation is display-shaped `MMSSmmm` (for example, `319104`
+represents `03:19.104`), not canonical elapsed milliseconds.
 
-Required source invariants include:
+Authoring playback converts this representation to true elapsed
+milliseconds before seeking. Build Tools must perform the same semantic
+conversion when timing data is exported into a package format whose
+contract uses elapsed milliseconds.
+
+Both values may be null while timing authoring is incomplete. When both
+are present, the effective timing invariants are:
 
 ``` text
-StartMs >= 0
-EndMs > StartMs
+Start >= 00:00.000
+End > Start
 ```
+
+The Access form performs the Start/End ordering check. Entering an End
+value also fills the next segment Start value when that next Start is
+null; an existing next Start is never overwritten.
 
 Where media duration is known during build:
 
@@ -1339,3 +1364,214 @@ A fresh Occasion 2 export from the current Author Database was built through the
 All `recordingIds` resolved to packaged MediaAssets and all packaged MediaAsset paths resolved to existing physical package files.
 
 This establishes the first verified end-to-end media mapping from the current Author Database into an Application Package.
+
+
+
+------------------------------------------------------------------------
+
+# Liturgical PERFORMANCE Recording and Timing Implementation Status --- 2026-09-28
+
+<!-- LITURGICAL-PERFORMANCE-TIMING-IMPLEMENTED-2026-09-28 -->
+
+The Author Database media model is now implemented and verified for
+contextual liturgical recordings and text-level timing authoring.
+
+This section records the current implementation and supersedes the
+earlier conceptual names where the physical Access schema now has an
+authoritative name.
+
+## Authoritative liturgical recording relationship
+
+The implemented relationship is:
+
+``` text
+ExistsIn
+   |
+   v
+ExistsInMedia (Role = PERFORMANCE)
+   |
+   v
+MediaAsset
+```
+
+`ExistsInMedia` is the physical Author Database table corresponding to
+the earlier conceptual `LiturgicalItemMedia` relationship.
+
+Important fields include:
+
+``` text
+ExistsInMedia
+|-- ExistsInMediaID
+|-- ExistsInID
+|-- MediaAssetID
+|-- Role
+|-- Sort
+|-- MediaTimingSetID
+`-- publicationStatus
+```
+
+For contextual liturgical recordings:
+
+- `Role = PERFORMANCE`;
+- `Sort` is the authored recording order;
+- `publicationStatus` is required and currently accepts
+  `PUBLISHED` or `ARCHIVE`;
+- one `MediaAsset` may be reused by several `ExistsInMedia`
+  relationships when the same physical performance is valid in several
+  liturgical occurrences.
+
+The recording file is therefore not duplicated merely because it is
+used in more than one `ExistsIn` occurrence.
+
+## MediaAsset identity and duplicate protection
+
+`MediaAsset` remains the central logical media resource.
+
+The current schema also contains required `ContentHash` metadata with
+a unique index. This supports authoring-side duplicate protection while
+`MediaAssetID` remains the logical identity used by relationships.
+
+A checksum/hash is not a deployment path and must not replace the
+stable media identifier in package relationships.
+
+## Reusable timing model
+
+The verified timing relationship is:
+
+``` text
+MediaAsset
+   |
+   v
+MediaTimingSet
+   |
+   v
+MediaSegment
+   |
+   v
+ExistsInTextMediaSegment
+   |
+   v
+ExistsInText
+```
+
+Each `ExistsInMedia` recording may reference one
+`MediaTimingSet`. A timing set belongs to one `MediaAsset` and may
+be shared by several `ExistsInMedia` rows that use the same recording
+and segmentation.
+
+`MediaSegment.Sequence` preserves segment order. `StartMs` and
+`EndMs` are nullable so a timing set may exist while timing entry is
+still incomplete.
+
+`ExistsInTextMediaSegment` maps the contextual text occurrence
+(`ExistsInText.ID`) to the reusable segment. `TextID` is deliberately
+not used as the timing identity because one reusable text may occur in
+different liturgical contexts.
+
+## Timing lifecycle when text structure changes
+
+Timing is structurally dependent on the ordered set of
+`ExistsInText` occurrences for the liturgical item.
+
+Adding or deleting a text occurrence invalidates the existing
+segmentation. The implemented authoring rule is therefore:
+
+1. warn the author when actual Start/End timing values exist;
+2. when the structural edit is committed, detach every
+   `ExistsInMedia` row that references the affected shared timing set;
+3. delete the invalid `MediaTimingSet`;
+4. allow relational cascade deletion to remove its
+   `MediaSegment` rows and text-segment mappings;
+5. retain the `ExistsInMedia` recording relationships,
+   `MediaAsset`, and physical audio file.
+
+This invalidation applies to all liturgical occurrences sharing the same
+timing set. A shared timing set cannot remain valid for only one of its
+consumers after its text segmentation has changed.
+
+A direct `SortInPra` correction does not automatically invalidate
+timing. This is intentional: ordering corrections may repair authoring
+metadata without changing the actual text segmentation. Petgomo
+assignment likewise does not invalidate recording timing.
+
+## Recording deletion lifecycle
+
+Deleting one `ExistsInMedia` relationship does not delete a shared
+recording or shared timing data while other valid references remain.
+
+When the final applicable recording relationship is removed, timing
+records are cleaned up and the `MediaAsset` and physical file may be
+removed only when no other media relationship still uses that asset.
+
+This preserves shared-resource semantics and prevents orphaned timing
+data.
+
+## Authoring playback verification
+
+The Access Author Database includes authoring/test playback capable of
+playing the segment associated with one `ExistsInText.ID` from a
+selected `ExistsInMediaID`.
+
+The lookup follows the authoritative relationships rather than
+`TextID` or editable sort values.
+
+The current Access preview implementation uses Windows MCI. Because the
+authoring database stores display-shaped `MMSSmmm` Long values, the
+preview helper converts them to true elapsed milliseconds before issuing
+the MCI seek/play command.
+
+Testing also established an authoring-tool constraint: MP3 files
+exported with variable bitrate (Audacity Preset/Standard VBR) produced
+inaccurate MCI seeking, while Constant Bit Rate MP3 corrected the
+problem. For recordings that require precise timing preview in the
+current Access tool, the verified authoring export convention is:
+
+``` text
+Format:        MP3
+Sample Rate:   44100 Hz
+Bit Rate Mode: Constant (CBR)
+Bit Rate:      192 kbps
+```
+
+This is an Access/MCI authoring-preview constraint. It is not a domain
+rule and must not be imposed on the Core Engine or future
+platform-specific media players unless separately required by those
+implementations.
+
+## Build/package boundary
+
+The controlled media export already includes:
+
+``` text
+MediaAsset.csv
+MelodyMedia.csv
+ExistsInMedia.csv
+MediaTimingSet.csv
+MediaSegment.csv
+ExistsInTextMediaSegment.csv
+```
+
+The melody-recording path has already been verified end-to-end through
+Schema v1 packaging.
+
+The contextual `PERFORMANCE` relationship and timing authoring model
+are now verified in the Author Database, but this section does not claim
+that their complete runtime/package consumption path has been
+implemented. Build Tools and Application Package integration for these
+newly verified semantics must be updated explicitly in the subsequent
+platform implementation phase.
+
+## Current schema snapshot
+
+The authoritative machine-readable structural snapshot for this status
+is commit `d4cd41b`.
+
+The 2026-09-28 export confirms, among other current schema facts:
+
+- required `ExistsInMedia.publicationStatus` with
+  `PUBLISHED` / `ARCHIVE` validation;
+- required `MediaAsset.ContentHash` with a unique index;
+- nullable `MediaSegment.StartMs`;
+- nullable `MediaSegment.EndMs`;
+- no relationship changes relative to the preceding committed
+  relationship snapshot.
