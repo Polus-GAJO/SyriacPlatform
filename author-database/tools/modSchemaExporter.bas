@@ -1312,7 +1312,7 @@ Private Sub ExportExistsInMedia(ByVal outputRoot As String)
 
     ExportQueryToCsv _
         "SELECT ExistsInMediaID, ExistsInID, MediaAssetID, Role, Sort, " & _
-        "MediaTimingSetID FROM ExistsInMedia " & _
+        "MediaTimingSetID, publicationStatus FROM ExistsInMedia " & _
         "ORDER BY ExistsInID, Sort, ExistsInMediaID;", _
         outputRoot & "\ExistsInMedia.csv"
 
