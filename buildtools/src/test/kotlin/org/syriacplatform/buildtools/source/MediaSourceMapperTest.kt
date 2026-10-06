@@ -76,6 +76,124 @@ class MediaSourceMapperTest {
     }
 
     @Test
+    fun mapsExistsInMedia() {
+        val relation =
+            mapper.toExistsInMedia(
+                CsvRow(
+                    values = mapOf(
+                        "ExistsInMediaID" to "41",
+                        "ExistsInID" to "73",
+                        "MediaAssetID" to "17",
+                        "Role" to "PERFORMANCE",
+                        "Sort" to "2",
+                        "MediaTimingSetID" to "29"
+                    )
+                )
+            )
+
+        assertEquals(
+            41L,
+            relation.id
+        )
+        assertEquals(
+            73L,
+            relation.existsInId
+        )
+        assertEquals(
+            17L,
+            relation.mediaAssetId
+        )
+        assertEquals(
+            "PERFORMANCE",
+            relation.role
+        )
+        assertEquals(
+            2L,
+            relation.sort
+        )
+        assertEquals(
+            29L,
+            relation.mediaTimingSetId
+        )
+    }
+
+    @Test
+    fun mapsExistsInMediaWithoutTimingSet() {
+        val relation =
+            mapper.toExistsInMedia(
+                CsvRow(
+                    values = mapOf(
+                        "ExistsInMediaID" to "42",
+                        "ExistsInID" to "74",
+                        "MediaAssetID" to "18",
+                        "Role" to "PERFORMANCE",
+                        "Sort" to "1",
+                        "MediaTimingSetID" to ""
+                    )
+                )
+            )
+
+        assertEquals(
+            null,
+            relation.mediaTimingSetId
+        )
+    }
+
+    @Test
+    fun rejectsNonPerformanceExistsInMediaRole() {
+        val error =
+            assertFailsWith<IllegalArgumentException> {
+                mapper.toExistsInMedia(
+                    CsvRow(
+                        values = mapOf(
+                            "ExistsInMediaID" to "1",
+                            "ExistsInID" to "73",
+                            "MediaAssetID" to "17",
+                            "Role" to "RECORDING",
+                            "Sort" to "1",
+                            "MediaTimingSetID" to ""
+                        )
+                    )
+                )
+            }
+
+        assertTrue(
+            error.message
+                .orEmpty()
+                .contains(
+                    "unsupported Role"
+                )
+        )
+    }
+
+    @Test
+    fun rejectsNonPositiveExistsInMediaSort() {
+        val error =
+            assertFailsWith<IllegalArgumentException> {
+                mapper.toExistsInMedia(
+                    CsvRow(
+                        values = mapOf(
+                            "ExistsInMediaID" to "1",
+                            "ExistsInID" to "73",
+                            "MediaAssetID" to "17",
+                            "Role" to "PERFORMANCE",
+                            "Sort" to "0",
+                            "MediaTimingSetID" to ""
+                        )
+                    )
+                )
+            }
+
+        assertTrue(
+            error.message
+                .orEmpty()
+                .contains(
+                    "Sort > 0"
+                )
+        )
+    }
+
+    @Test
     fun rejectsUnsupportedMediaType() {
         val error =
             assertFailsWith<IllegalArgumentException> {
