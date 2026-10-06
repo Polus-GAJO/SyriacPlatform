@@ -2,6 +2,7 @@ package org.syriacplatform.buildtools.source
 
 import org.syriacplatform.buildtools.source.models.ExistsInMediaSource
 import org.syriacplatform.buildtools.source.models.MediaAssetSource
+import org.syriacplatform.buildtools.source.models.MediaSegmentSource
 import org.syriacplatform.buildtools.source.models.MediaTimingSetSource
 import org.syriacplatform.buildtools.source.models.MelodyMediaSource
 
@@ -83,6 +84,32 @@ class MediaSourceMapper {
             role = role,
             sort = sort,
             mediaTimingSetId = row.optionalLong("MediaTimingSetID")
+        )
+    }
+
+    fun toMediaSegment(
+        row: CsvRow
+    ): MediaSegmentSource {
+        val sequence = row.requiredLong("Sequence")
+        val startMs = row.optionalLong("StartMs")
+        val endMs = row.optionalLong("EndMs")
+
+        require(sequence > 0L) {
+            "MediaSegment ${row["MediaSegmentID"]} must have " +
+                    "Sequence > 0, but was $sequence."
+        }
+
+        require(startMs == null || startMs >= 0L) {
+            "MediaSegment ${row["MediaSegmentID"]} must have " +
+                    "StartMs >= 0, but was $startMs."
+        }
+
+        return MediaSegmentSource(
+            id = row.requiredLong("MediaSegmentID"),
+            mediaTimingSetId = row.requiredLong("MediaTimingSetID"),
+            sequence = sequence,
+            startMs = startMs,
+            endMs = endMs
         )
     }
 
