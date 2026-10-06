@@ -120,8 +120,7 @@ class MediaSourceDataLoader(
         validateTimingSetReferences(
             existsInMedia = existsInMedia,
             mediaTimingSets = mediaTimingSets,
-            mediaSegments = mediaSegments,
-            existsInTextMediaSegments = existsInTextMediaSegments
+            mediaSegments = mediaSegments
         )
 
         validateMediaSegmentReferences(
