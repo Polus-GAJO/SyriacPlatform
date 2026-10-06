@@ -1,5 +1,6 @@
 package org.syriacplatform.buildtools.source
 
+import org.syriacplatform.buildtools.source.models.ExistsInMediaSource
 import org.syriacplatform.buildtools.source.models.MediaAssetSource
 import org.syriacplatform.buildtools.source.models.MelodyMediaSource
 
@@ -56,6 +57,48 @@ class MediaSourceMapper {
             role = role,
             sort = sort
         )
+    }
+
+    fun toExistsInMedia(
+        row: CsvRow
+    ): ExistsInMediaSource {
+        val role = row.requiredText("Role")
+        val sort = row.requiredLong("Sort")
+
+        require(role == PERFORMANCE_ROLE) {
+            "ExistsInMedia ${row["ExistsInMediaID"]} has unsupported " +
+                    "Role '$role'."
+        }
+
+        require(sort > 0L) {
+            "ExistsInMedia ${row["ExistsInMediaID"]} must have " +
+                    "Sort > 0, but was $sort."
+        }
+
+        return ExistsInMediaSource(
+            id = row.requiredLong("ExistsInMediaID"),
+            existsInId = row.requiredLong("ExistsInID"),
+            mediaAssetId = row.requiredLong("MediaAssetID"),
+            role = role,
+            sort = sort,
+            mediaTimingSetId = row.optionalLong("MediaTimingSetID")
+        )
+    }
+
+    private fun CsvRow.optionalLong(
+        columnName: String
+    ): Long? {
+        val rawValue =
+            this[columnName]
+                ?.trim()
+                ?.takeIf { it.isNotEmpty() }
+                ?: return null
+
+        return rawValue.toLongOrNull()
+            ?: error(
+                "Column '$columnName' must contain a Long, " +
+                        "but was '$rawValue'."
+            )
     }
 
     private fun CsvRow.requiredLong(
@@ -122,6 +165,9 @@ class MediaSourceMapper {
     private companion object {
         const val RECORDING_ROLE =
             "RECORDING"
+
+        const val PERFORMANCE_ROLE =
+            "PERFORMANCE"
 
         val SUPPORTED_MEDIA_TYPES =
             setOf(
