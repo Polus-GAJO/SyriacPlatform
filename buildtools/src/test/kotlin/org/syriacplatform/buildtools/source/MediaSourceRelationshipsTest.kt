@@ -46,6 +46,12 @@ class MediaSourceRelationshipsTest {
                     "\"MediaTimingSetID\",\"MediaAssetID\",\"Name\"\n"
                 )
 
+            directory
+                .resolve("MediaSegment.csv")
+                .writeText(
+                    "\"MediaSegmentID\",\"MediaTimingSetID\",\"Sequence\",\"StartMs\",\"EndMs\"\n"
+                )
+
             val source =
                 MediaSourceDataLoader()
                     .load(directory)
