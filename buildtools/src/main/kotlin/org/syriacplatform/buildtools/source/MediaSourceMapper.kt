@@ -1,6 +1,7 @@
 package org.syriacplatform.buildtools.source
 
 import org.syriacplatform.buildtools.source.models.ExistsInMediaSource
+import org.syriacplatform.buildtools.source.models.ExistsInTextMediaSegmentSource
 import org.syriacplatform.buildtools.source.models.MediaAssetSource
 import org.syriacplatform.buildtools.source.models.MediaSegmentSource
 import org.syriacplatform.buildtools.source.models.MediaTimingSetSource
@@ -84,6 +85,16 @@ class MediaSourceMapper {
             role = role,
             sort = sort,
             mediaTimingSetId = row.optionalLong("MediaTimingSetID")
+        )
+    }
+
+    fun toExistsInTextMediaSegment(
+        row: CsvRow
+    ): ExistsInTextMediaSegmentSource {
+        return ExistsInTextMediaSegmentSource(
+            id = row.requiredLong("ExistsInTextMediaSegmentID"),
+            existsInTextId = row.requiredLong("ExistsInTextID"),
+            mediaSegmentId = row.requiredLong("MediaSegmentID")
         )
     }
 
