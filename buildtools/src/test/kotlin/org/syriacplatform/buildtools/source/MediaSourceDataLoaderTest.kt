@@ -83,6 +83,18 @@ class MediaSourceDataLoaderTest {
                 null,
                 source.mediaSegments.last().endMs
             )
+            assertEquals(
+                2,
+                source.existsInTextMediaSegments.size
+            )
+            assertEquals(
+                listOf(101L, 102L),
+                source.existsInTextMediaSegments.map { it.existsInTextId }
+            )
+            assertEquals(
+                listOf(21L, 22L),
+                source.existsInTextMediaSegments.map { it.mediaSegmentId }
+            )
 
             assertEquals(
                 listOf(
@@ -389,6 +401,61 @@ class MediaSourceDataLoaderTest {
     }
 
     @Test
+    fun rejectsDuplicateExistsInTextMediaSegmentId() {
+        withMediaExport(
+            mediaAssetCsv = """
+                "MediaAssetID","MediaType","SourceRelativePath"
+                "1","AUDIO","audio/performances/media-000001.mp3"
+            """.trimIndent(),
+            melodyMediaCsv = EMPTY_MELODY_MEDIA_CSV,
+            existsInTextMediaSegmentCsv = """
+                "ExistsInTextMediaSegmentID","ExistsInTextID","MediaSegmentID"
+                "31","101","21"
+                "31","102","22"
+            """.trimIndent()
+        ) { directory ->
+            val error =
+                assertFailsWith<IllegalArgumentException> {
+                    loader.load(directory)
+                }
+
+            assertTrue(
+                error.message
+                    .orEmpty()
+                    .contains("duplicate ExistsInTextMediaSegmentID")
+            )
+        }
+    }
+
+    @Test
+    fun rejectsMissingTextLinkMediaSegmentReference() {
+        withMediaExport(
+            mediaAssetCsv = """
+                "MediaAssetID","MediaType","SourceRelativePath"
+                "1","AUDIO","audio/performances/media-000001.mp3"
+            """.trimIndent(),
+            melodyMediaCsv = EMPTY_MELODY_MEDIA_CSV,
+            existsInTextMediaSegmentCsv = """
+                "ExistsInTextMediaSegmentID","ExistsInTextID","MediaSegmentID"
+                "31","999","99"
+            """.trimIndent()
+        ) { directory ->
+            val error =
+                assertFailsWith<IllegalArgumentException> {
+                    loader.load(directory)
+                }
+
+            assertTrue(
+                error.message
+                    .orEmpty()
+                    .contains(
+                        "ExistsInTextMediaSegment.csv references missing MediaSegmentID"
+                    )
+            )
+        }
+    }
+
+    @Test
     fun rejectsMissingMediaAssetReference() {
         withMediaExport(
             mediaAssetCsv = """
@@ -529,6 +596,8 @@ class MediaSourceDataLoaderTest {
         existsInMediaCsv: String = DEFAULT_EXISTS_IN_MEDIA_CSV,
         mediaTimingSetCsv: String = DEFAULT_MEDIA_TIMING_SET_CSV,
         mediaSegmentCsv: String = DEFAULT_MEDIA_SEGMENT_CSV,
+        existsInTextMediaSegmentCsv: String =
+            DEFAULT_EXISTS_IN_TEXT_MEDIA_SEGMENT_CSV,
         block: (Path) -> Unit
     ) {
         val directory =
@@ -567,6 +636,12 @@ class MediaSourceDataLoaderTest {
                     mediaSegmentCsv + "\n"
                 )
 
+            directory
+                .resolve("ExistsInTextMediaSegment.csv")
+                .writeText(
+                    existsInTextMediaSegmentCsv + "\n"
+                )
+
             block(directory)
         } finally {
             directory
@@ -593,6 +668,13 @@ class MediaSourceDataLoaderTest {
                 "MediaSegmentID","MediaTimingSetID","Sequence","StartMs","EndMs"
                 "21","15","1","0","1000"
                 "22","15","2","1000",""
+            """.trimIndent()
+
+        val DEFAULT_EXISTS_IN_TEXT_MEDIA_SEGMENT_CSV =
+            """
+                "ExistsInTextMediaSegmentID","ExistsInTextID","MediaSegmentID"
+                "31","101","21"
+                "32","102","22"
             """.trimIndent()
 
         val EMPTY_MELODY_MEDIA_CSV =
