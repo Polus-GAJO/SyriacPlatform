@@ -211,6 +211,12 @@ class OccasionPackageBuilderMediaTest {
             .writeText(
                 "\"MediaSegmentID\",\"MediaTimingSetID\",\"Sequence\",\"StartMs\",\"EndMs\"\n"
             )
+
+        directory
+            .resolve("ExistsInTextMediaSegment.csv")
+            .writeText(
+                "\"ExistsInTextMediaSegmentID\",\"ExistsInTextID\",\"MediaSegmentID\"\n"
+            )
     }
 
     private fun representativeExportDirectory():
