@@ -2,6 +2,7 @@ package org.syriacplatform.buildtools.source
 
 import org.syriacplatform.buildtools.source.models.ExistsInMediaSource
 import org.syriacplatform.buildtools.source.models.MediaAssetSource
+import org.syriacplatform.buildtools.source.models.MediaTimingSetSource
 import org.syriacplatform.buildtools.source.models.MelodyMediaSource
 
 class MediaSourceMapper {
@@ -82,6 +83,18 @@ class MediaSourceMapper {
             role = role,
             sort = sort,
             mediaTimingSetId = row.optionalLong("MediaTimingSetID")
+        )
+    }
+
+    fun toMediaTimingSet(
+        row: CsvRow
+    ): MediaTimingSetSource {
+        return MediaTimingSetSource(
+            id = row.requiredLong("MediaTimingSetID"),
+            mediaAssetId = row.requiredLong("MediaAssetID"),
+            name = row["Name"]
+                ?.trim()
+                ?.takeIf { it.isNotEmpty() }
         )
     }
 
