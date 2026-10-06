@@ -40,6 +40,12 @@ class MediaSourceRelationshipsTest {
                     "\"ExistsInMediaID\",\"ExistsInID\",\"MediaAssetID\",\"Role\",\"Sort\",\"MediaTimingSetID\",\"publicationStatus\"\n"
                 )
 
+            directory
+                .resolve("MediaTimingSet.csv")
+                .writeText(
+                    "\"MediaTimingSetID\",\"MediaAssetID\",\"Name\"\n"
+                )
+
             val source =
                 MediaSourceDataLoader()
                     .load(directory)
