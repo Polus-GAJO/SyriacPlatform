@@ -4,6 +4,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import org.syriacplatform.buildtools.source.models.ExistsInMediaSource
 import org.syriacplatform.buildtools.source.models.MediaAssetSource
+import org.syriacplatform.buildtools.source.models.MediaSegmentSource
 import org.syriacplatform.buildtools.source.models.MediaTimingSetSource
 import org.syriacplatform.buildtools.source.models.MelodyMediaSource
 
@@ -63,6 +64,14 @@ class MediaSourceDataLoader(
                 mapper::toMediaTimingSet
             )
 
+        val mediaSegments =
+            readRows(
+                directory = directory,
+                fileName = "MediaSegment.csv"
+            ).map(
+                mapper::toMediaSegment
+            )
+
         validateUniqueMediaAssetIds(
             mediaAssets
         )
@@ -80,6 +89,10 @@ class MediaSourceDataLoader(
             mediaTimingSets
         )
 
+        validateUniqueMediaSegmentIds(
+            mediaSegments
+        )
+
         validateUniqueSourceRelativePaths(
             mediaAssets
         )
@@ -93,14 +106,16 @@ class MediaSourceDataLoader(
 
         validateTimingSetReferences(
             existsInMedia = existsInMedia,
-            mediaTimingSets = mediaTimingSets
+            mediaTimingSets = mediaTimingSets,
+            mediaSegments = mediaSegments
         )
 
         return MediaSourceData(
             mediaAssets = mediaAssets,
             melodyMedia = melodyMedia,
             existsInMedia = existsInMedia,
-            mediaTimingSets = mediaTimingSets
+            mediaTimingSets = mediaTimingSets,
+            mediaSegments = mediaSegments
         )
     }
 
@@ -253,6 +268,25 @@ class MediaSourceDataLoader(
         }
     }
 
+    private fun validateUniqueMediaSegmentIds(
+        mediaSegments: List<MediaSegmentSource>
+    ) {
+        val duplicateIds =
+            mediaSegments
+                .groupingBy { it.id }
+                .eachCount()
+                .filterValues { it > 1 }
+                .keys
+                .sorted()
+
+        require(
+            duplicateIds.isEmpty()
+        ) {
+            "MediaSegment.csv contains duplicate MediaSegmentID values: " +
+                    duplicateIds.joinToString()
+        }
+    }
+
     private fun validateUniqueSourceRelativePaths(
         mediaAssets: List<MediaAssetSource>
     ) {
@@ -349,7 +383,8 @@ class MediaSourceDataLoader(
 
     private fun validateTimingSetReferences(
         existsInMedia: List<ExistsInMediaSource>,
-        mediaTimingSets: List<MediaTimingSetSource>
+        mediaTimingSets: List<MediaTimingSetSource>,
+        mediaSegments: List<MediaSegmentSource>
     ) {
         val timingSetIds =
             mediaTimingSets
@@ -373,6 +408,22 @@ class MediaSourceDataLoader(
         ) {
             "ExistsInMedia.csv references missing MediaTimingSetID values: " +
                     missingTimingSetIds.joinToString()
+        }
+
+        val missingSegmentTimingSetIds =
+            mediaSegments
+                .map { it.mediaTimingSetId }
+                .filterNot {
+                    it in timingSetIds
+                }
+                .distinct()
+                .sorted()
+
+        require(
+            missingSegmentTimingSetIds.isEmpty()
+        ) {
+            "MediaSegment.csv references missing MediaTimingSetID values: " +
+                    missingSegmentTimingSetIds.joinToString()
         }
     }
 }
