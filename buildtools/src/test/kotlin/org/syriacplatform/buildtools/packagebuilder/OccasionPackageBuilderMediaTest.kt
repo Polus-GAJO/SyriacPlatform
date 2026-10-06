@@ -194,6 +194,12 @@ class OccasionPackageBuilderMediaTest {
         directory
             .resolve("MelodyMedia.csv")
             .writeText(relations)
+
+        directory
+            .resolve("ExistsInMedia.csv")
+            .writeText(
+                "\"ExistsInMediaID\",\"ExistsInID\",\"MediaAssetID\",\"Role\",\"Sort\",\"MediaTimingSetID\",\"publicationStatus\"\n"
+            )
     }
 
     private fun representativeExportDirectory():
