@@ -4,6 +4,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import org.syriacplatform.buildtools.source.models.ExistsInMediaSource
 import org.syriacplatform.buildtools.source.models.MediaAssetSource
+import org.syriacplatform.buildtools.source.models.MediaTimingSetSource
 import org.syriacplatform.buildtools.source.models.MelodyMediaSource
 
 class MediaSourceDataLoader(
@@ -54,6 +55,14 @@ class MediaSourceDataLoader(
                     mapper::toExistsInMedia
                 )
 
+        val mediaTimingSets =
+            readRows(
+                directory = directory,
+                fileName = "MediaTimingSet.csv"
+            ).map(
+                mapper::toMediaTimingSet
+            )
+
         validateUniqueMediaAssetIds(
             mediaAssets
         )
@@ -66,6 +75,10 @@ class MediaSourceDataLoader(
             existsInMedia
         )
 
+        validateUniqueMediaTimingSetIds(
+            mediaTimingSets
+        )
+
         validateUniqueSourceRelativePaths(
             mediaAssets
         )
@@ -73,13 +86,20 @@ class MediaSourceDataLoader(
         validateMediaAssetReferences(
             mediaAssets = mediaAssets,
             melodyMedia = melodyMedia,
-            existsInMedia = existsInMedia
+            existsInMedia = existsInMedia,
+            mediaTimingSets = mediaTimingSets
+        )
+
+        validateTimingSetReferences(
+            existsInMedia = existsInMedia,
+            mediaTimingSets = mediaTimingSets
         )
 
         return MediaSourceData(
             mediaAssets = mediaAssets,
             melodyMedia = melodyMedia,
-            existsInMedia = existsInMedia
+            existsInMedia = existsInMedia,
+            mediaTimingSets = mediaTimingSets
         )
     }
 
@@ -194,7 +214,8 @@ class MediaSourceDataLoader(
     }
 
     private fun validateUniqueExistsInMediaIds(
-        existsInMedia: List<ExistsInMediaSource>
+        existsInMedia: List<ExistsInMediaSource>,
+        mediaTimingSets: List<MediaTimingSetSource>
     ) {
         val duplicateIds =
             existsInMedia
@@ -208,6 +229,25 @@ class MediaSourceDataLoader(
             duplicateIds.isEmpty()
         ) {
             "ExistsInMedia.csv contains duplicate ExistsInMediaID values: " +
+                    duplicateIds.joinToString()
+        }
+    }
+
+    private fun validateUniqueMediaTimingSetIds(
+        mediaTimingSets: List<MediaTimingSetSource>
+    ) {
+        val duplicateIds =
+            mediaTimingSets
+                .groupingBy { it.id }
+                .eachCount()
+                .filterValues { it > 1 }
+                .keys
+                .sorted()
+
+        require(
+            duplicateIds.isEmpty()
+        ) {
+            "MediaTimingSet.csv contains duplicate MediaTimingSetID values: " +
                     duplicateIds.joinToString()
         }
     }
@@ -286,6 +326,51 @@ class MediaSourceDataLoader(
         ) {
             "ExistsInMedia.csv references missing MediaAssetID values: " +
                     missingExistsInMediaIds.joinToString()
+        }
+
+        val missingTimingSetAssetIds =
+            mediaTimingSets
+                .map { it.mediaAssetId }
+                .filterNot {
+                    it in mediaAssetIds
+                }
+                .distinct()
+                .sorted()
+
+        require(
+            missingTimingSetAssetIds.isEmpty()
+        ) {
+            "MediaTimingSet.csv references missing MediaAssetID values: " +
+                    missingTimingSetAssetIds.joinToString()
+        }
+    }
+
+    private fun validateTimingSetReferences(
+        existsInMedia: List<ExistsInMediaSource>,
+        mediaTimingSets: List<MediaTimingSetSource>
+    ) {
+        val timingSetIds =
+            mediaTimingSets
+                .mapTo(mutableSetOf()) {
+                    it.id
+                }
+
+        val missingTimingSetIds =
+            existsInMedia
+                .mapNotNull {
+                    it.mediaTimingSetId
+                }
+                .filterNot {
+                    it in timingSetIds
+                }
+                .distinct()
+                .sorted()
+
+        require(
+            missingTimingSetIds.isEmpty()
+        ) {
+            "ExistsInMedia.csv references missing MediaTimingSetID values: " +
+                    missingTimingSetIds.joinToString()
         }
     }
 }
