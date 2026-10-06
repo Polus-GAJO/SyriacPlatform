@@ -194,6 +194,24 @@ class MediaSourceMapperTest {
     }
 
     @Test
+    fun mapsExistsInTextMediaSegment() {
+        val relation =
+            mapper.toExistsInTextMediaSegment(
+                CsvRow(
+                    values = mapOf(
+                        "ExistsInTextMediaSegmentID" to "61",
+                        "ExistsInTextID" to "104",
+                        "MediaSegmentID" to "51"
+                    )
+                )
+            )
+
+        assertEquals(61L, relation.id)
+        assertEquals(104L, relation.existsInTextId)
+        assertEquals(51L, relation.mediaSegmentId)
+    }
+
+    @Test
     fun mapsMediaSegment() {
         val segment =
             mapper.toMediaSegment(
