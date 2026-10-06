@@ -72,7 +72,8 @@ class MediaSourceDataLoader(
         )
 
         validateUniqueExistsInMediaIds(
-            existsInMedia
+            existsInMedia = existsInMedia,
+            mediaTimingSets = mediaTimingSets
         )
 
         validateUniqueMediaTimingSetIds(
@@ -288,7 +289,8 @@ class MediaSourceDataLoader(
     private fun validateMediaAssetReferences(
         mediaAssets: List<MediaAssetSource>,
         melodyMedia: List<MelodyMediaSource>,
-        existsInMedia: List<ExistsInMediaSource>
+        existsInMedia: List<ExistsInMediaSource>,
+        mediaTimingSets: List<MediaTimingSetSource>
     ) {
         val mediaAssetIds =
             mediaAssets
