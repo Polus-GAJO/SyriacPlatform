@@ -7,5 +7,5 @@ import org.syriacplatform.buildtools.source.models.MelodyMediaSource
 data class MediaSourceData(
     val mediaAssets: List<MediaAssetSource>,
     val melodyMedia: List<MelodyMediaSource>,
-    val existsInMedia: List<ExistsInMediaSource>
+    val existsInMedia: List<ExistsInMediaSource> = emptyList()
 )
