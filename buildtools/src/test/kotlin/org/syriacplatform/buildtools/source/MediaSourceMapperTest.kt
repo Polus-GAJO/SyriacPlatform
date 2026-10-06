@@ -194,6 +194,52 @@ class MediaSourceMapperTest {
     }
 
     @Test
+    fun mapsMediaTimingSet() {
+        val timingSet =
+            mapper.toMediaTimingSet(
+                CsvRow(
+                    values = mapOf(
+                        "MediaTimingSetID" to "29",
+                        "MediaAssetID" to "17",
+                        "Name" to "Main timing"
+                    )
+                )
+            )
+
+        assertEquals(
+            29L,
+            timingSet.id
+        )
+        assertEquals(
+            17L,
+            timingSet.mediaAssetId
+        )
+        assertEquals(
+            "Main timing",
+            timingSet.name
+        )
+    }
+
+    @Test
+    fun mapsMediaTimingSetWithoutName() {
+        val timingSet =
+            mapper.toMediaTimingSet(
+                CsvRow(
+                    values = mapOf(
+                        "MediaTimingSetID" to "30",
+                        "MediaAssetID" to "18",
+                        "Name" to ""
+                    )
+                )
+            )
+
+        assertEquals(
+            null,
+            timingSet.name
+        )
+    }
+
+    @Test
     fun rejectsUnsupportedMediaType() {
         val error =
             assertFailsWith<IllegalArgumentException> {
