@@ -194,6 +194,95 @@ class MediaSourceMapperTest {
     }
 
     @Test
+    fun mapsMediaSegment() {
+        val segment =
+            mapper.toMediaSegment(
+                CsvRow(
+                    values = mapOf(
+                        "MediaSegmentID" to "51",
+                        "MediaTimingSetID" to "29",
+                        "Sequence" to "3",
+                        "StartMs" to "1250",
+                        "EndMs" to "2840"
+                    )
+                )
+            )
+
+        assertEquals(51L, segment.id)
+        assertEquals(29L, segment.mediaTimingSetId)
+        assertEquals(3L, segment.sequence)
+        assertEquals(1250L, segment.startMs)
+        assertEquals(2840L, segment.endMs)
+    }
+
+    @Test
+    fun mapsMediaSegmentWithoutTimingValues() {
+        val segment =
+            mapper.toMediaSegment(
+                CsvRow(
+                    values = mapOf(
+                        "MediaSegmentID" to "52",
+                        "MediaTimingSetID" to "29",
+                        "Sequence" to "4",
+                        "StartMs" to "",
+                        "EndMs" to ""
+                    )
+                )
+            )
+
+        assertEquals(null, segment.startMs)
+        assertEquals(null, segment.endMs)
+    }
+
+    @Test
+    fun rejectsNonPositiveMediaSegmentSequence() {
+        val error =
+            assertFailsWith<IllegalArgumentException> {
+                mapper.toMediaSegment(
+                    CsvRow(
+                        values = mapOf(
+                            "MediaSegmentID" to "53",
+                            "MediaTimingSetID" to "29",
+                            "Sequence" to "0",
+                            "StartMs" to "",
+                            "EndMs" to ""
+                        )
+                    )
+                )
+            }
+
+        assertTrue(
+            error.message
+                .orEmpty()
+                .contains("Sequence > 0")
+        )
+    }
+
+    @Test
+    fun rejectsNegativeMediaSegmentStartMs() {
+        val error =
+            assertFailsWith<IllegalArgumentException> {
+                mapper.toMediaSegment(
+                    CsvRow(
+                        values = mapOf(
+                            "MediaSegmentID" to "54",
+                            "MediaTimingSetID" to "29",
+                            "Sequence" to "1",
+                            "StartMs" to "-1",
+                            "EndMs" to ""
+                        )
+                    )
+                )
+            }
+
+        assertTrue(
+            error.message
+                .orEmpty()
+                .contains("StartMs >= 0")
+        )
+    }
+
+    @Test
     fun mapsMediaTimingSet() {
         val timingSet =
             mapper.toMediaTimingSet(
