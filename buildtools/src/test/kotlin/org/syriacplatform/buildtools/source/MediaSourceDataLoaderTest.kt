@@ -67,6 +67,22 @@ class MediaSourceDataLoaderTest {
                 1L,
                 source.mediaTimingSets.single().mediaAssetId
             )
+            assertEquals(
+                2,
+                source.mediaSegments.size
+            )
+            assertEquals(
+                listOf(1L, 2L),
+                source.mediaSegments.map { it.sequence }
+            )
+            assertEquals(
+                0L,
+                source.mediaSegments.first().startMs
+            )
+            assertEquals(
+                null,
+                source.mediaSegments.last().endMs
+            )
 
             assertEquals(
                 listOf(
@@ -318,6 +334,61 @@ class MediaSourceDataLoaderTest {
     }
 
     @Test
+    fun rejectsDuplicateMediaSegmentId() {
+        withMediaExport(
+            mediaAssetCsv = """
+                "MediaAssetID","MediaType","SourceRelativePath"
+                "1","AUDIO","audio/performances/media-000001.mp3"
+            """.trimIndent(),
+            melodyMediaCsv = EMPTY_MELODY_MEDIA_CSV,
+            mediaSegmentCsv = """
+                "MediaSegmentID","MediaTimingSetID","Sequence","StartMs","EndMs"
+                "21","15","1","0","1000"
+                "21","15","2","1000","2000"
+            """.trimIndent()
+        ) { directory ->
+            val error =
+                assertFailsWith<IllegalArgumentException> {
+                    loader.load(directory)
+                }
+
+            assertTrue(
+                error.message
+                    .orEmpty()
+                    .contains("duplicate MediaSegmentID")
+            )
+        }
+    }
+
+    @Test
+    fun rejectsMissingMediaSegmentTimingSetReference() {
+        withMediaExport(
+            mediaAssetCsv = """
+                "MediaAssetID","MediaType","SourceRelativePath"
+                "1","AUDIO","audio/performances/media-000001.mp3"
+            """.trimIndent(),
+            melodyMediaCsv = EMPTY_MELODY_MEDIA_CSV,
+            mediaSegmentCsv = """
+                "MediaSegmentID","MediaTimingSetID","Sequence","StartMs","EndMs"
+                "21","99","1","0","1000"
+            """.trimIndent()
+        ) { directory ->
+            val error =
+                assertFailsWith<IllegalArgumentException> {
+                    loader.load(directory)
+                }
+
+            assertTrue(
+                error.message
+                    .orEmpty()
+                    .contains(
+                        "MediaSegment.csv references missing MediaTimingSetID"
+                    )
+            )
+        }
+    }
+
+    @Test
     fun rejectsMissingMediaAssetReference() {
         withMediaExport(
             mediaAssetCsv = """
@@ -457,6 +528,7 @@ class MediaSourceDataLoaderTest {
         melodyMediaCsv: String,
         existsInMediaCsv: String = DEFAULT_EXISTS_IN_MEDIA_CSV,
         mediaTimingSetCsv: String = DEFAULT_MEDIA_TIMING_SET_CSV,
+        mediaSegmentCsv: String = DEFAULT_MEDIA_SEGMENT_CSV,
         block: (Path) -> Unit
     ) {
         val directory =
@@ -489,6 +561,12 @@ class MediaSourceDataLoaderTest {
                     mediaTimingSetCsv + "\n"
                 )
 
+            directory
+                .resolve("MediaSegment.csv")
+                .writeText(
+                    mediaSegmentCsv + "\n"
+                )
+
             block(directory)
         } finally {
             directory
@@ -508,6 +586,13 @@ class MediaSourceDataLoaderTest {
             """
                 "MediaTimingSetID","MediaAssetID","Name"
                 "15","1",""
+            """.trimIndent()
+
+        val DEFAULT_MEDIA_SEGMENT_CSV =
+            """
+                "MediaSegmentID","MediaTimingSetID","Sequence","StartMs","EndMs"
+                "21","15","1","0","1000"
+                "22","15","2","1000",""
             """.trimIndent()
 
         val EMPTY_MELODY_MEDIA_CSV =
