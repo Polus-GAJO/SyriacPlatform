@@ -2,6 +2,7 @@ package org.syriacplatform.buildtools.source
 
 import java.nio.file.Files
 import java.nio.file.Path
+import org.syriacplatform.buildtools.source.models.ExistsInMediaSource
 import org.syriacplatform.buildtools.source.models.MediaAssetSource
 import org.syriacplatform.buildtools.source.models.MelodyMediaSource
 
@@ -41,6 +42,18 @@ class MediaSourceDataLoader(
                     mapper::toMelodyMedia
                 )
 
+        val existsInMedia =
+            readRows(
+                directory = directory,
+                fileName = "ExistsInMedia.csv"
+            )
+                .filter(
+                    ::isPublishedExistsInMedia
+                )
+                .map(
+                    mapper::toExistsInMedia
+                )
+
         validateUniqueMediaAssetIds(
             mediaAssets
         )
@@ -49,18 +62,24 @@ class MediaSourceDataLoader(
             melodyMedia
         )
 
+        validateUniqueExistsInMediaIds(
+            existsInMedia
+        )
+
         validateUniqueSourceRelativePaths(
             mediaAssets
         )
 
         validateMediaAssetReferences(
             mediaAssets = mediaAssets,
-            melodyMedia = melodyMedia
+            melodyMedia = melodyMedia,
+            existsInMedia = existsInMedia
         )
 
         return MediaSourceData(
             mediaAssets = mediaAssets,
-            melodyMedia = melodyMedia
+            melodyMedia = melodyMedia,
+            existsInMedia = existsInMedia
         )
     }
 
@@ -85,6 +104,33 @@ class MediaSourceDataLoader(
             publicationStatus in SUPPORTED_PUBLICATION_STATUSES
         ) {
             "MelodyMedia ${row["MelodyMediaID"]} has unsupported " +
+                    "PublicationStatus '$publicationStatus'."
+        }
+
+        return publicationStatus == PUBLISHED_STATUS
+    }
+
+    private fun isPublishedExistsInMedia(
+        row: CsvRow
+    ): Boolean {
+        val publicationStatus =
+            row["publicationStatus"]
+                ?.trim()
+                ?.takeIf {
+                    it.isNotEmpty()
+                }
+
+        require(
+            publicationStatus != null
+        ) {
+            "ExistsInMedia ${row["ExistsInMediaID"]} must have " +
+                    "PublicationStatus."
+        }
+
+        require(
+            publicationStatus in SUPPORTED_PUBLICATION_STATUSES
+        ) {
+            "ExistsInMedia ${row["ExistsInMediaID"]} has unsupported " +
                     "PublicationStatus '$publicationStatus'."
         }
 
@@ -147,6 +193,25 @@ class MediaSourceDataLoader(
         }
     }
 
+    private fun validateUniqueExistsInMediaIds(
+        existsInMedia: List<ExistsInMediaSource>
+    ) {
+        val duplicateIds =
+            existsInMedia
+                .groupingBy { it.id }
+                .eachCount()
+                .filterValues { it > 1 }
+                .keys
+                .sorted()
+
+        require(
+            duplicateIds.isEmpty()
+        ) {
+            "ExistsInMedia.csv contains duplicate ExistsInMediaID values: " +
+                    duplicateIds.joinToString()
+        }
+    }
+
     private fun validateUniqueSourceRelativePaths(
         mediaAssets: List<MediaAssetSource>
     ) {
@@ -182,7 +247,8 @@ class MediaSourceDataLoader(
 
     private fun validateMediaAssetReferences(
         mediaAssets: List<MediaAssetSource>,
-        melodyMedia: List<MelodyMediaSource>
+        melodyMedia: List<MelodyMediaSource>,
+        existsInMedia: List<ExistsInMediaSource>
     ) {
         val mediaAssetIds =
             mediaAssets
@@ -190,7 +256,7 @@ class MediaSourceDataLoader(
                     it.id
                 }
 
-        val missingIds =
+        val missingMelodyMediaIds =
             melodyMedia
                 .map { it.mediaAssetId }
                 .filterNot {
@@ -200,10 +266,26 @@ class MediaSourceDataLoader(
                 .sorted()
 
         require(
-            missingIds.isEmpty()
+            missingMelodyMediaIds.isEmpty()
         ) {
             "MelodyMedia.csv references missing MediaAssetID values: " +
-                    missingIds.joinToString()
+                    missingMelodyMediaIds.joinToString()
+        }
+
+        val missingExistsInMediaIds =
+            existsInMedia
+                .map { it.mediaAssetId }
+                .filterNot {
+                    it in mediaAssetIds
+                }
+                .distinct()
+                .sorted()
+
+        require(
+            missingExistsInMediaIds.isEmpty()
+        ) {
+            "ExistsInMedia.csv references missing MediaAssetID values: " +
+                    missingExistsInMediaIds.joinToString()
         }
     }
 }
