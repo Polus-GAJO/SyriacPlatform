@@ -117,14 +117,56 @@ class ApplicationPackageContentRepository(
             }
 
             is PackageLoadResult.ValidationFailed -> {
+                val fatalIssues =
+                    result.validationReport
+                        .fatalIssues
+
+                val fatalDetails =
+                    fatalIssues
+                        .take(5)
+                        .joinToString(
+                            separator = "\n"
+                        ) { issue ->
+                            buildString {
+                                append(issue.code)
+                                append(": ")
+                                append(issue.message)
+
+                                issue.location
+                                    ?.let { location ->
+                                        append(" [")
+                                        append(location)
+                                        append("]")
+                                    }
+                            }
+                        }
+
+                val remainingCount =
+                    fatalIssues.size - 5
+
                 Result.Failure(
                     PlatformError(
                         code =
                             ErrorCode.PACKAGE_STRUCTURE_INVALID,
                         message =
-                            "Application package failed validation: " +
-                                    "${result.validationReport.fatalIssues.size} " +
-                                    "fatal issue(s)."
+                            buildString {
+                                append(
+                                    "Application package failed validation: "
+                                )
+                                append(fatalIssues.size)
+                                append(" fatal issue(s).")
+
+                                if (fatalDetails.isNotEmpty()) {
+                                    append("\n")
+                                    append(fatalDetails)
+                                }
+
+                                if (remainingCount > 0) {
+                                    append("\n... and ")
+                                    append(remainingCount)
+                                    append(" more fatal issue(s).")
+                                }
+                            }
                     )
                 )
             }
