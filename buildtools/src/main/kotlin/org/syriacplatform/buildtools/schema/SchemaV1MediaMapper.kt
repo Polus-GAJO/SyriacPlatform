@@ -143,4 +143,8 @@ class SchemaV1MediaMapper {
                     missingPerformanceMediaAssetIds.joinToString()
         }
     }
+
+    private companion object {
+        const val PERFORMANCE_ROLE = "PERFORMANCE"
+    }
 }
