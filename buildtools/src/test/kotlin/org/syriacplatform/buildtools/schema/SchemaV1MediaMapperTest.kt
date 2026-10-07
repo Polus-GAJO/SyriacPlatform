@@ -9,6 +9,7 @@ import org.syriacplatform.buildtools.source.models.MediaAssetSource
 import org.syriacplatform.buildtools.source.models.ExistsInMediaSource
 import org.syriacplatform.buildtools.source.models.MelodyMediaSource
 import org.syriacplatform.buildtools.source.models.MediaTimingSetSource
+import org.syriacplatform.buildtools.source.models.MediaSegmentSource
 
 class SchemaV1MediaMapperTest {
 
@@ -240,6 +241,67 @@ class SchemaV1MediaMapperTest {
         assertEquals(701L, timingSet.id)
         assertEquals(301L, timingSet.mediaAssetId)
         assertEquals("Performance timing", timingSet.name)
+    }
+
+    @Test
+    fun mapsMediaSegmentsWithNullableBounds() {
+        val canonical =
+            mapper.map(
+                MediaSourceData(
+                    mediaAssets = listOf(
+                        MediaAssetSource(
+                            id = 301L,
+                            mediaType = "AUDIO",
+                            sourceRelativePath =
+                                "audio/performances/media-000301.mp3"
+                        )
+                    ),
+                    melodyMedia = emptyList(),
+                    mediaTimingSets = listOf(
+                        MediaTimingSetSource(
+                            id = 701L,
+                            mediaAssetId = 301L,
+                            name = null
+                        )
+                    ),
+                    mediaSegments = listOf(
+                        MediaSegmentSource(
+                            id = 801L,
+                            mediaTimingSetId = 701L,
+                            sequence = 1L,
+                            startMs = 1250L,
+                            endMs = 4200L
+                        ),
+                        MediaSegmentSource(
+                            id = 802L,
+                            mediaTimingSetId = 701L,
+                            sequence = 2L,
+                            startMs = null,
+                            endMs = null
+                        )
+                    )
+                )
+            )
+
+        assertEquals(
+            listOf(
+                SchemaV1MediaSegment(
+                    id = 801L,
+                    mediaTimingSetId = 701L,
+                    sequence = 1L,
+                    startMs = 1250L,
+                    endMs = 4200L
+                ),
+                SchemaV1MediaSegment(
+                    id = 802L,
+                    mediaTimingSetId = 701L,
+                    sequence = 2L,
+                    startMs = null,
+                    endMs = null
+                )
+            ),
+            canonical.mediaSegments
+        )
     }
 
 }
