@@ -241,6 +241,8 @@ class DefaultAudioService(
                 currentResource =
                     null
 
+                clearInterval()
+
                 _state.value =
                     PlaybackState()
 
@@ -331,8 +333,10 @@ class DefaultAudioService(
                     _state.value.copy(status = PlaybackStatus.Playing)
                 AudioPlayerEvent.Paused ->
                     _state.value.copy(status = PlaybackStatus.Paused)
-                AudioPlayerEvent.Ended ->
+                AudioPlayerEvent.Ended -> {
+                    clearInterval()
                     _state.value.copy(status = PlaybackStatus.Ended)
+                }
                 is AudioPlayerEvent.PositionChanged -> {
                     if (event.positionMs < 0L) {
                         _state.value
@@ -365,8 +369,10 @@ class DefaultAudioService(
                         }
                     }
                 }
-                is AudioPlayerEvent.Error ->
+                is AudioPlayerEvent.Error -> {
+                    clearInterval()
                     _state.value.copy(status = PlaybackStatus.Error)
+                }
             }
     }
 
