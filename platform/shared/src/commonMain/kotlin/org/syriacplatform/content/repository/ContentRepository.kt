@@ -14,6 +14,7 @@ import org.syriacplatform.content.runtime.RuntimeOccasion
 import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.common.types.PerformanceMediaId
 import org.syriacplatform.common.types.TextOccurrenceId
+import org.syriacplatform.content.runtime.ResolvedPerformanceMedia
 import org.syriacplatform.content.runtime.ResolvedPerformanceTextOccurrenceInterval
 import org.syriacplatform.content.runtime.ResolvedLiturgicalItem
 
@@ -50,6 +51,10 @@ interface ContentRepository {
     suspend fun loadMelodyRecordings(
         id: MelodyId
     ): Result<List<MediaAsset>>
+    suspend fun loadPerformanceMedia(
+        liturgicalItemId: LiturgicalItemId
+    ): Result<List<ResolvedPerformanceMedia>>
+
     suspend fun loadPerformanceTextOccurrenceIntervals(
         performanceId: PerformanceMediaId,
         textOccurrenceId: TextOccurrenceId
