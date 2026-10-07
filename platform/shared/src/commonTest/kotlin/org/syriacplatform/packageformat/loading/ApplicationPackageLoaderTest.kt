@@ -555,6 +555,83 @@ class ApplicationPackageLoaderTest {
             assertEquals(801L, relation.mediaSegmentId.value)
         }
 
+
+    @Test
+    fun loadRejectsBrokenPerformanceTimingReference() =
+        runTest {
+            val emptyCollection =
+                """{"items":[]}""".encodeToByteArray()
+
+            val source =
+                FakePackageSource(
+                    files = mapOf(
+                        PackagePaths.MANIFEST to
+                            validManifestJson().encodeToByteArray(),
+                        PackagePaths.ENTRY_POINTS to emptyCollection,
+                        PackagePaths.OCCASIONS to emptyCollection,
+                        PackagePaths.PRAYERS to emptyCollection,
+                        PackagePaths.PRAYER_SEQUENCES to emptyCollection,
+                        PackagePaths.LITURGICAL_ITEMS to emptyCollection,
+                        PackagePaths.TEXTS to emptyCollection,
+                        PackagePaths.PERFORMANCE_MEDIA to
+                            """
+                            {"items":[{
+                              "id":401,
+                              "liturgicalItemId":999,
+                              "mediaAssetId":998,
+                              "role":"PERFORMANCE",
+                              "sort":1,
+                              "mediaTimingSetId":997
+                            }]}
+                            """.trimIndent().encodeToByteArray()
+                    )
+                )
+
+            val result =
+                ApplicationPackageLoader(source).load(
+                    coreCompatibility =
+                        CoreCompatibility(
+                            version = Version(1, 2, 0),
+                            supportedSchemaVersions = setOf("1.0")
+                        )
+                )
+
+            val failure =
+                assertIs<PackageLoadResult.ValidationFailed>(
+                    result
+                )
+
+            val performanceIssues =
+                failure.validationReport.issues.filter { issue ->
+                    issue.location?.startsWith(
+                        "performanceMedia[401]"
+                    ) == true
+                }
+
+            assertEquals(3, performanceIssues.size)
+            assertTrue(
+                performanceIssues.all { issue ->
+                    issue.severity ==
+                        org.syriacplatform.packagevalidation.ValidationSeverity.FATAL
+                }
+            )
+            assertTrue(
+                performanceIssues.all { issue ->
+                    issue.code == ErrorCode.INVALID_REFERENCE
+                }
+            )
+            assertEquals(
+                setOf(
+                    "performanceMedia[401].liturgicalItemId",
+                    "performanceMedia[401].mediaAssetId",
+                    "performanceMedia[401].mediaTimingSetId"
+                ),
+                performanceIssues.map { issue ->
+                    issue.location
+                }.toSet()
+            )
+        }
+
     private fun validManifestJson(): String {
         return """
             {
