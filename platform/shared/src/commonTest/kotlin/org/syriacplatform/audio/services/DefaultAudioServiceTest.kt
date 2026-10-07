@@ -538,6 +538,102 @@ class DefaultAudioServiceTest {
             service.state.value.status
         )
     }
+
+    @Test
+    fun intervalPlaybackSeeksOnReadyPlaysAndPausesAtEnd() {
+        val backend = RecordingBackend()
+        val service = service(backend)
+        service.initialize()
+
+        assertIs<Result.Success<Unit>>(
+            service.playInterval(
+                mediaAsset = mediaAsset(50L),
+                startMs = 1_000L,
+                endMs = 2_500L
+            )
+        )
+
+        assertEquals(
+            listOf("prepare:50"),
+            backend.commands
+        )
+
+        backend.emit(
+            AudioPlayerEvent.Ready(10_000L)
+        )
+
+        assertEquals(
+            listOf(
+                "prepare:50",
+                "seek:1000",
+                "play"
+            ),
+            backend.commands
+        )
+        assertEquals(
+            1_000L,
+            service.state.value.positionMs
+        )
+
+        backend.emit(AudioPlayerEvent.Playing)
+        backend.emit(
+            AudioPlayerEvent.PositionChanged(2_250L)
+        )
+
+        assertEquals(
+            PlaybackStatus.Playing,
+            service.state.value.status
+        )
+        assertEquals(
+            2_250L,
+            service.state.value.positionMs
+        )
+
+        backend.emit(
+            AudioPlayerEvent.PositionChanged(2_500L)
+        )
+
+        assertEquals(
+            listOf(
+                "prepare:50",
+                "seek:1000",
+                "play",
+                "pause"
+            ),
+            backend.commands
+        )
+        assertEquals(
+            PlaybackStatus.Paused,
+            service.state.value.status
+        )
+        assertEquals(
+            2_500L,
+            service.state.value.positionMs
+        )
+    }
+
+    @Test
+    fun invalidIntervalIsRejectedBeforeResolverOrBackend() {
+        val backend = RecordingBackend()
+        val service = service(backend)
+        service.initialize()
+
+        val result =
+            assertIs<Result.Failure>(
+                service.playInterval(
+                    mediaAsset = mediaAsset(51L),
+                    startMs = 2_500L,
+                    endMs = 2_500L
+                )
+            )
+
+        assertEquals(
+            ErrorCode.INVALID_ARGUMENT,
+            result.error.code
+        )
+        assertTrue(backend.commands.isEmpty())
+    }
+
     private fun service(backend: AudioPlayerBackend) =
         DefaultAudioService(SuccessfulResolver(), backend)
 
