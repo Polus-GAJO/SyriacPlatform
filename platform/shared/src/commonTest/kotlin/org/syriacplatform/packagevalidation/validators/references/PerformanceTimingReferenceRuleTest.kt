@@ -156,10 +156,12 @@ class PerformanceTimingReferenceRuleTest {
 
         assertTrue(
             issues.none { issue ->
-                issue.location.startsWith("performanceMedia") ||
-                    issue.location.startsWith("mediaTimingSets") ||
-                    issue.location.startsWith("mediaSegments") ||
-                    issue.location.startsWith("textOccurrenceMediaSegments")
+                issue.location?.let { location ->
+                    location.startsWith("performanceMedia") ||
+                        location.startsWith("mediaTimingSets") ||
+                        location.startsWith("mediaSegments") ||
+                        location.startsWith("textOccurrenceMediaSegments")
+                } == true
             }
         )
     }
