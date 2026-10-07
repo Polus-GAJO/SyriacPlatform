@@ -331,7 +331,7 @@ class RuntimeContentResolver(
                 }
 
                 val resolvedVerses =
-                    mutableListOf<ResolvedLiturgicalText>()
+                    mutableListOf<ResolvedTextOccurrence>()
 
                 /*
                  * نمر على القائمة الأصلية بالترتيب نفسه.
@@ -365,7 +365,8 @@ class RuntimeContentResolver(
                         }
 
                     resolvedVerses.add(
-                        ResolvedLiturgicalText(
+                        ResolvedTextOccurrence(
+                            id = verse.id,
                             text = text,
                             petgomo = petgomo
                         )
@@ -392,7 +393,7 @@ class RuntimeContentResolver(
             is LiturgicalItemTarget.UnresolvedQolo -> {
                 val resolvedVerses =
                     mutableListOf<
-                            ResolvedLiturgicalText
+                            ResolvedTextOccurrence
                             >()
 
                 target.verses.forEach { verse ->
@@ -421,7 +422,8 @@ class RuntimeContentResolver(
                         }
 
                     resolvedVerses.add(
-                        ResolvedLiturgicalText(
+                        ResolvedTextOccurrence(
+                            id = verse.id,
                             text = text,
                             petgomo = petgomo
                         )
