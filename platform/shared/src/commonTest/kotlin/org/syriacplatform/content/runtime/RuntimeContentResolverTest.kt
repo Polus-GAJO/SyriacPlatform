@@ -646,4 +646,93 @@ class RuntimeContentResolverTest {
         assertTrue(result.data.isEmpty())
     }
 
+
+    @Test
+    fun resolverResolvesPerformanceTimingAndPreservesSegmentOrder() {
+        val performance =
+            PerformanceMedia(
+                id = PerformanceMediaId(401),
+                liturgicalItemId = LiturgicalItemId(101),
+                mediaAssetId = MediaAssetId(301),
+                role = "PERFORMANCE",
+                sort = 1,
+                mediaTimingSetId = MediaTimingSetId(701)
+            )
+        val timingSet =
+            MediaTimingSet(
+                id = MediaTimingSetId(701),
+                mediaAssetId = MediaAssetId(301),
+                name = null
+            )
+        val firstSegment =
+            MediaSegment(
+                id = MediaSegmentId(801),
+                mediaTimingSetId = timingSet.id,
+                sequence = 1,
+                startMs = null,
+                endMs = 1250
+            )
+        val secondSegment =
+            firstSegment.copy(
+                id = MediaSegmentId(802),
+                sequence = 2,
+                startMs = 1250,
+                endMs = 2500
+            )
+
+        val packageData =
+            packageWith(
+                performanceMedia = listOf(performance),
+                mediaTimingSets = listOf(timingSet),
+                mediaSegments =
+                    listOf(firstSegment, secondSegment)
+            )
+
+        val result =
+            assertIs<Result.Success<ResolvedPerformanceTiming?>>(
+                RuntimeContentResolver(
+                    RuntimeContentStore.from(packageData)
+                ).resolvePerformanceTiming(performance.id)
+            )
+
+        val resolved = requireNotNull(result.data)
+
+        assertEquals(performance.id, resolved.performance.id)
+        assertEquals(timingSet.id, resolved.timingSet.id)
+        assertEquals(
+            listOf(
+                MediaSegmentId(801),
+                MediaSegmentId(802)
+            ),
+            resolved.segments.map { it.id }
+        )
+    }
+
+    @Test
+    fun resolverReturnsNullTimingForPerformanceWithoutTimingSet() {
+        val performance =
+            PerformanceMedia(
+                id = PerformanceMediaId(401),
+                liturgicalItemId = LiturgicalItemId(101),
+                mediaAssetId = MediaAssetId(301),
+                role = "PERFORMANCE",
+                sort = 1,
+                mediaTimingSetId = null
+            )
+
+        val result =
+            assertIs<Result.Success<ResolvedPerformanceTiming?>>(
+                RuntimeContentResolver(
+                    RuntimeContentStore.from(
+                        packageWith(
+                            performanceMedia =
+                                listOf(performance)
+                        )
+                    )
+                ).resolvePerformanceTiming(performance.id)
+            )
+
+        assertNull(result.data)
+    }
+
 }
