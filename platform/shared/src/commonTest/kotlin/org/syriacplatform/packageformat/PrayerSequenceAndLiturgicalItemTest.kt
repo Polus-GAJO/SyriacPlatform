@@ -11,6 +11,7 @@ import org.syriacplatform.common.types.MelodyId
 import org.syriacplatform.common.types.PrayerId
 import org.syriacplatform.common.types.QoloId
 import org.syriacplatform.common.types.TextId
+import org.syriacplatform.common.types.TextOccurrenceId
 import org.syriacplatform.content.models.LiturgicalItem
 import org.syriacplatform.content.models.LiturgicalItemTarget
 import org.syriacplatform.content.models.PrayerSequence
@@ -105,6 +106,21 @@ class PrayerSequenceAndLiturgicalItemTest {
         assertEquals(
             MelodyId(75),
             target.effectiveMelodyId
+        )
+
+        assertEquals(
+            1,
+            target.verses.size
+        )
+
+        assertEquals(
+            TextOccurrenceId(9001),
+            target.verses.single().id
+        )
+
+        assertEquals(
+            TextId(1002),
+            target.verses.single().textId
         )
     }
 
@@ -279,7 +295,14 @@ class PrayerSequenceAndLiturgicalItemTest {
                   "id": 502,
                   "type": "qolo",
                   "targetId": 438,
-                  "effectiveMelodyId": 75
+                  "effectiveMelodyId": 75,
+                  "verses": [
+                    {
+                      "id": 9001,
+                      "textId": 1002,
+                      "petgomoId": null
+                    }
+                  ]
                 }
               ]
             }
