@@ -19,6 +19,7 @@ import org.syriacplatform.content.runtime.RuntimeOccasion
 import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.common.types.PerformanceMediaId
 import org.syriacplatform.common.types.TextOccurrenceId
+import org.syriacplatform.content.runtime.ResolvedPerformanceMedia
 import org.syriacplatform.content.runtime.ResolvedPerformanceTextOccurrenceInterval
 import org.syriacplatform.content.runtime.ResolvedLiturgicalItem
 
@@ -194,6 +195,11 @@ class FakeContentRepository : ContentRepository {
             )
         }
     }
+
+    override suspend fun loadPerformanceMedia(
+        liturgicalItemId: LiturgicalItemId
+    ): Result<List<ResolvedPerformanceMedia>> =
+        Result.Success(emptyList())
 
     override suspend fun loadPerformanceTextOccurrenceIntervals(
         performanceId: PerformanceMediaId,
