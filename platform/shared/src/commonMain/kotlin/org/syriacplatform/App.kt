@@ -1284,6 +1284,9 @@ private fun HymnDetailsScreen(
 
     val playbackState = rememberPlaybackState(audioService)
 
+    val coroutineScope =
+        rememberCoroutineScope()
+
     var pendingAutoPlayId by remember(liturgicalItemId) {
         mutableStateOf<MediaAssetId?>(null)
     }
