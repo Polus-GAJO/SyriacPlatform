@@ -6,6 +6,7 @@ import org.syriacplatform.buildtools.source.models.ExistsInMediaSource
 import org.syriacplatform.buildtools.source.models.MelodyMediaSource
 import org.syriacplatform.buildtools.source.models.MediaTimingSetSource
 import org.syriacplatform.buildtools.source.models.MediaSegmentSource
+import org.syriacplatform.buildtools.source.models.ExistsInTextMediaSegmentSource
 
 class SchemaV1MediaMapper {
 
@@ -33,12 +34,17 @@ class SchemaV1MediaMapper {
             source.mediaSegments
                 .map(::mapMediaSegment)
 
+        val textOccurrenceMediaSegments =
+            source.existsInTextMediaSegments
+                .map(::mapTextOccurrenceMediaSegment)
+
         validateCanonicalReferences(
             mediaAssets = mediaAssets,
             melodyMedia = melodyMedia,
             performanceMedia = performanceMedia,
             mediaTimingSets = mediaTimingSets,
-            mediaSegments = mediaSegments
+            mediaSegments = mediaSegments,
+            textOccurrenceMediaSegments = textOccurrenceMediaSegments
         )
 
         return SchemaV1CanonicalMedia(
@@ -46,7 +52,8 @@ class SchemaV1MediaMapper {
             melodyMedia = melodyMedia,
             performanceMedia = performanceMedia,
             mediaTimingSets = mediaTimingSets,
-            mediaSegments = mediaSegments
+            mediaSegments = mediaSegments,
+            textOccurrenceMediaSegments = textOccurrenceMediaSegments
         )
     }
 
@@ -161,12 +168,35 @@ class SchemaV1MediaMapper {
         )
     }
 
+    private fun mapTextOccurrenceMediaSegment(
+        source: ExistsInTextMediaSegmentSource
+    ): SchemaV1TextOccurrenceMediaSegment {
+        require(source.id > 0L) {
+            "TextOccurrenceMediaSegment ${source.id} must have a positive id."
+        }
+
+        require(source.existsInTextId > 0L) {
+            "TextOccurrenceMediaSegment ${source.id} must reference a positive TextOccurrence id."
+        }
+
+        require(source.mediaSegmentId > 0L) {
+            "TextOccurrenceMediaSegment ${source.id} must reference a positive MediaSegment id."
+        }
+
+        return SchemaV1TextOccurrenceMediaSegment(
+            id = source.id,
+            textOccurrenceId = source.existsInTextId,
+            mediaSegmentId = source.mediaSegmentId
+        )
+    }
+
     private fun validateCanonicalReferences(
         mediaAssets: List<SchemaV1MediaAsset>,
         melodyMedia: List<SchemaV1MelodyMedia>,
         performanceMedia: List<SchemaV1PerformanceMedia>,
         mediaTimingSets: List<SchemaV1MediaTimingSet>,
-        mediaSegments: List<SchemaV1MediaSegment>
+        mediaSegments: List<SchemaV1MediaSegment>,
+        textOccurrenceMediaSegments: List<SchemaV1TextOccurrenceMediaSegment>
     ) {
         val mediaAssetIds =
             mediaAssets
@@ -222,6 +252,24 @@ class SchemaV1MediaMapper {
         ) {
             "Canonical MediaSegment references missing MediaTimingSet ids: " +
                     missingSegmentTimingSetIds.joinToString()
+        }
+
+        val mediaSegmentIds =
+            mediaSegments
+                .mapTo(mutableSetOf()) { it.id }
+
+        val missingLinkedMediaSegmentIds =
+            textOccurrenceMediaSegments
+                .map { it.mediaSegmentId }
+                .filterNot { it in mediaSegmentIds }
+                .distinct()
+                .sorted()
+
+        require(
+            missingLinkedMediaSegmentIds.isEmpty()
+        ) {
+            "Canonical TextOccurrence media links reference missing MediaSegment ids: " +
+                    missingLinkedMediaSegmentIds.joinToString()
         }
 
         val missingPerformanceTimingSetIds =
