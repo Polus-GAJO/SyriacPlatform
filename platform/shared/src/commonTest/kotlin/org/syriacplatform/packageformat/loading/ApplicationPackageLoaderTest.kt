@@ -444,6 +444,117 @@ class ApplicationPackageLoaderTest {
             )
         }
 
+
+    @Test
+    fun loadIngestsPerformanceTimingCollections() =
+        runTest {
+            val emptyCollection =
+                """{"items":[]}""".encodeToByteArray()
+
+            val source =
+                FakePackageSource(
+                    files = mapOf(
+                        PackagePaths.MANIFEST to
+                            validManifestJson().encodeToByteArray(),
+                        PackagePaths.ENTRY_POINTS to emptyCollection,
+                        PackagePaths.OCCASIONS to emptyCollection,
+                        PackagePaths.PRAYERS to emptyCollection,
+                        PackagePaths.PRAYER_SEQUENCES to emptyCollection,
+                        PackagePaths.LITURGICAL_ITEMS to emptyCollection,
+                        PackagePaths.TEXTS to emptyCollection,
+                        PackagePaths.PERFORMANCE_MEDIA to
+                            """
+                            {"items":[{
+                              "id":401,
+                              "liturgicalItemId":101,
+                              "mediaAssetId":301,
+                              "role":"PERFORMANCE",
+                              "sort":1,
+                              "mediaTimingSetId":701
+                            }]}
+                            """.trimIndent().encodeToByteArray(),
+                        PackagePaths.MEDIA_TIMING_SETS to
+                            """
+                            {"items":[{
+                              "id":701,
+                              "mediaAssetId":301,
+                              "name":null
+                            }]}
+                            """.trimIndent().encodeToByteArray(),
+                        PackagePaths.MEDIA_SEGMENTS to
+                            """
+                            {"items":[{
+                              "id":801,
+                              "mediaTimingSetId":701,
+                              "sequence":1,
+                              "startMs":null,
+                              "endMs":1250
+                            }]}
+                            """.trimIndent().encodeToByteArray(),
+                        PackagePaths.TEXT_OCCURRENCE_MEDIA_SEGMENTS to
+                            """
+                            {"items":[{
+                              "id":901,
+                              "textOccurrenceId":501,
+                              "mediaSegmentId":801
+                            }]}
+                            """.trimIndent().encodeToByteArray()
+                    )
+                )
+
+            val result =
+                ApplicationPackageLoader(source).load(
+                    coreCompatibility =
+                        CoreCompatibility(
+                            version = Version(1, 2, 0),
+                            supportedSchemaVersions = setOf("1.0")
+                        )
+                )
+
+            val loaded =
+                when (result) {
+                    is PackageLoadResult.Success ->
+                        result.packageData
+                    is PackageLoadResult.ValidationFailed ->
+                        result.packageData
+                    is PackageLoadResult.Failure ->
+                        error("Unexpected load failure: ${result.error}")
+                }
+
+            assertTrue(loaded.collectionPresence.performanceMedia)
+            assertTrue(loaded.collectionPresence.mediaTimingSets)
+            assertTrue(loaded.collectionPresence.mediaSegments)
+            assertTrue(
+                loaded.collectionPresence.textOccurrenceMediaSegments
+            )
+
+            val performance = loaded.performanceMedia.single()
+            assertEquals(401L, performance.id.value)
+            assertEquals(101L, performance.liturgicalItemId.value)
+            assertEquals(301L, performance.mediaAssetId.value)
+            assertEquals("PERFORMANCE", performance.role)
+            assertEquals(1L, performance.sort)
+            assertEquals(701L, performance.mediaTimingSetId?.value)
+
+            val timingSet = loaded.mediaTimingSets.single()
+            assertEquals(701L, timingSet.id.value)
+            assertEquals(301L, timingSet.mediaAssetId.value)
+            assertEquals(null, timingSet.name)
+
+            val segment = loaded.mediaSegments.single()
+            assertEquals(801L, segment.id.value)
+            assertEquals(701L, segment.mediaTimingSetId.value)
+            assertEquals(1L, segment.sequence)
+            assertEquals(null, segment.startMs)
+            assertEquals(1250L, segment.endMs)
+
+            val relation =
+                loaded.textOccurrenceMediaSegments.single()
+            assertEquals(901L, relation.id.value)
+            assertEquals(501L, relation.textOccurrenceId.value)
+            assertEquals(801L, relation.mediaSegmentId.value)
+        }
+
     private fun validManifestJson(): String {
         return """
             {
