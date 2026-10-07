@@ -3,6 +3,10 @@ package org.syriacplatform.packagevalidation
 import org.syriacplatform.content.models.EntryPoint
 import org.syriacplatform.content.models.LiturgicalItem
 import org.syriacplatform.content.models.MediaAsset
+import org.syriacplatform.content.models.MediaSegment
+import org.syriacplatform.content.models.MediaTimingSet
+import org.syriacplatform.content.models.PerformanceMedia
+import org.syriacplatform.content.models.TextOccurrenceMediaSegment
 import org.syriacplatform.content.models.Melody
 import org.syriacplatform.content.models.MelodyQintoAssignment
 import org.syriacplatform.content.models.Occasion
@@ -80,7 +84,12 @@ object PackageValidationTestFixture {
         melodies: List<Melody> = emptyList(),
         qintos: List<Qinto> = emptyList(),
         melodyQintoAssignments: List<MelodyQintoAssignment> = emptyList(),
-        mediaAssets: List<MediaAsset> = emptyList()
+        mediaAssets: List<MediaAsset> = emptyList(),
+        performanceMedia: List<PerformanceMedia> = emptyList(),
+        mediaTimingSets: List<MediaTimingSet> = emptyList(),
+        mediaSegments: List<MediaSegment> = emptyList(),
+        textOccurrenceMediaSegments:
+            List<TextOccurrenceMediaSegment> = emptyList()
     ): ParsedApplicationPackage {
         return ParsedApplicationPackage(
             manifest = manifest,
@@ -96,7 +105,12 @@ object PackageValidationTestFixture {
             melodies = melodies,
             qintos = qintos,
             melodyQintoAssignments = melodyQintoAssignments,
-            mediaAssets = mediaAssets
+            mediaAssets = mediaAssets,
+            performanceMedia = performanceMedia,
+            mediaTimingSets = mediaTimingSets,
+            mediaSegments = mediaSegments,
+            textOccurrenceMediaSegments =
+                textOccurrenceMediaSegments
         )
     }
 }
