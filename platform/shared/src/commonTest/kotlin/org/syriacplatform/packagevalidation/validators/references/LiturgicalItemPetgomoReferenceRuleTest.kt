@@ -6,6 +6,7 @@ import kotlin.test.assertTrue
 import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.common.types.PetgomoId
 import org.syriacplatform.common.types.TextId
+import org.syriacplatform.common.types.TextOccurrenceId
 import org.syriacplatform.content.models.LiturgicalItem
 import org.syriacplatform.content.models.LiturgicalItemTarget
 import org.syriacplatform.content.models.Petgomo
@@ -108,6 +109,7 @@ class LiturgicalItemPetgomoReferenceRuleTest {
                                     MelodyId(75),
                                 verses = listOf(
                                     LiturgicalTextRef(
+                                        id = TextOccurrenceId(1),
                                         textId =
                                             TextId(1001),
                                         petgomoId = null
@@ -140,6 +142,7 @@ class LiturgicalItemPetgomoReferenceRuleTest {
                                     MelodyId(75),
                                 verses = listOf(
                                     LiturgicalTextRef(
+                                        id = TextOccurrenceId(2),
                                         textId =
                                             TextId(1001),
                                         petgomoId =
@@ -181,6 +184,7 @@ class LiturgicalItemPetgomoReferenceRuleTest {
                                     MelodyId(75),
                                 verses = listOf(
                                     LiturgicalTextRef(
+                                        id = TextOccurrenceId(3),
                                         textId =
                                             TextId(1001),
                                         petgomoId =
