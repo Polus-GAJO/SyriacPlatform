@@ -131,17 +131,19 @@ if (developmentContentEnabled) {
 val effectiveOccasionId =
     configuredOccasionId ?: "1"
 
-tasks.named<Test>("testAndroidHostTest") {
-    dependsOn(
-        buildtoolsProject.tasks.named(
-            "buildOccasionPreview"
+tasks.withType<Test>().configureEach {
+    if (name == "testAndroidHostTest") {
+        dependsOn(
+            buildtoolsProject.tasks.named(
+                "buildOccasionPreview"
+            )
         )
-    )
 
-    systemProperty(
-        "syriacplatform.test.occasionId",
-        effectiveOccasionId
-    )
+        systemProperty(
+            "syriacplatform.test.occasionId",
+            effectiveOccasionId
+        )
+    }
 }
 
 val developmentComposeResourcesDirectory =
