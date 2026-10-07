@@ -1575,3 +1575,68 @@ The 2026-09-28 export confirms, among other current schema facts:
 - nullable `MediaSegment.EndMs`;
 - no relationship changes relative to the preceding committed
   relationship snapshot.
+
+
+------------------------------------------------------------------------
+
+# PERFORMANCE Package/Runtime Mapping Checkpoint --- 2026-10-08
+
+<!-- AUTHORDB-PERFORMANCE-RUNTIME-MAPPING-2026-10-08 -->
+
+The PERFORMANCE and timing mapping described above is now implemented
+through the Application Package and Android runtime.
+
+The verified mapping is:
+
+``` text
+ExistsInMedia (Role=PERFORMANCE, PUBLISHED)
+    -> PerformanceMedia
+
+ExistsInMedia.MediaTimingSetID
+    -> PerformanceMedia.mediaTimingSetId
+    -> MediaTimingSet
+
+MediaTimingSet
+    -> ordered MediaSegment
+
+ExistsInTextMediaSegment.ExistsInTextID
+    -> contextual TextOccurrenceId
+    -> TextOccurrenceMediaSegment
+```
+
+`ExistsInTextID` is a source-side contextual identity. Outside the Build
+Tools mapping boundary the platform uses `TextOccurrenceId`; the reusable
+canonical `TextID` must not replace it for timing.
+
+The Access `StartMs` / `EndMs` Long values remain display-shaped
+`MMSSmmm` authoring values. `SchemaV1MediaMapper` converts them to true
+elapsed milliseconds before package emission. Runtime and AudioService
+therefore receive canonical elapsed milliseconds.
+
+Current playback semantics for a selected PERFORMANCE and selected
+TextOccurrence are:
+
+``` text
+0 playable intervals -> no playback, success
+1 playable interval  -> play interval
+>1 playable intervals -> invalid-package ambiguity failure
+```
+
+Incomplete/null timing boundaries are not fabricated into playable
+intervals.
+
+The normal real-content development path is now:
+
+``` text
+EditPra.BtnExport
+    -> ExportOccasionForPlatform(OccN)
+    -> controlled Occasion + media CSVs
+    -> .\preview.ps1 <OccN>
+    -> package/runtime Android preview
+```
+
+`preview.ps1` intentionally cleans the generated shared and Android-app
+build outputs before rebuilding a newly selected Occasion. This prevents
+optional PERFORMANCE/timing resources from a previous Occasion from
+remaining in a later APK when the new package does not contain those
+collections.
