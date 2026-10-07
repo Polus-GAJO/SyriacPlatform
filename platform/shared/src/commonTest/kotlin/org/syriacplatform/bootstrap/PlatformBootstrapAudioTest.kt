@@ -37,6 +37,9 @@ class PlatformBootstrapAudioTest {
             RuntimeState.Ready,
             audio.runtimeState
         )
+        assertNotNull(
+            platform.performanceTextPlayback
+        )
 
         platform.shutdown()
 
