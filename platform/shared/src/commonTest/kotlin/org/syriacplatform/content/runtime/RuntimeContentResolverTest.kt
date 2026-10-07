@@ -888,4 +888,189 @@ class RuntimeContentResolverTest {
         assertTrue(result.data.isEmpty())
     }
 
+
+    @Test
+    fun resolverBuildsOnlyCompletePlayableIntervalsForSelectedPerformance() {
+        val occurrenceId = TextOccurrenceId(501)
+        val mediaAsset =
+            MediaAsset(
+                id = MediaAssetId(301),
+                type = "AUDIO",
+                path = "media/performance-301.mp3"
+            )
+        val timingSet =
+            MediaTimingSet(
+                id = MediaTimingSetId(701),
+                mediaAssetId = MediaAssetId(999),
+                name = null
+            )
+        val performance =
+            PerformanceMedia(
+                id = PerformanceMediaId(401),
+                liturgicalItemId = LiturgicalItemId(101),
+                mediaAssetId = mediaAsset.id,
+                role = "PERFORMANCE",
+                sort = 1,
+                mediaTimingSetId = timingSet.id
+            )
+        val playableSegment =
+            MediaSegment(
+                id = MediaSegmentId(801),
+                mediaTimingSetId = timingSet.id,
+                sequence = 1,
+                startMs = 1_000L,
+                endMs = 2_500L
+            )
+        val incompleteSegment =
+            MediaSegment(
+                id = MediaSegmentId(802),
+                mediaTimingSetId = timingSet.id,
+                sequence = 2,
+                startMs = 2_500L,
+                endMs = null
+            )
+
+        val packageData =
+            packageWith(
+                liturgicalItems = listOf(
+                    LiturgicalItem(
+                        id = LiturgicalItemId(101),
+                        target =
+                            LiturgicalItemTarget.UnresolvedQolo(
+                                verses = listOf(
+                                    LiturgicalTextRef(
+                                        id = occurrenceId,
+                                        textId = TextId(601)
+                                    )
+                                )
+                            )
+                    )
+                ),
+                mediaAssets = listOf(mediaAsset),
+                performanceMedia = listOf(performance),
+                mediaTimingSets = listOf(timingSet),
+                mediaSegments =
+                    listOf(playableSegment, incompleteSegment),
+                textOccurrenceMediaSegments = listOf(
+                    TextOccurrenceMediaSegment(
+                        id = TextOccurrenceMediaSegmentId(901),
+                        textOccurrenceId = occurrenceId,
+                        mediaSegmentId = playableSegment.id
+                    ),
+                    TextOccurrenceMediaSegment(
+                        id = TextOccurrenceMediaSegmentId(902),
+                        textOccurrenceId = occurrenceId,
+                        mediaSegmentId = incompleteSegment.id
+                    )
+                )
+            )
+
+        val result =
+            assertIs<
+                    Result.Success<
+                            List<ResolvedPerformanceTextOccurrenceInterval>
+                            >
+                    >(
+                RuntimeContentResolver(
+                    RuntimeContentStore.from(packageData)
+                ).resolvePerformanceTextOccurrenceIntervals(
+                    performanceId = performance.id,
+                    textOccurrenceId = occurrenceId
+                )
+            )
+
+        val interval = result.data.single()
+
+        assertEquals(mediaAsset.id, interval.mediaAsset.id)
+        assertEquals(playableSegment.id, interval.segment.id)
+        assertEquals(1_000L, interval.startMs)
+        assertEquals(2_500L, interval.endMs)
+
+        // Deliberately proves that playable media comes from PERFORMANCE,
+        // not from MediaTimingSet.mediaAssetId.
+        assertEquals(
+            performance.mediaAssetId,
+            interval.mediaAsset.id
+        )
+    }
+
+    @Test
+    fun resolverReturnsNoPlayableIntervalWhenTimingIsIncomplete() {
+        val occurrenceId = TextOccurrenceId(501)
+        val mediaAsset =
+            MediaAsset(
+                id = MediaAssetId(301),
+                type = "AUDIO",
+                path = "media/performance-301.mp3"
+            )
+        val timingSet =
+            MediaTimingSet(
+                id = MediaTimingSetId(701),
+                mediaAssetId = mediaAsset.id,
+                name = null
+            )
+        val performance =
+            PerformanceMedia(
+                id = PerformanceMediaId(401),
+                liturgicalItemId = LiturgicalItemId(101),
+                mediaAssetId = mediaAsset.id,
+                role = "PERFORMANCE",
+                sort = 1,
+                mediaTimingSetId = timingSet.id
+            )
+        val segment =
+            MediaSegment(
+                id = MediaSegmentId(801),
+                mediaTimingSetId = timingSet.id,
+                sequence = 1,
+                startMs = 1_000L,
+                endMs = null
+            )
+
+        val packageData =
+            packageWith(
+                liturgicalItems = listOf(
+                    LiturgicalItem(
+                        id = LiturgicalItemId(101),
+                        target =
+                            LiturgicalItemTarget.UnresolvedQolo(
+                                verses = listOf(
+                                    LiturgicalTextRef(
+                                        id = occurrenceId,
+                                        textId = TextId(601)
+                                    )
+                                )
+                            )
+                    )
+                ),
+                mediaAssets = listOf(mediaAsset),
+                performanceMedia = listOf(performance),
+                mediaTimingSets = listOf(timingSet),
+                mediaSegments = listOf(segment),
+                textOccurrenceMediaSegments = listOf(
+                    TextOccurrenceMediaSegment(
+                        id = TextOccurrenceMediaSegmentId(901),
+                        textOccurrenceId = occurrenceId,
+                        mediaSegmentId = segment.id
+                    )
+                )
+            )
+
+        val result =
+            assertIs<
+                    Result.Success<
+                            List<ResolvedPerformanceTextOccurrenceInterval>
+                            >
+                    >(
+                RuntimeContentResolver(
+                    RuntimeContentStore.from(packageData)
+                ).resolvePerformanceTextOccurrenceIntervals(
+                    performanceId = performance.id,
+                    textOccurrenceId = occurrenceId
+                )
+            )
+
+        assertTrue(result.data.isEmpty())
+    }
+
 }
