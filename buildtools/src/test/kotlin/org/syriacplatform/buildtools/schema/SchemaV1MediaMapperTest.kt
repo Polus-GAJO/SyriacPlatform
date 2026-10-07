@@ -8,6 +8,7 @@ import org.syriacplatform.buildtools.source.MediaSourceData
 import org.syriacplatform.buildtools.source.models.MediaAssetSource
 import org.syriacplatform.buildtools.source.models.ExistsInMediaSource
 import org.syriacplatform.buildtools.source.models.MelodyMediaSource
+import org.syriacplatform.buildtools.source.models.MediaTimingSetSource
 
 class SchemaV1MediaMapperTest {
 
@@ -190,4 +191,55 @@ class SchemaV1MediaMapperTest {
                 .mediaAssetId
         )
     }
+    @Test
+    fun mapsPerformanceMediaAndTimingSet() {
+        val canonical =
+            mapper.map(
+                MediaSourceData(
+                    mediaAssets = listOf(
+                        MediaAssetSource(
+                            id = 301L,
+                            mediaType = "AUDIO",
+                            sourceRelativePath =
+                                "audio/performances/media-000301.mp3"
+                        )
+                    ),
+                    melodyMedia = emptyList(),
+                    existsInMedia = listOf(
+                        ExistsInMediaSource(
+                            id = 401L,
+                            existsInId = 501L,
+                            mediaAssetId = 301L,
+                            role = "PERFORMANCE",
+                            sort = 2L,
+                            mediaTimingSetId = 701L
+                        )
+                    ),
+                    mediaTimingSets = listOf(
+                        MediaTimingSetSource(
+                            id = 701L,
+                            mediaAssetId = 301L,
+                            name = "Performance timing"
+                        )
+                    )
+                )
+            )
+
+        val performance =
+            canonical.performanceMedia.single()
+        val timingSet =
+            canonical.mediaTimingSets.single()
+
+        assertEquals(401L, performance.id)
+        assertEquals(501L, performance.liturgicalItemId)
+        assertEquals(301L, performance.mediaAssetId)
+        assertEquals("PERFORMANCE", performance.role)
+        assertEquals(2L, performance.sort)
+        assertEquals(701L, performance.mediaTimingSetId)
+
+        assertEquals(701L, timingSet.id)
+        assertEquals(301L, timingSet.mediaAssetId)
+        assertEquals("Performance timing", timingSet.name)
+    }
+
 }
