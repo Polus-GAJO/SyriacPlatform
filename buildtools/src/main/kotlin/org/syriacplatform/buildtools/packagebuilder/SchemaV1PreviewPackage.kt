@@ -10,6 +10,10 @@ import org.syriacplatform.buildtools.schema.SchemaV1Qinto
 import org.syriacplatform.buildtools.schema.SchemaV1Qolo
 import org.syriacplatform.buildtools.schema.SchemaV1Text
 import org.syriacplatform.buildtools.schema.SchemaV1LiturgicalItem
+import org.syriacplatform.buildtools.schema.SchemaV1PerformanceMedia
+import org.syriacplatform.buildtools.schema.SchemaV1MediaTimingSet
+import org.syriacplatform.buildtools.schema.SchemaV1MediaSegment
+import org.syriacplatform.buildtools.schema.SchemaV1TextOccurrenceMediaSegment
 
 data class SchemaV1PreviewPackage(
     val manifest: SchemaV1PreviewManifest,
@@ -23,7 +27,11 @@ data class SchemaV1PreviewPackage(
     val qolos: List<SchemaV1Qolo>,
     val melodies: List<SchemaV1Melody>,
     val qintos: List<SchemaV1Qinto>,
-    val mediaAssets: List<SchemaV1PackageMediaAsset> = emptyList()
+    val mediaAssets: List<SchemaV1PackageMediaAsset> = emptyList(),
+    val performanceMedia: List<SchemaV1PerformanceMedia> = emptyList(),
+    val mediaTimingSets: List<SchemaV1MediaTimingSet> = emptyList(),
+    val mediaSegments: List<SchemaV1MediaSegment> = emptyList(),
+    val textOccurrenceMediaSegments: List<SchemaV1TextOccurrenceMediaSegment> = emptyList()
 )
 
 data class SchemaV1PackageMediaAsset(
