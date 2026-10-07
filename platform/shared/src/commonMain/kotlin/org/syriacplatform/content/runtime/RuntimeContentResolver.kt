@@ -22,6 +22,52 @@ class RuntimeContentResolver(
 ) {
 
 
+
+    fun resolvePerformanceMedia(
+        id: LiturgicalItemId
+    ): Result<List<ResolvedPerformanceMedia>> {
+        if (store.index.liturgicalItemsById[id] == null) {
+            return notFound(
+                "LiturgicalItem",
+                id.value
+            )
+        }
+
+        val performanceMedia =
+            store.index
+                .performanceMediaByLiturgicalItemId[id]
+                .orEmpty()
+
+        val resolved =
+            mutableListOf<ResolvedPerformanceMedia>()
+
+        performanceMedia.forEach { performance ->
+            when (
+                val mediaAssetResult =
+                    resolveMediaAsset(
+                        performance.mediaAssetId
+                    )
+            ) {
+                is Result.Success ->
+                    resolved.add(
+                        ResolvedPerformanceMedia(
+                            performance = performance,
+                            mediaAsset =
+                                mediaAssetResult.data
+                        )
+                    )
+
+                is Result.Failure ->
+                    return mediaAssetResult
+            }
+        }
+
+        return Result.Success(
+            resolved
+        )
+    }
+
+
     fun resolveMediaAsset(
         id: MediaAssetId
     ): Result<MediaAsset> {
