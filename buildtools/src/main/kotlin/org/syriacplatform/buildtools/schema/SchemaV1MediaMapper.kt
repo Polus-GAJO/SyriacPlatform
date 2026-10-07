@@ -79,8 +79,7 @@ class SchemaV1MediaMapper {
             melodyId = source.melodyId,
             mediaAssetId = source.mediaAssetId,
             role = source.role,
-            sort = source.sort,
-            mediaTimingSetId = source.mediaTimingSetId
+            sort = source.sort
         )
     }
 
@@ -104,7 +103,8 @@ class SchemaV1MediaMapper {
             liturgicalItemId = source.existsInId,
             mediaAssetId = source.mediaAssetId,
             role = source.role,
-            sort = source.sort
+            sort = source.sort,
+            mediaTimingSetId = source.mediaTimingSetId
         )
     }
 
