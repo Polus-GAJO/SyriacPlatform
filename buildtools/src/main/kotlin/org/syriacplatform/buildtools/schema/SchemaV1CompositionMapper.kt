@@ -194,7 +194,7 @@ class SchemaV1CompositionMapper(
     private fun mapVerses(
         source: AuthorSourceData,
         existsInId: Long
-    ): List<SchemaV1LiturgicalTextRef> {
+    ): List<SchemaV1TextOccurrence> {
         val petExisByOccurrence =
             source.petExis
                 .groupBy {
@@ -238,7 +238,8 @@ class SchemaV1CompositionMapper(
                             "verse occurrence."
                 }
 
-                SchemaV1LiturgicalTextRef(
+                SchemaV1TextOccurrence(
+                    id = occurrence.id,
                     textId = textId,
 
                     petgomoId =
