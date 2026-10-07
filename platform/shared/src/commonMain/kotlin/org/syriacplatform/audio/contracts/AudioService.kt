@@ -20,6 +20,12 @@ interface AudioService : PlatformService {
         mediaAsset: MediaAsset
     ): Result<Unit>
 
+    fun playInterval(
+        mediaAsset: MediaAsset,
+        startMs: Long,
+        endMs: Long
+    ): Result<Unit>
+
     fun play(): Result<Unit>
 
     fun pause(): Result<Unit>
