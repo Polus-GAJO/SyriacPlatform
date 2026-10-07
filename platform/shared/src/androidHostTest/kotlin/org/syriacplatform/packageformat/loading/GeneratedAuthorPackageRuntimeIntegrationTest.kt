@@ -44,9 +44,48 @@ class GeneratedAuthorPackageRuntimeIntegrationTest {
                 )
 
             val loaded =
-                assertIs<
-                        PackageLoadResult.Success
-                        >(loadResult)
+                when (loadResult) {
+                    is PackageLoadResult.Success ->
+                        loadResult
+
+                    is PackageLoadResult.ValidationFailed -> {
+                        val fatalDetails =
+                            loadResult.validationReport
+                                .fatalIssues
+                                .joinToString(
+                                    separator = "\n"
+                                ) { issue ->
+                                    buildString {
+                                        append(issue.code)
+                                        append(": ")
+                                        append(issue.message)
+
+                                        issue.location
+                                            ?.let { location ->
+                                                append(" [")
+                                                append(location)
+                                                append("]")
+                                            }
+                                    }
+                                }
+
+                        error(
+                            "Generated preview package failed validation " +
+                                "with " +
+                                loadResult.validationReport
+                                    .fatalIssues
+                                    .size +
+                                " fatal issue(s):\n" +
+                                fatalDetails
+                        )
+                    }
+
+                    is PackageLoadResult.Failure ->
+                        error(
+                            "Generated preview package failed to load: " +
+                                loadResult.error
+                        )
+                }
 
             assertTrue(
                 loaded.validationReport.isValid
