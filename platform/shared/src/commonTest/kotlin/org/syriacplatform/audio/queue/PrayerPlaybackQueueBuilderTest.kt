@@ -28,6 +28,7 @@ import org.syriacplatform.content.models.PrayerSequence
 import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.runtime.ResolvedLiturgicalItem
 import org.syriacplatform.content.runtime.ResolvedLiturgicalItemTarget
+import org.syriacplatform.content.runtime.ResolvedPerformanceMedia
 import org.syriacplatform.content.runtime.ResolvedPerformanceTextOccurrenceInterval
 import org.syriacplatform.content.runtime.RuntimeEntryPoint
 import org.syriacplatform.content.runtime.RuntimeOccasion
@@ -590,6 +591,11 @@ private class FakeContentService(
             recordings[melodyId]
                 ?: emptyList()
         )
+
+    override suspend fun loadPerformanceMedia(
+        liturgicalItemId: LiturgicalItemId
+    ): Result<List<ResolvedPerformanceMedia>> =
+        Result.Success(emptyList())
 
     override suspend fun loadPerformanceTextOccurrenceIntervals(
         performanceId: PerformanceMediaId,
