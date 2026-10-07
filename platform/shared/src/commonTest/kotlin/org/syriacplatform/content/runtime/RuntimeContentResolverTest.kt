@@ -15,6 +15,7 @@ import org.syriacplatform.common.types.PrayerId
 import org.syriacplatform.common.types.PrayerSequenceId
 import org.syriacplatform.common.types.QoloId
 import org.syriacplatform.common.types.TextId
+import org.syriacplatform.common.types.TextOccurrenceId
 import org.syriacplatform.content.models.EntryPoint
 import org.syriacplatform.content.models.EntryPointTarget
 import org.syriacplatform.content.models.LiturgicalItem
@@ -114,10 +115,12 @@ class RuntimeContentResolverTest {
                                 effectiveMelodyId = MelodyId(901),
                                 verses = listOf(
                                     LiturgicalTextRef(
+                                        id = TextOccurrenceId(1),
                                         textId = TextId(601),
                                         petgomoId = PetgomoId(701)
                                     ),
                                     LiturgicalTextRef(
+                                        id = TextOccurrenceId(2),
                                         textId = TextId(601),
                                         petgomoId = null
                                     )
