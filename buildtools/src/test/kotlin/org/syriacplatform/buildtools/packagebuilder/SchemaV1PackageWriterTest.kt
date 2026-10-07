@@ -16,6 +16,10 @@ import org.syriacplatform.buildtools.schema.SchemaV1CompositionMapper
 import org.syriacplatform.buildtools.schema.SchemaV1NavigationMapper
 import org.syriacplatform.buildtools.source.AuthorSourceDataLoader
 import kotlinx.serialization.json.JsonNull
+import org.syriacplatform.buildtools.schema.SchemaV1PerformanceMedia
+import org.syriacplatform.buildtools.schema.SchemaV1MediaTimingSet
+import org.syriacplatform.buildtools.schema.SchemaV1MediaSegment
+import org.syriacplatform.buildtools.schema.SchemaV1TextOccurrenceMediaSegment
 
 class SchemaV1PackageWriterTest {
 
@@ -334,6 +338,165 @@ class SchemaV1PackageWriterTest {
                     .resolve("content")
                     .resolve("qintos.json")
             )
+        )
+    }
+
+
+    @Test
+    fun writesPerformanceTimingCollectionsWithCanonicalReferences() {
+        val source =
+            loader.load(
+                representativeExportDirectory()
+            )
+
+        val canonical =
+            canonicalMapper.map(source)
+
+        val fullComposition =
+            compositionMapper.map(source)
+
+        val preview =
+            previewSlice.create(fullComposition)
+
+        val navigation =
+            navigationMapper.map(
+                source = source,
+                composition = preview
+            )
+
+        val occurrence =
+            preview.prayers
+                .flatMap { it.resolvedItems }
+                .flatMap { it.verses }
+                .first()
+
+        val liturgicalItemId =
+            preview.prayers
+                .flatMap { it.resolvedItems }
+                .first { item ->
+                    item.verses.any { it.id == occurrence.id }
+                }
+                .id
+
+        val media =
+            org.syriacplatform.buildtools.schema.SchemaV1CanonicalMedia(
+                mediaAssets = emptyList(),
+                melodyMedia = emptyList(),
+                performanceMedia = listOf(
+                    SchemaV1PerformanceMedia(
+                        id = 401L,
+                        liturgicalItemId = liturgicalItemId,
+                        mediaAssetId = 301L,
+                        role = "PERFORMANCE",
+                        sort = 1L,
+                        mediaTimingSetId = 701L
+                    )
+                ),
+                mediaTimingSets = listOf(
+                    SchemaV1MediaTimingSet(
+                        id = 701L,
+                        mediaAssetId = 301L,
+                        name = null
+                    )
+                ),
+                mediaSegments = listOf(
+                    SchemaV1MediaSegment(
+                        id = 801L,
+                        mediaTimingSetId = 701L,
+                        sequence = 1L,
+                        startMs = null,
+                        endMs = 1250L
+                    )
+                ),
+                textOccurrenceMediaSegments = listOf(
+                    SchemaV1TextOccurrenceMediaSegment(
+                        id = 901L,
+                        textOccurrenceId = occurrence.id,
+                        mediaSegmentId = 801L
+                    )
+                )
+            )
+
+        val packageData =
+            assembler.assemble(
+                canonical = canonical,
+                composition = preview,
+                navigation = navigation,
+                config =
+                    OccasionPackageBuildConfig
+                        .developmentPreview(
+                            occasionId = source.occasion.id
+                        ),
+                media = media
+            )
+
+        val output =
+            outputDirectory()
+                .resolve("performance-timing-writer-test")
+
+        if (Files.exists(output)) {
+            output.toFile().deleteRecursively()
+        }
+
+        writer.write(
+            packageData = packageData,
+            outputDirectory = output
+        )
+
+        val performance =
+            readCollection(
+                output.resolve("content/performance-media.json")
+            ).single().jsonObject
+
+        assertEquals(
+            liturgicalItemId.toString(),
+            performance.getValue("liturgicalItemId").jsonPrimitive.content
+        )
+        assertEquals(
+            "701",
+            performance.getValue("mediaTimingSetId").jsonPrimitive.content
+        )
+
+        val timingSet =
+            readCollection(
+                output.resolve("content/media-timing-sets.json")
+            ).single().jsonObject
+
+        assertEquals(
+            "301",
+            timingSet.getValue("mediaAssetId").jsonPrimitive.content
+        )
+        assertEquals(JsonNull, timingSet.getValue("name"))
+
+        val segment =
+            readCollection(
+                output.resolve("content/media-segments.json")
+            ).single().jsonObject
+
+        assertEquals(
+            "701",
+            segment.getValue("mediaTimingSetId").jsonPrimitive.content
+        )
+        assertEquals(JsonNull, segment.getValue("startMs"))
+        assertEquals(
+            "1250",
+            segment.getValue("endMs").jsonPrimitive.content
+        )
+
+        val relation =
+            readCollection(
+                output.resolve(
+                    "content/text-occurrence-media-segments.json"
+                )
+            ).single().jsonObject
+
+        assertEquals(
+            occurrence.id.toString(),
+            relation.getValue("textOccurrenceId").jsonPrimitive.content
+        )
+        assertEquals(
+            "801",
+            relation.getValue("mediaSegmentId").jsonPrimitive.content
         )
     }
 
