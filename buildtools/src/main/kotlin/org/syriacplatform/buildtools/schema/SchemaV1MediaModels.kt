@@ -20,13 +20,21 @@ data class SchemaV1PerformanceMedia(
     val liturgicalItemId: Long,
     val mediaAssetId: Long,
     val role: String,
-    val sort: Long
+    val sort: Long,
+    val mediaTimingSetId: Long? = null
+)
+
+data class SchemaV1MediaTimingSet(
+    val id: Long,
+    val mediaAssetId: Long,
+    val name: String?
 )
 
 data class SchemaV1CanonicalMedia(
     val mediaAssets: List<SchemaV1MediaAsset>,
     val melodyMedia: List<SchemaV1MelodyMedia>,
-    val performanceMedia: List<SchemaV1PerformanceMedia> = emptyList()
+    val performanceMedia: List<SchemaV1PerformanceMedia> = emptyList(),
+    val mediaTimingSets: List<SchemaV1MediaTimingSet> = emptyList()
 ) {
     fun recordingsForMelody(
         melodyId: Long
