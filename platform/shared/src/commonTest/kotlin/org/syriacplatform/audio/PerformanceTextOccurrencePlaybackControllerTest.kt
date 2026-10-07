@@ -28,6 +28,7 @@ import org.syriacplatform.content.models.Occasion
 import org.syriacplatform.content.models.PerformanceMedia
 import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.runtime.ResolvedLiturgicalItem
+import org.syriacplatform.content.runtime.ResolvedPerformanceMedia
 import org.syriacplatform.content.runtime.ResolvedPerformanceTextOccurrenceInterval
 import org.syriacplatform.content.runtime.RuntimeEntryPoint
 import org.syriacplatform.content.runtime.RuntimeOccasion
@@ -171,6 +172,11 @@ private class FakeIntervalContentService(
         unsupported()
 
     override suspend fun loadMelodyRecordings(melodyId: MelodyId): Result<List<MediaAsset>> =
+        Result.Success(emptyList())
+
+    override suspend fun loadPerformanceMedia(
+        liturgicalItemId: LiturgicalItemId
+    ): Result<List<ResolvedPerformanceMedia>> =
         Result.Success(emptyList())
 
     override suspend fun loadPerformanceTextOccurrenceIntervals(
