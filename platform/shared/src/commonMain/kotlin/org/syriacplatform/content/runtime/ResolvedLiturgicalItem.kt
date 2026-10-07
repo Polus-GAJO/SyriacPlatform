@@ -5,6 +5,7 @@ import org.syriacplatform.content.models.Melody
 import org.syriacplatform.content.models.Petgomo
 import org.syriacplatform.content.models.Qolo as ContentQolo
 import org.syriacplatform.content.models.TextContent
+import org.syriacplatform.common.types.TextOccurrenceId
 
 /**
  * LiturgicalItem بعد حل المراجع القانونية اللازمة لعرضه في Runtime.
@@ -20,10 +21,17 @@ data class ResolvedLiturgicalItem(
  * يمكن أن يظهر TextContent نفسه عدة مرات داخل
  * الترتيلة، وكل ظهور يحتفظ بـ Petgomo الخاصة به.
  */
-data class ResolvedLiturgicalText(
+data class ResolvedTextOccurrence(
+    val id: TextOccurrenceId,
     val text: TextContent,
     val petgomo: Petgomo?
 )
+
+/*
+ * Compatibility alias for code that still uses the pre-4D name.
+ * Runtime now preserves the contextual TextOccurrence identity.
+ */
+typealias ResolvedLiturgicalText = ResolvedTextOccurrence
 
 /**
  * الهدف الفعلي الجاهز للاستهلاك داخل Runtime.
@@ -54,7 +62,7 @@ sealed interface ResolvedLiturgicalItemTarget {
         val qolo: ContentQolo,
         val effectiveMelody: Melody?,
         val melodyCandidates: List<Melody>,
-        val verses: List<ResolvedLiturgicalText>
+        val verses: List<ResolvedTextOccurrence>
     ) : ResolvedLiturgicalItemTarget
 
     /**
@@ -65,6 +73,6 @@ sealed interface ResolvedLiturgicalItemTarget {
      * حتى قبل معرفة Qolo الحقيقية.
      */
     data class UnresolvedQolo(
-        val verses: List<ResolvedLiturgicalText>
+        val verses: List<ResolvedTextOccurrence>
     ) : ResolvedLiturgicalItemTarget
 }
