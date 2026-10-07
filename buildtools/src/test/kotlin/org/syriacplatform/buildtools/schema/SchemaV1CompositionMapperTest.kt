@@ -212,6 +212,44 @@ class SchemaV1CompositionMapperTest {
     }
 
     @Test
+    fun contextualVersesPreserveExistsInTextIdentity() {
+        val source = loadSource()
+        val draft = mapper.map(source)
+
+        val resolvedItems =
+            draft.prayers.flatMap {
+                it.resolvedItems
+            }
+
+        resolvedItems.forEach { item ->
+            val expectedOccurrenceIds =
+                source.existsInTexts
+                    .filter {
+                        it.existsInId == item.id
+                    }
+                    .sortedWith(
+                        compareBy(
+                            {
+                                it.sortInPrayer
+                                    ?: Int.MAX_VALUE
+                            },
+                            { it.id }
+                        )
+                    )
+                    .map {
+                        it.id
+                    }
+
+            assertEquals(
+                expectedOccurrenceIds,
+                item.verses.map {
+                    it.id
+                }
+            )
+        }
+    }
+
+    @Test
     fun compositionIsDeterministic() {
         val source = loadSource()
 
