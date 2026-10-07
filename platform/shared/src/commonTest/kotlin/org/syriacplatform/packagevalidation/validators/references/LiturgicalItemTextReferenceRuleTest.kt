@@ -5,6 +5,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.common.types.TextId
+import org.syriacplatform.common.types.TextOccurrenceId
 import org.syriacplatform.content.models.LiturgicalItem
 import org.syriacplatform.content.models.LiturgicalItemTarget
 import org.syriacplatform.content.models.TextContent
@@ -88,14 +89,17 @@ class LiturgicalItemTextReferenceRuleTest {
                                     MelodyId(75),
                                 verses = listOf(
                                     LiturgicalTextRef(
+                                        id = TextOccurrenceId(1),
                                         textId =
                                             TextId(1001)
                                     ),
                                     LiturgicalTextRef(
+                                        id = TextOccurrenceId(2),
                                         textId =
                                             TextId(1002)
                                     ),
                                     LiturgicalTextRef(
+                                        id = TextOccurrenceId(3),
                                         textId =
                                             TextId(1001)
                                     )
@@ -139,10 +143,12 @@ class LiturgicalItemTextReferenceRuleTest {
                                     MelodyId(75),
                                 verses = listOf(
                                     LiturgicalTextRef(
+                                        id = TextOccurrenceId(4),
                                         textId =
                                             TextId(1001)
                                     ),
                                     LiturgicalTextRef(
+                                        id = TextOccurrenceId(5),
                                         textId =
                                             TextId(999)
                                     )
