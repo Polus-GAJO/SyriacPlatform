@@ -37,6 +37,14 @@ $updatedLines =
 Set-Content -LiteralPath $configPath -Value $updatedLines -Encoding ASCII
 
 Write-Host "Development occasion set to $OccasionId."
+Write-Host "Cleaning generated app resources from the previous occasion..."
+
+& $gradleWrapper -p (Join-Path $repoRoot "platform") :shared:clean :androidApp:clean
+
+if ($LASTEXITCODE -ne 0) {
+    exit $LASTEXITCODE
+}
+
 Write-Host "Building occasion preview..."
 
 & $gradleWrapper -p (Join-Path $repoRoot "platform") :buildtools:buildOccasionPreview
