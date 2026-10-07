@@ -30,11 +30,20 @@ data class SchemaV1MediaTimingSet(
     val name: String?
 )
 
+data class SchemaV1MediaSegment(
+    val id: Long,
+    val mediaTimingSetId: Long,
+    val sequence: Long,
+    val startMs: Long?,
+    val endMs: Long?
+)
+
 data class SchemaV1CanonicalMedia(
     val mediaAssets: List<SchemaV1MediaAsset>,
     val melodyMedia: List<SchemaV1MelodyMedia>,
     val performanceMedia: List<SchemaV1PerformanceMedia> = emptyList(),
-    val mediaTimingSets: List<SchemaV1MediaTimingSet> = emptyList()
+    val mediaTimingSets: List<SchemaV1MediaTimingSet> = emptyList(),
+    val mediaSegments: List<SchemaV1MediaSegment> = emptyList()
 ) {
     fun recordingsForMelody(
         melodyId: Long
