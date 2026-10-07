@@ -39,6 +39,18 @@ object PackagePaths {
     const val MEDIA_ASSETS =
         "content/media-assets.json"
 
+    const val PERFORMANCE_MEDIA =
+        "content/performance-media.json"
+
+    const val MEDIA_TIMING_SETS =
+        "content/media-timing-sets.json"
+
+    const val MEDIA_SEGMENTS =
+        "content/media-segments.json"
+
+    const val TEXT_OCCURRENCE_MEDIA_SEGMENTS =
+        "content/text-occurrence-media-segments.json"
+
     const val QINTOS =
         "content/qintos.json"
 
