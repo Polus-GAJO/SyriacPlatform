@@ -181,7 +181,10 @@ class OccasionPackageBuilder(
                     melodyIds =
                         packageMelodyIds(
                             packageComposition
-                        )
+                        ),
+                    liturgicalItems =
+                        packageComposition.prayers
+                            .flatMap { it.resolvedItems }
                 )
             } else {
                 SchemaV1CanonicalMedia(
