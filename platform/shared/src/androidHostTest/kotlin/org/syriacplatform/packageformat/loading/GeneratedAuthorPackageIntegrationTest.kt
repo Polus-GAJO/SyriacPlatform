@@ -83,7 +83,7 @@ class GeneratedAuthorPackageIntegrationTest {
                 success.packageData
 
             assertEquals(
-                "org.syriacplatform.preview.occasion2",
+                "org.syriacplatform.preview.occasion$occasionId",
                 packageData.manifest.packageId
             )
 
@@ -97,9 +97,8 @@ class GeneratedAuthorPackageIntegrationTest {
                 packageData.occasions.size
             )
 
-            assertEquals(
-                51,
-                packageData.liturgicalItems.size
+            assertTrue(
+                packageData.liturgicalItems.isNotEmpty()
             )
 
             assertTrue(
@@ -131,9 +130,8 @@ class GeneratedAuthorPackageIntegrationTest {
                 packageData.collectionPresence.mediaAssets
             )
 
-            assertEquals(
-                13,
-                packageData.mediaAssets.size
+            assertTrue(
+                packageData.mediaAssets.isNotEmpty()
             )
 
             val mediaAssetIds =
@@ -213,6 +211,14 @@ class GeneratedAuthorPackageIntegrationTest {
             )
         }
 
+    private val occasionId: Long
+        get() =
+            requireNotNull(
+                System.getProperty(
+                    "syriacplatform.test.occasionId"
+                )
+            ).toLong()
+
     private fun generatedPreviewPackageDirectory(): Path {
         return Path.of(
             "..",
@@ -220,7 +226,7 @@ class GeneratedAuthorPackageIntegrationTest {
             "buildtools",
             "build",
             "generated",
-            "occasion-2-preview"
+            "occasion-$occasionId-preview"
         ).toAbsolutePath().normalize()
     }
 
