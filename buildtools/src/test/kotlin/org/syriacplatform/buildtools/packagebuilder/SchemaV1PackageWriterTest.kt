@@ -212,6 +212,46 @@ class SchemaV1PackageWriterTest {
             }
         )
 
+        val writtenOccurrences =
+            liturgicalItems
+                .flatMap {
+                    it.jsonObject
+                        .getValue("verses")
+                        .jsonArray
+                }
+
+        val expectedOccurrenceIds =
+            source.existsInTexts
+                .filter { occurrence ->
+                    occurrence.existsInId in
+                            liturgicalItems
+                                .map {
+                                    it.jsonObject
+                                        .getValue("id")
+                                        .jsonPrimitive
+                                        .content
+                                        .toLong()
+                                }
+                                .toSet()
+                }
+                .map {
+                    it.id
+                }
+                .toSet()
+
+        assertEquals(
+            expectedOccurrenceIds,
+            writtenOccurrences
+                .map {
+                    it.jsonObject
+                        .getValue("id")
+                        .jsonPrimitive
+                        .content
+                        .toLong()
+                }
+                .toSet()
+        )
+
         val qolos =
             readCollection(
                 output
