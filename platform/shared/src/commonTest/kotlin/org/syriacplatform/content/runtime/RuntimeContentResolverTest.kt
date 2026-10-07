@@ -4,11 +4,14 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import org.syriacplatform.common.result.Result
 import org.syriacplatform.common.types.EntryPointId
 import org.syriacplatform.common.types.GroupId
 import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.common.types.MelodyId
+import org.syriacplatform.common.types.MediaAssetId
+import org.syriacplatform.common.types.PerformanceMediaId
 import org.syriacplatform.common.types.OccasionId
 import org.syriacplatform.common.types.PetgomoId
 import org.syriacplatform.common.types.PrayerId
@@ -21,6 +24,8 @@ import org.syriacplatform.content.models.EntryPointTarget
 import org.syriacplatform.content.models.LiturgicalItem
 import org.syriacplatform.content.models.LiturgicalItemTarget
 import org.syriacplatform.content.models.Melody
+import org.syriacplatform.content.models.MediaAsset
+import org.syriacplatform.content.models.PerformanceMedia
 import org.syriacplatform.content.models.Occasion
 import org.syriacplatform.content.models.Petgomo
 import org.syriacplatform.content.models.Prayer
@@ -411,4 +416,104 @@ class RuntimeContentResolverTest {
             target.petgomo
         )
     }
+
+    @Test
+    fun resolverResolvesPerformanceMediaForLiturgicalItemInSourceOrder() {
+        val itemId = LiturgicalItemId(501)
+        val firstAsset =
+            MediaAsset(
+                id = MediaAssetId(301),
+                type = "AUDIO",
+                path = "media/first.mp3",
+                performer = null
+            )
+        val secondAsset =
+            firstAsset.copy(
+                id = MediaAssetId(302),
+                path = "media/second.mp3"
+            )
+
+        val packageData =
+            packageWith(
+                liturgicalItems = listOf(
+                    LiturgicalItem(
+                        id = itemId,
+                        target =
+                            LiturgicalItemTarget.Text(
+                                textId = TextId(601)
+                            )
+                    )
+                ),
+                mediaAssets =
+                    listOf(firstAsset, secondAsset),
+                performanceMedia = listOf(
+                    PerformanceMedia(
+                        id = PerformanceMediaId(401),
+                        liturgicalItemId = itemId,
+                        mediaAssetId = MediaAssetId(301),
+                        role = "PERFORMANCE",
+                        sort = 1
+                    ),
+                    PerformanceMedia(
+                        id = PerformanceMediaId(402),
+                        liturgicalItemId = itemId,
+                        mediaAssetId = MediaAssetId(302),
+                        role = "PERFORMANCE",
+                        sort = 2
+                    )
+                )
+            )
+
+        val resolver =
+            RuntimeContentResolver(
+                RuntimeContentStore.from(packageData)
+            )
+
+        val result =
+            assertIs<Result.Success<List<ResolvedPerformanceMedia>>>(
+                resolver.resolvePerformanceMedia(itemId)
+            )
+
+        assertEquals(
+            listOf(
+                PerformanceMediaId(401),
+                PerformanceMediaId(402)
+            ),
+            result.data.map { it.performance.id }
+        )
+        assertEquals(
+            listOf(
+                MediaAssetId(301),
+                MediaAssetId(302)
+            ),
+            result.data.map { it.mediaAsset.id }
+        )
+    }
+
+    @Test
+    fun resolverReturnsEmptyPerformanceListForExistingItemWithoutPerformance() {
+        val itemId = LiturgicalItemId(501)
+        val packageData =
+            packageWith(
+                liturgicalItems = listOf(
+                    LiturgicalItem(
+                        id = itemId,
+                        target =
+                            LiturgicalItemTarget.Text(
+                                textId = TextId(601)
+                            )
+                    )
+                )
+            )
+
+        val result =
+            assertIs<Result.Success<List<ResolvedPerformanceMedia>>>(
+                RuntimeContentResolver(
+                    RuntimeContentStore.from(packageData)
+                ).resolvePerformanceMedia(itemId)
+            )
+
+        assertTrue(result.data.isEmpty())
+    }
+
 }
