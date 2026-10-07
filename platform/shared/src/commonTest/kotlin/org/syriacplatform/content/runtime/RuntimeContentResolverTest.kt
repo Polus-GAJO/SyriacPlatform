@@ -735,4 +735,157 @@ class RuntimeContentResolverTest {
         assertNull(result.data)
     }
 
+
+    @Test
+    fun resolverKeepsOnlyOccurrenceSegmentsFromSelectedPerformanceTimingSet() {
+        val occurrenceId = TextOccurrenceId(501)
+        val selectedTimingSet =
+            MediaTimingSet(
+                id = MediaTimingSetId(701),
+                mediaAssetId = MediaAssetId(301),
+                name = null
+            )
+        val otherTimingSet =
+            selectedTimingSet.copy(
+                id = MediaTimingSetId(702),
+                mediaAssetId = MediaAssetId(302)
+            )
+        val selectedSegment =
+            MediaSegment(
+                id = MediaSegmentId(801),
+                mediaTimingSetId = selectedTimingSet.id,
+                sequence = 1,
+                startMs = 100,
+                endMs = 1200
+            )
+        val otherSegment =
+            selectedSegment.copy(
+                id = MediaSegmentId(802),
+                mediaTimingSetId = otherTimingSet.id,
+                startMs = 200,
+                endMs = 1300
+            )
+        val performance =
+            PerformanceMedia(
+                id = PerformanceMediaId(401),
+                liturgicalItemId = LiturgicalItemId(101),
+                mediaAssetId = MediaAssetId(301),
+                role = "PERFORMANCE",
+                sort = 1,
+                mediaTimingSetId = selectedTimingSet.id
+            )
+
+        val packageData =
+            packageWith(
+                liturgicalItems = listOf(
+                    LiturgicalItem(
+                        id = LiturgicalItemId(101),
+                        target =
+                            LiturgicalItemTarget.UnresolvedQolo(
+                                verses = listOf(
+                                    LiturgicalTextRef(
+                                        id = occurrenceId,
+                                        textId = TextId(601)
+                                    )
+                                )
+                            )
+                    )
+                ),
+                performanceMedia = listOf(performance),
+                mediaTimingSets =
+                    listOf(selectedTimingSet, otherTimingSet),
+                mediaSegments =
+                    listOf(selectedSegment, otherSegment),
+                textOccurrenceMediaSegments = listOf(
+                    TextOccurrenceMediaSegment(
+                        id = TextOccurrenceMediaSegmentId(901),
+                        textOccurrenceId = occurrenceId,
+                        mediaSegmentId = selectedSegment.id
+                    ),
+                    TextOccurrenceMediaSegment(
+                        id = TextOccurrenceMediaSegmentId(902),
+                        textOccurrenceId = occurrenceId,
+                        mediaSegmentId = otherSegment.id
+                    )
+                )
+            )
+
+        val result =
+            assertIs<
+                    Result.Success<
+                            List<ResolvedPerformanceTextOccurrenceTiming>
+                            >
+                    >(
+                RuntimeContentResolver(
+                    RuntimeContentStore.from(packageData)
+                ).resolvePerformanceTextOccurrenceTiming(
+                    performanceId = performance.id,
+                    textOccurrenceId = occurrenceId
+                )
+            )
+
+        assertEquals(1, result.data.size)
+        assertEquals(
+            selectedTimingSet.id,
+            result.data.single().timingSet.id
+        )
+        assertEquals(
+            selectedSegment.id,
+            result.data.single().segment.id
+        )
+        assertEquals(
+            TextOccurrenceMediaSegmentId(901),
+            result.data.single().relation.id
+        )
+    }
+
+    @Test
+    fun resolverReturnsEmptyOccurrenceTimingForPerformanceWithoutTimingSet() {
+        val occurrenceId = TextOccurrenceId(501)
+        val performance =
+            PerformanceMedia(
+                id = PerformanceMediaId(401),
+                liturgicalItemId = LiturgicalItemId(101),
+                mediaAssetId = MediaAssetId(301),
+                role = "PERFORMANCE",
+                sort = 1,
+                mediaTimingSetId = null
+            )
+
+        val packageData =
+            packageWith(
+                liturgicalItems = listOf(
+                    LiturgicalItem(
+                        id = LiturgicalItemId(101),
+                        target =
+                            LiturgicalItemTarget.UnresolvedQolo(
+                                verses = listOf(
+                                    LiturgicalTextRef(
+                                        id = occurrenceId,
+                                        textId = TextId(601)
+                                    )
+                                )
+                            )
+                    )
+                ),
+                performanceMedia = listOf(performance)
+            )
+
+        val result =
+            assertIs<
+                    Result.Success<
+                            List<ResolvedPerformanceTextOccurrenceTiming>
+                            >
+                    >(
+                RuntimeContentResolver(
+                    RuntimeContentStore.from(packageData)
+                ).resolvePerformanceTextOccurrenceTiming(
+                    performanceId = performance.id,
+                    textOccurrenceId = occurrenceId
+                )
+            )
+
+        assertTrue(result.data.isEmpty())
+    }
+
 }
