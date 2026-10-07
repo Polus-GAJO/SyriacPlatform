@@ -3,6 +3,9 @@ package org.syriacplatform.content.runtime
 import org.syriacplatform.common.types.EntryPointId
 import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.common.types.MediaAssetId
+import org.syriacplatform.common.types.MediaSegmentId
+import org.syriacplatform.common.types.MediaTimingSetId
+import org.syriacplatform.common.types.PerformanceMediaId
 import org.syriacplatform.common.types.MelodyId
 import org.syriacplatform.common.types.OccasionId
 import org.syriacplatform.common.types.PetgomoId
@@ -15,6 +18,10 @@ import org.syriacplatform.common.types.TextOccurrenceId
 import org.syriacplatform.content.models.EntryPoint
 import org.syriacplatform.content.models.LiturgicalItem
 import org.syriacplatform.content.models.MediaAsset
+import org.syriacplatform.content.models.MediaSegment
+import org.syriacplatform.content.models.MediaTimingSet
+import org.syriacplatform.content.models.PerformanceMedia
+import org.syriacplatform.content.models.TextOccurrenceMediaSegment
 import org.syriacplatform.content.models.Melody
 import org.syriacplatform.content.models.MelodyQintoAssignment
 import org.syriacplatform.content.models.Occasion
@@ -48,6 +55,20 @@ class RuntimeContentIndex private constructor(
     val qolosById: Map<QoloId, Qolo>,
     val melodiesById: Map<MelodyId, Melody>,
     val mediaAssetsById: Map<MediaAssetId, MediaAsset>,
+    val performanceMediaById:
+    Map<PerformanceMediaId, PerformanceMedia>,
+    val performanceMediaByLiturgicalItemId:
+    Map<LiturgicalItemId, List<PerformanceMedia>>,
+    val mediaTimingSetsById:
+    Map<MediaTimingSetId, MediaTimingSet>,
+    val mediaSegmentsById:
+    Map<MediaSegmentId, MediaSegment>,
+    val mediaSegmentsByTimingSetId:
+    Map<MediaTimingSetId, List<MediaSegment>>,
+    val textOccurrenceMediaSegmentsByTextOccurrenceId:
+    Map<TextOccurrenceId, List<TextOccurrenceMediaSegment>>,
+    val textOccurrenceMediaSegmentsByMediaSegmentId:
+    Map<MediaSegmentId, List<TextOccurrenceMediaSegment>>,
     val qintosById: Map<QintoId, Qinto>,
 
     /**
@@ -114,6 +135,35 @@ class RuntimeContentIndex private constructor(
 
                 mediaAssetsById =
                     content.mediaAssets.associateBy { it.id },
+
+                performanceMediaById =
+                    content.performanceMedia.associateBy { it.id },
+
+                performanceMediaByLiturgicalItemId =
+                    content.performanceMedia.groupBy {
+                        it.liturgicalItemId
+                    },
+
+                mediaTimingSetsById =
+                    content.mediaTimingSets.associateBy { it.id },
+
+                mediaSegmentsById =
+                    content.mediaSegments.associateBy { it.id },
+
+                mediaSegmentsByTimingSetId =
+                    content.mediaSegments.groupBy {
+                        it.mediaTimingSetId
+                    },
+
+                textOccurrenceMediaSegmentsByTextOccurrenceId =
+                    content.textOccurrenceMediaSegments.groupBy {
+                        it.textOccurrenceId
+                    },
+
+                textOccurrenceMediaSegmentsByMediaSegmentId =
+                    content.textOccurrenceMediaSegments.groupBy {
+                        it.mediaSegmentId
+                    },
 
                 qintosById =
                     content.qintos.associateBy { it.id },
