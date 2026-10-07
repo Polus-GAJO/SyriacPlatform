@@ -388,6 +388,17 @@ private class FakeAudioService :
         return Result.Success(Unit)
     }
 
+    override fun playInterval(
+        mediaAsset: MediaAsset,
+        startMs: Long,
+        endMs: Long
+    ): Result<Unit> {
+        commands +=
+            "playInterval:${mediaAsset.id.value}:$startMs:$endMs"
+
+        return Result.Success(Unit)
+    }
+
     override fun play(): Result<Unit> {
         commands += "play"
         return Result.Success(Unit)
