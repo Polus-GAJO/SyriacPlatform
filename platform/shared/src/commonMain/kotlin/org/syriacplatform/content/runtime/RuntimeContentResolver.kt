@@ -26,6 +26,68 @@ class RuntimeContentResolver(
 
 
 
+    fun resolvePerformanceTextOccurrenceIntervals(
+        performanceId: PerformanceMediaId,
+        textOccurrenceId: TextOccurrenceId
+    ): Result<List<ResolvedPerformanceTextOccurrenceInterval>> {
+        val timings =
+            when (
+                val result =
+                    resolvePerformanceTextOccurrenceTiming(
+                        performanceId = performanceId,
+                        textOccurrenceId = textOccurrenceId
+                    )
+            ) {
+                is Result.Success -> result.data
+                is Result.Failure -> return result
+            }
+
+        if (timings.isEmpty()) {
+            return Result.Success(emptyList())
+        }
+
+        val performance =
+            timings.first().performance
+
+        val mediaAsset =
+            when (
+                val result =
+                    resolveMediaAsset(
+                        performance.mediaAssetId
+                    )
+            ) {
+                is Result.Success -> result.data
+                is Result.Failure -> return result
+            }
+
+        val intervals =
+            timings.mapNotNull { timing ->
+                val startMs = timing.segment.startMs
+                val endMs = timing.segment.endMs
+
+                if (
+                    startMs != null &&
+                    endMs != null &&
+                    startMs >= 0L &&
+                    endMs > startMs
+                ) {
+                    ResolvedPerformanceTextOccurrenceInterval(
+                        performance = performance,
+                        mediaAsset = mediaAsset,
+                        segment = timing.segment,
+                        startMs = startMs,
+                        endMs = endMs
+                    )
+                } else {
+                    null
+                }
+            }
+
+        return Result.Success(intervals)
+    }
+
+
+
 
 
     fun resolvePerformanceTextOccurrenceTiming(
