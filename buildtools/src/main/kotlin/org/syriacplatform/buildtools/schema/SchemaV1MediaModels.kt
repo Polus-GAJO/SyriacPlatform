@@ -38,12 +38,19 @@ data class SchemaV1MediaSegment(
     val endMs: Long?
 )
 
+data class SchemaV1TextOccurrenceMediaSegment(
+    val id: Long,
+    val textOccurrenceId: Long,
+    val mediaSegmentId: Long
+)
+
 data class SchemaV1CanonicalMedia(
     val mediaAssets: List<SchemaV1MediaAsset>,
     val melodyMedia: List<SchemaV1MelodyMedia>,
     val performanceMedia: List<SchemaV1PerformanceMedia> = emptyList(),
     val mediaTimingSets: List<SchemaV1MediaTimingSet> = emptyList(),
-    val mediaSegments: List<SchemaV1MediaSegment> = emptyList()
+    val mediaSegments: List<SchemaV1MediaSegment> = emptyList(),
+    val textOccurrenceMediaSegments: List<SchemaV1TextOccurrenceMediaSegment> = emptyList()
 ) {
     fun recordingsForMelody(
         melodyId: Long
