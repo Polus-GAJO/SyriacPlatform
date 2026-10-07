@@ -6,6 +6,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.syriacplatform.buildtools.source.MediaSourceData
 import org.syriacplatform.buildtools.source.models.MediaAssetSource
+import org.syriacplatform.buildtools.source.models.ExistsInMediaSource
 import org.syriacplatform.buildtools.source.models.MelodyMediaSource
 
 class SchemaV1MediaMapperTest {
