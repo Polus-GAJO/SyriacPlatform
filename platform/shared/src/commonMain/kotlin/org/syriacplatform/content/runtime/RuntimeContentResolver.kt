@@ -9,6 +9,7 @@ import org.syriacplatform.common.types.MelodyId
 import org.syriacplatform.common.types.OccasionId
 import org.syriacplatform.common.types.PlatformError
 import org.syriacplatform.common.types.PrayerSequenceId
+import org.syriacplatform.common.types.TextOccurrenceId
 import org.syriacplatform.content.models.EntryPointTarget
 import org.syriacplatform.content.models.LiturgicalItemTarget
 import org.syriacplatform.content.models.MediaAsset
@@ -21,6 +22,61 @@ class RuntimeContentResolver(
     private val store: RuntimeContentStore
 ) {
 
+
+
+
+    fun resolveTextOccurrenceTiming(
+        id: TextOccurrenceId
+    ): Result<List<ResolvedTextOccurrenceTiming>> {
+        if (store.index.textOccurrencesById[id] == null) {
+            return notFound(
+                "TextOccurrence",
+                id.value
+            )
+        }
+
+        val relations =
+            store.index
+                .textOccurrenceMediaSegmentsByTextOccurrenceId[id]
+                .orEmpty()
+
+        val resolved =
+            mutableListOf<ResolvedTextOccurrenceTiming>()
+
+        relations.forEach { relation ->
+            val segment =
+                store.index
+                    .mediaSegmentsById[
+                    relation.mediaSegmentId
+                ]
+                    ?: return notFound(
+                        "MediaSegment",
+                        relation.mediaSegmentId.value
+                    )
+
+            val timingSet =
+                store.index
+                    .mediaTimingSetsById[
+                    segment.mediaTimingSetId
+                ]
+                    ?: return notFound(
+                        "MediaTimingSet",
+                        segment.mediaTimingSetId.value
+                    )
+
+            resolved.add(
+                ResolvedTextOccurrenceTiming(
+                    relation = relation,
+                    segment = segment,
+                    timingSet = timingSet
+                )
+            )
+        }
+
+        return Result.Success(
+            resolved
+        )
+    }
 
 
     fun resolvePerformanceMedia(
