@@ -3,6 +3,10 @@ package org.syriacplatform.content.runtime
 import org.syriacplatform.content.models.EntryPoint
 import org.syriacplatform.content.models.LiturgicalItem
 import org.syriacplatform.content.models.MediaAsset
+import org.syriacplatform.content.models.MediaSegment
+import org.syriacplatform.content.models.MediaTimingSet
+import org.syriacplatform.content.models.PerformanceMedia
+import org.syriacplatform.content.models.TextOccurrenceMediaSegment
 import org.syriacplatform.content.models.Melody
 import org.syriacplatform.content.models.MelodyQintoAssignment
 import org.syriacplatform.content.models.Occasion
@@ -35,7 +39,12 @@ data class RuntimeContent(
     val melodies: List<Melody>,
     val qintos: List<Qinto>,
     val melodyQintoAssignments: List<MelodyQintoAssignment>,
-    val mediaAssets: List<MediaAsset> = emptyList()
+    val mediaAssets: List<MediaAsset> = emptyList(),
+    val performanceMedia: List<PerformanceMedia> = emptyList(),
+    val mediaTimingSets: List<MediaTimingSet> = emptyList(),
+    val mediaSegments: List<MediaSegment> = emptyList(),
+    val textOccurrenceMediaSegments:
+        List<TextOccurrenceMediaSegment> = emptyList()
 ) {
 
     companion object {
@@ -57,7 +66,15 @@ data class RuntimeContent(
                 melodyQintoAssignments =
                     packageData.melodyQintoAssignments,
                 mediaAssets =
-                    packageData.mediaAssets
+                    packageData.mediaAssets,
+                performanceMedia =
+                    packageData.performanceMedia,
+                mediaTimingSets =
+                    packageData.mediaTimingSets,
+                mediaSegments =
+                    packageData.mediaSegments,
+                textOccurrenceMediaSegments =
+                    packageData.textOccurrenceMediaSegments
             )
         }
     }
