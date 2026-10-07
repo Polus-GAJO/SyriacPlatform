@@ -2,6 +2,7 @@ package org.syriacplatform.buildtools.schema
 
 import org.syriacplatform.buildtools.source.MediaSourceData
 import org.syriacplatform.buildtools.source.models.MediaAssetSource
+import org.syriacplatform.buildtools.source.models.ExistsInMediaSource
 import org.syriacplatform.buildtools.source.models.MelodyMediaSource
 
 class SchemaV1MediaMapper {
@@ -17,14 +18,21 @@ class SchemaV1MediaMapper {
             source.melodyMedia
                 .map(::mapMelodyMedia)
 
+        val performanceMedia =
+            source.existsInMedia
+                .filter { it.role == PERFORMANCE_ROLE }
+                .map(::mapPerformanceMedia)
+
         validateCanonicalReferences(
             mediaAssets = mediaAssets,
-            melodyMedia = melodyMedia
+            melodyMedia = melodyMedia,
+            performanceMedia = performanceMedia
         )
 
         return SchemaV1CanonicalMedia(
             mediaAssets = mediaAssets,
-            melodyMedia = melodyMedia
+            melodyMedia = melodyMedia,
+            performanceMedia = performanceMedia
         )
     }
 
@@ -68,9 +76,34 @@ class SchemaV1MediaMapper {
         )
     }
 
+    private fun mapPerformanceMedia(
+        source: ExistsInMediaSource
+    ): SchemaV1PerformanceMedia {
+        require(source.id > 0L) {
+            "ExistsInMedia ${source.id} must have a positive id."
+        }
+
+        require(source.existsInId > 0L) {
+            "ExistsInMedia ${source.id} must reference a positive LiturgicalItem id."
+        }
+
+        require(source.mediaAssetId > 0L) {
+            "ExistsInMedia ${source.id} must reference a positive MediaAsset id."
+        }
+
+        return SchemaV1PerformanceMedia(
+            id = source.id,
+            liturgicalItemId = source.existsInId,
+            mediaAssetId = source.mediaAssetId,
+            role = source.role,
+            sort = source.sort
+        )
+    }
+
     private fun validateCanonicalReferences(
         mediaAssets: List<SchemaV1MediaAsset>,
-        melodyMedia: List<SchemaV1MelodyMedia>
+        melodyMedia: List<SchemaV1MelodyMedia>,
+        performanceMedia: List<SchemaV1PerformanceMedia>
     ) {
         val mediaAssetIds =
             mediaAssets
@@ -94,6 +127,20 @@ class SchemaV1MediaMapper {
         ) {
             "Canonical MelodyMedia references missing MediaAsset ids: " +
                     missingMediaAssetIds.joinToString()
+        }
+
+        val missingPerformanceMediaAssetIds =
+            performanceMedia
+                .map { it.mediaAssetId }
+                .filterNot { it in mediaAssetIds }
+                .distinct()
+                .sorted()
+
+        require(
+            missingPerformanceMediaAssetIds.isEmpty()
+        ) {
+            "Canonical PERFORMANCE media references missing MediaAsset ids: " +
+                    missingPerformanceMediaAssetIds.joinToString()
         }
     }
 }
