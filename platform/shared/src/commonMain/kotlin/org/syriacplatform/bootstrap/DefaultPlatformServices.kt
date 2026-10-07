@@ -1,5 +1,6 @@
 package org.syriacplatform.bootstrap
 
+import org.syriacplatform.audio.PerformanceTextOccurrencePlaybackController
 import org.syriacplatform.audio.contracts.AudioService
 import org.syriacplatform.audio.resources.ComposeResourceMediaResourceResolver
 import org.syriacplatform.audio.services.DefaultAudioService
@@ -35,10 +36,19 @@ object DefaultPlatformServices {
                 )
             }
 
+        val performanceTextPlayback =
+            audioService?.let { audio ->
+                PerformanceTextOccurrencePlaybackController(
+                    contentService = contentService,
+                    audioService = audio
+                )
+            }
+
         return PlatformServices(
             content = contentService,
             navigation = navigationService,
-            audio = audioService
+            audio = audioService,
+            performanceTextPlayback = performanceTextPlayback
         )
     }
 }
