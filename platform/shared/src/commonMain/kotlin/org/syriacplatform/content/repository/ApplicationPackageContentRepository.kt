@@ -21,6 +21,7 @@ import org.syriacplatform.content.models.Occasion
 import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.common.types.PerformanceMediaId
 import org.syriacplatform.common.types.TextOccurrenceId
+import org.syriacplatform.content.runtime.ResolvedPerformanceMedia
 import org.syriacplatform.content.runtime.ResolvedPerformanceTextOccurrenceInterval
 import org.syriacplatform.content.runtime.ResolvedLiturgicalItem
 
@@ -266,6 +267,24 @@ class ApplicationPackageContentRepository(
                     store = storeResult.data
                 ).resolveMelodyRecordings(id)
             }
+
+            is Result.Failure ->
+                storeResult
+        }
+    }
+
+    override suspend fun loadPerformanceMedia(
+        liturgicalItemId: LiturgicalItemId
+    ): Result<List<ResolvedPerformanceMedia>> {
+        return when (
+            val storeResult = loadStore()
+        ) {
+            is Result.Success ->
+                RuntimeContentResolver(
+                    store = storeResult.data
+                ).resolvePerformanceMedia(
+                    liturgicalItemId
+                )
 
             is Result.Failure ->
                 storeResult
