@@ -1,5 +1,6 @@
 package org.syriacplatform.context
 
+import org.syriacplatform.audio.PerformanceTextOccurrencePlaybackController
 import org.syriacplatform.audio.contracts.AudioService
 import org.syriacplatform.content.contracts.ContentService
 import org.syriacplatform.kernel.PlatformKernel
@@ -15,7 +16,8 @@ class PlatformContext internal constructor(
     internal val kernel: PlatformKernel,
     val content: ContentService,
     val navigation: NavigationService,
-    val audio: AudioService? = null
+    val audio: AudioService? = null,
+    val performanceTextPlayback: PerformanceTextOccurrencePlaybackController? = null
 ) {
     fun shutdown() {
         kernel.shutdown()
