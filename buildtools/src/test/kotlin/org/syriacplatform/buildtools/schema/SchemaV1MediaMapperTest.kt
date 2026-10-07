@@ -10,6 +10,7 @@ import org.syriacplatform.buildtools.source.models.ExistsInMediaSource
 import org.syriacplatform.buildtools.source.models.MelodyMediaSource
 import org.syriacplatform.buildtools.source.models.MediaTimingSetSource
 import org.syriacplatform.buildtools.source.models.MediaSegmentSource
+import org.syriacplatform.buildtools.source.models.ExistsInTextMediaSegmentSource
 
 class SchemaV1MediaMapperTest {
 
@@ -301,6 +302,56 @@ class SchemaV1MediaMapperTest {
                 )
             ),
             canonical.mediaSegments
+        )
+    }
+
+    @Test
+    fun mapsTextOccurrenceToMediaSegmentRelationship() {
+        val canonical =
+            mapper.map(
+                MediaSourceData(
+                    mediaAssets = listOf(
+                        MediaAssetSource(
+                            id = 301L,
+                            mediaType = "AUDIO",
+                            sourceRelativePath =
+                                "audio/performances/media-000301.mp3"
+                        )
+                    ),
+                    melodyMedia = emptyList(),
+                    mediaTimingSets = listOf(
+                        MediaTimingSetSource(
+                            id = 701L,
+                            mediaAssetId = 301L,
+                            name = null
+                        )
+                    ),
+                    mediaSegments = listOf(
+                        MediaSegmentSource(
+                            id = 801L,
+                            mediaTimingSetId = 701L,
+                            sequence = 1L,
+                            startMs = 1000L,
+                            endMs = 2500L
+                        )
+                    ),
+                    existsInTextMediaSegments = listOf(
+                        ExistsInTextMediaSegmentSource(
+                            id = 901L,
+                            existsInTextId = 9001L,
+                            mediaSegmentId = 801L
+                        )
+                    )
+                )
+            )
+
+        assertEquals(
+            SchemaV1TextOccurrenceMediaSegment(
+                id = 901L,
+                textOccurrenceId = 9001L,
+                mediaSegmentId = 801L
+            ),
+            canonical.textOccurrenceMediaSegments.single()
         )
     }
 
