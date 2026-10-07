@@ -25,6 +25,7 @@ import org.syriacplatform.buildtools.schema.SchemaV1QoloLiturgicalItem
 import org.syriacplatform.buildtools.schema.SchemaV1LiturgicalItem
 import org.syriacplatform.buildtools.schema.SchemaV1UnresolvedQoloLiturgicalItem
 import org.syriacplatform.buildtools.schema.SchemaV1Text
+import org.syriacplatform.buildtools.schema.SchemaV1TextOccurrence
 import kotlinx.serialization.ExperimentalSerializationApi
 
 @OptIn(ExperimentalSerializationApi::class)
@@ -445,16 +446,18 @@ class SchemaV1PackageWriter {
 
     private fun liturgicalVersesJson(
         verses:
-        List<
-                org.syriacplatform.buildtools.schema
-                .SchemaV1LiturgicalTextRef
-                >
+        List<SchemaV1TextOccurrence>
     ): JsonArray {
 
         return buildJsonArray {
             verses.forEach { verse ->
                 add(
                     buildJsonObject {
+                        put(
+                            "id",
+                            verse.id
+                        )
+
                         put(
                             "textId",
                             verse.textId
