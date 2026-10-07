@@ -8,9 +8,10 @@ import org.syriacplatform.common.types.PetgomoId
 import org.syriacplatform.common.types.PlatformError
 import org.syriacplatform.common.types.QoloId
 import org.syriacplatform.common.types.TextId
+import org.syriacplatform.common.types.TextOccurrenceId
 import org.syriacplatform.content.models.LiturgicalItem
 import org.syriacplatform.content.models.LiturgicalItemTarget
-import org.syriacplatform.content.models.LiturgicalTextRef
+import org.syriacplatform.content.models.TextOccurrence
 import org.syriacplatform.packageformat.dto.LiturgicalItemJsonDto
 
 /**
@@ -80,7 +81,11 @@ internal fun LiturgicalItemJsonDto.toDomain(): Result<LiturgicalItem> {
                         melodyCandidateIds.map(::MelodyId),
                     verses =
                         verses.map { verse ->
-                            LiturgicalTextRef(
+                            TextOccurrence(
+                                id =
+                                    TextOccurrenceId(
+                                        verse.id
+                                    ),
                                 textId =
                                     TextId(
                                         verse.textId
@@ -142,7 +147,11 @@ internal fun LiturgicalItemJsonDto.toDomain(): Result<LiturgicalItem> {
                 LiturgicalItemTarget.UnresolvedQolo(
                     verses =
                         verses.map { verse ->
-                            LiturgicalTextRef(
+                            TextOccurrence(
+                                id =
+                                    TextOccurrenceId(
+                                        verse.id
+                                    ),
                                 textId =
                                     TextId(
                                         verse.textId
