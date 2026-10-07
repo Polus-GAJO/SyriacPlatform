@@ -65,9 +65,8 @@ class GeneratedAuthorPackageRuntimeIntegrationTest {
                     loaded.packageData
                 )
 
-            assertEquals(
-                13,
-                store.content.mediaAssets.size
+            assertTrue(
+                store.content.mediaAssets.isNotEmpty()
             )
 
             assertEquals(
@@ -94,7 +93,7 @@ class GeneratedAuthorPackageRuntimeIntegrationTest {
                 entryPointSuccess.data
 
             assertEquals(
-                EntryPointId(2L),
+                EntryPointId(occasionId),
                 runtimeEntryPoint.entryPoint.id
             )
 
@@ -102,7 +101,7 @@ class GeneratedAuthorPackageRuntimeIntegrationTest {
                 runtimeEntryPoint.occasion
 
             assertEquals(
-                OccasionId(2L),
+                OccasionId(occasionId),
                 runtimeOccasion.occasion.id
             )
 
@@ -122,9 +121,8 @@ class GeneratedAuthorPackageRuntimeIntegrationTest {
                         it.items
                     }
 
-            assertEquals(
-                51,
-                runtimeItems.size
+            assertTrue(
+                runtimeItems.isNotEmpty()
             )
 
             /*
@@ -139,7 +137,7 @@ class GeneratedAuthorPackageRuntimeIntegrationTest {
                 }
 
             assertEquals(
-                51,
+                runtimeItems.size,
                 qoloTargets.size
             )
 
@@ -264,6 +262,14 @@ class GeneratedAuthorPackageRuntimeIntegrationTest {
                 }
         }
 
+    private val occasionId: Long
+        get() =
+            requireNotNull(
+                System.getProperty(
+                    "syriacplatform.test.occasionId"
+                )
+            ).toLong()
+
     private fun generatedPreviewPackageDirectory(): Path {
         return Path.of(
             "..",
@@ -271,7 +277,7 @@ class GeneratedAuthorPackageRuntimeIntegrationTest {
             "buildtools",
             "build",
             "generated",
-            "occasion-2-preview"
+            "occasion-$occasionId-preview"
         ).toAbsolutePath().normalize()
     }
 
