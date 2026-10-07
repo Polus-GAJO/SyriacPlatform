@@ -1561,3 +1561,98 @@ Integration**:
 
 The existing Phase 9 audio architecture is the baseline. It should be
 extended, not replaced.
+
+
+------------------------------------------------------------------------
+
+# Phase 9 Roadmap Update --- 2026-10-08
+
+<!-- ROADMAP-PERFORMANCE-TIMING-RUNTIME-2026-10-08 -->
+
+**Status:** PERFORMANCE Media and Timing Package/Runtime Integration completed and verified for the current Android reference-app scope.
+
+This update supersedes earlier Phase 9 entries that list occurrence-level
+PERFORMANCE package/runtime integration, MediaTimingSet/MediaSegment
+consumption, or verse timing playback as deferred work.
+
+## Completed and verified
+
+- `ExistsInMedia.publicationStatus` is included in the controlled media
+  export and PUBLISHED/ARCHIVE behavior is preserved into package
+  selection.
+- PERFORMANCE media is mapped from the Author Database through Build Tools
+  into Schema-v1 package content.
+- `MediaTimingSet`, ordered `MediaSegment`, and
+  text-occurrence/segment links are transported into the package.
+- Package validation checks PERFORMANCE, media asset, timing set, segment,
+  and contextual text-occurrence references.
+- Runtime indexes/resolvers preserve PERFORMANCE and contextual
+  `TextOccurrenceId` identity.
+- ContentRepository and ContentService expose resolved PERFORMANCE media
+  and timing required by application playback.
+- `AudioService.playInterval(mediaAsset, startMs, endMs)` provides
+  reusable interval playback without making AudioService content-aware.
+- `PerformanceTextOccurrencePlaybackController` implements the current
+  0/1/>1 playable-interval contract.
+- Hymn details can select contextual PERFORMANCE media and play individual
+  verse/text-occurrence intervals on Android.
+- Author Database display-shaped `MMSSmmm` timing values are converted
+  to canonical elapsed milliseconds at the Build Tools mapping boundary.
+- Real Occasion 379 was verified in the Android emulator with correct
+  timed verse playback, including intervals beyond one minute.
+- Root `preview.ps1` provides the normal Occasion-preview workflow.
+- Occasion switching now performs targeted `:shared:clean` and
+  `:androidApp:clean` before preview generation to prevent stale
+  Compose/Android package resources.
+- The regression transition `379 -> 64` was manually verified after the
+  cleanup change.
+
+## Preserved architectural contracts
+
+``` text
+MelodyMedia Role=RECORDING
+    !=
+ExistsInMedia Role=PERFORMANCE
+```
+
+PERFORMANCE identity is `PerformanceMediaId`, not MediaAssetId and not
+the selected Melody recording identity.
+
+Timing identity is contextual `TextOccurrenceId`, not reusable TextID.
+
+The Author Database timing representation is not a runtime concern:
+
+``` text
+Author DB MMSSmmm
+    -> Build Tools conversion
+    -> canonical elapsed milliseconds
+    -> package/runtime/audio
+```
+
+Do not impose a new equality constraint between
+`PerformanceMedia.mediaAssetId` and `MediaTimingSet.mediaAssetId`
+without an explicit semantic decision.
+
+## Current development workflow
+
+``` text
+EditPra / BtnExport
+    -> controlled Occasion + media export
+    -> .\preview.ps1 <OccN>
+    -> Android Studio Run
+```
+
+The targeted cleanup inside `preview.ps1` is currently part of the
+verified workflow, not an optional troubleshooting step.
+
+## Next Phase 9 direction
+
+The PERFORMANCE/timing foundation should not be rebuilt.
+
+The next work should build on the verified contracts and focus on
+application/UI integration, additional representative real-content
+coverage, and the next deliberately selected product capability.
+
+Older Phase 9 sections remain historical implementation checkpoints where
+useful, but this 2026-10-08 update is authoritative when their
+"deferred" or "next" statements conflict with the completed state above.
