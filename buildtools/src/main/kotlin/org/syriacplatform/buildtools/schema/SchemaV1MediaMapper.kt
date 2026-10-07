@@ -5,6 +5,7 @@ import org.syriacplatform.buildtools.source.models.MediaAssetSource
 import org.syriacplatform.buildtools.source.models.ExistsInMediaSource
 import org.syriacplatform.buildtools.source.models.MelodyMediaSource
 import org.syriacplatform.buildtools.source.models.MediaTimingSetSource
+import org.syriacplatform.buildtools.source.models.MediaSegmentSource
 
 class SchemaV1MediaMapper {
 
@@ -28,18 +29,24 @@ class SchemaV1MediaMapper {
             source.mediaTimingSets
                 .map(::mapMediaTimingSet)
 
+        val mediaSegments =
+            source.mediaSegments
+                .map(::mapMediaSegment)
+
         validateCanonicalReferences(
             mediaAssets = mediaAssets,
             melodyMedia = melodyMedia,
             performanceMedia = performanceMedia,
-            mediaTimingSets = mediaTimingSets
+            mediaTimingSets = mediaTimingSets,
+            mediaSegments = mediaSegments
         )
 
         return SchemaV1CanonicalMedia(
             mediaAssets = mediaAssets,
             melodyMedia = melodyMedia,
             performanceMedia = performanceMedia,
-            mediaTimingSets = mediaTimingSets
+            mediaTimingSets = mediaTimingSets,
+            mediaSegments = mediaSegments
         )
     }
 
@@ -126,11 +133,40 @@ class SchemaV1MediaMapper {
         )
     }
 
+    private fun mapMediaSegment(
+        source: MediaSegmentSource
+    ): SchemaV1MediaSegment {
+        require(source.id > 0L) {
+            "MediaSegment ${source.id} must have a positive id."
+        }
+
+        require(source.mediaTimingSetId > 0L) {
+            "MediaSegment ${source.id} must reference a positive MediaTimingSet id."
+        }
+
+        require(source.sequence > 0L) {
+            "MediaSegment ${source.id} must have a positive sequence."
+        }
+
+        require(source.startMs == null || source.startMs >= 0L) {
+            "MediaSegment ${source.id} must have a non-negative StartMs when present."
+        }
+
+        return SchemaV1MediaSegment(
+            id = source.id,
+            mediaTimingSetId = source.mediaTimingSetId,
+            sequence = source.sequence,
+            startMs = source.startMs,
+            endMs = source.endMs
+        )
+    }
+
     private fun validateCanonicalReferences(
         mediaAssets: List<SchemaV1MediaAsset>,
         melodyMedia: List<SchemaV1MelodyMedia>,
         performanceMedia: List<SchemaV1PerformanceMedia>,
-        mediaTimingSets: List<SchemaV1MediaTimingSet>
+        mediaTimingSets: List<SchemaV1MediaTimingSet>,
+        mediaSegments: List<SchemaV1MediaSegment>
     ) {
         val mediaAssetIds =
             mediaAssets
@@ -173,6 +209,20 @@ class SchemaV1MediaMapper {
         val timingSetIds =
             mediaTimingSets
                 .mapTo(mutableSetOf()) { it.id }
+
+        val missingSegmentTimingSetIds =
+            mediaSegments
+                .map { it.mediaTimingSetId }
+                .filterNot { it in timingSetIds }
+                .distinct()
+                .sorted()
+
+        require(
+            missingSegmentTimingSetIds.isEmpty()
+        ) {
+            "Canonical MediaSegment references missing MediaTimingSet ids: " +
+                    missingSegmentTimingSetIds.joinToString()
+        }
 
         val missingPerformanceTimingSetIds =
             performanceMedia
