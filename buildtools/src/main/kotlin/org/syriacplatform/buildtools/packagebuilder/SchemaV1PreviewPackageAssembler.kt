@@ -228,7 +228,13 @@ class SchemaV1PreviewPackageAssembler {
                                     asset.sourceRelativePath,
                         performer = asset.performer
                     )
-                }
+                },
+
+            performanceMedia = media.performanceMedia,
+            mediaTimingSets = media.mediaTimingSets,
+            mediaSegments = media.mediaSegments,
+            textOccurrenceMediaSegments =
+                media.textOccurrenceMediaSegments
         )
     }
 }
