@@ -7,6 +7,7 @@ import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.common.types.MediaAssetId
 import org.syriacplatform.common.types.MelodyId
 import org.syriacplatform.common.types.OccasionId
+import org.syriacplatform.common.types.PerformanceMediaId
 import org.syriacplatform.common.types.PlatformError
 import org.syriacplatform.common.types.PrayerSequenceId
 import org.syriacplatform.common.types.TextOccurrenceId
@@ -23,6 +24,43 @@ class RuntimeContentResolver(
 ) {
 
 
+
+
+
+    fun resolvePerformanceTiming(
+        id: PerformanceMediaId
+    ): Result<ResolvedPerformanceTiming?> {
+        val performance =
+            store.index.performanceMediaById[id]
+                ?: return notFound(
+                    "PerformanceMedia",
+                    id.value
+                )
+
+        val timingSetId =
+            performance.mediaTimingSetId
+                ?: return Result.Success(null)
+
+        val timingSet =
+            store.index.mediaTimingSetsById[timingSetId]
+                ?: return notFound(
+                    "MediaTimingSet",
+                    timingSetId.value
+                )
+
+        val segments =
+            store.index
+                .mediaSegmentsByTimingSetId[timingSetId]
+                .orEmpty()
+
+        return Result.Success(
+            ResolvedPerformanceTiming(
+                performance = performance,
+                timingSet = timingSet,
+                segments = segments
+            )
+        )
+    }
 
 
     fun resolveTextOccurrenceTiming(
