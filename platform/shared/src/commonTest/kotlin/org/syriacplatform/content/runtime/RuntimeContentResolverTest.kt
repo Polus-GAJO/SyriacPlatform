@@ -307,6 +307,11 @@ class RuntimeContentResolverTest {
          * ويحتفظ كل ظهور بسياق Petgomo الخاص به.
          */
         assertEquals(
+            TextOccurrenceId(1),
+            secondTarget.verses[0].id
+        )
+
+        assertEquals(
             TextId(601),
             secondTarget.verses[0].text.id
         )
@@ -314,6 +319,11 @@ class RuntimeContentResolverTest {
         assertEquals(
             PetgomoId(701),
             secondTarget.verses[0].petgomo?.id
+        )
+
+        assertEquals(
+            TextOccurrenceId(2),
+            secondTarget.verses[1].id
         )
 
         assertEquals(
