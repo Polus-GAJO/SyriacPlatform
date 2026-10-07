@@ -37,12 +37,14 @@ import org.syriacplatform.common.result.Result
 import org.syriacplatform.common.types.MediaAssetId
 import org.syriacplatform.common.types.MelodyId
 import org.syriacplatform.common.types.OccasionId
+import org.syriacplatform.common.types.PerformanceMediaId
 import org.syriacplatform.common.types.QoloId
 import org.syriacplatform.content.models.MediaAsset
 import org.syriacplatform.content.models.Occasion
 import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.runtime.ResolvedLiturgicalItem
 import org.syriacplatform.content.runtime.ResolvedLiturgicalItemTarget
+import org.syriacplatform.content.runtime.ResolvedPerformanceMedia
 import org.syriacplatform.content.runtime.RuntimeOccasion
 import org.syriacplatform.context.PlatformContext
 import org.syriacplatform.navigation.AppDestination
@@ -1301,6 +1303,26 @@ private fun HymnDetailsScreen(
     var selectedRecordingId by remember(liturgicalItemId) {
         mutableStateOf<MediaAssetId?>(null)
     }
+
+    var selectedPerformanceId by remember(liturgicalItemId) {
+        mutableStateOf<PerformanceMediaId?>(null)
+    }
+
+    var performancePlaybackMessage by remember(liturgicalItemId) {
+        mutableStateOf<String?>(null)
+    }
+
+    val performanceMediaResult by
+        produceState<Result<List<ResolvedPerformanceMedia>>?>(
+            initialValue = null,
+            key1 = platform,
+            key2 = liturgicalItemId
+        ) {
+            value =
+                platform.content.loadPerformanceMedia(
+                    liturgicalItemId
+                )
+        }
     LaunchedEffect(
         playbackState.positionMs,
         playbackState.mediaAssetId,
@@ -1776,6 +1798,125 @@ private fun HymnDetailsScreen(
                         }
                     }
 
+                    Text(
+                        text = "Performance recordings",
+                        modifier =
+                            Modifier.padding(
+                                top = 12.dp,
+                                bottom = 8.dp
+                            ),
+                        style =
+                            MaterialTheme.typography.titleSmall
+                    )
+
+                    val selectedPerformance =
+                        when (
+                            val performances =
+                                performanceMediaResult
+                        ) {
+                            is Result.Success -> {
+                                val available =
+                                    performances.data
+
+                                val selected =
+                                    available.firstOrNull {
+                                        it.performance.id ==
+                                            selectedPerformanceId
+                                    } ?: available.firstOrNull()
+
+                                LaunchedEffect(
+                                    available,
+                                    selectedPerformanceId
+                                ) {
+                                    if (
+                                        selectedPerformanceId == null &&
+                                        selected != null
+                                    ) {
+                                        selectedPerformanceId =
+                                            selected.performance.id
+                                    }
+                                }
+
+                                if (available.isEmpty()) {
+                                    Text(
+                                        "No performance recording available"
+                                    )
+                                } else {
+                                    available.forEach { resolved ->
+                                        val performerName =
+                                            resolved.mediaAsset.performer
+                                                ?.takeIf {
+                                                    it.isNotBlank()
+                                                }
+                                                ?: "Performance " +
+                                                    resolved.performance.id.value
+
+                                        Button(
+                                            enabled =
+                                                platform.performanceTextPlayback !=
+                                                    null,
+                                            onClick = {
+                                                if (
+                                                    selectedPerformanceId !=
+                                                    resolved.performance.id
+                                                ) {
+                                                    audioService?.stop()
+                                                    selectedPerformanceId =
+                                                        resolved.performance.id
+                                                    performancePlaybackMessage =
+                                                        null
+                                                }
+                                            },
+                                            modifier =
+                                                Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(
+                                                        bottom = 6.dp
+                                                    )
+                                        ) {
+                                            Text(
+                                                if (
+                                                    selected?.performance?.id ==
+                                                    resolved.performance.id
+                                                ) {
+                                                    "[Selected] $performerName"
+                                                } else {
+                                                    performerName
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+
+                                selected
+                            }
+
+                            is Result.Failure -> {
+                                Text(
+                                    performances.error.message
+                                        ?: "Performance recordings loading failed"
+                                )
+                                null
+                            }
+
+                            null -> {
+                                Text(
+                                    "Loading performance recordings..."
+                                )
+                                null
+                            }
+                        }
+
+                    performancePlaybackMessage?.let { message ->
+                        Text(
+                            text = message,
+                            modifier =
+                                Modifier.padding(
+                                    bottom = 8.dp
+                                )
+                        )
+                    }
+
                     if (target.verses.isEmpty()) {
                         Text("No verses available")
                     } else {
@@ -1787,22 +1928,77 @@ private fun HymnDetailsScreen(
                                 Arrangement.spacedBy(12.dp)
                         ) {
                             items(target.verses) { verse ->
-                                Column(
-                                    modifier = Modifier.fillMaxWidth()
+                                Button(
+                                    enabled =
+                                        selectedPerformance != null &&
+                                        platform.performanceTextPlayback !=
+                                            null,
+                                    onClick = {
+                                        val performance =
+                                            selectedPerformance
+                                        val playback =
+                                            platform.performanceTextPlayback
+
+                                        if (
+                                            performance != null &&
+                                            playback != null
+                                        ) {
+                                            performancePlaybackMessage =
+                                                null
+
+                                            coroutineScope.launch {
+                                                when (
+                                                    val playResult =
+                                                        playback.play(
+                                                            performanceId =
+                                                                performance
+                                                                    .performance
+                                                                    .id,
+                                                            textOccurrenceId =
+                                                                verse.id
+                                                        )
+                                                ) {
+                                                    is Result.Success -> {
+                                                        performancePlaybackMessage =
+                                                            null
+                                                    }
+
+                                                    is Result.Failure -> {
+                                                        performancePlaybackMessage =
+                                                            playResult
+                                                                .error
+                                                                .message
+                                                                ?: "Performance text playback failed"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    modifier =
+                                        Modifier.fillMaxWidth()
                                 ) {
-                                    verse.petgomo?.let { petgomo ->
+                                    Column(
+                                        modifier =
+                                            Modifier.fillMaxWidth()
+                                    ) {
+                                        verse.petgomo?.let { petgomo ->
+                                            Text(
+                                                text = petgomo.syriac,
+                                                modifier =
+                                                    Modifier.fillMaxWidth(),
+                                                style =
+                                                    SyriacTextStyles.body()
+                                            )
+                                        }
+
                                         Text(
-                                            text = petgomo.syriac,
-                                            modifier = Modifier.fillMaxWidth(),
-                                            style = SyriacTextStyles.body()
+                                            text = verse.text.syriac,
+                                            modifier =
+                                                Modifier.fillMaxWidth(),
+                                            style =
+                                                SyriacTextStyles.body()
                                         )
                                     }
-
-                                    Text(
-                                        text = verse.text.syriac,
-                                        modifier = Modifier.fillMaxWidth(),
-                                        style = SyriacTextStyles.body()
-                                    )
                                 }
                             }
                         }
