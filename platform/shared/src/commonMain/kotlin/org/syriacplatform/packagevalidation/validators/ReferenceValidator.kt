@@ -13,6 +13,10 @@ import org.syriacplatform.packagevalidation.validators.references.LiturgicalItem
 import org.syriacplatform.packagevalidation.validators.references.MelodyQoloReferenceRule
 import org.syriacplatform.packagevalidation.validators.references.MelodyQintoAssignmentMelodyReferenceRule
 import org.syriacplatform.packagevalidation.validators.references.MelodyQintoAssignmentQintoReferenceRule
+import org.syriacplatform.packagevalidation.validators.references.PerformanceMediaReferenceRule
+import org.syriacplatform.packagevalidation.validators.references.MediaTimingSetReferenceRule
+import org.syriacplatform.packagevalidation.validators.references.MediaSegmentReferenceRule
+import org.syriacplatform.packagevalidation.validators.references.TextOccurrenceMediaSegmentReferenceRule
 
 /**
  * منسق قواعد التحقق من المراجع بين كيانات الحزمة.
@@ -30,7 +34,11 @@ class ReferenceValidator(
             LiturgicalItemQoloReferenceRule(),
             MelodyQoloReferenceRule(),
             MelodyQintoAssignmentMelodyReferenceRule(),
-            MelodyQintoAssignmentQintoReferenceRule()
+            MelodyQintoAssignmentQintoReferenceRule(),
+            PerformanceMediaReferenceRule(),
+            MediaTimingSetReferenceRule(),
+            MediaSegmentReferenceRule(),
+            TextOccurrenceMediaSegmentReferenceRule()
         )
 ) : PackageValidationRule<ParsedApplicationPackage> {
 
