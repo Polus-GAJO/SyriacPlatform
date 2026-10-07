@@ -9,6 +9,7 @@ import org.syriacplatform.common.result.Result
 import org.syriacplatform.common.types.ErrorCode
 import org.syriacplatform.common.types.PetgomoId
 import org.syriacplatform.common.types.TextId
+import org.syriacplatform.common.types.TextOccurrenceId
 import org.syriacplatform.content.models.LiturgicalItem
 import org.syriacplatform.content.models.LiturgicalItemTarget
 import org.syriacplatform.content.models.Petgomo
@@ -179,13 +180,16 @@ class TextContentAndPetgomoTest {
                 effectiveMelodyId = 75,
                 verses = listOf(
                     LiturgicalTextRefJsonDto(
+                        id = 101,
                         textId = 1001,
                         petgomoId = 15
                     ),
                     LiturgicalTextRefJsonDto(
+                        id = 102,
                         textId = 1002
                     ),
                     LiturgicalTextRefJsonDto(
+                        id = 103,
                         textId = 1001,
                         petgomoId = 16
                     )
@@ -217,14 +221,17 @@ class TextContentAndPetgomoTest {
         assertEquals(
             listOf(
                 LiturgicalTextRef(
+                    id = TextOccurrenceId(101),
                     textId = TextId(1001),
                     petgomoId = PetgomoId(15)
                 ),
                 LiturgicalTextRef(
+                    id = TextOccurrenceId(102),
                     textId = TextId(1002),
                     petgomoId = null
                 ),
                 LiturgicalTextRef(
+                    id = TextOccurrenceId(103),
                     textId = TextId(1001),
                     petgomoId = PetgomoId(16)
                 )
