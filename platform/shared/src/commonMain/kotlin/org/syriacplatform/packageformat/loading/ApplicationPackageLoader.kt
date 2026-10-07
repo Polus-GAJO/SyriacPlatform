@@ -8,6 +8,10 @@ import org.syriacplatform.common.types.PlatformError
 import org.syriacplatform.packageformat.dto.EntryPointJsonDto
 import org.syriacplatform.packageformat.dto.LiturgicalItemJsonDto
 import org.syriacplatform.packageformat.dto.MediaAssetJsonDto
+import org.syriacplatform.packageformat.dto.MediaSegmentJsonDto
+import org.syriacplatform.packageformat.dto.MediaTimingSetJsonDto
+import org.syriacplatform.packageformat.dto.PerformanceMediaJsonDto
+import org.syriacplatform.packageformat.dto.TextOccurrenceMediaSegmentJsonDto
 import org.syriacplatform.packageformat.dto.MelodyJsonDto
 import org.syriacplatform.packageformat.dto.MelodyQintoAssignmentJsonDto
 import org.syriacplatform.packageformat.dto.OccasionJsonDto
@@ -337,6 +341,62 @@ class ApplicationPackageLoader(
             }
 
 
+        val performanceMedia =
+            when (
+                val result =
+                    parseCollection<PerformanceMediaJsonDto, org.syriacplatform.content.models.PerformanceMedia>(
+                        bytes = files.performanceMedia,
+                        path = PackagePaths.PERFORMANCE_MEDIA,
+                        mapper = { dto -> dto.toDomain() }
+                    )
+            ) {
+                is Result.Success -> result.data
+                is Result.Failure ->
+                    return PackageLoadResult.Failure(result.error)
+            }
+
+        val mediaTimingSets =
+            when (
+                val result =
+                    parseCollection<MediaTimingSetJsonDto, org.syriacplatform.content.models.MediaTimingSet>(
+                        bytes = files.mediaTimingSets,
+                        path = PackagePaths.MEDIA_TIMING_SETS,
+                        mapper = { dto -> dto.toDomain() }
+                    )
+            ) {
+                is Result.Success -> result.data
+                is Result.Failure ->
+                    return PackageLoadResult.Failure(result.error)
+            }
+
+        val mediaSegments =
+            when (
+                val result =
+                    parseCollection<MediaSegmentJsonDto, org.syriacplatform.content.models.MediaSegment>(
+                        bytes = files.mediaSegments,
+                        path = PackagePaths.MEDIA_SEGMENTS,
+                        mapper = { dto -> dto.toDomain() }
+                    )
+            ) {
+                is Result.Success -> result.data
+                is Result.Failure ->
+                    return PackageLoadResult.Failure(result.error)
+            }
+
+        val textOccurrenceMediaSegments =
+            when (
+                val result =
+                    parseCollection<TextOccurrenceMediaSegmentJsonDto, org.syriacplatform.content.models.TextOccurrenceMediaSegment>(
+                        bytes = files.textOccurrenceMediaSegments,
+                        path = PackagePaths.TEXT_OCCURRENCE_MEDIA_SEGMENTS,
+                        mapper = { dto -> dto.toDomain() }
+                    )
+            ) {
+                is Result.Success -> result.data
+                is Result.Failure ->
+                    return PackageLoadResult.Failure(result.error)
+            }
+
         val packageData =
             ParsedApplicationPackage(
                 manifest = manifest,
@@ -354,7 +414,12 @@ class ApplicationPackageLoader(
                 qintos = qintos,
                 melodyQintoAssignments =
                     melodyQintoAssignments,
-                mediaAssets = mediaAssets
+                mediaAssets = mediaAssets,
+                performanceMedia = performanceMedia,
+                mediaTimingSets = mediaTimingSets,
+                mediaSegments = mediaSegments,
+                textOccurrenceMediaSegments =
+                    textOccurrenceMediaSegments
             )
 
         val validationReport =
@@ -433,7 +498,15 @@ class ApplicationPackageLoader(
                     melodyQintoAssignments =
                         files.melodyQintoAssignments != null,
                     mediaAssets =
-                        files.mediaAssets != null
+                        files.mediaAssets != null,
+                    performanceMedia =
+                        files.performanceMedia != null,
+                    mediaTimingSets =
+                        files.mediaTimingSets != null,
+                    mediaSegments =
+                        files.mediaSegments != null,
+                    textOccurrenceMediaSegments =
+                        files.textOccurrenceMediaSegments != null
                 )
         )
     }
@@ -614,6 +687,22 @@ class ApplicationPackageLoader(
                 source.readBytesOrNull(
                     PackagePaths.MEDIA_ASSETS
                 ),
+            performanceMedia =
+                source.readBytesOrNull(
+                    PackagePaths.PERFORMANCE_MEDIA
+                ),
+            mediaTimingSets =
+                source.readBytesOrNull(
+                    PackagePaths.MEDIA_TIMING_SETS
+                ),
+            mediaSegments =
+                source.readBytesOrNull(
+                    PackagePaths.MEDIA_SEGMENTS
+                ),
+            textOccurrenceMediaSegments =
+                source.readBytesOrNull(
+                    PackagePaths.TEXT_OCCURRENCE_MEDIA_SEGMENTS
+                ),
 
             qintos =
                 source.readBytesOrNull(
@@ -642,6 +731,10 @@ class ApplicationPackageLoader(
         val qolos: ByteArray?,
         val melodies: ByteArray?,
         val mediaAssets: ByteArray?,
+        val performanceMedia: ByteArray?,
+        val mediaTimingSets: ByteArray?,
+        val mediaSegments: ByteArray?,
+        val textOccurrenceMediaSegments: ByteArray?,
         val qintos: ByteArray?,
         val melodyQintoAssignments: ByteArray?
     )
