@@ -27,6 +27,72 @@ class RuntimeContentResolver(
 
 
 
+
+    fun resolvePerformanceTextOccurrenceTiming(
+        performanceId: PerformanceMediaId,
+        textOccurrenceId: TextOccurrenceId
+    ): Result<List<ResolvedPerformanceTextOccurrenceTiming>> {
+        val performance =
+            store.index.performanceMediaById[performanceId]
+                ?: return notFound(
+                    "PerformanceMedia",
+                    performanceId.value
+                )
+
+        if (store.index.textOccurrencesById[textOccurrenceId] == null) {
+            return notFound(
+                "TextOccurrence",
+                textOccurrenceId.value
+            )
+        }
+
+        val timingSetId =
+            performance.mediaTimingSetId
+                ?: return Result.Success(emptyList())
+
+        val timingSet =
+            store.index.mediaTimingSetsById[timingSetId]
+                ?: return notFound(
+                    "MediaTimingSet",
+                    timingSetId.value
+                )
+
+        val relations =
+            store.index
+                .textOccurrenceMediaSegmentsByTextOccurrenceId[
+                    textOccurrenceId
+                ]
+                .orEmpty()
+
+        val resolved =
+            mutableListOf<ResolvedPerformanceTextOccurrenceTiming>()
+
+        relations.forEach { relation ->
+            val segment =
+                store.index.mediaSegmentsById[
+                    relation.mediaSegmentId
+                ]
+                    ?: return notFound(
+                        "MediaSegment",
+                        relation.mediaSegmentId.value
+                    )
+
+            if (segment.mediaTimingSetId == timingSetId) {
+                resolved.add(
+                    ResolvedPerformanceTextOccurrenceTiming(
+                        performance = performance,
+                        timingSet = timingSet,
+                        relation = relation,
+                        segment = segment
+                    )
+                )
+            }
+        }
+
+        return Result.Success(resolved)
+    }
+
+
     fun resolvePerformanceTiming(
         id: PerformanceMediaId
     ): Result<ResolvedPerformanceTiming?> {
