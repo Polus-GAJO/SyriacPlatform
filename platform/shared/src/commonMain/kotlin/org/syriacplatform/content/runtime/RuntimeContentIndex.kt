@@ -11,6 +11,7 @@ import org.syriacplatform.common.types.PrayerSequenceId
 import org.syriacplatform.common.types.QintoId
 import org.syriacplatform.common.types.QoloId
 import org.syriacplatform.common.types.TextId
+import org.syriacplatform.common.types.TextOccurrenceId
 import org.syriacplatform.content.models.EntryPoint
 import org.syriacplatform.content.models.LiturgicalItem
 import org.syriacplatform.content.models.MediaAsset
@@ -23,6 +24,8 @@ import org.syriacplatform.content.models.PrayerSequence
 import org.syriacplatform.content.models.Qinto
 import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.models.TextContent
+import org.syriacplatform.content.models.TextOccurrence
+import org.syriacplatform.content.models.LiturgicalItemTarget
 
 /**
  * فهارس القراءة السريعة للمحتوى القانوني داخل Runtime.
@@ -39,6 +42,8 @@ class RuntimeContentIndex private constructor(
     val liturgicalItemsById:
     Map<LiturgicalItemId, LiturgicalItem>,
     val textsById: Map<TextId, TextContent>,
+    val textOccurrencesById:
+    Map<TextOccurrenceId, TextOccurrence>,
     val petgomosById: Map<PetgomoId, Petgomo>,
     val qolosById: Map<QoloId, Qolo>,
     val melodiesById: Map<MelodyId, Melody>,
@@ -79,6 +84,24 @@ class RuntimeContentIndex private constructor(
 
                 textsById =
                     content.texts.associateBy { it.id },
+
+                textOccurrencesById =
+                    content.liturgicalItems
+                        .flatMap { item ->
+                            when (val target = item.target) {
+                                is LiturgicalItemTarget.Qolo ->
+                                    target.verses
+
+                                is LiturgicalItemTarget.UnresolvedQolo ->
+                                    target.verses
+
+                                is LiturgicalItemTarget.Text ->
+                                    emptyList()
+                            }
+                        }
+                        .associateBy { occurrence ->
+                            occurrence.id
+                        },
 
                 petgomosById =
                     content.petgomos.associateBy { it.id },
