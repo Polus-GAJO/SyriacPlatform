@@ -102,8 +102,13 @@ class MediaSourceMapper {
         row: CsvRow
     ): MediaSegmentSource {
         val sequence = row.requiredLong("Sequence")
-        val startMs = row.optionalLong("StartMs")
-        val endMs = row.optionalLong("EndMs")
+        val startMs =
+            row.optionalLong("StartMs")
+                ?.let(::authorTimingToElapsedMs)
+
+        val endMs =
+            row.optionalLong("EndMs")
+                ?.let(::authorTimingToElapsedMs)
 
         require(sequence > 0L) {
             "MediaSegment ${row["MediaSegmentID"]} must have " +
@@ -133,6 +138,37 @@ class MediaSourceMapper {
             name = row["Name"]
                 ?.trim()
                 ?.takeIf { it.isNotEmpty() }
+        )
+    }
+
+    /**
+     * Author DB stores timing as a numeric MMSSmmm value rather than
+     * elapsed milliseconds. For example, 123456 represents 01:23.456
+     * and must become 83,456 elapsed milliseconds.
+     *
+     * Negative values are preserved so the existing source validation /
+     * downstream playable-interval rules can reject or ignore them.
+     */
+    private fun authorTimingToElapsedMs(
+        value: Long
+    ): Long {
+        if (value < 0L) {
+            return value
+        }
+
+        val milliseconds =
+            value % 1_000L
+
+        val seconds =
+            (value / 1_000L) % 100L
+
+        val minutes =
+            value / 100_000L
+
+        return (
+            minutes * 60_000L +
+                seconds * 1_000L +
+                milliseconds
         )
     }
 
