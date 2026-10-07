@@ -1,9 +1,17 @@
 package org.syriacplatform.buildtools.schema
 
-data class SchemaV1LiturgicalTextRef(
+data class SchemaV1TextOccurrence(
+    val id: Long,
     val textId: Long,
     val petgomoId: Long?
 )
+
+/*
+ * Compatibility alias kept only while the package writer still
+ * consumes the pre-4B type name. The Schema-v1 composition contract
+ * itself now models an identified TextOccurrence.
+ */
+typealias SchemaV1LiturgicalTextRef = SchemaV1TextOccurrence
 
 sealed interface SchemaV1LiturgicalItem {
     val id: Long
