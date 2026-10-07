@@ -234,6 +234,31 @@ class MediaSourceMapperTest {
     }
 
     @Test
+    fun convertsAuthorTimingAcrossMinuteBoundary() {
+        val segment =
+            mapper.toMediaSegment(
+                CsvRow(
+                    values = mapOf(
+                        "MediaSegmentID" to "55",
+                        "MediaTimingSetID" to "29",
+                        "Sequence" to "5",
+                        "StartMs" to "123456",
+                        "EndMs" to "201789"
+                    )
+                )
+            )
+
+        assertEquals(
+            83_456L,
+            segment.startMs
+        )
+        assertEquals(
+            121_789L,
+            segment.endMs
+        )
+    }
+
+    @Test
     fun mapsMediaSegmentWithoutTimingValues() {
         val segment =
             mapper.toMediaSegment(
