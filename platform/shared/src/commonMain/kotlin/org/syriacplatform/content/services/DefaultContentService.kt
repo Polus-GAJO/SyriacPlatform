@@ -15,6 +15,9 @@ import org.syriacplatform.content.runtime.RuntimeOccasion
 import org.syriacplatform.content.models.EntryPoint
 import org.syriacplatform.content.models.Occasion
 import org.syriacplatform.common.types.LiturgicalItemId
+import org.syriacplatform.common.types.PerformanceMediaId
+import org.syriacplatform.common.types.TextOccurrenceId
+import org.syriacplatform.content.runtime.ResolvedPerformanceTextOccurrenceInterval
 import org.syriacplatform.content.runtime.ResolvedLiturgicalItem
 
 /**
@@ -82,5 +85,15 @@ class DefaultContentService(
         melodyId: MelodyId
     ): Result<List<MediaAsset>> {
         return repository.loadMelodyRecordings(melodyId)
+    }
+
+    override suspend fun loadPerformanceTextOccurrenceIntervals(
+        performanceId: PerformanceMediaId,
+        textOccurrenceId: TextOccurrenceId
+    ): Result<List<ResolvedPerformanceTextOccurrenceInterval>> {
+        return repository.loadPerformanceTextOccurrenceIntervals(
+            performanceId = performanceId,
+            textOccurrenceId = textOccurrenceId
+        )
     }
 }
