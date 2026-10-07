@@ -5,7 +5,13 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import org.syriacplatform.common.types.GroupId
 import org.syriacplatform.common.types.QoloId
+import org.syriacplatform.common.types.LiturgicalItemId
+import org.syriacplatform.common.types.TextId
+import org.syriacplatform.common.types.TextOccurrenceId
 import org.syriacplatform.content.models.Qolo
+import org.syriacplatform.content.models.LiturgicalItem
+import org.syriacplatform.content.models.LiturgicalItemTarget
+import org.syriacplatform.content.models.TextOccurrence
 
 class RuntimeContentIndexTest {
 
