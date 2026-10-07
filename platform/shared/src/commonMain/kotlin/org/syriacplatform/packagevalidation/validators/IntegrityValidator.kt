@@ -6,6 +6,7 @@ import org.syriacplatform.packagevalidation.ValidationIssue
 import org.syriacplatform.packagevalidation.validators.integrity.CanonicalIdUniquenessRule
 import org.syriacplatform.packagevalidation.validators.integrity.DefaultEntryPointUniquenessRule
 import org.syriacplatform.packagevalidation.validators.integrity.MelodyQintoAssignmentUniquenessRule
+import org.syriacplatform.packagevalidation.validators.integrity.TextOccurrenceIdUniquenessRule
 
 /**
  * منسق قواعد التحقق من سلامة البيانات الداخلية للحزمة.
@@ -19,7 +20,8 @@ class IntegrityValidator(
         listOf(
             CanonicalIdUniquenessRule(),
             DefaultEntryPointUniquenessRule(),
-            MelodyQintoAssignmentUniquenessRule()
+            MelodyQintoAssignmentUniquenessRule(),
+            TextOccurrenceIdUniquenessRule()
         )
 ) : PackageValidationRule<ParsedApplicationPackage> {
 
