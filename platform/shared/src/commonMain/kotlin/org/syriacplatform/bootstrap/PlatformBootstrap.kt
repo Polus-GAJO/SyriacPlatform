@@ -57,7 +57,9 @@ object PlatformBootstrap {
             kernel = kernel,
             content = services.content,
             navigation = services.navigation,
-            audio = services.audio
+            audio = services.audio,
+            performanceTextPlayback =
+                services.performanceTextPlayback
         )
     }
 }
