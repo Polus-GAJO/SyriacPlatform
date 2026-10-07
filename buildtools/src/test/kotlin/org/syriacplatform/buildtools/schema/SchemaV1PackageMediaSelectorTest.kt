@@ -3,6 +3,7 @@ package org.syriacplatform.buildtools.schema
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.test.assertFailsWith
 
 class SchemaV1PackageMediaSelectorTest {
 
@@ -126,6 +127,95 @@ class SchemaV1PackageMediaSelectorTest {
         assertTrue(
             result.melodyMedia.isEmpty()
         )
+    }
+
+    @Test
+    fun selectsReachablePerformanceTimingDeterministically() {
+        val media =
+            SchemaV1CanonicalMedia(
+                mediaAssets = listOf(
+                    SchemaV1MediaAsset(301L, "AUDIO", "audio/performance-301.mp3"),
+                    SchemaV1MediaAsset(302L, "AUDIO", "audio/performance-302.mp3")
+                ),
+                melodyMedia = emptyList(),
+                performanceMedia = listOf(
+                    SchemaV1PerformanceMedia(402L, 502L, 302L, "PERFORMANCE", 1L, 702L),
+                    SchemaV1PerformanceMedia(401L, 501L, 301L, "PERFORMANCE", 1L, 701L)
+                ),
+                mediaTimingSets = listOf(
+                    SchemaV1MediaTimingSet(702L, 302L, null),
+                    SchemaV1MediaTimingSet(701L, 301L, null)
+                ),
+                mediaSegments = listOf(
+                    SchemaV1MediaSegment(802L, 702L, 1L, 0L, 1000L),
+                    SchemaV1MediaSegment(801L, 701L, 1L, 0L, 1000L)
+                ),
+                textOccurrenceMediaSegments = listOf(
+                    SchemaV1TextOccurrenceMediaSegment(902L, 9002L, 802L),
+                    SchemaV1TextOccurrenceMediaSegment(901L, 9001L, 801L)
+                )
+            )
+
+        val result =
+            selector.select(
+                canonicalMedia = media,
+                melodyIds = emptySet(),
+                liturgicalItems = listOf(
+                    SchemaV1UnresolvedQoloLiturgicalItem(
+                        id = 501L,
+                        verses = listOf(
+                            SchemaV1TextOccurrence(9001L, 601L, null)
+                        )
+                    )
+                )
+            )
+
+        assertEquals(listOf(301L), result.mediaAssets.map { it.id })
+        assertEquals(listOf(401L), result.performanceMedia.map { it.id })
+        assertEquals(listOf(701L), result.mediaTimingSets.map { it.id })
+        assertEquals(listOf(801L), result.mediaSegments.map { it.id })
+        assertEquals(
+            listOf(901L),
+            result.textOccurrenceMediaSegments.map { it.id }
+        )
+    }
+
+    @Test
+    fun rejectsSelectedTimingThatReferencesOccurrenceOutsidePackage() {
+        val media =
+            SchemaV1CanonicalMedia(
+                mediaAssets = listOf(
+                    SchemaV1MediaAsset(301L, "AUDIO", "audio/performance-301.mp3")
+                ),
+                melodyMedia = emptyList(),
+                performanceMedia = listOf(
+                    SchemaV1PerformanceMedia(401L, 501L, 301L, "PERFORMANCE", 1L, 701L)
+                ),
+                mediaTimingSets = listOf(
+                    SchemaV1MediaTimingSet(701L, 301L, null)
+                ),
+                mediaSegments = listOf(
+                    SchemaV1MediaSegment(801L, 701L, 1L, 0L, 1000L)
+                ),
+                textOccurrenceMediaSegments = listOf(
+                    SchemaV1TextOccurrenceMediaSegment(901L, 9999L, 801L)
+                )
+            )
+
+        assertFailsWith<IllegalArgumentException> {
+            selector.select(
+                canonicalMedia = media,
+                melodyIds = emptySet(),
+                liturgicalItems = listOf(
+                    SchemaV1UnresolvedQoloLiturgicalItem(
+                        id = 501L,
+                        verses = listOf(
+                            SchemaV1TextOccurrence(9001L, 601L, null)
+                        )
+                    )
+                )
+            )
+        }
     }
 
     private fun canonicalMedia(): SchemaV1CanonicalMedia {
