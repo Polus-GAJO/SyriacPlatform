@@ -149,7 +149,7 @@ private class FakeIntervalContentService(
         runtimeState = RuntimeState.Ready
     }
 
-    override suspend fun loadQolo(id: QoloId): Result<Qolo> =
+    override suspend fun loadQolo(qoloId: QoloId): Result<Qolo> =
         unsupported()
 
     override suspend fun loadAllQolos(): Result<List<Qolo>> =
@@ -164,13 +164,13 @@ private class FakeIntervalContentService(
     override suspend fun loadDefaultEntryPoint(): Result<RuntimeEntryPoint> =
         unsupported()
 
-    override suspend fun loadOccasion(id: OccasionId): Result<RuntimeOccasion> =
+    override suspend fun loadOccasion(occasionId: OccasionId): Result<RuntimeOccasion> =
         unsupported()
 
-    override suspend fun loadLiturgicalItem(id: LiturgicalItemId): Result<ResolvedLiturgicalItem> =
+    override suspend fun loadLiturgicalItem(liturgicalItemId: LiturgicalItemId): Result<ResolvedLiturgicalItem> =
         unsupported()
 
-    override suspend fun loadMelodyRecordings(id: MelodyId): Result<List<MediaAsset>> =
+    override suspend fun loadMelodyRecordings(melodyId: MelodyId): Result<List<MediaAsset>> =
         Result.Success(emptyList())
 
     override suspend fun loadPerformanceTextOccurrenceIntervals(
