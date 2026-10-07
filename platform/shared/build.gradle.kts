@@ -131,6 +131,19 @@ if (developmentContentEnabled) {
 val effectiveOccasionId =
     configuredOccasionId ?: "1"
 
+tasks.named<Test>("testAndroidHostTest") {
+    dependsOn(
+        buildtoolsProject.tasks.named(
+            "buildOccasionPreview"
+        )
+    )
+
+    systemProperty(
+        "syriacplatform.test.occasionId",
+        effectiveOccasionId
+    )
+}
+
 val developmentComposeResourcesDirectory =
     layout.buildDirectory.dir(
         "generated/developmentComposeResources"
