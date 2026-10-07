@@ -26,6 +26,10 @@ import org.syriacplatform.buildtools.schema.SchemaV1LiturgicalItem
 import org.syriacplatform.buildtools.schema.SchemaV1UnresolvedQoloLiturgicalItem
 import org.syriacplatform.buildtools.schema.SchemaV1Text
 import org.syriacplatform.buildtools.schema.SchemaV1TextOccurrence
+import org.syriacplatform.buildtools.schema.SchemaV1PerformanceMedia
+import org.syriacplatform.buildtools.schema.SchemaV1MediaTimingSet
+import org.syriacplatform.buildtools.schema.SchemaV1MediaSegment
+import org.syriacplatform.buildtools.schema.SchemaV1TextOccurrenceMediaSegment
 import kotlinx.serialization.ExperimentalSerializationApi
 
 @OptIn(ExperimentalSerializationApi::class)
@@ -167,6 +171,40 @@ class SchemaV1PackageWriter {
                 "media-assets.json",
                 packageData.mediaAssets.map(
                     ::mediaAssetJson
+                )
+            )
+        }
+
+        if (packageData.performanceMedia.isNotEmpty()) {
+            writeCollection(
+                contentDirectory,
+                "performance-media.json",
+                packageData.performanceMedia.map(::performanceMediaJson)
+            )
+        }
+
+        if (packageData.mediaTimingSets.isNotEmpty()) {
+            writeCollection(
+                contentDirectory,
+                "media-timing-sets.json",
+                packageData.mediaTimingSets.map(::mediaTimingSetJson)
+            )
+        }
+
+        if (packageData.mediaSegments.isNotEmpty()) {
+            writeCollection(
+                contentDirectory,
+                "media-segments.json",
+                packageData.mediaSegments.map(::mediaSegmentJson)
+            )
+        }
+
+        if (packageData.textOccurrenceMediaSegments.isNotEmpty()) {
+            writeCollection(
+                contentDirectory,
+                "text-occurrence-media-segments.json",
+                packageData.textOccurrenceMediaSegments.map(
+                    ::textOccurrenceMediaSegmentJson
                 )
             )
         }
@@ -565,6 +603,50 @@ class SchemaV1PackageWriter {
                 item.performer
             )
         }
+    }
+
+
+    private fun performanceMediaJson(
+        item: SchemaV1PerformanceMedia
+    ): JsonElement = buildJsonObject {
+        put("id", item.id)
+        put("liturgicalItemId", item.liturgicalItemId)
+        put("mediaAssetId", item.mediaAssetId)
+        put("role", item.role)
+        put("sort", item.sort)
+        if (item.mediaTimingSetId == null) {
+            put("mediaTimingSetId", JsonNull)
+        } else {
+            put("mediaTimingSetId", item.mediaTimingSetId)
+        }
+    }
+
+    private fun mediaTimingSetJson(
+        item: SchemaV1MediaTimingSet
+    ): JsonElement = buildJsonObject {
+        put("id", item.id)
+        put("mediaAssetId", item.mediaAssetId)
+        putNullableString("name", item.name)
+    }
+
+    private fun mediaSegmentJson(
+        item: SchemaV1MediaSegment
+    ): JsonElement = buildJsonObject {
+        put("id", item.id)
+        put("mediaTimingSetId", item.mediaTimingSetId)
+        put("sequence", item.sequence)
+        if (item.startMs == null) put("startMs", JsonNull)
+        else put("startMs", item.startMs)
+        if (item.endMs == null) put("endMs", JsonNull)
+        else put("endMs", item.endMs)
+    }
+
+    private fun textOccurrenceMediaSegmentJson(
+        item: SchemaV1TextOccurrenceMediaSegment
+    ): JsonElement = buildJsonObject {
+        put("id", item.id)
+        put("textOccurrenceId", item.textOccurrenceId)
+        put("mediaSegmentId", item.mediaSegmentId)
     }
 
     private fun qintoJson(
