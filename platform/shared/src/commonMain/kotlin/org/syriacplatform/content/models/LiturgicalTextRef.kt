@@ -2,23 +2,31 @@ package org.syriacplatform.content.models
 
 import org.syriacplatform.common.types.PetgomoId
 import org.syriacplatform.common.types.TextId
+import org.syriacplatform.common.types.TextOccurrenceId
 
 /**
- * مرجع سياقي لظهور بيت نصي داخل مكوّن ليتورجي.
+ * ظهور سياقي مستقل لنص قابل لإعادة الاستخدام داخل مكوّن ليتورجي.
  *
- * يشير إلى TextContent قانوني قابل لإعادة الاستخدام،
- * مع الاحتفاظ بالمعلومات الخاصة بهذا الظهور الليتورجي.
+ * id يعرّف الظهور نفسه، بينما textId يشير إلى TextContent
+ * القانوني القابل لإعادة الاستخدام.
  *
- * ترتيب LiturgicalTextRef داخل القائمة هو ترتيب ظهور
+ * ترتيب TextOccurrence داخل القائمة هو ترتيب ظهور
  * الأبيات في هذا الاستعمال الليتورجي.
  *
- * يمكن أن يتكرر textId نفسه أكثر من مرة، لأن البيت
- * الواحد قد يظهر عدة مرات في الترتيلة نفسها.
+ * يمكن أن يتكرر textId نفسه أكثر من مرة، لكن لكل ظهور
+ * سياقي TextOccurrenceId مستقل.
  *
  * Petgomo مرتبط بهذا الظهور السياقي للبيت،
  * وليس بكيان TextContent نفسه.
  */
-data class LiturgicalTextRef(
+data class TextOccurrence(
+    val id: TextOccurrenceId,
     val textId: TextId,
     val petgomoId: PetgomoId? = null
 )
+
+/*
+ * Compatibility alias for code that still uses the pre-4C name.
+ * The Core domain contract is now TextOccurrence.
+ */
+typealias LiturgicalTextRef = TextOccurrence
