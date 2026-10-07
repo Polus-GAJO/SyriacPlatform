@@ -2,11 +2,11 @@
 
 **Document:** CurrentState\
 **Status:** Active implementation reference\
-**Last updated:** 2026-09-28\
+**Last updated:** 2026-10-08\
 **Repository:** SyriacPlatform\
 **Branch:** `main`\
-**Current milestone:** Phase 9 Runtime Audio Integration --- Android reusable audio/play-all foundation verified; Author Database PERFORMANCE recording and reusable timing authoring verified\
-**Verified functional milestone:** `b56fdea`\
+**Current milestone:** Phase 9 PERFORMANCE Media and Timing Package/Runtime Integration --- end-to-end Android verse playback verified\
+**Verified functional milestone:** `0e98ca3`\
 **Author Database schema checkpoint:** `d4cd41b`
 
 ------------------------------------------------------------------------
@@ -3495,3 +3495,242 @@ runtime milestone should then be selected explicitly from the roadmap.
 No redesign of the existing Melody recording, recording-selection,
 AudioService, or Prayer Play All paths is required merely to introduce
 PERFORMANCE/timing support.
+
+
+------------------------------------------------------------------------
+
+# 2026-10-08 Checkpoint --- PERFORMANCE Media and Timing End-to-End Runtime Integration
+
+<!-- PERFORMANCE-TIMING-RUNTIME-CHECKPOINT-2026-10-08 -->
+
+This checkpoint supersedes earlier restart statements that describe
+occurrence-level PERFORMANCE media and timing as Author Database-only or
+deferred runtime work.
+
+## Verified end-to-end path
+
+The contextual PERFORMANCE path is now implemented through the complete
+development pipeline:
+
+``` text
+Author Database
+    |
+    +-- ExistsInMedia (Role = PERFORMANCE, publicationStatus)
+    +-- MediaTimingSet
+    +-- MediaSegment
+    +-- ExistsInTextMediaSegment
+    |
+    v
+controlled CSV export
+    |
+    v
+Build Tools source loading and Schema-v1 mapping
+    |
+    v
+package media selection
+    |
+    +-- performance-media.json
+    +-- media-timing-sets.json
+    +-- media-segments.json
+    +-- text-occurrence-media-segments.json
+    |
+    v
+ApplicationPackageLoader / PackageValidator
+    |
+    v
+RuntimeContentResolver
+    |
+    v
+ContentRepository / ContentService
+    |
+    v
+PerformanceTextOccurrencePlaybackController
+    |
+    v
+AudioService.playInterval(...)
+    |
+    v
+Android Media3 / ExoPlayer
+    |
+    v
+verse/text-occurrence playback
+```
+
+Real Android emulator testing with Occasion 379 verified that selecting a
+PERFORMANCE recording and pressing contextual hymn verses plays the
+authored intervals correctly.
+
+The UI keeps the earlier Melody `RECORDING` path and the contextual
+`PERFORMANCE` path separate. PERFORMANCE selection uses
+`PerformanceMediaId`; it must not reuse Melody recording identity.
+
+## Publication filtering
+
+`ExistsInMedia.publicationStatus` is exported through the controlled
+media export.
+
+The supported authoring values are:
+
+``` text
+PUBLISHED
+ARCHIVE
+```
+
+Package selection publishes PERFORMANCE rows that are eligible for the
+selected package. An ARCHIVE performance is not made available as a
+runtime playable performance merely because its source media/timing rows
+exist in the Author Database.
+
+Real testing confirmed this behavior: a performance left as ARCHIVE was
+correctly absent from runtime playback until its publication state was
+changed deliberately.
+
+## Timing representation boundary
+
+The Author Database continues to store timing Long values in display-shaped
+`MMSSmmm` form despite the historical `StartMs` / `EndMs` names.
+
+Build Tools now performs the required conversion at the Author Database
+mapping boundary:
+
+``` text
+MMSSmmm author value
+    -> elapsed milliseconds
+    -> Schema/Application Package
+    -> Runtime
+```
+
+Example:
+
+``` text
+123456 -> 01:23.456 -> 83456 ms
+```
+
+This conversion must remain upstream in Build Tools. AudioService and the
+runtime package model consume canonical elapsed milliseconds and must not
+learn the Access-specific storage representation.
+
+Real Occasion 379 emulator testing verified timing beyond the first minute
+after this correction.
+
+## Runtime timing semantics
+
+The runtime preserves contextual text-occurrence identity.
+
+The playback key is conceptually:
+
+``` text
+selected PerformanceMediaId
++
+selected TextOccurrenceId
+```
+
+The current playback contract is:
+
+``` text
+0 complete playable intervals -> Success(Unit), no playback
+1 complete playable interval  -> play that interval
+>1 complete playable intervals -> INVALID_PACKAGE_DATA ambiguity failure
+```
+
+A reusable Text may occur more than once; those uses remain distinct
+`TextOccurrenceId` values.
+
+Null or incomplete segment boundaries are not playable intervals and are
+filtered rather than fabricated.
+
+No rule has been introduced requiring
+`PerformanceMedia.mediaAssetId == MediaTimingSet.mediaAssetId`.
+Do not add that semantic constraint without an explicit Author Database
+decision.
+
+## Author Database development workflow
+
+The current verified authoring/development workflow is:
+
+``` text
+EditPra
+    |
+    +-- BtnExport
+            |
+            +-- ExportOccasionForPlatform OccN
+                    +-- ExportOccasionData
+                    +-- ExportMediaData
+
+PowerShell
+    |
+    +-- .\preview.ps1 <OccN>
+
+Android Studio
+    |
+    +-- Run / emulator verification
+```
+
+`BtnExport` uses the current `OccN` and exports both Occasion content
+and controlled media data.
+
+## Occasion switching and stale Compose resources
+
+A real regression was found when switching from Occasion 379, which has
+PERFORMANCE/timing collections, to Occasion 64, which does not require
+those optional collections.
+
+The generated Occasion 64 preview was correct, but incremental
+Compose/Android build output retained PERFORMANCE JSON resources from the
+previous Occasion. The resulting APK therefore mixed current Occasion 64
+content with stale Occasion 379 PERFORMANCE resources and runtime package
+validation correctly reported 86 fatal invalid-reference issues.
+
+The diagnosis was verified by:
+
+- confirming the generated Occasion 64 package did not contain the
+  PERFORMANCE/timing JSON collections;
+- confirming stale PERFORMANCE/timing JSON collections were still present
+  in the APK;
+- confirming a clean build removed the validation failures.
+
+The permanent development-workflow fix is in root `preview.ps1`.
+Before building a newly selected Occasion preview it now runs:
+
+``` text
+:shared:clean
+:androidApp:clean
+```
+
+and then:
+
+``` text
+:buildtools:buildOccasionPreview
+```
+
+The transition `379 -> 64` was manually retested after this change and
+both Occasions loaded successfully in the emulator.
+
+Do not remove this targeted cleanup unless the underlying Compose resource
+staleness is eliminated and the transition from a package with optional
+PERFORMANCE collections to one without them is regression-tested.
+
+## Restart point
+
+When work resumes after this checkpoint:
+
+1. treat PERFORMANCE package/runtime/timed verse playback as implemented,
+   not as deferred architecture;
+2. preserve the separate Melody RECORDING and liturgical PERFORMANCE
+   identities;
+3. preserve contextual `TextOccurrenceId` timing identity;
+4. preserve the Build Tools `MMSSmmm -> elapsed milliseconds` boundary;
+5. use `BtnExport` followed by `.\preview.ps1 <OccN>` for real-content
+   preview work;
+6. retain the targeted preview cleanup required for safe Occasion
+   switching;
+7. continue from UI/product integration and additional real-content
+   coverage rather than rebuilding the PERFORMANCE foundation.
+
+Verified real-content regression pair:
+
+``` text
+Occasion 379 -> PERFORMANCE + timing playback verified
+Occasion 64  -> no stale PERFORMANCE validation failures
+379 -> 64    -> switching verified after preview cleanup fix
+```
