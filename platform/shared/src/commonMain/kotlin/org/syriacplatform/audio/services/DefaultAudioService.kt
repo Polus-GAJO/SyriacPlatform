@@ -32,6 +32,8 @@ class DefaultAudioService(
     override val state: StateFlow<PlaybackState> = _state.asStateFlow()
 
     private var currentResource: MediaResource? = null
+    private var pendingIntervalStartMs: Long? = null
+    private var intervalEndMs: Long? = null
 
     init {
         playerBackend.setEventListener(::handlePlayerEvent)
@@ -50,11 +52,43 @@ class DefaultAudioService(
         playerBackend.release()
 
         currentResource = null
+        clearInterval()
         _state.value = PlaybackState()
         runtimeState = RuntimeState.NotInitialized
     }
 
+    override fun playInterval(
+        mediaAsset: MediaAsset,
+        startMs: Long,
+        endMs: Long
+    ): Result<Unit> {
+        if (startMs < 0L || endMs <= startMs) {
+            return Result.Failure(
+                PlatformError(
+                    code = ErrorCode.INVALID_ARGUMENT,
+                    message =
+                        "Audio interval requires startMs >= 0 and endMs > startMs."
+                )
+            )
+        }
+
+        pendingIntervalStartMs = startMs
+        intervalEndMs = endMs
+
+        return when (val result = load(mediaAsset)) {
+            is Result.Success -> Result.Success(Unit)
+            is Result.Failure -> {
+                clearInterval()
+                result
+            }
+        }
+    }
+
     override fun load(mediaAsset: MediaAsset): Result<Unit> {
+        if (pendingIntervalStartMs == null) {
+            clearInterval()
+        }
+
         val readiness = requireReadyService()
         if (readiness is Result.Failure) return readiness
 
@@ -254,24 +288,91 @@ class DefaultAudioService(
 
         _state.value =
             when (event) {
-                is AudioPlayerEvent.Ready ->
-                    _state.value.copy(
-                        status = PlaybackStatus.Ready,
-                        durationMs = event.durationMs
-                    )
+                is AudioPlayerEvent.Ready -> {
+                    val startMs = pendingIntervalStartMs
+                    if (startMs != null) {
+                        pendingIntervalStartMs = null
+
+                        when (val seekResult = playerBackend.seekTo(startMs)) {
+                            is Result.Success -> {
+                                _state.value =
+                                    _state.value.copy(
+                                        status = PlaybackStatus.Ready,
+                                        durationMs = event.durationMs,
+                                        positionMs = startMs
+                                    )
+
+                                when (val playResult = playerBackend.play()) {
+                                    is Result.Success -> _state.value
+                                    is Result.Failure -> {
+                                        clearInterval()
+                                        _state.value.copy(
+                                            status = PlaybackStatus.Error
+                                        )
+                                    }
+                                }
+                            }
+
+                            is Result.Failure -> {
+                                clearInterval()
+                                _state.value.copy(
+                                    status = PlaybackStatus.Error
+                                )
+                            }
+                        }
+                    } else {
+                        _state.value.copy(
+                            status = PlaybackStatus.Ready,
+                            durationMs = event.durationMs
+                        )
+                    }
+                }
                 AudioPlayerEvent.Playing ->
                     _state.value.copy(status = PlaybackStatus.Playing)
                 AudioPlayerEvent.Paused ->
                     _state.value.copy(status = PlaybackStatus.Paused)
                 AudioPlayerEvent.Ended ->
                     _state.value.copy(status = PlaybackStatus.Ended)
-                is AudioPlayerEvent.PositionChanged ->
-                    if (event.positionMs >= 0L)
-                        _state.value.copy(positionMs = event.positionMs)
-                    else _state.value
+                is AudioPlayerEvent.PositionChanged -> {
+                    if (event.positionMs < 0L) {
+                        _state.value
+                    } else {
+                        val endMs = intervalEndMs
+                        if (
+                            endMs != null &&
+                            event.positionMs >= endMs
+                        ) {
+                            when (playerBackend.pause()) {
+                                is Result.Success -> {
+                                    clearInterval()
+                                    _state.value.copy(
+                                        status = PlaybackStatus.Paused,
+                                        positionMs = endMs
+                                    )
+                                }
+
+                                is Result.Failure -> {
+                                    clearInterval()
+                                    _state.value.copy(
+                                        status = PlaybackStatus.Error
+                                    )
+                                }
+                            }
+                        } else {
+                            _state.value.copy(
+                                positionMs = event.positionMs
+                            )
+                        }
+                    }
+                }
                 is AudioPlayerEvent.Error ->
                     _state.value.copy(status = PlaybackStatus.Error)
             }
+    }
+
+    private fun clearInterval() {
+        pendingIntervalStartMs = null
+        intervalEndMs = null
     }
 
     private fun requireReadyService(): Result<Unit> =
