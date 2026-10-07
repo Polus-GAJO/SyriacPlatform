@@ -1,6 +1,7 @@
 package org.syriacplatform.packagevalidation.validators.references
 
 import org.syriacplatform.common.types.ErrorCode
+import org.syriacplatform.content.models.LiturgicalItemTarget
 import org.syriacplatform.packageformat.parsed.ParsedApplicationPackage
 import org.syriacplatform.packagevalidation.PackageValidationRule
 import org.syriacplatform.packagevalidation.ValidationIssue
@@ -17,7 +18,16 @@ class TextOccurrenceMediaSegmentReferenceRule :
 
         val textOccurrenceIds =
             value.liturgicalItems
-                .flatMap { item -> item.verses }
+                .flatMap { item ->
+                    when (val target = item.target) {
+                        is LiturgicalItemTarget.Qolo ->
+                            target.verses
+                        is LiturgicalItemTarget.UnresolvedQolo ->
+                            target.verses
+                        is LiturgicalItemTarget.Text ->
+                            emptyList()
+                    }
+                }
                 .map { occurrence -> occurrence.id }
                 .toSet()
 
