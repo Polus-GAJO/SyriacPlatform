@@ -17,6 +17,9 @@ import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.runtime.RuntimeEntryPoint
 import org.syriacplatform.content.runtime.RuntimeOccasion
 import org.syriacplatform.common.types.LiturgicalItemId
+import org.syriacplatform.common.types.PerformanceMediaId
+import org.syriacplatform.common.types.TextOccurrenceId
+import org.syriacplatform.content.runtime.ResolvedPerformanceTextOccurrenceInterval
 import org.syriacplatform.content.runtime.ResolvedLiturgicalItem
 
 class FakeContentRepository : ContentRepository {
@@ -190,5 +193,12 @@ class FakeContentRepository : ContentRepository {
                 )
             )
         }
+    }
+
+    override suspend fun loadPerformanceTextOccurrenceIntervals(
+        performanceId: PerformanceMediaId,
+        textOccurrenceId: TextOccurrenceId
+    ): Result<List<ResolvedPerformanceTextOccurrenceInterval>> {
+        return Result.Success(emptyList())
     }
 }
