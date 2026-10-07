@@ -11,6 +11,9 @@ import org.syriacplatform.common.types.GroupId
 import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.common.types.MelodyId
 import org.syriacplatform.common.types.MediaAssetId
+import org.syriacplatform.common.types.MediaSegmentId
+import org.syriacplatform.common.types.MediaTimingSetId
+import org.syriacplatform.common.types.TextOccurrenceMediaSegmentId
 import org.syriacplatform.common.types.PerformanceMediaId
 import org.syriacplatform.common.types.OccasionId
 import org.syriacplatform.common.types.PetgomoId
@@ -25,6 +28,9 @@ import org.syriacplatform.content.models.LiturgicalItem
 import org.syriacplatform.content.models.LiturgicalItemTarget
 import org.syriacplatform.content.models.Melody
 import org.syriacplatform.content.models.MediaAsset
+import org.syriacplatform.content.models.MediaSegment
+import org.syriacplatform.content.models.MediaTimingSet
+import org.syriacplatform.content.models.TextOccurrenceMediaSegment
 import org.syriacplatform.content.models.PerformanceMedia
 import org.syriacplatform.content.models.Occasion
 import org.syriacplatform.content.models.Petgomo
@@ -511,6 +517,130 @@ class RuntimeContentResolverTest {
                 RuntimeContentResolver(
                     RuntimeContentStore.from(packageData)
                 ).resolvePerformanceMedia(itemId)
+            )
+
+        assertTrue(result.data.isEmpty())
+    }
+
+
+    @Test
+    fun resolverResolvesAllTimingRelationsForTextOccurrence() {
+        val occurrenceId = TextOccurrenceId(501)
+        val timingSet =
+            MediaTimingSet(
+                id = MediaTimingSetId(701),
+                mediaAssetId = MediaAssetId(301),
+                name = "Main timing"
+            )
+        val firstSegment =
+            MediaSegment(
+                id = MediaSegmentId(801),
+                mediaTimingSetId = timingSet.id,
+                sequence = 1,
+                startMs = null,
+                endMs = 1250
+            )
+        val secondSegment =
+            firstSegment.copy(
+                id = MediaSegmentId(802),
+                sequence = 2,
+                startMs = 1250,
+                endMs = 2500
+            )
+        val firstRelation =
+            TextOccurrenceMediaSegment(
+                id = TextOccurrenceMediaSegmentId(901),
+                textOccurrenceId = occurrenceId,
+                mediaSegmentId = firstSegment.id
+            )
+        val secondRelation =
+            TextOccurrenceMediaSegment(
+                id = TextOccurrenceMediaSegmentId(902),
+                textOccurrenceId = occurrenceId,
+                mediaSegmentId = secondSegment.id
+            )
+
+        val packageData =
+            packageWith(
+                liturgicalItems = listOf(
+                    LiturgicalItem(
+                        id = LiturgicalItemId(101),
+                        target =
+                            LiturgicalItemTarget.UnresolvedQolo(
+                                verses = listOf(
+                                    LiturgicalTextRef(
+                                        id = occurrenceId,
+                                        textId = TextId(601)
+                                    )
+                                )
+                            )
+                    )
+                ),
+                mediaTimingSets = listOf(timingSet),
+                mediaSegments =
+                    listOf(firstSegment, secondSegment),
+                textOccurrenceMediaSegments =
+                    listOf(firstRelation, secondRelation)
+            )
+
+        val result =
+            assertIs<Result.Success<List<ResolvedTextOccurrenceTiming>>>(
+                RuntimeContentResolver(
+                    RuntimeContentStore.from(packageData)
+                ).resolveTextOccurrenceTiming(occurrenceId)
+            )
+
+        assertEquals(
+            listOf(
+                TextOccurrenceMediaSegmentId(901),
+                TextOccurrenceMediaSegmentId(902)
+            ),
+            result.data.map { it.relation.id }
+        )
+        assertEquals(
+            listOf(
+                MediaSegmentId(801),
+                MediaSegmentId(802)
+            ),
+            result.data.map { it.segment.id }
+        )
+        assertEquals(
+            listOf(
+                MediaTimingSetId(701),
+                MediaTimingSetId(701)
+            ),
+            result.data.map { it.timingSet.id }
+        )
+        assertNull(result.data.first().segment.startMs)
+        assertEquals(1250, result.data.first().segment.endMs)
+    }
+
+    @Test
+    fun resolverReturnsEmptyTimingListForExistingOccurrenceWithoutTiming() {
+        val occurrenceId = TextOccurrenceId(501)
+        val packageData =
+            packageWith(
+                liturgicalItems = listOf(
+                    LiturgicalItem(
+                        id = LiturgicalItemId(101),
+                        target =
+                            LiturgicalItemTarget.UnresolvedQolo(
+                                verses = listOf(
+                                    LiturgicalTextRef(
+                                        id = occurrenceId,
+                                        textId = TextId(601)
+                                    )
+                                )
+                            )
+                    )
+                )
+            )
+
+        val result =
+            assertIs<Result.Success<List<ResolvedTextOccurrenceTiming>>>(
+                RuntimeContentResolver(
+                    RuntimeContentStore.from(packageData)
+                ).resolveTextOccurrenceTiming(occurrenceId)
             )
 
         assertTrue(result.data.isEmpty())
