@@ -1,14 +1,19 @@
 package org.syriacplatform
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.Surface
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -26,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import org.syriacplatform.audio.contracts.AudioService
 import org.syriacplatform.audio.models.PlaybackState
 import org.syriacplatform.audio.models.PlaybackStatus
@@ -276,6 +282,7 @@ private fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .safeDrawingPadding()
             .background(
                 MaterialTheme.colorScheme.primaryContainer
             )
@@ -334,9 +341,7 @@ private fun HomeScreen(
                             .fillMaxWidth()
                             .weight(1f),
                         verticalArrangement =
-                            Arrangement.spacedBy(
-                                12.dp
-                            )
+                            Arrangement.spacedBy(12.dp, Alignment.CenterVertically)
                     ) {
                         items(occasions) {
                                 occasion ->
@@ -423,6 +428,7 @@ private fun OccasionDetailsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .safeDrawingPadding()
             .background(
                 MaterialTheme.colorScheme.primaryContainer
             )
@@ -490,9 +496,7 @@ private fun OccasionDetailsScreen(
                             .fillMaxWidth()
                             .weight(1f),
                         verticalArrangement =
-                            Arrangement.spacedBy(
-                                20.dp
-                            )
+                            Arrangement.spacedBy(20.dp, Alignment.CenterVertically)
                     ) {
                         items(
                             runtimeOccasion
@@ -627,6 +631,7 @@ private fun PrayerDetailsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .safeDrawingPadding()
             .background(
                 MaterialTheme.colorScheme.primaryContainer
             )
@@ -865,9 +870,7 @@ private fun PrayerDetailsScreen(
                                 .fillMaxWidth()
                                 .weight(1f),
                             verticalArrangement =
-                                Arrangement.spacedBy(
-                                    12.dp
-                                )
+                                Arrangement.spacedBy(12.dp, Alignment.CenterVertically)
                         ) {
                             items(sequence.items) {
                                     item ->
@@ -1358,6 +1361,7 @@ private fun HymnDetailsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .safeDrawingPadding()
             .background(MaterialTheme.colorScheme.primaryContainer)
             .padding(24.dp)
     ) {
@@ -1931,12 +1935,13 @@ private fun HymnDetailsScreen(
                                 Arrangement.spacedBy(12.dp)
                         ) {
                             items(target.verses) { verse ->
-                                Button(
-                                    enabled =
-                                        selectedPerformance != null &&
-                                        platform.performanceTextPlayback !=
-                                            null,
-                                    onClick = {
+                                Surface(
+                                    shape = RoundedCornerShape(4.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant,
+                                    modifier = Modifier.fillMaxWidth().clickable(
+                                        enabled = selectedPerformance != null &&
+                                            platform.performanceTextPlayback != null,
+                                        onClick = {
                                         val performance =
                                             selectedPerformance
                                         val playback =
@@ -1976,13 +1981,12 @@ private fun HymnDetailsScreen(
                                                 }
                                             }
                                         }
-                                    },
-                                    modifier =
-                                        Modifier.fillMaxWidth()
+                                    }
+                                    )
                                 ) {
                                     Column(
                                         modifier =
-                                            Modifier.fillMaxWidth()
+                                            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp)
                                     ) {
                                         verse.petgomo?.let { petgomo ->
                                             Text(
