@@ -430,7 +430,7 @@ private fun OccasionDetailsScreen(
             .background(
                 MaterialTheme.colorScheme.primaryContainer
             )
-            .padding(24.dp)
+            .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 8.dp)
     ) {
         when (
             val result =
@@ -458,7 +458,9 @@ private fun OccasionDetailsScreen(
 
                 Text(
                     text = runtimeOccasion.occasion.name,
-                    style = SyriacTextStyles.body()
+                    modifier = Modifier.fillMaxWidth(),
+                    style = SyriacTextStyles.body(),
+                    textAlign = TextAlign.Center
                 )
 
                 runtimeOccasion
@@ -546,9 +548,7 @@ private fun OccasionDetailsScreen(
         Button(
             onClick = onBack,
             modifier =
-                Modifier.padding(
-                    top = 24.dp
-                )
+                Modifier.padding(top = 8.dp)
         ) {
             Text(
                 text = "Back"
@@ -633,7 +633,7 @@ private fun PrayerDetailsScreen(
             .background(
                 MaterialTheme.colorScheme.primaryContainer
             )
-            .padding(24.dp)
+            .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 8.dp)
     ) {
         when (
             val result =
@@ -670,7 +670,9 @@ private fun PrayerDetailsScreen(
                 } else {
                     Text(
                         text = sequence.prayer.name,
-                        style = SyriacTextStyles.body()
+                        modifier = Modifier.fillMaxWidth(),
+                        style = SyriacTextStyles.body(),
+                        textAlign = TextAlign.Center
                     )
 
                     sequence.prayer.description?.let {
@@ -895,9 +897,7 @@ private fun PrayerDetailsScreen(
                 onBack()
             },
             modifier =
-                Modifier.padding(
-                    top = 24.dp
-                )
+                Modifier.padding(top = 8.dp)
         ) {
             Text(
                 text = "Back"
@@ -932,9 +932,7 @@ private fun MissingPrayerSelectionScreen(
         Button(
             onClick = onBack,
             modifier =
-                Modifier.padding(
-                    top = 24.dp
-                )
+                Modifier.padding(top = 8.dp)
         ) {
             Text(
                 text = "Back"
@@ -1361,7 +1359,7 @@ private fun HymnDetailsScreen(
             .fillMaxSize()
             .safeDrawingPadding()
             .background(MaterialTheme.colorScheme.primaryContainer)
-            .padding(24.dp)
+            .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 8.dp)
     ) {
         when (val result = itemResult) {
             null -> Text("Loading...")
@@ -2019,7 +2017,7 @@ private fun HymnDetailsScreen(
                 audioService?.stop()
                 onBack()
             },
-            modifier = Modifier.padding(top = 24.dp)
+            modifier = Modifier.padding(top = 8.dp)
         ) {
             Text("Back")
         }
