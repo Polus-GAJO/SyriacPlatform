@@ -3900,3 +3900,23 @@ A fresh Occasion 2 package was verified with 13 MediaAssets and 13 physical file
 This implemented contract covers melody `RECORDING` media.
 
 Occurrence-level `PERFORMANCE`, timing sets, timed segments, and verse synchronization are not yet part of the emitted runtime package contract.
+
+
+------------------------------------------------------------------------
+
+# Schema-v1 implementation alignment — Editorial Notes (2026-10-14)
+
+<!-- SCHEMA-V1-EDITORIAL-NOTES-2026-10-14 -->
+
+This additive implementation-alignment section documents the verified Schema-v1 editorial Notes contract. It does not redefine personal/user Notes (Phase 11) or alter PERFORMANCE/timing semantics.
+
+- content/notes.json is an optional collection. It is written when at least one referenced PUBLISHED Note is selected. Each Note record carries its stable numeric id and text.
+- content/occasions.json: an Occasion may contain an optional numeric noteId referring to its contextual Occasion Note. The property is omitted when absent.
+- content/prayer-sequences.json: a PrayerSequence carries noteIds, an array of numeric Note identifiers. An empty array represents no Prayer Notes; older packages without the property remain supported by runtime defaults.
+- content/liturgical-items.json: each liturgical occurrence may contain an optional numeric noteId. This reference belongs to the occurrence (ExistsIn identity), never to a reusable canonical Qolo or Text. It is omitted when absent.
+- Every emitted Note reference must resolve to a packaged Note. Build Tools selects only referenced Notes with publicationStatus PUBLISHED; ARCHIVE and unreferenced Notes must not be emitted merely because they exist in the Author Database.
+- Prayer Note source pseudo-records (ItemType PRAYER_NOTE) are mapped to PrayerSequence noteIds and must not become liturgical items.
+
+Authoring boundary: current Access/VBA allows one Prayer Note per prayer within an Occasion and disables ExistsIn.Sort for these pseudo-records, leaving Sort normally NULL. The Schema-v1 noteIds array remains future-compatible with multiple Notes; authoritative authoring order for that future case is not specified. The current Sort-then-ExistsIn.ID implementation fallback is not a normative editorial ordering rule.
+
+Verification: the three contextual Notes scopes were confirmed in real Occasion 378 and the Android emulator. Four focused regression tests and a subsequent complete buildtools:test suite were reported BUILD SUCCESSFUL on the user's Windows checkout. UI placement and styling are not part of this physical package contract.
