@@ -1334,6 +1334,17 @@ private fun HymnDetailsScreen(
         value = platform.content.loadLiturgicalItem(liturgicalItemId)
     }
 
+    val occurrenceNoteId =
+        (itemResult as? Result.Success)?.data?.item?.noteId
+
+    val occurrenceNoteResult by produceState<Result<org.syriacplatform.content.models.Note>?>(
+        initialValue = null,
+        key1 = platform,
+        key2 = occurrenceNoteId
+    ) {
+        value = occurrenceNoteId?.let { platform.content.loadNote(it) }
+    }
+
     val playbackState = rememberPlaybackState(audioService)
 
     val coroutineScope =
@@ -1423,6 +1434,18 @@ private fun HymnDetailsScreen(
 
             is Result.Success -> {
                 val target = result.data.target
+
+                val occurrenceNoteText =
+                    (occurrenceNoteResult as? Result.Success)?.data?.text
+                if (!occurrenceNoteText.isNullOrBlank()) {
+                    Text(
+                        text = occurrenceNoteText,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
 
                 if (target is ResolvedLiturgicalItemTarget.Qolo) {
                     val effectiveMelody = target.effectiveMelody
