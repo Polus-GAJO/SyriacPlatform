@@ -25,6 +25,7 @@ import org.syriacplatform.content.models.TextOccurrenceMediaSegment
 import org.syriacplatform.content.models.Melody
 import org.syriacplatform.content.models.MelodyQintoAssignment
 import org.syriacplatform.content.models.Occasion
+import org.syriacplatform.content.models.Note
 import org.syriacplatform.content.models.Petgomo
 import org.syriacplatform.content.models.Prayer
 import org.syriacplatform.content.models.PrayerSequence
@@ -43,6 +44,7 @@ import org.syriacplatform.content.models.LiturgicalItemTarget
 class RuntimeContentIndex private constructor(
     val entryPointsById: Map<EntryPointId, EntryPoint>,
     val occasionsById: Map<OccasionId, Occasion>,
+    val notesById: Map<Long, Note>,
     val prayersById: Map<PrayerId, Prayer>,
     val prayerSequencesById:
     Map<PrayerSequenceId, PrayerSequence>,
@@ -93,6 +95,9 @@ class RuntimeContentIndex private constructor(
 
                 occasionsById =
                     content.occasions.associateBy { it.id },
+
+                notesById =
+                    content.notes.associateBy { it.id },
 
                 prayersById =
                     content.prayers.associateBy { it.id },
