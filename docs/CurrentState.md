@@ -3850,3 +3850,21 @@ The user also confirmed successful Android emulator display of all three scopes.
 ## Restart point
 
 Treat all three contextual editorial Notes scopes as implemented and Android-verified for Occasion 378. Do not rebuild this foundation. First close focused test/specification gaps, then select the next requirement-driven milestone from the roadmap. Keep changes small, commit through GitHub, pull locally, and verify with Gradle and emulator when applicable.
+
+
+------------------------------------------------------------------------
+
+# 2026-10-14 Checkpoint — Editorial Notes focused regression tests
+
+<!-- NOTES-FOCUSED-TESTS-2026-10-14 -->
+
+Four focused Kotlin regression tests individually passed on the user's Windows checkout:
+
+1. Published-only note selection across Occasion, Prayer, and occurrence; excludes ARCHIVE and unreferenced notes (b5324b6).
+2. One Prayer Note with ExistsIn.Sort = NULL correctly maps to its PrayerSequence (c629906).
+3. Two occurrences of the same canonical Qolo preserve separate occurrence Note IDs (9e6dcaa).
+4. Missing optional Notes across all three scopes produce no packaged Notes (75fd9e1).
+
+Authoring clarification: Access VBA currently allows only one Prayer Note per prayer per Occasion; the Prayer Note form disables ExistsIn.Sort, normally leaving it NULL. The platform's PrayerSequence.noteIds list supports future multiplicity, but ordering of multiple authored Prayer Notes is not yet an approved contract. Existing Sort-then-ExistsIn.ID ordering is a technical fallback, not an agreed future authoring rule. This clarification supersedes earlier statements implying Access permits multiple Prayer Notes or that their authored order has been settled.
+
+Focused tests passed individually. A fresh complete buildtools:test suite after these changes has not yet been reported. Next: full Build Tools suite, Schema-v1 package specification update, and roadmap prioritization. UI note placement polish remains deferred; editorial Notes remain distinct from Phase 11 user Notes.
