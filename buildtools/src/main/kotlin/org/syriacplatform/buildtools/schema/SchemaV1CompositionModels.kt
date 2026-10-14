@@ -16,6 +16,7 @@ typealias SchemaV1LiturgicalTextRef = SchemaV1TextOccurrence
 sealed interface SchemaV1LiturgicalItem {
     val id: Long
     val verses: List<SchemaV1LiturgicalTextRef>
+    val noteId: Long?
 }
 
 data class SchemaV1QoloLiturgicalItem(
@@ -36,12 +37,14 @@ data class SchemaV1QoloLiturgicalItem(
      */
     val melodyCandidateIds: List<Long> = emptyList(),
 
-    override val verses: List<SchemaV1LiturgicalTextRef>
+    override val verses: List<SchemaV1LiturgicalTextRef>,
+    override val noteId: Long? = null
 ) : SchemaV1LiturgicalItem
 
 data class SchemaV1UnresolvedQoloLiturgicalItem(
     override val id: Long,
-    override val verses: List<SchemaV1LiturgicalTextRef>
+    override val verses: List<SchemaV1LiturgicalTextRef>,
+    override val noteId: Long? = null
 ) : SchemaV1LiturgicalItem
 
 data class SchemaV1PrayerCompositionDraft(
