@@ -179,7 +179,8 @@ internal fun LiturgicalItemJsonDto.toDomain(): Result<LiturgicalItem> {
     return Result.Success(
         LiturgicalItem(
             id = LiturgicalItemId(id),
-            target = resolvedTarget
+            target = resolvedTarget,
+            noteId = noteId
         )
     )
 }
