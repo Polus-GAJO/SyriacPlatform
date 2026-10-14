@@ -562,7 +562,6 @@ private fun OccasionDetailsScreen(
                                     }
                                 }
                             }
-                            PrayerSequenceNotes(platform, sequence.sequence.noteIds)
                             }
                         }
                     }
@@ -738,6 +737,8 @@ private fun PrayerDetailsScreen(
                                 )
                         )
                     }
+
+                    PrayerSequenceNotes(platform, sequence.sequence.noteIds)
 
                     Button(
                         enabled =
