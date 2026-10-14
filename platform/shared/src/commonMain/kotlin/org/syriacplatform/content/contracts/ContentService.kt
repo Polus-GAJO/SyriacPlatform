@@ -7,6 +7,7 @@ import org.syriacplatform.common.types.QoloId
 import org.syriacplatform.content.models.EntryPoint
 import org.syriacplatform.content.models.MediaAsset
 import org.syriacplatform.content.models.Occasion
+import org.syriacplatform.content.models.Note
 import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.runtime.RuntimeEntryPoint
 import org.syriacplatform.content.runtime.RuntimeOccasion
@@ -38,6 +39,8 @@ interface ContentService : PlatformService {
 
     suspend fun loadDefaultEntryPoint():
             Result<RuntimeEntryPoint>
+
+    suspend fun loadNote(noteId: Long): Result<Note>
 
     suspend fun loadOccasion(
         occasionId: OccasionId
