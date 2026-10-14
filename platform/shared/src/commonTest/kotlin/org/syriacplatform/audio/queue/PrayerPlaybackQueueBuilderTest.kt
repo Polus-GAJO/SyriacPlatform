@@ -23,6 +23,7 @@ import org.syriacplatform.content.models.LiturgicalItemTarget
 import org.syriacplatform.content.models.MediaAsset
 import org.syriacplatform.content.models.Melody
 import org.syriacplatform.content.models.Occasion
+import org.syriacplatform.content.models.Note
 import org.syriacplatform.content.models.Prayer
 import org.syriacplatform.content.models.PrayerSequence
 import org.syriacplatform.content.models.Qolo
@@ -572,6 +573,9 @@ private class FakeContentService(
 
     override suspend fun loadDefaultEntryPoint():
         Result<RuntimeEntryPoint> =
+        unsupported()
+
+    override suspend fun loadNote(noteId: Long): Result<Note> =
         unsupported()
 
     override suspend fun loadOccasion(
