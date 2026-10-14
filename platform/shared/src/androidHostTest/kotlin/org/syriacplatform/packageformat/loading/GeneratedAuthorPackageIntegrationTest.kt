@@ -122,9 +122,8 @@ class GeneratedAuthorPackageIntegrationTest {
             )
 
             /*
-             * Occasion 2 is the verified media-aware preview:
-             * Build Tools selected and packaged exactly the
-             * MediaAssets referenced by its Melody recordingIds.
+             * Preview media may be referenced by Melody recordings,
+             * PerformanceMedia, or both.
              */
             assertTrue(
                 packageData.collectionPresence.mediaAssets
@@ -143,10 +142,6 @@ class GeneratedAuthorPackageIntegrationTest {
                 packageData.melodies
                     .flatMap { it.recordingIds }
                     .toSet()
-
-            assertTrue(
-                recordingIds.isNotEmpty()
-            )
 
             val performanceMediaAssetIds =
                 packageData.performanceMedia
