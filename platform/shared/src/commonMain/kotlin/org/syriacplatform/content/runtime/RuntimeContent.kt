@@ -10,6 +10,7 @@ import org.syriacplatform.content.models.TextOccurrenceMediaSegment
 import org.syriacplatform.content.models.Melody
 import org.syriacplatform.content.models.MelodyQintoAssignment
 import org.syriacplatform.content.models.Occasion
+import org.syriacplatform.content.models.Note
 import org.syriacplatform.content.models.Petgomo
 import org.syriacplatform.content.models.Prayer
 import org.syriacplatform.content.models.PrayerSequence
@@ -44,7 +45,8 @@ data class RuntimeContent(
     val mediaTimingSets: List<MediaTimingSet> = emptyList(),
     val mediaSegments: List<MediaSegment> = emptyList(),
     val textOccurrenceMediaSegments:
-        List<TextOccurrenceMediaSegment> = emptyList()
+        List<TextOccurrenceMediaSegment> = emptyList(),
+    val notes: List<Note> = emptyList()
 ) {
 
     companion object {
@@ -74,7 +76,8 @@ data class RuntimeContent(
                 mediaSegments =
                     packageData.mediaSegments,
                 textOccurrenceMediaSegments =
-                    packageData.textOccurrenceMediaSegments
+                    packageData.textOccurrenceMediaSegments,
+                notes = packageData.notes
             )
         }
     }
