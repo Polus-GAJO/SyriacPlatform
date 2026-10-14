@@ -14,6 +14,7 @@ import org.syriacplatform.content.runtime.RuntimeEntryPoint
 import org.syriacplatform.content.runtime.RuntimeOccasion
 import org.syriacplatform.content.models.EntryPoint
 import org.syriacplatform.content.models.Occasion
+import org.syriacplatform.content.models.Note
 import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.common.types.PerformanceMediaId
 import org.syriacplatform.common.types.TextOccurrenceId
@@ -54,6 +55,10 @@ class DefaultContentService(
     override suspend fun loadDefaultEntryPoint():
             Result<RuntimeEntryPoint> {
         return repository.loadDefaultEntryPoint()
+    }
+
+    override suspend fun loadNote(noteId: Long): Result<Note> {
+        return repository.loadNote(noteId)
     }
 
     override suspend fun loadOccasion(
