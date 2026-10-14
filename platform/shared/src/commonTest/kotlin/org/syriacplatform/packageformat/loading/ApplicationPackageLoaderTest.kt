@@ -555,6 +555,111 @@ class ApplicationPackageLoaderTest {
             assertEquals(801L, relation.mediaSegmentId.value)
         }
 
+        @Test
+fun loadIngestsNotesCollection() =
+    runTest {
+        val emptyCollection =
+            """{"items":[]}""".encodeToByteArray()
+
+        val source =
+            FakePackageSource(
+                files = mapOf(
+                    PackagePaths.MANIFEST to
+                        validManifestJson().encodeToByteArray(),
+                    PackagePaths.ENTRY_POINTS to emptyCollection,
+                    PackagePaths.OCCASIONS to emptyCollection,
+                    PackagePaths.PRAYERS to emptyCollection,
+                    PackagePaths.PRAYER_SEQUENCES to emptyCollection,
+                    PackagePaths.LITURGICAL_ITEMS to emptyCollection,
+                    PackagePaths.TEXTS to emptyCollection,
+                    PackagePaths.NOTES to
+                        """
+                        {"items":[
+                          {
+                            "id":101,
+                            "text":"Test occasion note"
+                          },
+                          {
+                            "id":102,
+                            "text":"Test prayer note"
+                          }
+                        ]}
+                        """.trimIndent().encodeToByteArray()
+                )
+            )
+
+        val result =
+            ApplicationPackageLoader(source).load(
+                coreCompatibility =
+                    CoreCompatibility(
+                        version = Version(1, 2, 0),
+                        supportedSchemaVersions = setOf("1.0")
+                    )
+            )
+
+        val loaded =
+            when (result) {
+                is PackageLoadResult.Success ->
+                    result.packageData
+                is PackageLoadResult.ValidationFailed ->
+                    result.packageData
+                is PackageLoadResult.Failure ->
+                    error("Unexpected load failure: ${result.error}")
+            }
+
+        assertTrue(loaded.collectionPresence.notes)
+        assertEquals(2, loaded.notes.size)
+
+        assertEquals(101L, loaded.notes[0].id)
+        assertEquals("Test occasion note", loaded.notes[0].text)
+
+        assertEquals(102L, loaded.notes[1].id)
+        assertEquals("Test prayer note", loaded.notes[1].text)
+    }
+
+    @Test
+fun loadWithoutNotesCollectionReturnsEmptyNotes() =
+    runTest {
+        val emptyCollection =
+            """{"items":[]}""".encodeToByteArray()
+
+        val source =
+            FakePackageSource(
+                files = mapOf(
+                    PackagePaths.MANIFEST to
+                        validManifestJson().encodeToByteArray(),
+                    PackagePaths.ENTRY_POINTS to emptyCollection,
+                    PackagePaths.OCCASIONS to emptyCollection,
+                    PackagePaths.PRAYERS to emptyCollection,
+                    PackagePaths.PRAYER_SEQUENCES to emptyCollection,
+                    PackagePaths.LITURGICAL_ITEMS to emptyCollection,
+                    PackagePaths.TEXTS to emptyCollection
+                )
+            )
+
+        val result =
+            ApplicationPackageLoader(source).load(
+                coreCompatibility =
+                    CoreCompatibility(
+                        version = Version(1, 2, 0),
+                        supportedSchemaVersions = setOf("1.0")
+                    )
+            )
+
+        val loaded =
+            when (result) {
+                is PackageLoadResult.Success ->
+                    result.packageData
+                is PackageLoadResult.ValidationFailed ->
+                    result.packageData
+                is PackageLoadResult.Failure ->
+                    error("Unexpected load failure: ${result.error}")
+            }
+
+        assertFalse(loaded.collectionPresence.notes)
+        assertTrue(loaded.notes.isEmpty())
+    }
+
 
     @Test
     fun loadRejectsBrokenPerformanceTimingReference() =

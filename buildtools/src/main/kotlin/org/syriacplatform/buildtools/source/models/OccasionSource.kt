@@ -5,5 +5,6 @@ data class OccasionSource(
     val id: Long,
     val name: String?,
     val day: Double?,
-    val monthId: Long?
+    val monthId: Long?,
+    val noteId: Long? = null
 )

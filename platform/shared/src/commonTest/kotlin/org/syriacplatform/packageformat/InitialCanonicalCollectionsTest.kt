@@ -131,6 +131,8 @@ class InitialCanonicalCollectionsTest {
             ),
             occasion.prayerSequenceIds
         )
+
+        assertNull(occasion.noteId)
     }
 
     @Test
@@ -185,6 +187,32 @@ class InitialCanonicalCollectionsTest {
 
         assertNull(morning.description)
     }
+
+    @Test
+fun occasionNoteIdIsDecodedAndMapped() {
+    val occasionJson = """
+        {
+          "id": 101,
+          "name": "Nativity",
+          "prayerSequenceIds": [303, 301, 302],
+          "noteId": 501
+        }
+    """.trimIndent()
+
+    val dto = json.decodeFromString<OccasionJsonDto>(
+        occasionJson
+    )
+
+    val result = dto.toDomain()
+
+    val occasion =
+        assertIs<Result.Success<Occasion>>(result).data
+
+    assertEquals(
+        501L,
+        occasion.noteId
+    )
+}
 
     private companion object {
 

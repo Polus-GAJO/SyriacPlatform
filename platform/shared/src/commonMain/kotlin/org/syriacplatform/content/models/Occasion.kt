@@ -11,5 +11,6 @@ data class Occasion(
     val id: OccasionId,
     val name: String,
     val description: String?,
-    val prayerSequenceIds: List<PrayerSequenceId>
+    val prayerSequenceIds: List<PrayerSequenceId>,
+    val noteId: Long? = null
 )

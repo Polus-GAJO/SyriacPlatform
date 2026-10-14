@@ -30,5 +30,7 @@ data class PackageCollectionPresence(
     val performanceMedia: Boolean = false,
     val mediaTimingSets: Boolean = false,
     val mediaSegments: Boolean = false,
-    val textOccurrenceMediaSegments: Boolean = false
+    val textOccurrenceMediaSegments: Boolean = false,
+    val notes: Boolean = false
+
 )

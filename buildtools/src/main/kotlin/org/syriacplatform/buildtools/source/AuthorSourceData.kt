@@ -11,6 +11,7 @@ import org.syriacplatform.buildtools.source.models.PrayerSource
 import org.syriacplatform.buildtools.source.models.QintoSource
 import org.syriacplatform.buildtools.source.models.QoloSource
 import org.syriacplatform.buildtools.source.models.TextSource
+import org.syriacplatform.buildtools.source.models.NoteSource
 
 data class AuthorSourceData(
     val occasion: OccasionSource,
@@ -23,5 +24,6 @@ data class AuthorSourceData(
     val texts: List<TextSource>,
     val petgomos: List<PetgomoSource>,
     val melodies: List<MelodySource>,
-    val qintos: List<QintoSource>
+    val qintos: List<QintoSource>,
+    val notes: List<NoteSource> = emptyList()
 )

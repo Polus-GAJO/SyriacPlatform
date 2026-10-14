@@ -11,18 +11,31 @@ import org.syriacplatform.buildtools.source.models.PrayerSource
 import org.syriacplatform.buildtools.source.models.QintoSource
 import org.syriacplatform.buildtools.source.models.QoloSource
 import org.syriacplatform.buildtools.source.models.TextSource
+import org.syriacplatform.buildtools.source.models.NoteSource
 
 class AuthorSourceMapper {
 
     fun toOccasion(row: CsvRow): OccasionSource {
-        return OccasionSource(
-            sort = row.optionalLong("OccSort"),
-            id = row.requiredLong("OccN"),
-            name = row["Occasion"],
-            day = row.optionalDouble("OccDay"),
-            monthId = row.optionalLong("OccMonth")
-        )
-    }
+    return OccasionSource(
+        sort = row.optionalLong("OccSort"),
+        id = row.requiredLong("OccN"),
+        name = row["Occasion"],
+        day = row.optionalDouble("OccDay"),
+        monthId = row.optionalLong("OccMonth"),
+        noteId = row.optionalLong("NoteN")
+    )
+}
+
+fun toNote(row: CsvRow): NoteSource {
+    return NoteSource(
+        id = row.requiredLong("NoteN"),
+        text = row["Note"],
+        publicationStatus = row["publicationStatus"]
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
+            ?: error("Missing publicationStatus for NoteN=${row.requiredLong("NoteN")}")
+    )
+}
 
     fun toPrayer(row: CsvRow): PrayerSource {
         return PrayerSource(
@@ -32,18 +45,19 @@ class AuthorSourceMapper {
     }
 
     fun toExistsIn(row: CsvRow): ExistsInSource {
-        return ExistsInSource(
-            id = row.requiredLong("ID"),
-            sort = row.optionalLong("Sort"),
-            bookId = row.optionalLong("BookN"),
-            prayerId = row.optionalLong("PrayerN"),
-            locationId = row.optionalLong("LocationN"),
-            qoloId = row.optionalLong("QoloN"),
-            qintoId = row.optionalLong("QintoN"),
-            noteId = row.optionalLong("NoteN"),
-            dayId = row.optionalLong("DayN")
-        )
-    }
+    return ExistsInSource(
+        id = row.requiredLong("ID"),
+        sort = row.optionalLong("Sort"),
+        bookId = row.optionalLong("BookN"),
+        prayerId = row.optionalLong("PrayerN"),
+        locationId = row.optionalLong("LocationN"),
+        qoloId = row.optionalLong("QoloN"),
+        qintoId = row.optionalLong("QintoN"),
+        noteId = row.optionalLong("NoteN"),
+        dayId = row.optionalLong("DayN"),
+        itemType = row["ItemType"]?.takeIf { it.isNotBlank() }
+    )
+}
 
     fun toOccaExis(row: CsvRow): OccaExisSource {
         return OccaExisSource(

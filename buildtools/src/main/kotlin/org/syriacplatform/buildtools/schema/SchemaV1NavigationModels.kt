@@ -11,7 +11,8 @@ data class SchemaV1Occasion(
     val id: Long,
     val name: String,
     val description: String? = null,
-    val prayerSequenceIds: List<Long>
+    val prayerSequenceIds: List<Long>,
+    val noteId: Long? = null
 )
 
 data class SchemaV1PrayerSequence(

@@ -9,5 +9,6 @@ data class ExistsInSource(
     val qoloId: Long?,
     val qintoId: Long?,
     val noteId: Long?,
-    val dayId: Long?
+    val dayId: Long?,
+    val itemType: String? = null
 )

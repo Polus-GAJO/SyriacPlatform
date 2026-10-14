@@ -29,6 +29,8 @@ import org.syriacplatform.packageformat.parsed.PackageCollectionPresence
 import org.syriacplatform.packageformat.parsed.ParsedApplicationPackage
 import org.syriacplatform.packagevalidation.PackageValidator
 import org.syriacplatform.packagevalidation.compatibility.CoreCompatibility
+import org.syriacplatform.packageformat.dto.NoteJsonDto
+import org.syriacplatform.packageformat.mappers.toDomain
 
 /**
  * المنسق الأعلى لتحميل Application Package.
@@ -397,6 +399,20 @@ class ApplicationPackageLoader(
                     return PackageLoadResult.Failure(result.error)
             }
 
+        val notes =
+    when (
+        val result =
+            parseCollection<NoteJsonDto, org.syriacplatform.content.models.Note>(
+                bytes = files.notes,
+                path = PackagePaths.NOTES,
+                mapper = { dto -> dto.toDomain() }
+            )
+    ) {
+        is Result.Success -> result.data
+        is Result.Failure ->
+            return PackageLoadResult.Failure(result.error)
+    }
+
         val packageData =
             ParsedApplicationPackage(
                 manifest = manifest,
@@ -419,7 +435,8 @@ class ApplicationPackageLoader(
                 mediaTimingSets = mediaTimingSets,
                 mediaSegments = mediaSegments,
                 textOccurrenceMediaSegments =
-                    textOccurrenceMediaSegments
+                    textOccurrenceMediaSegments,
+                    notes = notes
             )
 
         val validationReport =
@@ -506,7 +523,9 @@ class ApplicationPackageLoader(
                     mediaSegments =
                         files.mediaSegments != null,
                     textOccurrenceMediaSegments =
-                        files.textOccurrenceMediaSegments != null
+                        files.textOccurrenceMediaSegments != null,
+                    notes =
+                        files.notes != null
                 )
         )
     }
@@ -711,7 +730,11 @@ class ApplicationPackageLoader(
             melodyQintoAssignments =
                 source.readBytesOrNull(
                     PackagePaths.MELODY_QINTO_ASSIGNMENTS
-                )
+                ),
+            notes =
+                source.readBytesOrNull(
+                     PackagePaths.NOTES
+    )
         )
     }
 
@@ -736,6 +759,7 @@ class ApplicationPackageLoader(
         val mediaSegments: ByteArray?,
         val textOccurrenceMediaSegments: ByteArray?,
         val qintos: ByteArray?,
-        val melodyQintoAssignments: ByteArray?
+        val melodyQintoAssignments: ByteArray?,
+        val notes: ByteArray? = null
     )
 }

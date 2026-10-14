@@ -39,6 +39,9 @@ class OccasionPackageBuilder(
     private val navigationMapper: SchemaV1NavigationMapper =
         SchemaV1NavigationMapper(),
 
+    private val noteSelector: SchemaV1PackageNoteSelector =
+    SchemaV1PackageNoteSelector(),
+
     private val assembler: SchemaV1PreviewPackageAssembler =
         SchemaV1PreviewPackageAssembler(),
 
@@ -217,13 +220,17 @@ class OccasionPackageBuilder(
                     occasionId = occasionId
                 )
 
+        val packageNotes =
+            noteSelector.selectOccasionNotes(source)
+
         val packageData =
             assembler.assemble(
                 canonical = canonical,
                 composition = packageComposition,
                 navigation = navigation,
                 config = config,
-                media = packageMedia
+                media = packageMedia,
+             notes = packageNotes
             )
 
         if (

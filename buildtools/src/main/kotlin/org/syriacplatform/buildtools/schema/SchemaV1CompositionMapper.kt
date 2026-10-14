@@ -26,9 +26,10 @@ class SchemaV1CompositionMapper(
                 .toSet()
 
         val selectedItems =
-            source.existsIn.filter {
-                it.id in occasionExistsInIds
-            }
+           source.existsIn.filter {
+            it.id in occasionExistsInIds &&
+             it.itemType != "PRAYER_NOTE"
+           }
 
         val itemsByPrayer =
             selectedItems.groupBy {

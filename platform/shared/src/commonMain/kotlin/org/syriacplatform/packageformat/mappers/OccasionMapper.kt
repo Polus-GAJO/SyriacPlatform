@@ -17,7 +17,8 @@ internal fun OccasionJsonDto.toDomain(): Result<Occasion> {
             description = description,
             prayerSequenceIds = prayerSequenceIds.map { value ->
                 PrayerSequenceId(value)
-            }
+            },
+            noteId = noteId
         )
     )
 }

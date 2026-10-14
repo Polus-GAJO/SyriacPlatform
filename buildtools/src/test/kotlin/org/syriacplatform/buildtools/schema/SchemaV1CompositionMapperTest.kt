@@ -6,6 +6,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.syriacplatform.buildtools.source.AuthorSourceDataLoader
 import kotlin.test.assertFalse
+import org.syriacplatform.buildtools.source.models.ExistsInSource
 
 class SchemaV1CompositionMapperTest {
 
@@ -65,12 +66,26 @@ class SchemaV1CompositionMapperTest {
         val source = loadSource()
         val draft = mapper.map(source)
 
-        val selectedIds =
-            source.occasionLinks
-                .mapNotNull {
-                    it.existsInId
-                }
-                .toSet()
+        val occasionExistsInIds =
+    source.occasionLinks
+        .filter {
+            it.occasionId == source.occasion.id
+        }
+        .mapNotNull {
+            it.existsInId
+        }
+        .toSet()
+
+val selectedIds =
+    source.existsIn
+        .filter {
+            it.id in occasionExistsInIds &&
+                it.itemType != "PRAYER_NOTE"
+        }
+        .map {
+            it.id
+        }
+        .toSet()
 
         val accountedIds =
             draft.prayers
@@ -264,6 +279,64 @@ class SchemaV1CompositionMapperTest {
             second
         )
     }
+
+    @Test
+fun excludesPrayerNoteFromLiturgicalComposition() {
+    val originalSource = loadSource()
+
+    val prayerId = originalSource.prayers.first().id
+    val noteItemId = -1001L
+
+    val prayerNote = ExistsInSource(
+        id = noteItemId,
+        sort = null,
+        bookId = null,
+        prayerId = prayerId,
+        locationId = null,
+        qoloId = null,
+        qintoId = null,
+        noteId = 1001L,
+        dayId = null,
+        itemType = "PRAYER_NOTE"
+    )
+
+    val source = originalSource.copy(
+        existsIn = originalSource.existsIn + prayerNote,
+        occasionLinks = originalSource.occasionLinks +
+            originalSource.occasionLinks.first().copy(
+                existsInId = noteItemId
+            )
+    )
+
+    val originalDraft = mapper.map(originalSource)
+    val draft = mapper.map(source)
+
+    val orderedIds = draft.prayers.flatMap {
+        it.orderedSourceItemIds
+    }
+
+    val resolvedIds = draft.prayers.flatMap {
+        it.resolvedItems
+    }.map {
+        it.id
+    }
+
+    assertFalse(noteItemId in orderedIds)
+    assertFalse(noteItemId in resolvedIds)
+
+    assertEquals(
+        originalDraft.prayers,
+        draft.prayers
+    )
+
+    assertTrue(
+        source.existsIn.any {
+            it.id == noteItemId &&
+                it.itemType == "PRAYER_NOTE" &&
+                it.noteId == 1001L
+        }
+    )
+}
 
     private fun mapRepresentativeSource():
             SchemaV1CompositionDraft {

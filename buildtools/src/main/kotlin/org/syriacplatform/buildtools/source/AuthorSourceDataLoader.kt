@@ -74,9 +74,23 @@ class AuthorSourceDataLoader(
             ).map(mapper::toMelody),
 
             qintos = readRows(
-                directory,
-                "Qinto.csv"
-            ).map(mapper::toQinto)
+    directory,
+    "Qinto.csv"
+).map(mapper::toQinto),
+
+notes = directory.resolve("Notes.csv").let { notesPath ->
+    if (Files.isRegularFile(notesPath)) {
+        readRows(directory, "Notes.csv")
+            .map(mapper::toNote)
+            .also { notes ->
+                require(notes.all { it.publicationStatus == "PUBLISHED" }) {
+                    "Notes.csv contains notes that are not PUBLISHED."
+                }
+            }
+    } else {
+        emptyList()
+    }
+}
         )
     }
 

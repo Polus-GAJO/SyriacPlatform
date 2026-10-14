@@ -15,9 +15,10 @@ class SchemaV1PreviewPackageAssembler {
         navigation: SchemaV1NavigationContent,
         config: OccasionPackageBuildConfig,
         media: SchemaV1CanonicalMedia = SchemaV1CanonicalMedia(
-            mediaAssets = emptyList(),
-            melodyMedia = emptyList()
-        )
+    mediaAssets = emptyList(),
+    melodyMedia = emptyList()
+),
+notes: List<SchemaV1PackageNote> = emptyList()
     ): SchemaV1PreviewPackage {
         require(
             !composition.hasBlockingDiagnostics
@@ -234,7 +235,8 @@ class SchemaV1PreviewPackageAssembler {
             mediaTimingSets = media.mediaTimingSets,
             mediaSegments = media.mediaSegments,
             textOccurrenceMediaSegments =
-                media.textOccurrenceMediaSegments
+                media.textOccurrenceMediaSegments,
+            notes = notes
         )
     }
 }

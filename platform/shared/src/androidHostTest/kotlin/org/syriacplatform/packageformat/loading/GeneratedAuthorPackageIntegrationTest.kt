@@ -148,9 +148,14 @@ class GeneratedAuthorPackageIntegrationTest {
                 recordingIds.isNotEmpty()
             )
 
-            assertEquals(
-                mediaAssetIds,
-                recordingIds
+            val performanceMediaAssetIds =
+                packageData.performanceMedia
+                  .map { it.mediaAssetId }
+                  .toSet()
+
+           assertEquals(
+             mediaAssetIds,
+             recordingIds + performanceMediaAssetIds
             )
 
             /*

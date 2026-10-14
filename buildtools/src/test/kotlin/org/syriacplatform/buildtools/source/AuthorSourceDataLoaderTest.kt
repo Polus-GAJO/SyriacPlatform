@@ -4,6 +4,9 @@ import java.nio.file.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+import kotlin.test.assertFailsWith
 
 class AuthorSourceDataLoaderTest {
 
@@ -107,6 +110,93 @@ class AuthorSourceDataLoaderTest {
             } == 2
         )
     }
+
+    @Test
+fun loadsPublishedNotesFromCsv() {
+    val temporaryDirectory = Files.createTempDirectory(
+        "syriac-notes-test-"
+    )
+
+    try {
+        val sourceDirectory = representativeExportDirectory()
+
+        Files.list(sourceDirectory).use { files ->
+            files.filter { Files.isRegularFile(it) }
+                .forEach { sourceFile ->
+                    Files.copy(
+                        sourceFile,
+                        temporaryDirectory.resolve(sourceFile.fileName),
+                        StandardCopyOption.REPLACE_EXISTING
+                    )
+                }
+        }
+
+        Files.writeString(
+            temporaryDirectory.resolve("Notes.csv"),
+            """
+            NoteN,Note,publicationStatus
+            1001,Published test note,PUBLISHED
+            """.trimIndent() + "\n"
+        )
+
+        val data = loader.load(temporaryDirectory)
+
+        assertEquals(1, data.notes.size)
+        assertEquals(1001L, data.notes.single().id)
+        assertEquals(
+            "Published test note",
+            data.notes.single().text
+        )
+        assertEquals(
+            "PUBLISHED",
+            data.notes.single().publicationStatus
+        )
+    } finally {
+        temporaryDirectory.toFile().deleteRecursively()
+    }
+}
+
+@Test
+fun rejectsArchivedNotesFromCsv() {
+    val temporaryDirectory = Files.createTempDirectory(
+        "syriac-archived-notes-test-"
+    )
+
+    try {
+        val sourceDirectory = representativeExportDirectory()
+
+        Files.list(sourceDirectory).use { files ->
+            files.filter { Files.isRegularFile(it) }
+                .forEach { sourceFile ->
+                    Files.copy(
+                        sourceFile,
+                        temporaryDirectory.resolve(sourceFile.fileName),
+                        StandardCopyOption.REPLACE_EXISTING
+                    )
+                }
+        }
+
+        Files.writeString(
+            temporaryDirectory.resolve("Notes.csv"),
+            """
+            NoteN,Note,publicationStatus
+            1002,Archived test note,ARCHIVE
+            """.trimIndent() + "\n"
+        )
+
+        val exception = assertFailsWith<IllegalArgumentException> {
+            loader.load(temporaryDirectory)
+        }
+
+        assertTrue(
+            exception.message?.contains(
+                "Notes.csv contains notes that are not PUBLISHED."
+            ) == true
+        )
+    } finally {
+        temporaryDirectory.toFile().deleteRecursively()
+    }
+}
 
     private fun representativeExportDirectory(): Path {
         return Path.of(

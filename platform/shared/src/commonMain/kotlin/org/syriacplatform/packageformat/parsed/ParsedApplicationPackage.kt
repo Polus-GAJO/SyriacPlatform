@@ -17,6 +17,7 @@ import org.syriacplatform.content.models.Qinto
 import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.models.TextContent
 import org.syriacplatform.packageformat.models.PackageManifest
+import org.syriacplatform.content.models.Note
 
 /**
  * التمثيل القانوني الكامل للحزمة بعد فك JSON وتحويل DTOs،
@@ -47,5 +48,6 @@ data class ParsedApplicationPackage(
     val mediaTimingSets: List<MediaTimingSet> = emptyList(),
     val mediaSegments: List<MediaSegment> = emptyList(),
     val textOccurrenceMediaSegments:
-        List<TextOccurrenceMediaSegment> = emptyList()
+        List<TextOccurrenceMediaSegment> = emptyList(),
+    val notes: List<Note> = emptyList()
 )

@@ -56,4 +56,7 @@ object PackagePaths {
 
     const val MELODY_QINTO_ASSIGNMENTS =
         "content/melody-qinto-assignments.json"
+
+    const val NOTES =
+    "content/notes.json"
 }

@@ -31,7 +31,13 @@ data class SchemaV1PreviewPackage(
     val performanceMedia: List<SchemaV1PerformanceMedia> = emptyList(),
     val mediaTimingSets: List<SchemaV1MediaTimingSet> = emptyList(),
     val mediaSegments: List<SchemaV1MediaSegment> = emptyList(),
-    val textOccurrenceMediaSegments: List<SchemaV1TextOccurrenceMediaSegment> = emptyList()
+    val textOccurrenceMediaSegments: List<SchemaV1TextOccurrenceMediaSegment> = emptyList(),
+val notes: List<SchemaV1PackageNote> = emptyList()
+)
+
+data class SchemaV1PackageNote(
+    val id: Long,
+    val text: String?
 )
 
 data class SchemaV1PackageMediaAsset(

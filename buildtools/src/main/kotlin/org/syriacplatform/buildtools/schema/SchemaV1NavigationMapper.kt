@@ -46,13 +46,22 @@ class SchemaV1NavigationMapper {
                 "Occasion ${source.occasion.id} has no name."
             }
 
-        val occasion =
-            SchemaV1Occasion(
-                id = source.occasion.id,
-                name = occasionName,
-                prayerSequenceIds =
-                    prayerSequences.map { it.id }
-            )
+        val publishedOccasionNoteId =
+    source.occasion.noteId?.takeIf { noteId ->
+        source.notes.any { note ->
+            note.id == noteId &&
+                note.publicationStatus == "PUBLISHED"
+        }
+    }
+
+val occasion =
+    SchemaV1Occasion(
+        id = source.occasion.id,
+        name = occasionName,
+        prayerSequenceIds =
+            prayerSequences.map { it.id },
+        noteId = publishedOccasionNoteId
+    )
 
         val entryPoint =
             SchemaV1EntryPoint(

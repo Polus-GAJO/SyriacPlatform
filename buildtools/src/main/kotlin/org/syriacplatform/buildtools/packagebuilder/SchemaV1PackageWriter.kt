@@ -218,6 +218,14 @@ class SchemaV1PackageWriter {
                 )
             )
         }
+
+        if (packageData.notes.isNotEmpty()) {
+    writeCollection(
+        contentDirectory,
+        "notes.json",
+        packageData.notes.map(::noteJson)
+            )
+        }
     }
 
     private fun manifestJson(
@@ -364,6 +372,9 @@ class SchemaV1PackageWriter {
                     item.prayerSequenceIds
                 )
             )
+            item.noteId?.let { noteId ->
+                put("noteId", noteId)
+            }
         }
     }
 
@@ -655,6 +666,15 @@ class SchemaV1PackageWriter {
         return buildJsonObject {
             put("id", item.id)
             put("name", item.name)
+        }
+    }
+
+    private fun noteJson(
+        item: SchemaV1PackageNote
+    ): JsonElement {
+        return buildJsonObject {
+            put("id", item.id)
+            putNullableString("text", item.text)
         }
     }
 
