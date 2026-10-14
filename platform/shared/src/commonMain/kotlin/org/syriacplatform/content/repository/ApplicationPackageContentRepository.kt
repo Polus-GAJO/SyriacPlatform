@@ -18,6 +18,7 @@ import org.syriacplatform.content.runtime.RuntimeOccasion
 import org.syriacplatform.content.models.EntryPoint
 import org.syriacplatform.content.models.MediaAsset
 import org.syriacplatform.content.models.Occasion
+import org.syriacplatform.content.models.Note
 import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.common.types.PerformanceMediaId
 import org.syriacplatform.common.types.TextOccurrenceId
@@ -196,6 +197,25 @@ class ApplicationPackageContentRepository(
 
             is Result.Failure ->
                 storeResult
+        }
+    }
+
+    override suspend fun loadNote(id: Long): Result<Note> {
+        return when (val storeResult = loadStore()) {
+            is Result.Success -> {
+                val note = storeResult.data.index.notesById[id]
+                if (note != null) {
+                    Result.Success(note)
+                } else {
+                    Result.Failure(
+                        PlatformError(
+                            code = ErrorCode.CONTENT_NOT_FOUND,
+                            message = "Note was not found: $id"
+                        )
+                    )
+                }
+            }
+            is Result.Failure -> storeResult
         }
     }
 
