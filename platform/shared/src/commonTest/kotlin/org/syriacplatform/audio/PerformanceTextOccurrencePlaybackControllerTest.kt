@@ -25,6 +25,7 @@ import org.syriacplatform.content.models.EntryPoint
 import org.syriacplatform.content.models.MediaAsset
 import org.syriacplatform.content.models.MediaSegment
 import org.syriacplatform.content.models.Occasion
+import org.syriacplatform.content.models.Note
 import org.syriacplatform.content.models.PerformanceMedia
 import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.runtime.ResolvedLiturgicalItem
@@ -163,6 +164,9 @@ private class FakeIntervalContentService(
         Result.Success(emptyList())
 
     override suspend fun loadDefaultEntryPoint(): Result<RuntimeEntryPoint> =
+        unsupported()
+
+    override suspend fun loadNote(noteId: Long): Result<Note> =
         unsupported()
 
     override suspend fun loadOccasion(occasionId: OccasionId): Result<RuntimeOccasion> =
