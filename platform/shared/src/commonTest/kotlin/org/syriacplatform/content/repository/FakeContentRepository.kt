@@ -13,6 +13,7 @@ import org.syriacplatform.content.models.EntryPoint
 import org.syriacplatform.content.models.EntryPointTarget
 import org.syriacplatform.content.models.MediaAsset
 import org.syriacplatform.content.models.Occasion
+import org.syriacplatform.content.models.Note
 import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.runtime.RuntimeEntryPoint
 import org.syriacplatform.content.runtime.RuntimeOccasion
@@ -117,6 +118,14 @@ class FakeContentRepository : ContentRepository {
             defaultEntryPoint
         )
     }
+
+    override suspend fun loadNote(id: Long): Result<Note> =
+        Result.Failure(
+            PlatformError(
+                code = ErrorCode.CONTENT_NOT_FOUND,
+                message = "Note was not found: $id"
+            )
+        )
 
     override suspend fun loadOccasion(
         id: OccasionId
