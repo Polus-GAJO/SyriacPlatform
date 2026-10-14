@@ -170,14 +170,14 @@ Private Function BuildSingleTableJson( _
         Spaces(indent + 2) & _
         """columns"": [" & vbCrLf
 
-    For i = 0 To tdf.Fields.Count - 1
+    For i = 0 To tdf.fields.Count - 1
 
-        Set fld = tdf.Fields(i)
+        Set fld = tdf.fields(i)
 
         Result = Result & _
             BuildFieldJson(tdf, fld, i, indent + 4)
 
-        If i < tdf.Fields.Count - 1 Then
+        If i < tdf.fields.Count - 1 Then
             Result = Result & ","
         End If
 
@@ -307,7 +307,7 @@ Private Function BuildRelationshipsJson( _
 
             Result = Result & _
                 BuildSingleRelationshipJson( _
-                    db.Relations(CStr(relationNames(i))), _
+                    db.relations(CStr(relationNames(i))), _
                     4)
 
             If i < UBound(relationNames) Then
@@ -374,9 +374,9 @@ Private Function BuildSingleRelationshipJson( _
         Spaces(indent + 2) & _
         """columns"": [" & vbCrLf
 
-    For i = 0 To rel.Fields.Count - 1
+    For i = 0 To rel.fields.Count - 1
 
-        Set fld = rel.Fields(i)
+        Set fld = rel.fields(i)
 
         Result = Result & _
             Spaces(indent + 4) & "{" & vbCrLf
@@ -392,7 +392,7 @@ Private Function BuildSingleRelationshipJson( _
         Result = Result & _
             Spaces(indent + 4) & "}"
 
-        If i < rel.Fields.Count - 1 Then
+        If i < rel.fields.Count - 1 Then
             Result = Result & ","
         End If
 
@@ -531,9 +531,9 @@ Private Function BuildSingleIndexJson( _
         Spaces(indent + 2) & _
         """columns"": [" & vbCrLf
 
-    For i = 0 To idx.Fields.Count - 1
+    For i = 0 To idx.fields.Count - 1
 
-        Set fld = idx.Fields(i)
+        Set fld = idx.fields(i)
 
         Result = Result & _
             Spaces(indent + 4) & "{" & vbCrLf
@@ -554,7 +554,7 @@ Private Function BuildSingleIndexJson( _
         Result = Result & _
             Spaces(indent + 4) & "}"
 
-        If i < idx.Fields.Count - 1 Then
+        If i < idx.fields.Count - 1 Then
             Result = Result & ","
         End If
 
@@ -610,7 +610,7 @@ Private Function IsPrimaryKeyField( _
 
         If idx.Primary Then
 
-            For Each fld In idx.Fields
+            For Each fld In idx.fields
 
                 If StrComp( _
                     fld.Name, _
@@ -860,7 +860,7 @@ Private Function GetRelationNames( _
     Dim rel As DAO.Relation
     Dim Count As Long
 
-    For Each rel In db.Relations
+    For Each rel In db.relations
 
         If Not IsSystemRelation(rel) Then
             Count = Count + 1
@@ -879,7 +879,7 @@ Private Function GetRelationNames( _
 
     Count = 0
 
-    For Each rel In db.Relations
+    For Each rel In db.relations
 
         If Not IsSystemRelation(rel) Then
 
@@ -1389,6 +1389,18 @@ ErrorHandler:
 
 End Sub
 
+Public Sub ExportOccasionForPlatform(ByVal occasionId As Long)
+
+    If occasionId <= 0 Then
+        MsgBox "Invalid Occasion ID.", vbExclamation, "Platform Export"
+        Exit Sub
+    End If
+
+    ExportOccasionData occasionId
+    ExportMediaData
+
+End Sub
+
 Public Sub ExportOccasionData(ByVal occasionId As Long)
 
     Dim outputRoot As String
@@ -1439,6 +1451,7 @@ Private Sub ExportOccasionDataToFolder( _
     EnsureFolderExists outputRoot
 
     ExportOccasion occasionId, outputRoot
+    ExportNotes occasionId, outputRoot
     ExportOccaExis occasionId, outputRoot
     ExportExistsIn occasionId, outputRoot
     ExportExistsInText occasionId, outputRoot
@@ -1468,6 +1481,37 @@ Private Sub ExportOccasion( _
     ExportQueryToCsv _
         sqlText, _
         outputRoot & "\Occasion.csv"
+
+End Sub
+
+Private Sub ExportNotes( _
+    ByVal occasionId As Long, _
+    ByVal outputRoot As String _
+)
+
+    Dim sqlText As String
+
+    sqlText = _
+        "SELECT N.NoteN, N.Note, N.publicationStatus " & _
+        "FROM Notes AS N " & _
+        "WHERE N.publicationStatus = 'PUBLISHED' " & _
+        "AND (" & _
+            "N.NoteN IN (" & _
+                "SELECT O.NoteN FROM Occasion AS O " & _
+                "WHERE O.OccN = " & occasionId & _
+            ") " & _
+            "OR N.NoteN IN (" & _
+                "SELECT E.NoteN FROM ExistsIn AS E " & _
+                "INNER JOIN OccaExis AS OE " & _
+                "ON E.ID = OE.ExistInID " & _
+                "WHERE OE.OccN = " & occasionId & _
+            ")" & _
+        ") " & _
+        "ORDER BY N.NoteN;"
+
+    ExportQueryToCsv _
+        sqlText, _
+        outputRoot & "\Notes.csv"
 
 End Sub
 
@@ -1798,14 +1842,14 @@ Private Sub WriteRecordsetToUtf8Csv( _
     Dim output As String
     Dim fieldIndex As Long
 
-    For fieldIndex = 0 To rs.Fields.Count - 1
+    For fieldIndex = 0 To rs.fields.Count - 1
 
         If fieldIndex > 0 Then
             output = output & ","
         End If
 
         output = output & _
-            CsvValue(rs.Fields(fieldIndex).Name)
+            CsvValue(rs.fields(fieldIndex).Name)
 
     Next fieldIndex
 
@@ -1813,14 +1857,14 @@ Private Sub WriteRecordsetToUtf8Csv( _
 
     Do While Not rs.EOF
 
-        For fieldIndex = 0 To rs.Fields.Count - 1
+        For fieldIndex = 0 To rs.fields.Count - 1
 
             If fieldIndex > 0 Then
                 output = output & ","
             End If
 
             output = output & _
-                CsvValue(rs.Fields(fieldIndex).value)
+                CsvValue(rs.fields(fieldIndex).value)
 
         Next fieldIndex
 
