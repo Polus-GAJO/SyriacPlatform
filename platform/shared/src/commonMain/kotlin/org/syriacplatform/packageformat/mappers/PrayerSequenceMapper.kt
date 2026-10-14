@@ -17,7 +17,8 @@ internal fun PrayerSequenceJsonDto.toDomain(): Result<PrayerSequence> {
             prayerId = PrayerId(prayerId),
             liturgicalItemIds = liturgicalItemIds.map { value ->
                 LiturgicalItemId(value)
-            }
+            },
+            noteIds = noteIds
         )
     )
 }
