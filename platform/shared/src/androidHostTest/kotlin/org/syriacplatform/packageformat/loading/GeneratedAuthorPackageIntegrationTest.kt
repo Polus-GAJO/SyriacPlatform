@@ -8,6 +8,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
+import org.syriacplatform.common.result.Result
+import org.syriacplatform.common.types.ErrorCode
+import org.syriacplatform.content.repository.ApplicationPackageContentRepository
+import org.syriacplatform.content.services.DefaultContentService
 import org.syriacplatform.packagevalidation.compatibility.CoreCompatibilityDefaults
 
 class GeneratedAuthorPackageIntegrationTest {
@@ -210,6 +214,36 @@ class GeneratedAuthorPackageIntegrationTest {
                     .melodyQintoAssignments
             )
         }
+
+    @Test
+    fun occasion378NoteLoadsThroughContentService() = runTest {
+        if (occasionId != 378L) return@runTest
+
+        val source = FileSystemTestPackageSource(
+            root = generatedPreviewPackageDirectory()
+        )
+        val loader = ApplicationPackageLoader(source = source)
+        val packageResult = assertIs<PackageLoadResult.Success>(
+            loader.load(CoreCompatibilityDefaults.CURRENT)
+        )
+        val expectedNote = packageResult.packageData.notes.single { it.id == 347L }
+        assertTrue(!expectedNote.text.isNullOrBlank())
+
+        val repository = ApplicationPackageContentRepository(
+            loader = loader,
+            coreCompatibility = CoreCompatibilityDefaults.CURRENT
+        )
+        val service = DefaultContentService(repository)
+        val loaded = assertIs<Result.Success<org.syriacplatform.content.models.Note>>(
+            service.loadNote(347L)
+        )
+        assertEquals(expectedNote, loaded.data)
+
+        val missing = assertIs<Result.Failure>(
+            service.loadNote(Long.MAX_VALUE)
+        )
+        assertEquals(ErrorCode.CONTENT_NOT_FOUND, missing.error.code)
+    }
 
     private val occasionId: Long
         get() =
