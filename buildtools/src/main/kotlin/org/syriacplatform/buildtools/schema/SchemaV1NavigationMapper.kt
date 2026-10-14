@@ -25,6 +25,30 @@ class SchemaV1NavigationMapper {
                     "package-blocking diagnostics."
         }
 
+        val linkedIds = source.occasionLinks
+            .filter { it.occasionId == source.occasion.id }
+            .mapNotNull { it.existsInId }
+            .toSet()
+        val publishedIds = source.notes
+            .filter { it.publicationStatus == "PUBLISHED" }
+            .map { it.id }
+            .toSet()
+        val noteIdsByPrayer = source.existsIn
+            .filter {
+                it.id in linkedIds &&
+                    it.itemType == "PRAYER_NOTE" &&
+                    it.noteId in publishedIds
+            }
+            .groupBy { it.prayerId }
+            .mapValues { (_, rows) ->
+                rows.sortedWith(
+                    compareBy(
+                        { it.sort ?: Long.MAX_VALUE },
+                        { it.id }
+                    )
+                ).mapNotNull { it.noteId }.distinct()
+            }
+
         val prayerSequences =
             composition.prayers.map { prayer ->
                 val sequenceId =
@@ -37,7 +61,8 @@ class SchemaV1NavigationMapper {
                     id = sequenceId,
                     prayerId = prayer.prayerId,
                     liturgicalItemIds =
-                        prayer.orderedSourceItemIds
+                        prayer.orderedSourceItemIds,
+                    noteIds = noteIdsByPrayer[prayer.prayerId].orEmpty()
                 )
             }
 
