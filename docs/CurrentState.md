@@ -3797,3 +3797,56 @@ Recommended next sequence:
 5. Update `docs/Roadmap v1.4.md` and other applicable documentation as milestones are verified.
 
 Development preference: make small, reviewable changes directly on GitHub where practical, then synchronize locally and run the relevant Gradle/Android tests. Do not treat a GitHub edit as locally tested until those tests run.
+
+
+------------------------------------------------------------------------
+
+# 2026-10-14 Checkpoint --- Three Contextual Notes Scopes Verified
+
+<!-- NOTES-THREE-SCOPES-VERIFIED-2026-10-14 -->
+
+This checkpoint supersedes the earlier 2026-10-14 Notes checkpoint wherever it describes Prayer Notes or liturgical-occurrence Notes as pending. The earlier checkpoint remains as implementation history. The Phase 9 PERFORMANCE/timing implementation and preview cleanup remain in force.
+
+## Verified content contract
+
+Author Database `Notes(NoteN, Note, publicationStatus)` remains authoritative. Only `PUBLISHED` referenced Notes are selected for package output. Three independent relationships are now implemented:
+
+1. **Occasion:** `Occasion.NoteN` -> `Occasion.noteId: Long?`. The Occasion Details screen shows this note.
+2. **Prayer sequence:** `ExistsIn` pseudo-records with `ItemType = "PRAYER_NOTE"`, `PrayerN`, `NoteN`, and `OccaExis` linkage -> `PrayerSequence.noteIds: List<Long>`. Multiple notes are supported, ordered by source `Sort` then `ExistsIn.ID`. These pseudo-records are excluded from liturgical items. Notes are shown only after opening the corresponding Prayer Details screen.
+3. **Liturgical occurrence:** `ExistsIn.NoteN` on an ordinary `ExistsIn` occurrence -> `LiturgicalItem.noteId: Long?`. The relationship belongs to the occurrence ID, not to canonical `Qolo` or reusable text. The note is shown only in that occurrence's Hymn Details screen.
+
+Schema-v1 JSON DTOs and runtime domain models accept optional note references, with defaults preserving compatibility with packages lacking them. `content/notes.json` carries the published note text. UI retrieval uses `ContentService.loadNote()`, not direct JSON access.
+
+## Real Occasion 378 verification
+
+The user ran:
+
+```powershell
+git pull --ff-only origin main
+.\platform\gradlew.bat -p .\platform :shared:allTests :buildtools:test
+```
+
+and reported `BUILD SUCCESSFUL`. The generated media-aware Occasion 378 package contains 1 prayer, 2 liturgical items and 2 media assets.
+
+The user inspected generated JSON and confirmed:
+
+- Occasion 378 -> Note 347.
+- Prayer 13, PrayerSequence 1623497637901 -> `noteIds: [346]`.
+- Liturgical occurrence 4132 (Qolo target 426) -> `noteId: 349`.
+- Liturgical occurrence 4133 (Qolo target 208) -> no note reference.
+- `notes.json` includes the full text for Notes 346, 347 and 349.
+
+The user also confirmed successful Android emulator display of all three scopes. The Occasion note remains on Occasion Details; Prayer Notes appear only on the selected Prayer Details page; the occurrence note appears only on its Hymn Details page. The final occurrence-note UI commit is `9f887b2`. Earlier integration commits include `eaa59b8` (PrayerSequence note model), `ed17fb0` (Prayer Notes package projection), `4445493` (Prayer Notes screen placement), `7e673dd` (LiturgicalItem note model), and `59e882f` (occurrence package projection).
+
+## Remaining work and limits
+
+- **UI polish deferred:** move the occurrence note from the top of Hymn Details to immediately before the hymn/verse texts. This is a presentation task, not a blocker for content relationships.
+- Add targeted automated regression tests for published/archived note filtering, multiple Prayer Notes and authored ordering, and occurrence identity; the successful existing test suites and real-package/emulator checks do not by themselves prove every edge case.
+- Review/update the applicable Schema-v1 package specification for the optional `noteId` and `noteIds` contracts.
+- Broaden representative Occasion coverage when a real-content requirement warrants it.
+- Author Database editorial Notes are **not** Phase 11 personal/user-authored Notes; keep these domains separate.
+- Preserve the verified PERFORMANCE/timing contracts and `preview.ps1` cleanup behavior.
+
+## Restart point
+
+Treat all three contextual editorial Notes scopes as implemented and Android-verified for Occasion 378. Do not rebuild this foundation. First close focused test/specification gaps, then select the next requirement-driven milestone from the roadmap. Keep changes small, commit through GitHub, pull locally, and verify with Gradle and emulator when applicable.
