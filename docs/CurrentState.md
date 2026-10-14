@@ -2,11 +2,11 @@
 
 **Document:** CurrentState\
 **Status:** Active implementation reference\
-**Last updated:** 2026-10-08\
+**Last updated:** 2026-10-14\
 **Repository:** SyriacPlatform\
 **Branch:** `main`\
-**Current milestone:** Phase 9 PERFORMANCE Media and Timing Package/Runtime Integration --- end-to-end Android verse playback verified\
-**Verified functional milestone:** `0e98ca3`\
+**Current milestone:** Phase 9 PERFORMANCE/timing Android playback verified; initial Notes package/runtime foundation and Occasion 378 package verification completed\
+**Verified functional milestone:** PERFORMANCE/timing Android playback `0e98ca3`; initial Notes package/runtime `97fac38`\
 **Author Database schema checkpoint:** `d4cd41b`
 
 ------------------------------------------------------------------------
@@ -3734,3 +3734,66 @@ Occasion 379 -> PERFORMANCE + timing playback verified
 Occasion 64  -> no stale PERFORMANCE validation failures
 379 -> 64    -> switching verified after preview cleanup fix
 ```
+
+
+------------------------------------------------------------------------
+
+# 2026-10-14 Checkpoint --- Notes Package Foundation and Occasion 378 Verification
+
+<!-- NOTES-PACKAGE-CHECKPOINT-2026-10-14 -->
+
+This checkpoint supplements the 2026-10-08 PERFORMANCE/timing checkpoint. The earlier verified Android verse/timing playback functionality remains implemented; Notes work does not replace or redesign it.
+
+## Implemented Notes scope
+
+Notes originate in the Author Database `Notes` table, whose relevant fields are `NoteN`, `Note`, and `publicationStatus` (`PUBLISHED` or `ARCHIVE`). The controlled Occasion export includes `Notes.csv` for published Notes referenced by the selected Occasion or its related `ExistsIn` records.
+
+The initial Build Tools / Schema-v1 Notes support has been implemented and committed, including Notes source loading and mapping, optional `content/notes.json`, and an optional `noteId` in `content/occasions.json`. The runtime package/domain support for Occasion Notes is implemented and covered by automated tests. The verified code checkpoint for this initial Notes work is commit `97fac38` ("Add initial notes support to Schema V1 packages and runtime").
+
+Three distinct contextual Notes scopes must be preserved:
+
+1. **Occasion note:** `Occasion.NoteN` -> package `Occasion.noteId`. This is the scope currently projected into the generated package.
+2. **Prayer notes:** Author Database `ExistsIn` pseudo-records with `ItemType = "PRAYER_NOTE"`, linked to a prayer through `PrayerN` and to the Occasion through `OccaExis`. A prayer can have multiple notes. Projection and UI consumption are not yet implemented.
+3. **Liturgical-item occurrence note:** `ExistsIn.NoteN` on an ordinary liturgical occurrence. This is contextual to the occurrence, not a permanent property of its reusable canonical text or Qolo. Projection and UI consumption are not yet implemented.
+
+Do not conflate prayer-note pseudo-records with liturgical items or infer note relationships outside the Author Database.
+
+## Real package verification: Occasion 378
+
+Occasion `378` was exported from Access and built with:
+
+```powershell
+.\platform\gradlew.bat -p .\platform :buildtools:buildOccasionPreview -PoccasionId=378
+```
+
+The build completed successfully in media-aware mode: 1 prayer, 2 liturgical items, 2 packaged media assets. Output: `buildtools/build/generated/occasion-378-preview`.
+
+The generated `content/occasions.json` contains Occasion `378` with `"noteId": 347`. The generated `content/notes.json` contains Note `347` and its complete Arabic text. This verifies the Access -> CSV -> Build Tools -> Schema-v1 package boundary for an Occasion note. It does **not** establish that Note 347 is already displayed by the Android UI.
+
+The same fixture also includes Prayer Note `346` and liturgical-item occurrence Note `349` in the authoring data; their absence from the current package projection is expected until their respective scopes are implemented.
+
+## Export troubleshooting and Access source sync
+
+An earlier `Occasion.csv` for Occasion 378 contained a second all-empty record (`,,,,,`), causing `AuthorSourceDataLoader` to reject the input ("Expected exactly one Occasion row, but found 2"). The Author Database query confirmed exactly one Occasion 378 row. Re-exporting Occasion 378 through `ExportOccasionData 378`, and again through the Access button invoking `ExportOccasionForPlatform CLng(Me!OccN)`, produced a correct one-record CSV in both cases. The empty-row anomaly could not be reproduced; no speculative exporter fix was applied.
+
+The Access VBA module `modSchemaExporter` was exported from Access and copied into the local tracked path `author-database/tools/modSchemaExporter.bas`. Local changes include `ExportOccasionForPlatform` and `ExportNotes`; a backup and Access-exported comparison copy were also made locally. **At this checkpoint, these VBA changes were not yet committed/pushed to GitHub.** Stage only the intended tracked `.bas` file when synchronizing; avoid committing backup/comparison copies.
+
+## Android reference UI and preview workflow
+
+A functional, deliberately simple Android Reference Application already exists. The documented navigation is `HOME -> OCCASION_DETAILS -> PRAYER_DETAILS -> HYMN_DETAILS`; the UI will be improved later. The next Notes UI task is to inspect and extend the existing Occasion details flow to retrieve and present its note, rather than inventing a separate application UI. Do not mark UI Notes display as implemented until verified in the emulator.
+
+For generating a package only, the direct Gradle `-PoccasionId=378` command above is appropriate. For **switching the Occasion actually embedded in the Android reference app**, use the root `preview.ps1 <OccN>` workflow, which cleans `:shared` and `:androidApp` to prevent stale optional Compose resources from contaminating a different Occasion's APK. Note that `preview.ps1` also updates the development-content selection.
+
+## Tests and next steps
+
+The initial Notes Kotlin work previously passed `:buildtools:test` and `:shared:allTests`. The real Occasion 378 package build and JSON inspection also passed. An Android emulator display test for Notes has **not** yet been performed.
+
+Recommended next sequence:
+
+1. Commit and push the synchronized Access exporter `modSchemaExporter.bas` after reviewing the local diff; keep local backup/comparison files out of the commit.
+2. Inspect the existing Android Occasion details UI and its ContentService/runtime API; implement a minimal, contextual Occasion note display and verify it with Occasion 378 in the emulator.
+3. Extend package/runtime and then UI support for multiple Prayer Notes, preserving their authored prayer context.
+4. Extend package/runtime and UI support for liturgical-item occurrence Notes, preserving occurrence identity.
+5. Update `docs/Roadmap v1.4.md` and other applicable documentation as milestones are verified.
+
+Development preference: make small, reviewable changes directly on GitHub where practical, then synchronize locally and run the relevant Gradle/Android tests. Do not treat a GitHub edit as locally tested until those tests run.
