@@ -2,12 +2,14 @@ package org.syriacplatform.buildtools.packagebuilder
 
 import org.syriacplatform.buildtools.source.AuthorSourceData
 import org.syriacplatform.buildtools.schema.SchemaV1NavigationContent
+import org.syriacplatform.buildtools.schema.SchemaV1CompositionDraft
 
 class SchemaV1PackageNoteSelector {
 
     fun selectNotes(
         source: AuthorSourceData,
-        navigation: SchemaV1NavigationContent
+        navigation: SchemaV1NavigationContent,
+        composition: SchemaV1CompositionDraft
     ): List<SchemaV1PackageNote> {
         val referencedIds = buildSet {
             navigation.occasions.forEach { occasion ->
@@ -16,6 +18,8 @@ class SchemaV1PackageNoteSelector {
             navigation.prayerSequences.forEach { sequence ->
                 addAll(sequence.noteIds)
             }
+            composition.prayers.flatMap { it.resolvedItems }
+                .forEach { item -> item.noteId?.let { add(it) } }
         }
         return source.notes
             .filter {
