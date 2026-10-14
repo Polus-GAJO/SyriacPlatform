@@ -13,5 +13,6 @@ import org.syriacplatform.common.types.PrayerSequenceId
 data class PrayerSequence(
     val id: PrayerSequenceId,
     val prayerId: PrayerId,
-    val liturgicalItemIds: List<LiturgicalItemId>
+    val liturgicalItemIds: List<LiturgicalItemId>,
+    val noteIds: List<Long> = emptyList()
 )
