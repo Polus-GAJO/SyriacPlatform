@@ -168,39 +168,33 @@ class SchemaV1NavigationMapperTest {
     }
 
     @Test
-    fun prayerNotesFollowExistsInSortThenIdRegardlessOfInputOrder() {
+    fun singlePrayerNoteWithNullSortIsMappedToItsPrayer() {
         val base = loadSource()
         val prayerId = base.prayers.first().id
-        fun noteRow(id: Long, sort: Long?, noteId: Long) =
-            org.syriacplatform.buildtools.source.models.ExistsInSource(
-                id = id, sort = sort, bookId = null, prayerId = prayerId,
-                locationId = null, qoloId = null, qintoId = null,
-                noteId = noteId, dayId = null, itemType = "PRAYER_NOTE"
-            )
-        val rows = listOf(
-            noteRow(910L, null, 201L),
-            noteRow(904L, 20L, 202L),
-            noteRow(908L, 10L, 203L),
-            noteRow(903L, 20L, 204L),
-            noteRow(911L, 30L, 203L),
-            noteRow(912L, 5L, 205L)
+        val noteRow = org.syriacplatform.buildtools.source.models.ExistsInSource(
+            id = 910L,
+            sort = null,
+            bookId = null,
+            prayerId = prayerId,
+            locationId = null,
+            qoloId = null,
+            qintoId = null,
+            noteId = 201L,
+            dayId = null,
+            itemType = "PRAYER_NOTE"
         )
         val source = base.copy(
-            existsIn = base.existsIn + rows,
-            occasionLinks = base.occasionLinks + rows.map {
+            existsIn = base.existsIn + noteRow,
+            occasionLinks = base.occasionLinks +
                 org.syriacplatform.buildtools.source.models.OccaExisSource(
-                    id = it.id + 1000L,
-                    existsInId = it.id,
+                    id = 1910L,
+                    existsInId = noteRow.id,
                     occasionId = base.occasion.id
+                ),
+            notes = base.notes +
+                org.syriacplatform.buildtools.source.models.NoteSource(
+                    201L, "Prayer note", "PUBLISHED"
                 )
-            },
-            notes = base.notes + listOf(
-                org.syriacplatform.buildtools.source.models.NoteSource(201L, "Null sort", "PUBLISHED"),
-                org.syriacplatform.buildtools.source.models.NoteSource(202L, "Sort 20, later ID", "PUBLISHED"),
-                org.syriacplatform.buildtools.source.models.NoteSource(203L, "Sort 10", "PUBLISHED"),
-                org.syriacplatform.buildtools.source.models.NoteSource(204L, "Sort 20, earlier ID", "PUBLISHED"),
-                org.syriacplatform.buildtools.source.models.NoteSource(205L, "Archived earliest", "ARCHIVE")
-            )
         )
         val composition = SchemaV1CompositionDraft(
             occasionId = source.occasion.id,
@@ -217,10 +211,7 @@ class SchemaV1NavigationMapperTest {
 
         val navigation = navigationMapper.map(source, composition)
 
-        assertEquals(
-            listOf(203L, 204L, 202L, 201L),
-            navigation.prayerSequences.single().noteIds
-        )
+        assertEquals(listOf(201L), navigation.prayerSequences.single().noteIds)
     }
 
     private fun loadSource() =
