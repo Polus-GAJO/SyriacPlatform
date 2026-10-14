@@ -9,5 +9,6 @@ import kotlinx.serialization.Serializable
 internal data class PrayerSequenceJsonDto(
     val id: Long,
     val prayerId: Long,
-    val liturgicalItemIds: List<Long>
+    val liturgicalItemIds: List<Long>,
+    val noteIds: List<Long> = emptyList()
 )
