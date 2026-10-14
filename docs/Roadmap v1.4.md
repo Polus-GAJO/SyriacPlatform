@@ -1733,3 +1733,16 @@ See `docs/CurrentState.md`, checkpoint `2026-10-14`, for exact implemented state
 Editorial Notes imported from the Author Database are distinct from Phase 11 personal/user Notes.
 
 For the detailed restart point and verified JSON identities, see `docs/CurrentState.md`, checkpoint `NOTES-THREE-SCOPES-VERIFIED-2026-10-14`.
+
+
+------------------------------------------------------------------------
+
+# Editorial Notes focused regression closure — 2026-10-14
+
+<!-- ROADMAP-NOTES-FOCUSED-TESTS-2026-10-14 -->
+
+Four focused tests passed individually on the user's Windows checkout: PUBLISHED/ARCHIVE and referenced-note selection (b5324b6), a single Prayer Note with null ExistsIn.Sort (c629906), independent Notes for repeated Qolo occurrences (9e6dcaa), and absent optional Notes (75fd9e1).
+
+Current Access VBA allows only one Prayer Note per prayer per Occasion and disables its ExistsIn.Sort field. Platform PrayerSequence.noteIds remains multi-value capable for future use, but the authoritative order for multiple Prayer Notes has not been decided. Existing Sort-then-ExistsIn.ID code is a fallback, not an agreed authoring contract. This supersedes earlier statements suggesting that Access currently permits multiple Prayer Notes or that their order is settled.
+
+Next: run the complete buildtools:test suite; synchronize ApplicationPackageSpecification.md with the optional editorial Notes fields and published-only selection; review roadmap remaining priorities and select one small functional milestone. Keep cosmetic UI placement deferred, Phase 11 personal Notes separate, and verified PERFORMANCE/timing contracts intact.
