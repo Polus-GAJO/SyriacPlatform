@@ -221,7 +221,7 @@ class OccasionPackageBuilder(
                 )
 
         val packageNotes =
-            noteSelector.selectNotes(source, navigation)
+            noteSelector.selectNotes(source, navigation, packageComposition)
 
         val packageData =
             assembler.assemble(
