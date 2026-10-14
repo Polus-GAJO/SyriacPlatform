@@ -25,6 +25,11 @@ class SchemaV1CompositionMapper(
                 }
                 .toSet()
 
+        val publishedNoteIds = source.notes
+            .filter { it.publicationStatus == "PUBLISHED" }
+            .map { it.id }
+            .toSet()
+
         val selectedItems =
            source.existsIn.filter {
             it.id in occasionExistsInIds &&
@@ -64,6 +69,7 @@ class SchemaV1CompositionMapper(
                             resolved +=
                                 SchemaV1UnresolvedQoloLiturgicalItem(
                                     id = item.id,
+                                    noteId = item.noteId?.takeIf { it in publishedNoteIds },
                                     verses =
                                         mapVerses(
                                             source = source,
@@ -86,6 +92,7 @@ class SchemaV1CompositionMapper(
                                     mapQoloItem(
                                         source = source,
                                         item = item,
+                                        publishedNoteIds = publishedNoteIds,
                                         effectiveMelodyId =
                                             resolution.melodyId,
                                         melodyCandidateIds =
@@ -168,6 +175,7 @@ class SchemaV1CompositionMapper(
     private fun mapQoloItem(
         source: AuthorSourceData,
         item: ExistsInSource,
+        publishedNoteIds: Set<Long>,
         effectiveMelodyId: Long?,
         melodyCandidateIds: List<Long>
     ): SchemaV1QoloLiturgicalItem {
@@ -179,6 +187,7 @@ class SchemaV1CompositionMapper(
 
         return SchemaV1QoloLiturgicalItem(
             id = item.id,
+            noteId = item.noteId?.takeIf { it in publishedNoteIds },
             qoloId = qoloId,
             effectiveMelodyId =
                 effectiveMelodyId,
