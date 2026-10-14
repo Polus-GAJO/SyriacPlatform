@@ -338,6 +338,54 @@ fun excludesPrayerNoteFromLiturgicalComposition() {
     )
 }
 
+    @Test
+    fun sameCanonicalQoloOccurrencesKeepTheirOwnNotes() {
+        val original = loadSource()
+        val linkedIds = original.occasionLinks
+            .filter { it.occasionId == original.occasion.id }
+            .mapNotNull { it.existsInId }
+            .toSet()
+        val pair = original.existsIn
+            .filter { it.id in linkedIds && it.itemType != "PRAYER_NOTE" && it.qoloId != null }
+            .groupBy { it.qoloId }
+            .values
+            .firstOrNull { it.size >= 2 }
+            ?.take(2)
+            ?: error("Representative fixture needs two occurrences of one Qolo")
+        val firstId = pair[0].id
+        val secondId = pair[1].id
+        val source = original.copy(
+            existsIn = original.existsIn.map { item ->
+                when (item.id) {
+                    firstId -> item.copy(noteId = 99001L)
+                    secondId -> item.copy(noteId = 99002L)
+                    else -> item
+                }
+            },
+            notes = original.notes + listOf(
+                org.syriacplatform.buildtools.source.models.NoteSource(
+                    99001L, "First occurrence note", "PUBLISHED"
+                ),
+                org.syriacplatform.buildtools.source.models.NoteSource(
+                    99002L, "Second occurrence note", "PUBLISHED"
+                )
+            )
+        )
+
+        val draft = mapper.map(source)
+        val items = draft.prayers.flatMap { it.resolvedItems }
+        val first = items.single { it.id == firstId }
+        val second = items.single { it.id == secondId }
+
+        assertEquals(pair[0].qoloId, pair[1].qoloId)
+        assertEquals(99001L, first.noteId)
+        assertEquals(99002L, second.noteId)
+        assertEquals(
+            listOf(99001L, 99002L),
+            listOf(first.noteId, second.noteId)
+        )
+    }
+
     private fun mapRepresentativeSource():
             SchemaV1CompositionDraft {
 
