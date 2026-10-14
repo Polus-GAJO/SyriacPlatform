@@ -524,6 +524,7 @@ private fun OccasionDetailsScreen(
                             runtimeOccasion
                                 .prayerSequences
                         ) { sequence ->
+                            Column(modifier = Modifier.fillMaxWidth()) {
                             Button(
                                 onClick = {
                                     onOpenPrayer(
@@ -561,6 +562,8 @@ private fun OccasionDetailsScreen(
                                     }
                                 }
                             }
+                            PrayerSequenceNotes(platform, sequence.sequence.noteIds)
+                            }
                         }
                     }
                 }
@@ -576,6 +579,33 @@ private fun OccasionDetailsScreen(
                 text = "Back"
             )
         }
+    }
+}
+
+@Composable
+private fun PrayerSequenceNotes(
+    platform: PlatformContext,
+    noteIds: List<Long>
+) {
+    val notesResult by produceState<List<String>>(
+        initialValue = emptyList(),
+        key1 = platform,
+        key2 = noteIds
+    ) {
+        value = noteIds.mapNotNull { noteId ->
+            (platform.content.loadNote(noteId) as? Result.Success)
+                ?.data?.text?.takeIf { it.isNotBlank() }
+        }
+    }
+
+    notesResult.forEach { noteText ->
+        Text(
+            text = noteText,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
 
