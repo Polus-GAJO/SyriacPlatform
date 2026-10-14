@@ -405,6 +405,7 @@ class SchemaV1PackageWriter {
                     item.liturgicalItemIds
                 )
             )
+            put("noteIds", longArrayJson(item.noteIds))
         }
     }
 
