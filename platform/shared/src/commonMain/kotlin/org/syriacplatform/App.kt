@@ -423,6 +423,16 @@ private fun OccasionDetailsScreen(
             )
     }
 
+    val noteId = (occasionResult as? Result.Success)
+        ?.data?.occasion?.noteId
+    val noteResult by produceState<Result<org.syriacplatform.content.models.Note>?>(
+        initialValue = null,
+        key1 = platform,
+        key2 = noteId
+    ) {
+        value = noteId?.let { platform.content.loadNote(it) }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -498,6 +508,18 @@ private fun OccasionDetailsScreen(
                         verticalArrangement =
                             Arrangement.spacedBy(20.dp, Alignment.CenterVertically)
                     ) {
+                        val noteText = (noteResult as? Result.Success)?.data?.text
+                        if (!noteText.isNullOrBlank()) {
+                            item {
+                                Text(
+                                    text = noteText,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = 12.dp),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
                         items(
                             runtimeOccasion
                                 .prayerSequences
