@@ -419,6 +419,7 @@ class SchemaV1PackageWriter {
                 buildJsonObject {
                     put("id", item.id)
                     put("type", "qolo")
+                    item.noteId?.let { put("noteId", it) }
                     put("targetId", item.qoloId)
 
                     if (item.effectiveMelodyId != null) {
@@ -458,6 +459,7 @@ class SchemaV1PackageWriter {
                 buildJsonObject {
                     put("id", item.id)
                     put("type", "qolo-unresolved")
+                    item.noteId?.let { put("noteId", it) }
 
                     /*
                      * targetId remains physically required
