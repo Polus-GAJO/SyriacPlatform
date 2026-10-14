@@ -111,6 +111,7 @@ class SchemaV1CompositionMapper(
                                     mapQoloItem(
                                         source = source,
                                         item = item,
+                                        publishedNoteIds = publishedNoteIds,
                                         effectiveMelodyId = null,
                                         melodyCandidateIds =
                                             emptyList()
@@ -128,6 +129,7 @@ class SchemaV1CompositionMapper(
                                     mapQoloItem(
                                         source = source,
                                         item = item,
+                                        publishedNoteIds = publishedNoteIds,
                                         effectiveMelodyId = null,
                                         melodyCandidateIds =
                                             emptyList()
@@ -143,6 +145,7 @@ class SchemaV1CompositionMapper(
                                     mapQoloItem(
                                         source = source,
                                         item = item,
+                                        publishedNoteIds = publishedNoteIds,
                                         effectiveMelodyId = null,
                                         melodyCandidateIds =
                                             resolution.melodyIds
