@@ -1703,3 +1703,33 @@ For package-only tests, direct `:buildtools:buildOccasionPreview -PoccasionId=37
 Prefer small, reviewed GitHub changes followed by local synchronization and test execution. A remote commit alone does not count as local build or emulator verification.
 
 See `docs/CurrentState.md`, checkpoint `2026-10-14`, for exact implemented state and restart instructions.
+
+
+------------------------------------------------------------------------
+
+# Notes Integration Roadmap Completion --- 2026-10-14
+
+<!-- ROADMAP-NOTES-THREE-SCOPES-VERIFIED-2026-10-14 -->
+
+**Status:** Three contextual editorial Notes scopes implemented and verified end-to-end with real Occasion 378 and Android emulator. This section supersedes the earlier 2026-10-14 Notes roadmap update wherever it describes Prayer Notes, occurrence Notes, or their Android UI consumption as pending. PERFORMANCE/timing Phase 9 completion remains unchanged.
+
+## Completed and verified
+
+- Occasion Notes: `Occasion.NoteN` -> `Occasion.noteId` -> package/runtime -> Occasion Details.
+- Prayer Notes: `ExistsIn.ItemType = "PRAYER_NOTE"`, linked by `PrayerN` and `OccaExis` -> ordered `PrayerSequence.noteIds[]` -> package/runtime -> selected Prayer Details. Multiple Prayer Notes are supported; pseudo-records are not emitted as liturgical items.
+- Liturgical-occurrence Notes: ordinary `ExistsIn.NoteN` -> `LiturgicalItem.noteId` -> package/runtime -> corresponding Hymn Details, preserving contextual occurrence identity.
+- Published-only package note selection; optional references and compatibility defaults for existing packages; `ContentService.loadNote()` used by the UI.
+- Occasion 378 package inspection: Note 347 (Occasion), Note 346 (Prayer 13), Note 349 (occurrence 4132); occurrence 4133 has no note.
+- User-reported successful `:shared:allTests :buildtools:test` and Android emulator verification of all three note placements.
+- Latest verified Notes UI change: `9f887b2`.
+
+## Next focused tasks
+
+1. Add focused automated tests for publication filtering, multiple ordered Prayer Notes, and distinct liturgical-occurrence Notes; preserve existing audio/timing behavior.
+2. Synchronize Schema-v1 package specification documentation with the optional Notes fields and publication semantics.
+3. Defer UI styling: move occurrence Notes immediately before verse/text content rather than displaying them at the top of Hymn Details.
+4. Choose the next feature based on representative real content and the existing roadmap, rather than speculative infrastructure.
+
+Editorial Notes imported from the Author Database are distinct from Phase 11 personal/user Notes.
+
+For the detailed restart point and verified JSON identities, see `docs/CurrentState.md`, checkpoint `NOTES-THREE-SCOPES-VERIFIED-2026-10-14`.
