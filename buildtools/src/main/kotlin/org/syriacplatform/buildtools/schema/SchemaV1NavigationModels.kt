@@ -18,7 +18,8 @@ data class SchemaV1Occasion(
 data class SchemaV1PrayerSequence(
     val id: Long,
     val prayerId: Long,
-    val liturgicalItemIds: List<Long>
+    val liturgicalItemIds: List<Long>,
+    val noteIds: List<Long> = emptyList()
 )
 
 data class SchemaV1NavigationContent(
