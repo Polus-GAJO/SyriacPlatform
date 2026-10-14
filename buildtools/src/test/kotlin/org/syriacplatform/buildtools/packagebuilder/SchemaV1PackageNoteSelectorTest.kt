@@ -123,6 +123,55 @@ class SchemaV1PackageNoteSelectorTest {
         )
     }
 
+    @Test
+    fun missingNotesAcrossAllScopesProduceNoPackageNotes() {
+        val source = source(
+            noteId = null,
+            notes = listOf(
+                NoteSource(101L, "Unreferenced published note", "PUBLISHED")
+            )
+        )
+        val navigation = org.syriacplatform.buildtools.schema.SchemaV1NavigationContent(
+            entryPoints = emptyList(),
+            occasions = listOf(
+                org.syriacplatform.buildtools.schema.SchemaV1Occasion(
+                    id = 1L,
+                    name = "Occasion without note",
+                    prayerSequenceIds = listOf(10L),
+                    noteId = null
+                )
+            ),
+            prayerSequences = listOf(
+                org.syriacplatform.buildtools.schema.SchemaV1PrayerSequence(
+                    id = 10L,
+                    prayerId = 20L,
+                    liturgicalItemIds = listOf(30L),
+                    noteIds = emptyList()
+                )
+            )
+        )
+        val composition = org.syriacplatform.buildtools.schema.SchemaV1CompositionDraft(
+            occasionId = 1L,
+            prayers = listOf(
+                org.syriacplatform.buildtools.schema.SchemaV1PrayerCompositionDraft(
+                    prayerId = 20L,
+                    orderedSourceItemIds = listOf(30L),
+                    resolvedItems = listOf(
+                        org.syriacplatform.buildtools.schema.SchemaV1UnresolvedQoloLiturgicalItem(
+                            id = 30L,
+                            verses = emptyList(),
+                            noteId = null
+                        )
+                    ),
+                    blockedItemIds = emptyList()
+                )
+            ),
+            diagnostics = emptyList()
+        )
+
+        assertTrue(selector.selectNotes(source, navigation, composition).isEmpty())
+    }
+
     private fun source(
         noteId: Long?,
         notes: List<NoteSource>
