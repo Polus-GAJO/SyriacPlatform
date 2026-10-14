@@ -3,7 +3,7 @@
 ## Roadmap v1.4
 
 **Status:** Official Development Plan\
-**Updated:** 2026-09-28\
+**Updated:** 2026-10-14\
 **Verified implementation baseline:** `b56fdea`\
 **Author Database schema checkpoint:** `d4cd41b`
 
@@ -1656,3 +1656,50 @@ coverage, and the next deliberately selected product capability.
 Older Phase 9 sections remain historical implementation checkpoints where
 useful, but this 2026-10-08 update is authoritative when their
 "deferred" or "next" statements conflict with the completed state above.
+
+
+------------------------------------------------------------------------
+
+# Notes Integration Roadmap Update --- 2026-10-14
+
+<!-- ROADMAP-NOTES-2026-10-14 -->
+
+**Status:** Initial Occasion Notes package/runtime foundation implemented and real-package output verified; Android Notes UI and the remaining contextual Notes scopes are pending.
+
+This update supplements the 2026-10-08 Phase 9 PERFORMANCE/timing completion checkpoint. It does not reopen or supersede the verified PERFORMANCE, verse interval playback, or preview-resource cleanup work. Earlier roadmap passages that describe PERFORMANCE runtime integration as future work are historical.
+
+## Completed and verified
+
+- Author Database Notes source uses `NoteN`, `Note`, and `publicationStatus`; controlled Occasion export selects published referenced Notes into `Notes.csv`.
+- Build Tools source loading/mapping and Schema-v1 output support optional `content/notes.json` and Occasion `noteId`.
+- Package/runtime support for Occasion Notes is implemented and covered by Kotlin automated tests. Initial Notes implementation checkpoint: `97fac38`; `:buildtools:test` and `:shared:allTests` passed for that work.
+- The Access exporter was synchronized to the repository, including `ExportNotes` and `ExportOccasionForPlatform`, in commit `92d0fe7`.
+- A real media-aware package for Occasion 378 built successfully with 1 prayer, 2 liturgical items, and 2 packaged media assets.
+- Inspection of the generated package confirmed `occasions.json` references Note 347 and `notes.json` contains its complete Arabic text.
+- The documentation restart checkpoint was updated in `docs/CurrentState.md` (commit `16eac95`).
+
+**Verification boundary:** The real-package test proves the Access -> CSV -> Build Tools -> Schema-v1 Occasion Note path. It does not prove that the note is currently rendered in the Android Reference Application.
+
+## Contextual Notes scopes
+
+1. **Occasion:** `Occasion.NoteN` -> `Occasion.noteId`; initial package/runtime implementation complete.
+2. **Prayer:** `ExistsIn` rows with `ItemType = "PRAYER_NOTE"`, related through `PrayerN` and `OccaExis`; multiple notes per prayer are permitted. Package/runtime/UI projection pending.
+3. **Liturgical-item occurrence:** `ExistsIn.NoteN` on ordinary contextual occurrences; must remain attached to the occurrence, not the reusable canonical text or Qolo. Package/runtime/UI projection pending.
+
+The Occasion 378 authoring fixture includes Note 347 (Occasion), Note 346 (Prayer), and Note 349 (liturgical occurrence). Only Note 347 is currently expected in the generated package.
+
+## Next implementation order
+
+1. Inspect the existing Android Reference Application `OCCASION_DETAILS` screen and current runtime/ContentService Notes access.
+2. Add a minimal, optional display for the Occasion Note using existing navigation and service boundaries; test in the Android emulator with Occasion 378. Keep visual styling provisional.
+3. Extend Build Tools, package DTOs, validation, runtime, and application consumption to support **multiple Prayer Notes** without turning `PRAYER_NOTE` source records into liturgical items.
+4. Extend the same layers for **liturgical-item occurrence Notes**, preserving contextual occurrence identity and authored ordering.
+5. Run focused automated tests and representative real-content package/emulator checks for each incremental step. Update the relevant package specification and implementation documents as contracts change.
+
+## Development and verification discipline
+
+For package-only tests, direct `:buildtools:buildOccasionPreview -PoccasionId=378` is suitable. For switching content in the Android reference app, retain the root `preview.ps1 <OccN>` workflow and its `:shared:clean` / `:androidApp:clean` steps, which prevent stale optional resources.
+
+Prefer small, reviewed GitHub changes followed by local synchronization and test execution. A remote commit alone does not count as local build or emulator verification.
+
+See `docs/CurrentState.md`, checkpoint `2026-10-14`, for exact implemented state and restart instructions.
