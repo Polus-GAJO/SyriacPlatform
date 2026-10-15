@@ -47,6 +47,13 @@ sealed interface ResolvedLiturgicalItemTarget {
     ) : ResolvedLiturgicalItemTarget
 
     /**
+     * نص غير مرتل مع ظهوراته النصية المحلولة بالترتيب.
+     */
+    data class NonMelodicText(
+        val verses: List<ResolvedTextOccurrence>
+    ) : ResolvedLiturgicalItemTarget
+
+    /**
      * ظهور ترتيلة Qolo داخل السياق الليتورجي.
      *
      * effectiveMelody تكون موجودة فقط عندما يكون
