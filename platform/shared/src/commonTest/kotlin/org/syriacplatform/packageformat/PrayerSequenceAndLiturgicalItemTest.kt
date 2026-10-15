@@ -104,7 +104,15 @@ class PrayerSequenceAndLiturgicalItemTest {
 
         assertEquals(LiturgicalItemId(4132), item.id)
         assertEquals(349L, item.noteId)
-        assertIs<LiturgicalItemTarget.Text>(item.target)
+        val target = assertIs<LiturgicalItemTarget.NonMelodicText>(item.target)
+        assertEquals(
+            listOf(TextOccurrenceId(9001), TextOccurrenceId(9002), TextOccurrenceId(9003)),
+            target.verses.map { it.id }
+        )
+        assertEquals(
+            listOf(TextId(1001), TextId(1002), TextId(1001)),
+            target.verses.map { it.textId }
+        )
     }
 
     @Test
