@@ -30,11 +30,19 @@ class SchemaV1CompositionMapper(
             .map { it.id }
             .toSet()
 
+        // Empty non-melodic occurrences are authoring placeholders, not
+        // publishable liturgical items. Exclude them before constructing both
+        // resolved items and orderedSourceItemIds.
+        val itemIdsWithText = source.existsInTexts
+            .map { it.existsInId }
+            .toSet()
+
         val selectedItems =
-           source.existsIn.filter {
-            it.id in occasionExistsInIds &&
-             it.itemType != "PRAYER_NOTE"
-           }
+            source.existsIn.filter {
+                it.id in occasionExistsInIds &&
+                    it.itemType != "PRAYER_NOTE" &&
+                    (it.qoloId != null || it.id in itemIdsWithText)
+            }
 
         val itemsByPrayer =
             selectedItems.groupBy {
