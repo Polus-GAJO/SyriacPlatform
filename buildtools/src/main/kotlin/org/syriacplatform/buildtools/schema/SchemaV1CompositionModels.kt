@@ -50,7 +50,8 @@ data class SchemaV1UnresolvedQoloLiturgicalItem(
 data class SchemaV1TextLiturgicalItem(
     override val id: Long,
     override val verses: List<SchemaV1LiturgicalTextRef>,
-    override val noteId: Long? = null
+    override val noteId: Long? = null,
+    val locationTitle: String? = null
 ) : SchemaV1LiturgicalItem
 
 data class SchemaV1PrayerCompositionDraft(
