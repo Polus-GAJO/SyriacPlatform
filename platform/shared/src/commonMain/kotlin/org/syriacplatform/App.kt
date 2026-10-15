@@ -1080,26 +1080,19 @@ private fun ResolvedLiturgicalItemView(
           }
 
         is ResolvedLiturgicalItemTarget.NonMelodicText -> {
-            Column(
+            Button(
+                onClick = { onOpenHymn(item.item.id) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
             ) {
-                target.verses.forEach { verse ->
-                    verse.petgomo?.let { petgomo ->
-                        Text(
-                            text = petgomo.syriac,
-                            modifier = Modifier.padding(top = 8.dp),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                    Text(
-                        text = verse.text.syriac,
-                        modifier = Modifier.padding(top = 4.dp),
-                        style = SyriacTextStyles.body(),
-                        textAlign = TextAlign.Right
-                    )
-                }
+                Text(
+                    text = item.item.locationTitle
+                        ?.takeIf { it.isNotBlank() }
+                        ?: "Text",
+                    style = SyriacTextStyles.body(),
+                    textAlign = TextAlign.Center
+                )
             }
         }
 
@@ -1471,7 +1464,39 @@ private fun HymnDetailsScreen(
                     )
                 }
 
-                if (target is ResolvedLiturgicalItemTarget.Qolo) {
+                if (target is ResolvedLiturgicalItemTarget.NonMelodicText) {
+                    Text(
+                        text = result.data.item.locationTitle
+                            ?.takeIf { it.isNotBlank() }
+                            ?: "Text",
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                        style = SyriacTextStyles.body(),
+                        textAlign = TextAlign.Center
+                    )
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth().weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(target.verses) { verse ->
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                verse.petgomo?.let { petgomo ->
+                                    Text(
+                                        text = petgomo.syriac,
+                                        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                                        style = SyriacTextStyles.body(),
+                                        textAlign = TextAlign.Right
+                                    )
+                                }
+                                Text(
+                                    text = verse.text.syriac,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    style = SyriacTextStyles.body(),
+                                    textAlign = TextAlign.Right
+                                )
+                            }
+                        }
+                    }
+                } else if (target is ResolvedLiturgicalItemTarget.Qolo) {
                     val effectiveMelody = target.effectiveMelody
 
                     val selectedMelody =
