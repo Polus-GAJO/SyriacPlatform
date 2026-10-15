@@ -3906,3 +3906,17 @@ Non-melodic liturgical texts (prayers/readings/sedros) already exist in Author D
 6. Workflow: assistant makes small, reviewable edits directly in private GitHub repo `Polus-GAJO/SyriacPlatform` branch `main`; user pulls to `D:\SyriacPlatform` and executes local Gradle tests. Ask only for needed tests/results; do not imply remote commits are locally tested.
 
 **Latest verified commit:** `c6326cb`. **Latest verified command:** `:shared:testAndroidHostTest` -> BUILD SUCCESSFUL.
+
+
+---
+
+## 2026-10-15 — Occasion 379 non-melodic text navigation checkpoint
+
+- Access exporter now emits `Location.csv` for the occasion's linked `ExistsIn` occurrences. The user confirmed 14 Syriac Location labels in the occasion 379 export.
+- Build Tools load optional `Location.csv` and map `ExistsIn.locationId` to optional `locationTitle` on non-melodic liturgical items. The field travels through Schema-v1 JSON DTO and domain `LiturgicalItem` without changing occurrence identity (`ExistsIn.ID`). Older packages without this field remain representable.
+- Empty non-melodic placeholders remain excluded; authored prayer ordering, repeated occurrence identity, contextual verses, and Petgomo references remain intact.
+- Prayer UI now renders non-melodic occurrences as clickable Location-title buttons; the existing item-ID navigation opens the details view with verses and contextual Petgomo. Qolo buttons retain their behavior. Fallback label is `Text` when a location title is unavailable.
+- User-reported verification: `SchemaV1CompositionMapperTest` passed; generated occasion 379 preview built with 1 prayer / 16 liturgical items; `GeneratedAuthorPackageRuntimeIntegrationTest` passed after removing its obsolete all-Qolo assumption.
+- Not yet independently verified in this checkpoint: the full `:shared:testAndroidHostTest` suite after that test fix, and a new emulator build after UI commit `cd282da`. Do not claim these tests passed without their logs.
+- Editorial decision: postpone further visual formatting and ordering polish; current Syriac text presentation is satisfactory. Next milestone is translation authoring/identity/linking design, not UI styling.
+- Translation design investigation: see `docs/TranslationArchitectureStudy.md`. No translation database schema change has been approved or implemented yet.
