@@ -1566,8 +1566,8 @@ Private Sub ExportLocations( _
 
     sqlText = _
         "SELECT DISTINCT L.LocationN, L.Location " & _
-        "FROM Location AS L " & _
-        "INNER JOIN ExistsIn AS E ON L.LocationN = E.LocationN " & _
+        "FROM (Location AS L " & _
+        "INNER JOIN ExistsIn AS E ON L.LocationN = E.LocationN) " & _
         "INNER JOIN OccaExis AS OE ON E.ID = OE.ExistInID " & _
         "WHERE OE.OccN = " & occasionId & " " & _
         "ORDER BY L.LocationN;"
