@@ -3920,3 +3920,89 @@ This additive implementation-alignment section documents the verified Schema-v1 
 Authoring boundary: current Access/VBA allows one Prayer Note per prayer within an Occasion and disables ExistsIn.Sort for these pseudo-records, leaving Sort normally NULL. The Schema-v1 noteIds array remains future-compatible with multiple Notes; authoritative authoring order for that future case is not specified. The current Sort-then-ExistsIn.ID implementation fallback is not a normative editorial ordering rule.
 
 Verification: the three contextual Notes scopes were confirmed in real Occasion 378 and the Android emulator. Four focused regression tests and a subsequent complete buildtools:test suite were reported BUILD SUCCESSFUL on the user's Windows checkout. UI placement and styling are not part of this physical package contract.
+
+
+------------------------------------------------------------------------
+
+# Schema-v1 implementation alignment — Non-melodic liturgical texts (2026-10-15)
+
+<!-- SCHEMA-V1-NON-MELODIC-TEXT-2026-10-15 -->
+
+This section extends §12.5.1 for the implemented Schema-v1 non-melodic
+liturgical-text representation. The older single-Text form remains supported.
+Where §12.5.1 states that all `type = "text"` records must have a canonical
+`targetId` and no verses, those restrictions apply to the **legacy single-Text
+form only**.
+
+## Multi-occurrence non-melodic Text
+
+A liturgical item sourced from `ExistsIn` with `QoloN = NULL` and ordered
+`ExistsInText` rows is serialized as `type = "text"` with `targetId = 0`
+and a nonempty `verses` array:
+
+```json
+{
+  "id": 4132,
+  "type": "text",
+  "targetId": 0,
+  "effectiveMelodyId": null,
+  "melodyCandidateIds": [],
+  "petgomoId": null,
+  "verses": [
+    { "id": 9001, "textId": 1001, "petgomoId": null },
+    { "id": 9002, "textId": 1002, "petgomoId": 701 },
+    { "id": 9003, "textId": 1001, "petgomoId": null }
+  ],
+  "noteId": 349
+}
+```
+
+- `id` identifies the `ExistsIn` liturgical occurrence; `noteId`, when
+  present, is its contextual editorial Note reference.
+- `targetId = 0` is a compatibility placeholder, **not** a canonical
+  `TextId`; the canonical references are the individual `verses[].textId`.
+- Each `verses[].id` is the stable `ExistsInText` occurrence identity and
+  must be unique across liturgical text occurrences in the package.
+- Array order is authoritative. Repeating a canonical `textId` with
+  different occurrence IDs is valid and must be preserved.
+- Each `verses[].textId` must resolve to packaged canonical Text content.
+  Optional `verses[].petgomoId`, when non-null, must resolve to a packaged
+  Petgomo and belongs to that occurrence.
+- The top-level `petgomoId` must be absent or null. Melody fields are not
+  applicable: `effectiveMelodyId` is absent or null and
+  `melodyCandidateIds` is absent or empty.
+- A missing referenced Text or Petgomo, or duplicate occurrence ID, is a
+  fatal package-validation error. Runtime resolution must not silently
+  discard unresolved occurrences.
+
+## Backward compatibility
+
+Existing single-Text records retain their original interpretation:
+
+```json
+{
+  "id": 501,
+  "type": "text",
+  "targetId": 601,
+  "effectiveMelodyId": null,
+  "melodyCandidateIds": [],
+  "petgomoId": 701
+}
+```
+
+A positive `targetId` with no nonempty `verses` maps to the legacy
+single-Text target. It must **not** be reinterpreted as the new
+multi-occurrence form. Conversely, the multi-occurrence form maps to
+`LiturgicalItemTarget.NonMelodicText`, not to a fabricated canonical Text
+with ID zero. The Schema-v1 version number is unchanged.
+
+## Verification boundary
+
+On 2026-10-15 the user reported `BUILD SUCCESSFUL` for both
+`:shared:testAndroidHostTest` and `:buildtools:test` after focused tests
+of runtime ordering, repeated canonical Text IDs, Note preservation,
+missing Text/Petgomo references, and duplicate occurrence IDs.
+
+This confirms the tested code paths, **not** a real authored non-melodic
+package end-to-end in the Android emulator. That integration and visual
+verification remain separate follow-up work.
