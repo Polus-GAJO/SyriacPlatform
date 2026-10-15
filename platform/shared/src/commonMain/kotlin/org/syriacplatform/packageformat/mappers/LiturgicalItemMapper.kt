@@ -45,20 +45,29 @@ internal fun LiturgicalItemJsonDto.toDomain(): Result<LiturgicalItem> {
                 }
 
                 if (verses.isNotEmpty()) {
-                    return Result.Failure(
-                        PlatformError(
-                            code = ErrorCode.INVALID_PACKAGE_DATA,
-                            message =
-                                "Text liturgical item must not declare verses: $id"
+                    if (targetId != 0L || petgomoId != null) {
+                        return Result.Failure(
+                            PlatformError(
+                                code = ErrorCode.INVALID_PACKAGE_DATA,
+                                message = "Non-melodic text must use targetId 0 and no top-level petgomoId: $id"
+                            )
                         )
+                    }
+                    LiturgicalItemTarget.NonMelodicText(
+                        verses = verses.map { verse ->
+                            TextOccurrence(
+                                id = TextOccurrenceId(verse.id),
+                                textId = TextId(verse.textId),
+                                petgomoId = verse.petgomoId?.let(::PetgomoId)
+                            )
+                        }
+                    )
+                } else {
+                    LiturgicalItemTarget.Text(
+                        textId = TextId(targetId),
+                        petgomoId = petgomoId?.let(::PetgomoId)
                     )
                 }
-
-                LiturgicalItemTarget.Text(
-                    textId = TextId(targetId),
-                    petgomoId =
-                        petgomoId?.let(::PetgomoId)
-                )
             }
 
             "qolo" -> {
