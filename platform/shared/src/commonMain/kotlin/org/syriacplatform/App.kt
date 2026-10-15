@@ -1079,6 +1079,30 @@ private fun ResolvedLiturgicalItemView(
 
           }
 
+        is ResolvedLiturgicalItemTarget.NonMelodicText -> {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                target.verses.forEach { verse ->
+                    verse.petgomo?.let { petgomo ->
+                        Text(
+                            text = petgomo.syriac,
+                            modifier = Modifier.padding(top = 8.dp),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                    Text(
+                        text = verse.text.syriac,
+                        modifier = Modifier.padding(top = 4.dp),
+                        style = SyriacTextStyles.body(),
+                        textAlign = TextAlign.Right
+                    )
+                }
+            }
+        }
+
         is ResolvedLiturgicalItemTarget.UnresolvedQolo -> {
             Column(
                 modifier = Modifier
