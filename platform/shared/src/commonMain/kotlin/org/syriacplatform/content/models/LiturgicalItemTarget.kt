@@ -19,6 +19,15 @@ sealed interface LiturgicalItemTarget {
     ) : LiturgicalItemTarget
 
     /**
+     * نص ليتورجي غير مرتل، يحتفظ بجميع ظهورات ExistsInText
+     * بالترتيب، مع هوياتها السياقية وتكراراتها.
+     * منفصل عن Text القديم ذي المرجع الواحد حفاظًا على التوافق.
+     */
+    data class NonMelodicText(
+        val verses: List<LiturgicalTextRef>
+    ) : LiturgicalItemTarget
+
+    /**
      * ظهور Qolo داخل السياق الليتورجي.
      *
      * وجود Qolo في الصلاة مستقل عن حسم اللحن.
