@@ -165,20 +165,29 @@ class GeneratedAuthorPackageRuntimeIntegrationTest {
             )
 
             /*
-             * The preview currently consists only of
-             * resolved Qolo occurrences.
+             * Real author exports may contain both Qolo occurrences
+             * and non-melodic text groups. Preserve and verify both.
              */
-            val qoloTargets =
-                runtimeItems.map { item ->
-                    assertIs<
-                            ResolvedLiturgicalItemTarget.Qolo
-                            >(item.target)
-                }
+            val qoloTargets = runtimeItems.mapNotNull {
+                it.target as? ResolvedLiturgicalItemTarget.Qolo
+            }
+            val nonMelodicTargets = runtimeItems.mapNotNull {
+                it.target as? ResolvedLiturgicalItemTarget.NonMelodicText
+            }
+            val unresolvedQoloTargets = runtimeItems.mapNotNull {
+                it.target as? ResolvedLiturgicalItemTarget.UnresolvedQolo
+            }
 
             assertEquals(
                 runtimeItems.size,
-                qoloTargets.size
+                qoloTargets.size + nonMelodicTargets.size +
+                    unresolvedQoloTargets.size
             )
+
+            nonMelodicTargets.forEach { target ->
+                assertTrue(target.verses.isNotEmpty())
+                assertTrue(target.verses.all { it.text.syriac.isNotBlank() })
+            }
 
             /*
              * effectiveMelodyId has already been resolved
