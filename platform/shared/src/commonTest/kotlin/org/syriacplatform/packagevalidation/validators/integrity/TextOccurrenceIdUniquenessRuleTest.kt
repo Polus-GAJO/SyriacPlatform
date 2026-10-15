@@ -66,6 +66,38 @@ class TextOccurrenceIdUniquenessRuleTest {
     }
 
     @Test
+    fun duplicateNonMelodicTextOccurrenceIdProducesFatalIssue() {
+        val packageData = packageWith(
+            liturgicalItems = listOf(
+                LiturgicalItem(
+                    id = LiturgicalItemId(501),
+                    target = LiturgicalItemTarget.NonMelodicText(
+                        verses = listOf(
+                            TextOccurrence(
+                                id = TextOccurrenceId(9001),
+                                textId = TextId(601)
+                            ),
+                            TextOccurrence(
+                                id = TextOccurrenceId(9001),
+                                textId = TextId(601)
+                            )
+                        )
+                    )
+                )
+            )
+        )
+
+        val issues = rule.validate(packageData)
+
+        assertEquals(1, issues.size)
+        assertEquals(ValidationSeverity.FATAL, issues.single().severity)
+        assertEquals(
+            "liturgicalItems.textOccurrences[id=9001]",
+            issues.single().location
+        )
+    }
+
+    @Test
     fun repeatedTextIdWithDistinctOccurrenceIdsProducesNoIssues() {
         val packageData =
             packageWith(
