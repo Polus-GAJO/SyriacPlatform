@@ -1746,3 +1746,41 @@ Four focused tests passed individually on the user's Windows checkout: PUBLISHED
 Current Access VBA allows only one Prayer Note per prayer per Occasion and disables its ExistsIn.Sort field. Platform PrayerSequence.noteIds remains multi-value capable for future use, but the authoritative order for multiple Prayer Notes has not been decided. Existing Sort-then-ExistsIn.ID code is a fallback, not an agreed authoring contract. This supersedes earlier statements suggesting that Access currently permits multiple Prayer Notes or that their order is settled.
 
 Next: run the complete buildtools:test suite; synchronize ApplicationPackageSpecification.md with the optional editorial Notes fields and published-only selection; review roadmap remaining priorities and select one small functional milestone. Keep cosmetic UI placement deferred, Phase 11 personal Notes separate, and verified PERFORMANCE/timing contracts intact.
+
+
+------------------------------------------------------------------------
+
+# 2026-10-15 Checkpoint — Non-melodic liturgical text Runtime (handoff)
+
+<!-- NON-MELODIC-TEXT-RUNTIME-2026-10-15 -->
+
+**Latest user-verified state:** On Windows checkout `D:\SyriacPlatform`, after `git pull --ff-only origin main` through commit **c6326cb**, the user ran:
+
+```powershell
+.\platform\gradlew.bat -p .\platform :shared:testAndroidHostTest
+```
+
+and reported **BUILD SUCCESSFUL** (15 seconds, 34 actionable tasks). Earlier RED run had **243 tests, 1 failure** specifically in `PrayerSequenceAndLiturgicalItemTest.nonMelodicTextWithContextualOccurrencesIsAccepted`; after implementation the suite succeeded. Do **not** claim an Android emulator test of non-melodic text, a fresh `:buildtools:test` after these runtime commits, or end-to-end real non-melodic content verification: none has yet been reported.
+
+## Authoring contract and rationale
+
+Non-melodic liturgical texts (prayers/readings/sedros) already exist in Author DB `Texts`, related by `ExistsIn -> ExistsInText -> Texts`. `ExistsIn.QoloN = NULL` identifies **non-melodic text**; `QoloN = 0` identifies unresolved Qolo; `QoloN > 0` identifies a Qolo. `ExistsIn.ItemType = "PRAYER_NOTE"` is a pseudo-record for prayer editorial notes, not a liturgical item. Preserve each `ExistsIn.ID` as liturgical-item identity, all ordered `ExistsInText` occurrence IDs and `TextId` references, optional per-verse Petgomo, repeated canonical TextIds, and `ExistsIn.NoteN` as `LiturgicalItem.noteId`. Never collapse verses to a single text or deduplicate repeated TextIds.
+
+## Implemented commits and JSON/domain contract
+
+- Build Tools mapper regression and `SchemaV1TextLiturgicalItem(id, verses, noteId)`: commits `7aeac92`, `e0c0bda`, `e2c0d5d`. Package writer support: `1ead935`, import fix `6c8221b`. User previously reported successful full `:buildtools:test` after the writer fix.
+- New Schema-v1 `liturgical-items.json` representation: `{"id":4132,"type":"text","targetId":0,"effectiveMelodyId":null,"melodyCandidateIds":[],"petgomoId":null,"verses":[{"id":9001,"textId":1001,"petgomoId":null},...],"noteId":349}`. `targetId=0` is a compatibility placeholder, **not** a canonical TextId.
+- Existing legacy `type="text"` with positive `targetId` and no verses remains `LiturgicalItemTarget.Text(textId,petgomoId)`; this backward compatibility must remain intact.
+- New multi-occurrence text maps to **`LiturgicalItemTarget.NonMelodicText(verses: List<LiturgicalTextRef>)`**, separate from legacy `Text`; the mapper requires `targetId=0` and no top-level petgomo for nonempty verses. New regression test initially RED `94bdcc2`, model `3251d51`, mapper `8247e3c`, strengthened test `78a2f52`. Test checks item ID, note ID, occurrence order [9001,9002,9003] and TextIds [1001,1002,1001].
+- Runtime and validation additions through `f320c4d`: `RuntimeContentIndex` indexes new text occurrences; `TextOccurrenceIdUniquenessRule` and `TextOccurrenceMediaSegmentReferenceRule` include them; `LiturgicalItemTextReferenceRule` and `LiturgicalItemPetgomoReferenceRule` validate their contextual references; `ResolvedLiturgicalItemTarget.NonMelodicText(verses: List<ResolvedTextOccurrence>)` and `RuntimeContentResolver` resolve texts and per-occurrence Petgomo in order. The Android reference UI `App.kt` required a new exhaustive `when` branch, added in commit `c6326cb` (user pulled and tested successfully).
+
+## Restart instructions / immediate next work
+
+1. Inspect `docs/CurrentState.md` latest checkpoint and `docs/Roadmap v1.4.md`, then current code and tests. Do not redo completed editorial Notes, media/timing or non-melodic package/runtime foundations.
+2. Add **focused runtime resolver test(s)** asserting ordered resolved occurrences, duplicate TextId preservation, optional contextual Petgomo, note retention and missing-reference behavior. Add focused validation tests for non-melodic missing Text/Petgomo and duplicate occurrence IDs, ideally extending existing suites rather than adding broad infrastructure.
+3. Verify full `:shared:testAndroidHostTest` and `:buildtools:test` after new tests/changes. Consider a representative real non-melodic Occasion package and Android emulator only when suitable authoring data exists; no such verification yet.
+4. Inspect and update `docs/ApplicationPackageSpecification.md` (or actual Schema-v1 specification path) for the new `type="text", targetId=0, verses[]` semantics and legacy compatibility. Check the `App.kt` display branch behavior before declaring UI ready.
+5. Next larger goal: shared Syriac texts, translations and language choice across Occasion, Shhima and Full Library. **Translations are not yet modeled or populated in Access/platform**; design them after closing the current text-runtime regression/validation checks. Keep UI language separate from content/translation language.
+6. Workflow: assistant makes small, reviewable edits directly in private GitHub repo `Polus-GAJO/SyriacPlatform` branch `main`; user pulls to `D:\SyriacPlatform` and executes local Gradle tests. Ask only for needed tests/results; do not imply remote commits are locally tested.
+
+**Latest verified commit:** `c6326cb`. **Latest verified command:** `:shared:testAndroidHostTest` -> BUILD SUCCESSFUL.
