@@ -189,7 +189,8 @@ internal fun LiturgicalItemJsonDto.toDomain(): Result<LiturgicalItem> {
         LiturgicalItem(
             id = LiturgicalItemId(id),
             target = resolvedTarget,
-            noteId = noteId
+            noteId = noteId,
+            locationTitle = locationTitle
         )
     )
 }
