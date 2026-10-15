@@ -480,6 +480,44 @@ class RuntimeContentResolverTest {
     }
 
     @Test
+    fun nonMelodicTextFailsWhenReferencedPetgomoIsMissing() {
+        val itemId = LiturgicalItemId(4132)
+        val packageData = packageWith(
+            liturgicalItems = listOf(
+                LiturgicalItem(
+                    id = itemId,
+                    target = LiturgicalItemTarget.NonMelodicText(
+                        verses = listOf(
+                            LiturgicalTextRef(
+                                id = TextOccurrenceId(9001),
+                                textId = TextId(1001)
+                            ),
+                            LiturgicalTextRef(
+                                id = TextOccurrenceId(9002),
+                                textId = TextId(1001),
+                                petgomoId = PetgomoId(9999)
+                            )
+                        )
+                    )
+                )
+            ),
+            texts = listOf(
+                TextContent(
+                    id = TextId(1001),
+                    syriac = "Existing text",
+                    translations = emptyList()
+                )
+            )
+        )
+
+        val result = RuntimeContentResolver(
+            RuntimeContentStore.from(packageData)
+        ).resolveLiturgicalItem(itemId)
+
+        assertIs<Result.Failure>(result)
+    }
+
+    @Test
     fun textWithoutPetgomoResolvesWithNullPetgomo() {
         val packageData =
             packageWith(
