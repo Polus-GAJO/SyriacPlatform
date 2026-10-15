@@ -73,6 +73,28 @@ class AuthorSourceDataLoaderTest {
     }
 
     @Test
+    fun loadsSyriacLocationTitles() {
+        val temporaryDirectory = Files.createTempDirectory("syriac-location-test-")
+        try {
+            Files.list(representativeExportDirectory()).use { files ->
+                files.filter { Files.isRegularFile(it) }.forEach { file ->
+                    Files.copy(file, temporaryDirectory.resolve(file.fileName))
+                }
+            }
+            Files.writeString(
+                temporaryDirectory.resolve("Location.csv"),
+                "LocationN,Location\n11,ܣܶܕܪܳܐ\n"
+            )
+            val data = loader.load(temporaryDirectory)
+            assertEquals(1, data.locations.size)
+            assertEquals(11L, data.locations.single().id)
+            assertEquals("ܣܶܕܪܳܐ", data.locations.single().name)
+        } finally {
+            temporaryDirectory.toFile().deleteRecursively()
+        }
+    }
+
+    @Test
     fun preservesRepresentativePrayerOrderByPrayerId() {
         val data = loader.load(
             representativeExportDirectory()
