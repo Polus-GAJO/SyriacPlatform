@@ -84,7 +84,37 @@ class LiturgicalItemTextReferenceRule :
                         }
                     }
 
-                    is LiturgicalItemTarget.NonMelodicText,
+                    is LiturgicalItemTarget.NonMelodicText -> {
+                        target.verses.forEachIndexed {
+                                index,
+                                verse ->
+
+                            if (
+                                verse.textId !in textIds
+                            ) {
+                                add(
+                                    ValidationIssue(
+                                        severity =
+                                            ValidationSeverity.FATAL,
+                                        code =
+                                            ErrorCode.INVALID_REFERENCE,
+                                        message =
+                                            "Liturgical item " +
+                                                    "${item.id.value} " +
+                                                    "verse $index references " +
+                                                    "missing text " +
+                                                    "${verse.textId.value}.",
+                                        location =
+                                            "liturgicalItems" +
+                                                    "[${item.id.value}]" +
+                                                    ".target.verses[$index]" +
+                                                    ".textId"
+                                    )
+                                )
+                            }
+                        }
+                    }
+
                     is LiturgicalItemTarget.UnresolvedQolo -> {
                         target.verses.forEachIndexed {
                                 index,
