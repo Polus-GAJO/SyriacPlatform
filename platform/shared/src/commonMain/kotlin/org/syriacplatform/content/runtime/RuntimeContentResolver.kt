@@ -658,6 +658,59 @@ class RuntimeContentResolver(
                 )
             }
 
+            is LiturgicalItemTarget.NonMelodicText -> {
+                val resolvedVerses =
+                    mutableListOf<
+                            ResolvedTextOccurrence
+                            >()
+
+                target.verses.forEach { verse ->
+                    val text =
+                        store.index
+                            .textsById[
+                            verse.textId
+                        ]
+                            ?: return notFound(
+                                "Text",
+                                verse.textId.value
+                            )
+
+                    val petgomo =
+                        if (verse.petgomoId != null) {
+                            store.index
+                                .petgomosById[
+                                verse.petgomoId
+                            ]
+                                ?: return notFound(
+                                    "Petgomo",
+                                    verse.petgomoId.value
+                                )
+                        } else {
+                            null
+                        }
+
+                    resolvedVerses.add(
+                        ResolvedTextOccurrence(
+                            id = verse.id,
+                            text = text,
+                            petgomo = petgomo
+                        )
+                    )
+                }
+
+                Result.Success(
+                    ResolvedLiturgicalItem(
+                        item = item,
+                        target =
+                            ResolvedLiturgicalItemTarget
+                                .NonMelodicText(
+                                    verses =
+                                        resolvedVerses
+                                )
+                    )
+                )
+            }
+
             is LiturgicalItemTarget.UnresolvedQolo -> {
                 val resolvedVerses =
                     mutableListOf<
