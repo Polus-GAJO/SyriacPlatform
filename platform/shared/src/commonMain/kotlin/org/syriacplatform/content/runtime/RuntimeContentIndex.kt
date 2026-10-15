@@ -121,6 +121,9 @@ class RuntimeContentIndex private constructor(
                                 is LiturgicalItemTarget.UnresolvedQolo ->
                                     target.verses
 
+                                is LiturgicalItemTarget.NonMelodicText ->
+                                    target.verses
+
                                 is LiturgicalItemTarget.Text ->
                                     emptyList()
                             }
