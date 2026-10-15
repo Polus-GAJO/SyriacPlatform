@@ -386,6 +386,40 @@ fun excludesPrayerNoteFromLiturgicalComposition() {
         )
     }
 
+    @Test
+    fun nullQoloOccurrenceIsPreservedAsNonQoloTextItem() {
+        val original = loadSource()
+        val linkedIds = original.occasionLinks
+            .filter { it.occasionId == original.occasion.id }
+            .mapNotNull { it.existsInId }
+            .toSet()
+        val existing = original.existsIn.first { item ->
+            item.id in linkedIds &&
+                item.itemType != "PRAYER_NOTE" &&
+                original.existsInTexts.any { it.existsInId == item.id }
+        }
+        val source = original.copy(
+            existsIn = original.existsIn.map { item ->
+                if (item.id == existing.id) item.copy(qoloId = null, qintoId = null)
+                else item
+            }
+        )
+        val expectedVerses = source.existsInTexts
+            .filter { it.existsInId == existing.id }
+            .sortedWith(compareBy({ it.sortInPrayer ?: Int.MAX_VALUE }, { it.id }))
+
+        val draft = mapper.map(source)
+        val item = draft.prayers
+            .flatMap { it.resolvedItems }
+            .single { it.id == existing.id }
+
+        assertFalse(item is SchemaV1QoloLiturgicalItem)
+        assertFalse(item is SchemaV1UnresolvedQoloLiturgicalItem)
+        assertEquals(expectedVerses.map { it.id }, item.verses.map { it.id })
+        assertEquals(expectedVerses.map { it.textId }, item.verses.map { it.textId })
+        assertFalse(draft.hasBlockingDiagnostics)
+    }
+
     private fun mapRepresentativeSource():
             SchemaV1CompositionDraft {
 
