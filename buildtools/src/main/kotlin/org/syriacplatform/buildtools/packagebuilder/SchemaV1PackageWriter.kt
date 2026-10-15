@@ -23,6 +23,7 @@ import org.syriacplatform.buildtools.schema.SchemaV1Qinto
 import org.syriacplatform.buildtools.schema.SchemaV1Qolo
 import org.syriacplatform.buildtools.schema.SchemaV1QoloLiturgicalItem
 import org.syriacplatform.buildtools.schema.SchemaV1LiturgicalItem
+import org.syriacplatform.buildtools.schema.SchemaV1TextLiturgicalItem
 import org.syriacplatform.buildtools.schema.SchemaV1UnresolvedQoloLiturgicalItem
 import org.syriacplatform.buildtools.schema.SchemaV1Text
 import org.syriacplatform.buildtools.schema.SchemaV1TextOccurrence
