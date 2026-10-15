@@ -420,6 +420,43 @@ fun excludesPrayerNoteFromLiturgicalComposition() {
         assertFalse(draft.hasBlockingDiagnostics)
     }
 
+    @Test
+    fun excludesEmptyNonMelodicPlaceholderWithoutChangingOtherItems() {
+        val original = loadSource()
+        val linkedIds = original.occasionLinks
+            .filter { it.occasionId == original.occasion.id }
+            .mapNotNull { it.existsInId }
+            .toSet()
+        val existing = original.existsIn.first { item ->
+            item.id in linkedIds &&
+                item.itemType != "PRAYER_NOTE" &&
+                original.existsInTexts.any { it.existsInId == item.id }
+        }
+        val nonMelodic = original.copy(
+            existsIn = original.existsIn.map { item ->
+                if (item.id == existing.id) item.copy(qoloId = null, qintoId = null)
+                else item
+            }
+        )
+        val populatedDraft = mapper.map(nonMelodic)
+        val source = nonMelodic.copy(
+            existsInTexts = nonMelodic.existsInTexts.filterNot {
+                it.existsInId == existing.id
+            }
+        )
+        val draft = mapper.map(source)
+
+        val populatedOrdered = populatedDraft.prayers.flatMap { it.orderedSourceItemIds }
+        val ordered = draft.prayers.flatMap { it.orderedSourceItemIds }
+        val resolved = draft.prayers.flatMap { it.resolvedItems }.map { it.id }
+
+        assertTrue(existing.id in populatedOrdered)
+        assertEquals(populatedOrdered.filterNot { it == existing.id }, ordered)
+        assertFalse(existing.id in resolved)
+        assertEquals(ordered, resolved)
+        assertFalse(draft.hasBlockingDiagnostics)
+    }
+
     private fun mapRepresentativeSource():
             SchemaV1CompositionDraft {
 
