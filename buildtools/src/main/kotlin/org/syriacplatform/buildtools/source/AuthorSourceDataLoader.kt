@@ -28,6 +28,14 @@ class AuthorSourceDataLoader(
                 occasionRows.single()
             ),
 
+            locations = directory.resolve("Location.csv").let { path ->
+                if (Files.isRegularFile(path)) {
+                    readRows(directory, "Location.csv").map(mapper::toLocation)
+                } else {
+                    emptyList()
+                }
+            },
+
             prayers = readRows(
                 directory,
                 "Prayers.csv"
