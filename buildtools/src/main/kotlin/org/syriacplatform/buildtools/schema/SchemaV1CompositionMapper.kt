@@ -65,6 +65,16 @@ class SchemaV1CompositionMapper(
 
                     prayerItems.forEach { item ->
 
+                        if (item.qoloId == null) {
+                            resolved += SchemaV1TextLiturgicalItem(
+                                id = item.id,
+                                noteId = item.noteId?.takeIf { it in publishedNoteIds },
+                                verses = mapVerses(source, item.id)
+                            )
+                            return@forEach
+                        }
+
+
                         if (item.qoloId == 0L) {
                             resolved +=
                                 SchemaV1UnresolvedQoloLiturgicalItem(
