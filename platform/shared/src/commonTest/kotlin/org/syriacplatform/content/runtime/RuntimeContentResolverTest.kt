@@ -369,6 +369,80 @@ class RuntimeContentResolverTest {
     }
 
     @Test
+    fun nonMelodicTextResolvesOrderedOccurrencesAndPreservesNote() {
+        val itemId = LiturgicalItemId(4132)
+        val packageData = packageWith(
+            liturgicalItems = listOf(
+                LiturgicalItem(
+                    id = itemId,
+                    noteId = 349L,
+                    target = LiturgicalItemTarget.NonMelodicText(
+                        verses = listOf(
+                            LiturgicalTextRef(
+                                id = TextOccurrenceId(9001),
+                                textId = TextId(1001)
+                            ),
+                            LiturgicalTextRef(
+                                id = TextOccurrenceId(9002),
+                                textId = TextId(1002),
+                                petgomoId = PetgomoId(701)
+                            ),
+                            LiturgicalTextRef(
+                                id = TextOccurrenceId(9003),
+                                textId = TextId(1001)
+                            )
+                        )
+                    )
+                )
+            ),
+            texts = listOf(
+                TextContent(
+                    id = TextId(1001),
+                    syriac = "First text",
+                    translations = emptyList()
+                ),
+                TextContent(
+                    id = TextId(1002),
+                    syriac = "Second text",
+                    translations = emptyList()
+                )
+            ),
+            petgomos = listOf(
+                Petgomo(
+                    id = PetgomoId(701),
+                    syriac = "Contextual Petgomo",
+                    translations = emptyList()
+                )
+            )
+        )
+
+        val result = RuntimeContentResolver(
+            RuntimeContentStore.from(packageData)
+        ).resolveLiturgicalItem(itemId)
+
+        val resolved = assertIs<Result.Success<ResolvedLiturgicalItem>>(result).data
+        assertEquals(itemId, resolved.item.id)
+        assertEquals(349L, resolved.item.noteId)
+
+        val target = assertIs<ResolvedLiturgicalItemTarget.NonMelodicText>(
+            resolved.target
+        )
+        assertEquals(
+            listOf(TextOccurrenceId(9001), TextOccurrenceId(9002), TextOccurrenceId(9003)),
+            target.verses.map { it.id }
+        )
+        assertEquals(
+            listOf(TextId(1001), TextId(1002), TextId(1001)),
+            target.verses.map { it.text.id }
+        )
+        assertEquals("First text", target.verses[0].text.syriac)
+        assertEquals("Second text", target.verses[1].text.syriac)
+        assertNull(target.verses[0].petgomo)
+        assertEquals(PetgomoId(701), target.verses[1].petgomo?.id)
+        assertNull(target.verses[2].petgomo)
+    }
+
+    @Test
     fun textWithoutPetgomoResolvesWithNullPetgomo() {
         val packageData =
             packageWith(
