@@ -459,6 +459,7 @@ class SchemaV1PackageWriter {
             is SchemaV1TextLiturgicalItem -> {
                 buildJsonObject {
                     put("id", item.id)
+                    item.locationTitle?.let { put("locationTitle", it) }
                     put("type", "text")
                     item.noteId?.let { put("noteId", it) }
                     // Required by the current DTO; non-Qolo text has no Qolo target.
