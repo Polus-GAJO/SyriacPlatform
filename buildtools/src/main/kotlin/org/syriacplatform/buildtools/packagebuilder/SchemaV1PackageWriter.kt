@@ -455,6 +455,20 @@ class SchemaV1PackageWriter {
                 }
             }
 
+            is SchemaV1TextLiturgicalItem -> {
+                buildJsonObject {
+                    put("id", item.id)
+                    put("type", "text")
+                    item.noteId?.let { put("noteId", it) }
+                    // Required by the current DTO; non-Qolo text has no Qolo target.
+                    put("targetId", 0L)
+                    put("effectiveMelodyId", JsonNull)
+                    put("melodyCandidateIds", JsonArray(emptyList()))
+                    put("petgomoId", JsonNull)
+                    put("verses", liturgicalVersesJson(item.verses))
+                }
+            }
+
             is SchemaV1UnresolvedQoloLiturgicalItem -> {
                 buildJsonObject {
                     put("id", item.id)
