@@ -12,6 +12,7 @@ import org.syriacplatform.buildtools.source.models.QintoSource
 import org.syriacplatform.buildtools.source.models.QoloSource
 import org.syriacplatform.buildtools.source.models.TextSource
 import org.syriacplatform.buildtools.source.models.NoteSource
+import org.syriacplatform.buildtools.source.models.LocationSource
 
 class AuthorSourceMapper {
 
@@ -36,6 +37,13 @@ fun toNote(row: CsvRow): NoteSource {
             ?: error("Missing publicationStatus for NoteN=${row.requiredLong("NoteN")}")
     )
 }
+
+    fun toLocation(row: CsvRow): LocationSource {
+        return LocationSource(
+            id = row.requiredLong("LocationN"),
+            name = row["Location"]
+        )
+    }
 
     fun toPrayer(row: CsvRow): PrayerSource {
         return PrayerSource(
