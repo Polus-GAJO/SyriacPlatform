@@ -130,6 +130,45 @@ class LiturgicalItemTextReferenceRuleTest {
     }
 
     @Test
+    fun missingNonMelodicVerseTextReferenceProducesFatalIssue() {
+        val packageData = packageWith(
+            liturgicalItems = listOf(
+                LiturgicalItem(
+                    id = LiturgicalItemId(501),
+                    target = LiturgicalItemTarget.NonMelodicText(
+                        verses = listOf(
+                            LiturgicalTextRef(
+                                id = TextOccurrenceId(9001),
+                                textId = TextId(1001)
+                            ),
+                            LiturgicalTextRef(
+                                id = TextOccurrenceId(9002),
+                                textId = TextId(999)
+                            )
+                        )
+                    )
+                )
+            ),
+            texts = listOf(
+                TextContent(
+                    id = TextId(1001),
+                    syriac = "Existing text",
+                    translations = emptyList()
+                )
+            )
+        )
+
+        val issues = rule.validate(packageData)
+
+        assertEquals(1, issues.size)
+        assertEquals(ValidationSeverity.FATAL, issues.single().severity)
+        assertEquals(
+            "liturgicalItems[501].target.verses[1].textId",
+            issues.single().location
+        )
+    }
+
+    @Test
     fun missingQoloVerseTextReferenceProducesFatalIssue() {
         val packageData =
             packageWith(
