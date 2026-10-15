@@ -24,6 +24,8 @@ class TextOccurrenceMediaSegmentReferenceRule :
                             target.verses
                         is LiturgicalItemTarget.UnresolvedQolo ->
                             target.verses
+                        is LiturgicalItemTarget.NonMelodicText ->
+                            target.verses
                         is LiturgicalItemTarget.Text ->
                             emptyList()
                     }
