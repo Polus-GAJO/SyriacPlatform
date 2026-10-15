@@ -83,6 +83,31 @@ class PrayerSequenceAndLiturgicalItemTest {
     }
 
     @Test
+    fun nonMelodicTextWithContextualOccurrencesIsAccepted() {
+        val payload = """
+            {
+              "id": 4132,
+              "type": "text",
+              "targetId": 0,
+              "noteId": 349,
+              "verses": [
+                {"id": 9001, "textId": 1001, "petgomoId": null},
+                {"id": 9002, "textId": 1002, "petgomoId": null},
+                {"id": 9003, "textId": 1001, "petgomoId": null}
+              ]
+            }
+        """.trimIndent()
+
+        val dto = json.decodeFromString<LiturgicalItemJsonDto>(payload)
+        val result = dto.toDomain()
+        val item = assertIs<Result.Success<LiturgicalItem>>(result).data
+
+        assertEquals(LiturgicalItemId(4132), item.id)
+        assertEquals(349L, item.noteId)
+        assertIs<LiturgicalItemTarget.Text>(item.target)
+    }
+
+    @Test
     fun qoloLiturgicalItemIsDecodedWithEffectiveMelody() {
         val collection = decodeLiturgicalItems()
 
