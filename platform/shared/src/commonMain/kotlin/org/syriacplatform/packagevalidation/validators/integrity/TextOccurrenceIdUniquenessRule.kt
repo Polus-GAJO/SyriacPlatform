@@ -29,6 +29,9 @@ class TextOccurrenceIdUniquenessRule :
                     is LiturgicalItemTarget.UnresolvedQolo ->
                         target.verses.map { it.id.value }
 
+                    is LiturgicalItemTarget.NonMelodicText ->
+                        target.verses.map { it.id.value }
+
                     is LiturgicalItemTarget.Text ->
                         emptyList()
                 }
