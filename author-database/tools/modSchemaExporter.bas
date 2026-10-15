@@ -1454,6 +1454,7 @@ Private Sub ExportOccasionDataToFolder( _
     ExportNotes occasionId, outputRoot
     ExportOccaExis occasionId, outputRoot
     ExportExistsIn occasionId, outputRoot
+    ExportLocations occasionId, outputRoot
     ExportExistsInText occasionId, outputRoot
     ExportPetExis occasionId, outputRoot
     ExportPrayers occasionId, outputRoot
@@ -1552,6 +1553,28 @@ Private Sub ExportExistsIn( _
     ExportQueryToCsv _
         sqlText, _
         outputRoot & "\ExistsIn.csv"
+
+End Sub
+
+
+Private Sub ExportLocations( _
+    ByVal occasionId As Long, _
+    ByVal outputRoot As String _
+)
+
+    Dim sqlText As String
+
+    sqlText = _
+        "SELECT DISTINCT L.LocationN, L.Location " & _
+        "FROM Location AS L " & _
+        "INNER JOIN ExistsIn AS E ON L.LocationN = E.LocationN " & _
+        "INNER JOIN OccaExis AS OE ON E.ID = OE.ExistInID " & _
+        "WHERE OE.OccN = " & occasionId & " " & _
+        "ORDER BY L.LocationN;"
+
+    ExportQueryToCsv _
+        sqlText, _
+        outputRoot & "\\Location.csv"
 
 End Sub
 
