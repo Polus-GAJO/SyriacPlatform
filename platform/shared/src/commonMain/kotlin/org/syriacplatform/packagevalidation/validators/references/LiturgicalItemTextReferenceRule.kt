@@ -84,6 +84,7 @@ class LiturgicalItemTextReferenceRule :
                         }
                     }
 
+                    is LiturgicalItemTarget.NonMelodicText,
                     is LiturgicalItemTarget.UnresolvedQolo -> {
                         target.verses.forEachIndexed {
                                 index,
