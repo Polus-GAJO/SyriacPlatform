@@ -37,6 +37,8 @@ class SchemaV1CompositionMapper(
             .map { it.existsInId }
             .toSet()
 
+        val locationTitles = source.locations.associate { it.id to it.name }
+
         val selectedItems =
             source.existsIn.filter {
                 it.id in occasionExistsInIds &&
@@ -77,7 +79,8 @@ class SchemaV1CompositionMapper(
                             resolved += SchemaV1TextLiturgicalItem(
                                 id = item.id,
                                 noteId = item.noteId?.takeIf { it in publishedNoteIds },
-                                verses = mapVerses(source, item.id)
+                                verses = mapVerses(source, item.id),
+                                locationTitle = item.locationId?.let(locationTitles::get)
                             )
                             return@forEach
                         }
