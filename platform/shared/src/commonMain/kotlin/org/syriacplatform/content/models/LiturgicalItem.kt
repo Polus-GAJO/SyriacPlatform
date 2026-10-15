@@ -11,5 +11,6 @@ import org.syriacplatform.common.types.LiturgicalItemId
 data class LiturgicalItem(
     val id: LiturgicalItemId,
     val target: LiturgicalItemTarget,
-    val noteId: Long? = null
+    val noteId: Long? = null,
+    val locationTitle: String? = null
 )
