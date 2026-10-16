@@ -63,3 +63,17 @@ Proposed relationship fields: `TranslationLinks(LinkID, TranslationID, TextID NU
 A single translation can therefore be linked to a `Texts` record and to a `Petgomo` record without duplicating its content. Preserve separate canonical entities in package Schema v1; Build Tools distribute the shared authored translation to each entity's existing `translations` array. No app/runtime schema migration is necessary for this relationship model.
 
 **Pending before implementation:** confirm whether an existing `Languages` table exists; choose language-code policy, multiple translations per language, review/publication selection, and Access constraints/forms. Identical Syriac text should be reviewed before sharing translation links; normalization may find candidates but must not silently equate diacritic or editorial variants. No Access schema or executable code was changed by this documentation update.
+
+
+## Design decision — 2026-10-16: retain alternatives, select one published translation
+
+**User-approved editorial rule:** For one Syriac source and one language, retain multiple translations from different translators/sources in the Author Database, but select **one** for publication in the app.
+
+Proposed authoring implementation:
+
+- `Translations` retains every translation, language, source/translator and an editorial review status independent of publication.
+- `TranslationLinks` links a translation to exactly one `TextID` or `PetgomoID` per row; add `IsPublished` (Yes/No) on the link, **not** globally on `Translations`, because the same translation may be selected for one source entity and not another.
+- Publishing invariant: at most one `IsPublished = True` link for each (`TextID`, language) and each (`PetgomoID`, language). Validate this across the joined translation language in Access save/publish workflows and again in Build Tools; ordinary Access indexes on `TranslationLinks` alone cannot enforce this cross-table conditional uniqueness.
+- Unselected translations remain in the authoring database; the initial application package should include only the selected translation for each source entity and language. A missing selected translation leaves the language unavailable, without auto-translation.
+- Switching a published selection must atomically clear the prior selection for that source entity/language to avoid inconsistent intermediate states.
+- This is an approved **design direction**, not an implemented Access migration. Review the exact Access schema and validation workflow before adding tables/forms.
