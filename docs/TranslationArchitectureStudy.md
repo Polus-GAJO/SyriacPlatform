@@ -52,3 +52,14 @@
 - Preserve Syriac text, authored occurrence ordering and Petgomo relationships.
 - No change to the current non-melodic text UI or hymn navigation during translation architecture study.
 - Keep language-content translations separate from application interface localization.
+
+
+## Design decision — 2026-10-16: shared translations without legacy table migration
+
+**User-approved direction:** Use one canonical `Translations` table and a separate `TranslationLinks` association table. Do **not** merge or restructure existing Access `Texts` and `Petgomo` tables or their downstream queries, reports, forms and VBA. Roughly 20 Petgomo records also occur as text; identical Syriac content should share a translation regardless of liturgical role.
+
+Proposed relationship fields: `TranslationLinks(LinkID, TranslationID, TextID NULL, PetgomoID NULL)`. Each link row must refer to **exactly one** of TextID or PetgomoID (exclusive OR); the same TranslationID can have multiple link rows. Add referential integrity and duplicate-link prevention, plus a save/publish validation that a translation has at least one link. Translation identity must not be inferred from `ExistsIn` or placement.
+
+A single translation can therefore be linked to a `Texts` record and to a `Petgomo` record without duplicating its content. Preserve separate canonical entities in package Schema v1; Build Tools distribute the shared authored translation to each entity's existing `translations` array. No app/runtime schema migration is necessary for this relationship model.
+
+**Pending before implementation:** confirm whether an existing `Languages` table exists; choose language-code policy, multiple translations per language, review/publication selection, and Access constraints/forms. Identical Syriac text should be reviewed before sharing translation links; normalization may find candidates but must not silently equate diacritic or editorial variants. No Access schema or executable code was changed by this documentation update.
