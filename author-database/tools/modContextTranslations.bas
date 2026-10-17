@@ -32,6 +32,8 @@ Public Sub InstallContextTranslationForm()
         "T.ReviewStatus FROM TranslationLinks AS L INNER JOIN Translations AS T " & _
         "ON L.TranslationID = T.TranslationID"
     f.DefaultView = 1
+    ' CreateForm has no header by default. Add it before referencing acHeader.
+    DoCmd.RunCommand acCmdFormHdrFtr
     f.Width = 15100
     f.Section(acDetail).Height = 1500
     f.Section(acHeader).Height = 2650
