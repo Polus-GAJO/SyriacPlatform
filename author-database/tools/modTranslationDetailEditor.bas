@@ -78,7 +78,6 @@ Public Sub InstallTranslationDetailEditor()
     c.Caption = "Cancel"
     c.OnClick = "=CancelTranslationDetail()"
 
-    f.OnBeforeUpdate = "=ValidateTranslationDetail()"
     DoCmd.Close acForm, n, acSaveYes
     DoCmd.Rename EDITOR_FORM, acForm, n
     MsgBox "Created " & EDITOR_FORM & ".", vbInformation
