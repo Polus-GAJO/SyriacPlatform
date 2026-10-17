@@ -107,11 +107,22 @@ Public Sub InstallContextTranslationForm()
 End Sub
 
 Public Sub OpenTranslationsForText(ByVal textId As Long)
-    DoCmd.OpenForm BROWSER_NAME, , , , , , "Text|" & CStr(textId)
+    OpenContextTranslations "Text", textId
 End Sub
 
 Public Sub OpenTranslationsForPetgomo(ByVal petN As Long)
-    DoCmd.OpenForm BROWSER_NAME, , , , , , "Petgomo|" & CStr(petN)
+    OpenContextTranslations "Petgomo", petN
+End Sub
+
+Private Sub OpenContextTranslations(ByVal sourceType As String, ByVal sourceId As Long)
+    If sourceId <= 0 Then Err.Raise vbObjectError + 5320, , "Invalid source ID."
+    ' Access does not re-run OnLoad/OpenArgs when OpenForm targets an already-open form.
+    ' Close and reopen so the new source context is always applied.
+    If CurrentProject.AllForms(BROWSER_NAME).IsLoaded Then
+        DoCmd.Close acForm, BROWSER_NAME, acSaveNo
+    End If
+    DoCmd.OpenForm BROWSER_NAME, acNormal, , , , , _
+                   sourceType & "|" & CStr(sourceId)
 End Sub
 
 Public Function LoadContextTranslationBrowser() As Boolean
@@ -170,9 +181,17 @@ Public Function RefreshContextTranslationList() As Boolean
     Else
         Exit Function
     End If
-    f.Filter = "[" & target & "]=" & CStr(CLng(parts(1))) & _
-               " AND [LanguageID]=" & CStr(CLng(f!cboLanguageFilter))
-    f.FilterOn = True
+    ' Restrict the RecordSource itself, including when zero translations exist.
+    ' A bound form with no matching rows must remain empty rather than showing
+    ' stale records from a previously selected source.
+    f.RecordSource = "SELECT L.LinkID, L.TextID, L.PetN, L.TranslationID, " & _
+        "L.IsPublished, T.LanguageID, T.Translation, T.Translator, T.Source, " & _
+        "T.ReviewStatus FROM TranslationLinks AS L INNER JOIN Translations AS T " & _
+        "ON L.TranslationID = T.TranslationID WHERE L.[" & target & "]=" & _
+        CStr(CLng(parts(1))) & " AND T.LanguageID=" & _
+        CStr(CLng(f!cboLanguageFilter))
+    f.FilterOn = False
+    f.Requery
     RefreshContextTranslationList = True
     Exit Function
 Failed:
