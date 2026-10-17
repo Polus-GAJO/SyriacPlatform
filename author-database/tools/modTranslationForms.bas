@@ -26,33 +26,32 @@ Private Sub CreateLinksForm()
     f.Caption = "Linked texts and Petgomo"
     f.DefaultView = 1 ' Continuous Forms
     f.Width = 11500
-    f.Section(acDetail).Height = 750
-    f.Section(acHeader).Height = 550
+    f.Section(acDetail).Height = 1050
     f.NavigationButtons = True
     f.RecordSelectors = True
 
-    AddHeader tempName, "TextID (optional)", 200, 170, 1700
-    AddHeader tempName, "PetN (optional)", 2100, 170, 1700
-    AddHeader tempName, "Published?", 4000, 170, 1300
-    AddHeader tempName, "LinkID", 5550, 170, 900
+    AddLabel tempName, "TextID (optional)", 200, 90, 1700
+    AddLabel tempName, "PetN (optional)", 2100, 90, 1700
+    AddLabel tempName, "Published?", 4000, 90, 1300
+    AddLabel tempName, "LinkID", 5550, 90, 900
 
-    AddBoundText tempName, "txtTextID", "TextID", 200, 120, 1500, 350
-    AddBoundText tempName, "txtPetN", "PetN", 2100, 120, 1500, 350
+    AddBoundText tempName, "txtTextID", "TextID", 200, 490, 1500, 350
+    AddBoundText tempName, "txtPetN", "PetN", 2100, 490, 1500, 350
     Dim c As Control
-    Set c = CreateControl(tempName, acCheckBox, acDetail, , "IsPublished", 4220, 140, 450, 350)
+    Set c = CreateControl(tempName, acCheckBox, acDetail, , "IsPublished", 4220, 510, 450, 350)
     c.Name = "chkPublished"
     c.Locked = True
     c.TabStop = False
-    AddBoundText tempName, "txtLinkID", "LinkID", 5550, 120, 900, 350
+    AddBoundText tempName, "txtLinkID", "LinkID", 5550, 490, 900, 350
     f.Controls("txtLinkID").Locked = True
     f.Controls("txtLinkID").TabStop = False
 
-    Set c = CreateControl(tempName, acCommandButton, acDetail, , , 6800, 100, 1950, 430)
+    Set c = CreateControl(tempName, acCommandButton, acDetail, , , 6800, 470, 1950, 430)
     c.Name = "cmdPublish"
     c.Caption = "Publish this link"
     c.OnClick = "=PublishActiveTranslationLink()"
 
-    Set c = CreateControl(tempName, acCommandButton, acDetail, , , 8950, 100, 1800, 430)
+    Set c = CreateControl(tempName, acCommandButton, acDetail, , , 8950, 470, 1800, 430)
     c.Name = "cmdUnpublish"
     c.Caption = "Unpublish"
     c.OnClick = "=UnpublishActiveTranslationLink()"
