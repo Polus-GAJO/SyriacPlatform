@@ -123,7 +123,7 @@ Public Function LoadContextTranslationBrowser() As Boolean
     Dim sql As String
     Dim rs As DAO.Recordset
 
-    Set f = Screen.ActiveForm
+    Set f = Forms(BROWSER_NAME)
     If IsNull(f.OpenArgs) Then Err.Raise vbObjectError + 5300, , "Open this form from a source record."
     parts = Split(CStr(f.OpenArgs), "|")
     If UBound(parts) <> 1 Then Err.Raise vbObjectError + 5301, , "Invalid source argument."
@@ -159,7 +159,7 @@ Public Function RefreshContextTranslationList() As Boolean
     Dim f As Form
     Dim parts() As String
     Dim target As String
-    Set f = Screen.ActiveForm
+    Set f = Forms(BROWSER_NAME)
     If IsNull(f.OpenArgs) Or IsNull(f!cboLanguageFilter) Then Exit Function
     parts = Split(CStr(f.OpenArgs), "|")
     If UBound(parts) <> 1 Then Exit Function
@@ -194,7 +194,7 @@ Public Function NewContextTranslation() As Boolean
     Dim translationId As Long
     Dim link As DAO.Recordset
 
-    Set f = Screen.ActiveForm
+    Set f = Forms(BROWSER_NAME)
     If IsNull(f!cboLanguageFilter) Then Exit Function
     parts = Split(CStr(f.OpenArgs), "|")
     target = IIf(parts(0) = "Text", "TextID", "PetN")
@@ -244,7 +244,7 @@ Public Function LinkExistingContextTranslation() As Boolean
     Dim answer As String
     Dim rs As DAO.Recordset
 
-    Set f = Screen.ActiveForm
+    Set f = Forms(BROWSER_NAME)
     answer = InputBox("Enter the ID of an existing translation in the selected language:", "Link existing translation")
     If Len(Trim$(answer)) = 0 Then Exit Function
     If Not IsNumeric(answer) Then Err.Raise vbObjectError + 5310, , "Enter a numeric TranslationID."
