@@ -21,6 +21,8 @@ Public Sub PublishTranslationLink(ByVal linkId As Long)
     Dim targetField As String
     Dim sql As String
     Dim inTransaction As Boolean
+    Dim errNumber As Long
+    Dim errDescription As String
 
     Set db = CurrentDb
     Set ws = DBEngine.Workspaces(0)
@@ -71,8 +73,6 @@ Public Sub PublishTranslationLink(ByVal linkId As Long)
     Exit Sub
 
 RollbackAndRaise:
-    Dim errNumber As Long
-    Dim errDescription As String
     errNumber = Err.Number
     errDescription = Err.Description
     On Error Resume Next
