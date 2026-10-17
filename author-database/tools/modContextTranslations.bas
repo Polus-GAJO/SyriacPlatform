@@ -39,7 +39,7 @@ Public Sub InstallContextTranslationForm()
     f.Section(acHeader).Height = 2650
     f.AllowAdditions = False
     f.AllowDeletions = False
-    f.AllowEdits = False
+    f.AllowEdits = True
     f.NavigationButtons = True
     f.RecordSelectors = False
     f.FilterOn = False
@@ -296,20 +296,11 @@ End Function
 Public Function EditContextTranslation() As Boolean
     On Error GoTo Failed
     Dim f As Form
-    Dim answer As String
-    Dim rs As DAO.Recordset
+    Dim translationId As Long
     Set f = Screen.ActiveControl.Parent
-    If f.NewRecord Then Exit Function
-    answer = InputBox("Edit translation (shared by all linked sources):", _
-                      "Edit translation", Nz(f!Translation, ""))
-    If Len(Trim$(answer)) = 0 Then Exit Function
-    Set rs = CurrentDb.OpenRecordset("SELECT * FROM Translations WHERE TranslationID=" & _
-                                     CLng(f!TranslationID), dbOpenDynaset)
-    If rs.EOF Then Err.Raise vbObjectError + 5313, , "Translation no longer exists."
-    rs.Edit
-    rs!Translation = answer
-    rs.Update
-    rs.Close
+    If f.NewRecord Or IsNull(f!TranslationID) Then Exit Function
+    translationId = CLng(f!TranslationID)
+    OpenTranslationDetail translationId
     f.Requery
     EditContextTranslation = True
     Exit Function
