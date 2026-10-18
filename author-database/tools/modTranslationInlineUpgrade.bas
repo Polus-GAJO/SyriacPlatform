@@ -16,6 +16,7 @@ Private mEditingTranslationId As Long
 Public Sub UpgradeInlineTranslationEditor()
     Dim f As Form
     Dim c As Control
+    Dim message As String
     On Error GoTo Failed
 
     If CurrentProject.AllForms(FORM_NAME).IsLoaded Then
@@ -73,13 +74,11 @@ Public Sub UpgradeInlineTranslationEditor()
     ' The existing Edit button now unlocks this form's fields.
     f!cmdEdit.OnClick = "=BeginInlineTranslationEdit()"
     f.OnCurrent = "=InlineTranslationCurrent()"
-    f.OnBeforeUpdate = "=InlineTranslationBeforeUpdate()"
 
     DoCmd.Close acForm, FORM_NAME, acSaveYes
     MsgBox "Inline translation editor installed. Test on sample records.", vbInformation
     Exit Sub
 Failed:
-    Dim message As String
     message = Err.Number & " - " & Err.Description
     On Error Resume Next
     DoCmd.Close acForm, FORM_NAME, acSaveNo
