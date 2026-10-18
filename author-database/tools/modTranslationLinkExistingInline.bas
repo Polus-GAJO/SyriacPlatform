@@ -91,6 +91,7 @@ Public Function AttachSelectedTranslation() As Boolean
     Dim f As Form, parts() As String, sourceField As String
     Dim sourceId As Long, translationId As Long
     Dim rs As DAO.Recordset
+    Dim errorText As String
     On Error GoTo Failed
     Set f = Forms(FORM_NAME)
     If IsNull(f!cboExistingTranslation) Then
@@ -132,7 +133,8 @@ Public Function AttachSelectedTranslation() As Boolean
     AttachSelectedTranslation = True
     Exit Function
 Failed:
+    errorText = Err.Description
     On Error Resume Next
     If Not rs Is Nothing Then rs.Close
-    MsgBox "Cannot attach translation: " & Err.Description, vbExclamation
+    MsgBox "Cannot attach translation: " & errorText, vbExclamation
 End Function
