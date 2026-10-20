@@ -1463,6 +1463,7 @@ Private Sub ExportOccasionDataToFolder( _
     ExportMelodies occasionId, outputRoot
     ExportTexts occasionId, outputRoot
     ExportPetgomos occasionId, outputRoot
+    ExportPublishedTranslations occasionId, outputRoot
 
 End Sub
 
@@ -1835,6 +1836,68 @@ End Sub
 
 
 
+
+
+' ============================================================
+' PUBLISHED TRANSLATIONS FOR AN OCCASION
+' Only published links to source records exported in this package.
+' Shared translations are exported once, with their valid links.
+' ============================================================
+
+Private Sub ExportPublishedTranslations( _
+    ByVal occasionId As Long, _
+    ByVal outputRoot As String _
+)
+    Dim eligibleLinks As String
+    Dim eligibleTranslations As String
+    Dim eligibleLanguages As String
+
+    eligibleLinks = PublishedTranslationLinksSql(occasionId)
+    eligibleTranslations = "SELECT DISTINCT L.TranslationID FROM (" & _
+                           eligibleLinks & ") AS L"
+    eligibleLanguages = "SELECT DISTINCT T.LanguageID FROM Translations AS T " & _
+                        "WHERE T.TranslationID IN (" & eligibleTranslations & ")"
+
+    ExportQueryToCsv _
+        "SELECT G.* FROM Languages AS G WHERE G.LanguageID IN (" & _
+        eligibleLanguages & ") ORDER BY G.LanguageID;", _
+        outputRoot & "\Languages.csv"
+
+    ExportQueryToCsv _
+        "SELECT T.* FROM Translations AS T WHERE T.TranslationID IN (" & _
+        eligibleTranslations & ") ORDER BY T.TranslationID;", _
+        outputRoot & "\Translations.csv"
+
+    ExportQueryToCsv _
+        "SELECT L.* FROM TranslationLinks AS L WHERE L.LinkID IN (" & _
+        "SELECT X.LinkID FROM (" & eligibleLinks & ") AS X" & _
+        ") ORDER BY L.LinkID;", _
+        outputRoot & "\TranslationLinks.csv"
+End Sub
+
+Private Function PublishedTranslationLinksSql(ByVal occasionId As Long) As String
+    Dim ids As String
+    Dim textIds As String
+    Dim petIds As String
+
+    ids = "SELECT E.ID FROM ExistsIn AS E " & _
+          "INNER JOIN OccaExis AS OE ON E.ID=OE.ExistInID " & _
+          "WHERE OE.OccN=" & CStr(occasionId)
+
+    textIds = "SELECT DISTINCT EIT.TextID FROM ExistsInText AS EIT " & _
+              "WHERE EIT.TextID Is Not Null AND EIT.ExistsInID IN (" & ids & ")"
+
+    petIds = "SELECT DISTINCT PE.PetN FROM PetExis AS PE " & _
+             "WHERE PE.PetN Is Not Null AND PE.ExistInTextID IN (" & _
+             "SELECT EIT.ID FROM ExistsInText AS EIT " & _
+             "WHERE EIT.ExistsInID IN (" & ids & "))"
+
+    PublishedTranslationLinksSql = _
+        "SELECT L.LinkID, L.TranslationID FROM TranslationLinks AS L " & _
+        "WHERE L.IsPublished=True AND (" & _
+        "(L.TextID Is Not Null AND L.TextID IN (" & textIds & ")) OR " & _
+        "(L.PetN Is Not Null AND L.PetN IN (" & petIds & ")))"
+End Function
 
 Private Sub ExportQueryToCsv( _
     ByVal sqlText As String, _
