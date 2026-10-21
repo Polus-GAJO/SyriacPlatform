@@ -1,6 +1,7 @@
 package org.syriacplatform.buildtools.schema
 
 import org.syriacplatform.buildtools.source.AuthorSourceData
+import org.syriacplatform.buildtools.source.PublishedTranslationIndexBuilder
 import org.syriacplatform.buildtools.source.models.MelodySource
 import org.syriacplatform.buildtools.source.models.PetgomoSource
 import org.syriacplatform.buildtools.source.models.PrayerSource
@@ -33,6 +34,7 @@ class SchemaV1CanonicalMapper {
         source: AuthorSourceData,
         media: SchemaV1CanonicalMedia?
     ): SchemaV1CanonicalContent {
+        val publishedTranslations = PublishedTranslationIndexBuilder().build(source)
         return SchemaV1CanonicalContent(
             prayers = source.prayers
                 .map(::mapPrayer),
@@ -42,10 +44,20 @@ class SchemaV1CanonicalMapper {
                 .map(::mapQolo),
 
             texts = source.texts
-                .map(::mapText),
+                .map { text ->
+                    mapText(text).copy(
+                        translations = publishedTranslations.byTextId[text.id].orEmpty()
+                            .map { SchemaV1Translation(it.languageCode, it.content) }
+                    )
+                },
 
             petgomos = source.petgomos
-                .map(::mapPetgomo),
+                .map { petgomo ->
+                    mapPetgomo(petgomo).copy(
+                        translations = publishedTranslations.byPetgomoId[petgomo.id].orEmpty()
+                            .map { SchemaV1Translation(it.languageCode, it.content) }
+                    )
+                },
 
             qintos = source.qintos
                 .filter { it.id > 0L }
