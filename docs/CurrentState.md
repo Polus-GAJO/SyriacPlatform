@@ -3920,3 +3920,44 @@ Non-melodic liturgical texts (prayers/readings/sedros) already exist in Author D
 - Not yet independently verified in this checkpoint: the full `:shared:testAndroidHostTest` suite after that test fix, and a new emulator build after UI commit `cd282da`. Do not claim these tests passed without their logs.
 - Editorial decision: postpone further visual formatting and ordering polish; current Syriac text presentation is satisfactory. Next milestone is translation authoring/identity/linking design, not UI styling.
 - Translation design investigation: see `docs/TranslationArchitectureStudy.md`. No translation database schema change has been approved or implemented yet.
+
+
+---
+
+## 2026-10-22 — Access translation authoring and published-only occasion export (user verified)
+
+The earlier 2026-10-15 statement that translations were not modeled in Access is **superseded** for the Author Database. This checkpoint covers Access and its CSV export only; it does **not** claim Build Tools, package JSON, runtime, or UI integration.
+
+### Author Database schema and editorial contract
+
+- Existing canonical Syriac sources remain `Texts(TextID)` and `Petgomo(PetN)`; neither table was merged or replaced.
+- `Languages(LanguageID, LanguageCode, LanguageName)`, seeded with `ar`, `en`, `fr`.
+- `Translations(TranslationID, LanguageID, Translation, Translator, Source, ReviewStatus)`; editorial statuses `Draft`, `Reviewed`, `Approved`.
+- `TranslationLinks(LinkID, TranslationID, TextID NULL, PetN NULL, IsPublished)`. Exactly one of `TextID` and `PetN` must be populated per link. A single canonical translation may have multiple links to different Texts/Petgomo. A translation edit affects all its linked sources.
+- `IsPublished` belongs to the **link**, not the translation, and is independent of `ReviewStatus`. At most one published link per source/language is allowed by the publishing workflow; Build Tools must validate this invariant independently.
+- User enabled both **Cascade Update Related Fields** and **Cascade Delete Related Records** for the relationship `Translations.TranslationID -> TranslationLinks.TranslationID`. The final-delete button checks cascade and deletes one Translations record; Access removes all links. `Remove link` deletes only the current association.
+- Distinguish **Author DB alternatives/drafts** from **publishable app data**: only published links and their referenced translations should leave Access in the occasion export.
+
+### Forms and VBA (user tested)
+
+- `frmTextTranslations` opens for a canonical `TextID` or `PetN` and filters by selected content language (Arabic default). Available workflows: inline Edit/Save/Cancel, New translation, Link existing translation, Publish/Unpublish, Remove link, and permanent Delete with affected-link warning.
+- The same translation browser opens from `TextsChoose` and `TextsForQolo`; the user verified the latter and will polish its visual layout.
+- Runtime VBA modules to retain: `modContextTranslations`, `modTranslationPublishing`, `modTranslationInlineUpgrade`, `modTranslationNewInline`, `modTranslationLinkExistingInline`, `modTranslationPermanentDelete`, `modTextsForQoloTranslations`. Several contain both one-time installation procedures and live button callbacks; do not delete them based on the word Upgrade/Install.
+
+### Occasion CSV export (user tested)
+
+`author-database/tools/modSchemaExporter.bas` now calls `ExportPublishedTranslations` from `ExportOccasionDataToFolder` (commit `8903ca6`). Each `author-database/exports/occasion-<id>/` additionally contains:
+
+- `Languages.csv`: languages referenced by eligible exported translations;
+- `Translations.csv`: distinct canonical translation rows referenced by eligible published links;
+- `TranslationLinks.csv`: published links only, scoped to TextID/PetN included by the occasion's `ExistsIn -> ExistsInText` and `PetExis` relationships.
+
+No unpublished translation or unrelated occasion links are exported. Shared translations appear once with multiple eligible links. The user explicitly verified successful export, published-only filtering, and correct link counts in Access on 2026-10-22. This is verification of **CSV files**, not of application package contents.
+
+### Next milestone — buildtools to app
+
+1. Inspect current CSV loader/source DTOs, composition mapper, Schema-v1 text/Petgomo translation arrays, package writer, validator, runtime resolver, and UI.
+2. Add focused tests for CSV parsing and published-only source/link association, language codes, shared translations, and missing/duplicate references; do not expose unpublished records.
+3. Wire Access CSVs through Build Tools into existing Schema-v1 `texts` and `petgomo` translation arrays where compatible, with deterministic ordering and explicit validation of at most one published translation per source/language.
+4. Test generated occasion package, shared runtime access, and language selection/display in the app; keep **content translation language** distinct from **UI localization language**.
+5. Ask user to run focused Gradle tests on Windows after each small commit. Do not claim platform-side success before those tests.
