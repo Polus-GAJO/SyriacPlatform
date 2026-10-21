@@ -310,6 +310,60 @@ class GeneratedAuthorPackageRuntimeIntegrationTest {
                 }
         }
 
+    /**
+     * Occasion 379 is the real author-export translation smoke test:
+     * TextIDs 6064-6066 have published ar/en translations; 6067 does not.
+     * Exercise the complete JSON -> package loader -> runtime index ->
+     * resolved liturgical verse path, without changing UI behavior.
+     */
+    @Test
+    fun publishedTranslationsFromGeneratedPreviewReachRuntimeVerses() = runTest {
+        if (occasionId != 379L) return@runTest
+
+        val loader = ApplicationPackageLoader(
+            source = FileSystemTestPackageSource(generatedPreviewPackageDirectory())
+        )
+        val loaded = assertIs<PackageLoadResult.Success>(
+            loader.load(coreCompatibility = CoreCompatibilityDefaults.CURRENT)
+        )
+        val store = RuntimeContentStore.from(loaded.packageData)
+        val resolver = RuntimeContentResolver(store)
+        val occasion = assertIs<Result.Success<RuntimeEntryPoint>>(
+            resolver.resolveDefaultEntryPoint()
+        ).data.occasion
+
+        val verses = occasion.prayerSequences.flatMap { sequence ->
+            sequence.items.flatMap { resolved ->
+                when (val target = resolved.target) {
+                    is ResolvedLiturgicalItemTarget.Qolo -> target.verses
+                    is ResolvedLiturgicalItemTarget.NonMelodicText -> target.verses
+                    is ResolvedLiturgicalItemTarget.UnresolvedQolo -> target.verses
+                    is ResolvedLiturgicalItemTarget.Text -> emptyList()
+                }
+            }
+        }
+        val canonicalTexts = store.content.texts.associateBy { it.id.value }
+        listOf(6064L, 6065L, 6066L).forEach { textId ->
+            val text = assertNotNull(canonicalTexts[textId], "Missing canonical TextID=$textId")
+            assertEquals(
+                setOf("ar", "en"),
+                text.translations.map { it.language }.toSet(),
+                "Wrong published languages for TextID=$textId"
+            )
+            assertEquals(2, text.translations.size)
+            assertTrue(text.translations.all { it.content.isNotBlank() })
+            val occurrences = verses.filter { it.text.id.value == textId }
+            assertTrue(occurrences.isNotEmpty(), "TextID=$textId did not reach runtime verses")
+            occurrences.forEach { occurrence ->
+                assertEquals(text.translations, occurrence.text.translations)
+            }
+        }
+        assertTrue(
+            assertNotNull(canonicalTexts[6067L]).translations.isEmpty(),
+            "Unpublished TextID=6067 must not contain translations"
+        )
+    }
+
     private val occasionId: Long
         get() =
             requireNotNull(
