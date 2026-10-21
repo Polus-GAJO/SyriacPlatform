@@ -223,6 +223,9 @@ fun rejectsArchivedNotesFromCsv() {
 
     @Test
     fun loadsPublishedTranslationsAndSharedLinks() {
+        val original = loader.load(representativeExportDirectory())
+        val textId = original.texts.first().id
+        val petId = original.petgomos.first().id
         val temp = Files.createTempDirectory("translation-loader-")
         try {
             Files.list(representativeExportDirectory()).use { stream ->
@@ -232,13 +235,13 @@ fun rejectsArchivedNotesFromCsv() {
             }
             Files.writeString(temp.resolve("Languages.csv"), "LanguageID,LanguageCode,LanguageName\n1,ar,Arabic\n")
             Files.writeString(temp.resolve("Translations.csv"), "TranslationID,LanguageID,Translation,Translator,Source,ReviewStatus\n41,1,Example,,,Draft\n")
-            Files.writeString(temp.resolve("TranslationLinks.csv"), "LinkID,TranslationID,TextID,PetN,IsPublished\n1,41,100,,True\n2,41,,200,True\n")
+            Files.writeString(temp.resolve("TranslationLinks.csv"), "LinkID,TranslationID,TextID,PetN,IsPublished\n1,41,$textId,,True\n2,41,,$petId,True\n")
             val data = loader.load(temp)
             assertEquals("ar", data.languages.single().code)
             assertEquals("Example", data.translations.single().content)
             assertEquals(2, data.translationLinks.size)
-            assertEquals(100L, data.translationLinks[0].textId)
-            assertEquals(200L, data.translationLinks[1].petgomoId)
+            assertEquals(textId, data.translationLinks[0].textId)
+            assertEquals(petId, data.translationLinks[1].petgomoId)
         } finally {
             temp.toFile().deleteRecursively()
         }
