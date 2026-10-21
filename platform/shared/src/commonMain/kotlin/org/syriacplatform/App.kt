@@ -1383,6 +1383,10 @@ private fun HymnDetailsScreen(
         mutableStateOf<String?>(null)
     }
 
+    var shownTranslation by remember(liturgicalItemId) {
+        mutableStateOf<String?>(null)
+    }
+
     var selectedMelodyId by remember(liturgicalItemId) {
         mutableStateOf<MelodyId?>(null)
     }
@@ -1439,10 +1443,12 @@ private fun HymnDetailsScreen(
         }
     }
 
+    androidx.compose.foundation.layout.Box(
+        modifier = Modifier.fillMaxSize().safeDrawingPadding()
+    ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .safeDrawingPadding()
             .background(MaterialTheme.colorScheme.primaryContainer)
             .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 8.dp)
     ) {
@@ -1479,23 +1485,34 @@ private fun HymnDetailsScreen(
                 if (languages.isNotEmpty()) {
                     androidx.compose.foundation.layout.Row(
                         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        (listOf<String?>(null) + languages).forEach { language ->
-                            Button(
-                                onClick = { selectedTranslationLanguage = language },
-                                enabled = selectedTranslationLanguage != language
+                        languages.forEach { language ->
+                            androidx.compose.material3.TextButton(
+                                onClick = {
+                                    selectedTranslationLanguage =
+                                        if (selectedTranslationLanguage == language) null else language
+                                    shownTranslation = null
+                                },
+                                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp)
                             ) {
-                                Text(when (language) {
-                                    null -> "Syriac"
-                                    "ar" -> "العربية"
-                                    "en" -> "English"
-                                    "fr" -> "Français"
-                                    else -> language
-                                })
+                                Text(
+                                    when (language) {
+                                        "ar" -> "ع"
+                                        "en" -> "En"
+                                        "fr" -> "Fr"
+                                        else -> language
+                                    },
+                                    color = if (selectedTranslationLanguage == language)
+                                        MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                         }
                     }
+                } else if (selectedTranslationLanguage != null) {
+                    selectedTranslationLanguage = null
+                    shownTranslation = null
                 }
 
                 if (target is ResolvedLiturgicalItemTarget.NonMelodicText) {
@@ -1527,7 +1544,7 @@ private fun HymnDetailsScreen(
                                     style = SyriacTextStyles.body(),
                                     textAlign = TextAlign.Right
                                 )
-                                VerseTranslationLine(verse.text.translations, selectedTranslationLanguage)
+                                VerseTranslationTrigger(verse.text.translations, selectedTranslationLanguage) { shownTranslation = it }
                             }
                         }
                     }
@@ -2161,7 +2178,7 @@ private fun HymnDetailsScreen(
                                             style =
                                                 SyriacTextStyles.body()
                                         )
-                                        VerseTranslationLine(verse.text.translations, selectedTranslationLanguage)
+                                        VerseTranslationTrigger(verse.text.translations, selectedTranslationLanguage) { shownTranslation = it }
                                     }
                                 }
                             }
@@ -2183,21 +2200,49 @@ private fun HymnDetailsScreen(
             Text("Back")
         }
     }
+    shownTranslation?.let { translation ->
+        androidx.compose.material3.Surface(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 64.dp),
+            shape = RoundedCornerShape(12.dp),
+            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.93f),
+            shadowElevation = 8.dp
+        ) {
+            androidx.compose.foundation.layout.Row(
+                modifier = Modifier.padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = translation,
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = if (selectedTranslationLanguage == "ar") TextAlign.Right else TextAlign.Start
+                )
+                androidx.compose.material3.TextButton(onClick = { shownTranslation = null }) {
+                    Text("×")
+                }
+            }
+        }
+    }
+}
 }
 
 @Composable
-private fun VerseTranslationLine(
+private fun VerseTranslationTrigger(
     translations: List<org.syriacplatform.content.models.TextTranslation>,
-    language: String?
+    language: String?,
+    onShow: (String) -> Unit
 ) {
     val translation = translations.firstOrNull { it.language == language }
     if (translation != null && translation.content.isNotBlank()) {
-        Text(
-            text = translation.content,
-            modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = if (language == "ar") TextAlign.Right else TextAlign.Start
-        )
+        androidx.compose.material3.TextButton(
+            onClick = { onShow(translation.content) },
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+        ) {
+            Text(if (language == "ar") "ع" else if (language == "en") "En" else language.orEmpty())
+        }
     }
 }
 
