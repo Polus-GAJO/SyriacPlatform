@@ -77,3 +77,30 @@ Proposed authoring implementation:
 - Unselected translations remain in the authoring database; the initial application package should include only the selected translation for each source entity and language. A missing selected translation leaves the language unavailable, without auto-translation.
 - Switching a published selection must atomically clear the prior selection for that source entity/language to avoid inconsistent intermediate states.
 - This is an approved **design direction**, not an implemented Access migration. Review the exact Access schema and validation workflow before adding tables/forms.
+
+
+---
+
+## Implementation checkpoint — 2026-10-22 (supersedes earlier proposals)
+
+The preceding proposal/pending language reflects the original study. The **implemented and user-verified Access design** is now:
+
+| Table | Fields / role |
+| --- | --- |
+| `Languages` | `LanguageID` (PK), `LanguageCode`, `LanguageName`; initial `ar`, `en`, `fr` |
+| `Translations` | `TranslationID` (PK), `LanguageID` (FK), `Translation` (Long Text), `Translator`, `Source`, `ReviewStatus` (`Draft`, `Reviewed`, `Approved`) |
+| `TranslationLinks` | `LinkID` (PK), `TranslationID` (FK), nullable `TextID` and `PetN`, `IsPublished` (Yes/No); exactly one of `TextID`/`PetN` per row |
+
+`PetN` is the **actual** Petgomo primary key (not the study's proposed `PetgomoID`). Existing `Texts` and `Petgomo` tables were not restructured. The same translation may link to many canonical sources, and editing it changes its content everywhere it is linked. Alternate translations can coexist in Access; publication is per **link**, not per canonical translation. `ReviewStatus` and `IsPublished` are independent; current export selects on `IsPublished=True` (not `ReviewStatus='Approved'`). Publishing workflow selects at most one per source/language.
+
+The user enabled cascading update and delete on `Translations -> TranslationLinks`. `Remove link` deletes a single link without deleting the translation; `Delete permanently` warns about affected Text/Petgomo/published links and deletes the canonical translation, with Access cascading to its links.
+
+User-tested authoring UI: `frmTextTranslations` accessed from `TextsChoose` and `TextsForQolo`; inline editing, new translation, linking existing, publishing/unpublishing, unlinking and permanent deletion. No separate detail editor is used.
+
+### Export contract (Access CSV, verified)
+
+`modSchemaExporter.bas` / `ExportOccasionDataToFolder` writes `Languages.csv`, `Translations.csv`, and `TranslationLinks.csv` into each occasion export directory. Only published links referencing that occasion's exported Texts/Petgomo are included, with their canonical Translations and Languages. Unpublished alternatives remain **only** in the Author Database. Shared Translations are deduplicated while eligible links remain distinct. User verified the generated CSVs and counts; **Build Tools and application consumption are still pending**.
+
+### Required downstream mapping
+
+Build Tools should join `TranslationLinks.TranslationID -> Translations.TranslationID -> Languages.LanguageID` and attach published translations to canonical `TextID` or `PetN` (not to an occurrence or liturgical position). Reuse existing Schema-v1 `translations: [{language, content}]` for Text and Petgomo where supported; retain authored Syriac and occurrence identity. Validate missing references and more than one published translation for a source/language, and preserve content-language choice separately from interface localization. No runtime or UI completion is claimed by this checkpoint.
