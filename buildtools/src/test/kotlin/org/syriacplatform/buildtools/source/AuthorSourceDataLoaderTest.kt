@@ -220,6 +220,48 @@ fun rejectsArchivedNotesFromCsv() {
     }
 }
 
+
+    @Test
+    fun loadsPublishedTranslationsAndSharedLinks() {
+        val temp = Files.createTempDirectory("translation-loader-")
+        try {
+            Files.list(representativeExportDirectory()).use { stream ->
+                stream.filter { Files.isRegularFile(it) }.forEach {
+                    Files.copy(it, temp.resolve(it.fileName), StandardCopyOption.REPLACE_EXISTING)
+                }
+            }
+            Files.writeString(temp.resolve("Languages.csv"), "LanguageID,LanguageCode,LanguageName\n1,ar,Arabic\n")
+            Files.writeString(temp.resolve("Translations.csv"), "TranslationID,LanguageID,Translation,Translator,Source,ReviewStatus\n41,1,Example,,,Draft\n")
+            Files.writeString(temp.resolve("TranslationLinks.csv"), "LinkID,TranslationID,TextID,PetN,IsPublished\n1,41,100,,True\n2,41,,200,True\n")
+            val data = loader.load(temp)
+            assertEquals("ar", data.languages.single().code)
+            assertEquals("Example", data.translations.single().content)
+            assertEquals(2, data.translationLinks.size)
+            assertEquals(100L, data.translationLinks[0].textId)
+            assertEquals(200L, data.translationLinks[1].petgomoId)
+        } finally {
+            temp.toFile().deleteRecursively()
+        }
+    }
+
+    @Test
+    fun rejectsUnpublishedTranslationLinkInExport() {
+        val temp = Files.createTempDirectory("translation-unpublished-")
+        try {
+            Files.list(representativeExportDirectory()).use { stream ->
+                stream.filter { Files.isRegularFile(it) }.forEach {
+                    Files.copy(it, temp.resolve(it.fileName), StandardCopyOption.REPLACE_EXISTING)
+                }
+            }
+            Files.writeString(temp.resolve("Languages.csv"), "LanguageID,LanguageCode,LanguageName\n1,ar,Arabic\n")
+            Files.writeString(temp.resolve("Translations.csv"), "TranslationID,LanguageID,Translation,Translator,Source,ReviewStatus\n41,1,Example,,,Draft\n")
+            Files.writeString(temp.resolve("TranslationLinks.csv"), "LinkID,TranslationID,TextID,PetN,IsPublished\n1,41,100,,False\n")
+            assertFailsWith<IllegalArgumentException> { loader.load(temp) }
+        } finally {
+            temp.toFile().deleteRecursively()
+        }
+    }
+
     private fun representativeExportDirectory(): Path {
         return Path.of(
             "..",
