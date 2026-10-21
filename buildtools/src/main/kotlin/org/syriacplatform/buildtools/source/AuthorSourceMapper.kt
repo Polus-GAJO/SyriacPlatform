@@ -15,6 +15,36 @@ import org.syriacplatform.buildtools.source.models.NoteSource
 import org.syriacplatform.buildtools.source.models.LocationSource
 
 class AuthorSourceMapper {
+    fun toLanguage(row: CsvRow) =
+        org.syriacplatform.buildtools.source.models.LanguageSource(
+            row.requiredLong("LanguageID"),
+            requireNotNull(row["LanguageCode"]) { "Missing LanguageCode" },
+            row["LanguageName"]
+        )
+
+    fun toTranslation(row: CsvRow) =
+        org.syriacplatform.buildtools.source.models.TranslationSource(
+            row.requiredLong("TranslationID"),
+            row.requiredLong("LanguageID"),
+            requireNotNull(row["Translation"]) { "Missing Translation" },
+            row["Translator"], row["Source"], row["ReviewStatus"]
+        )
+
+    fun toTranslationLink(row: CsvRow): org.syriacplatform.buildtools.source.models.TranslationLinkSource {
+        val textId = row.optionalLong("TextID")
+        val petgomoId = row.optionalLong("PetN")
+        require((textId == null) != (petgomoId == null)) {
+            "TranslationLinks must reference exactly one of TextID or PetN."
+        }
+        require(row.optionalBoolean("IsPublished") == true) {
+            "TranslationLinks.csv contains an unpublished link."
+        }
+        return org.syriacplatform.buildtools.source.models.TranslationLinkSource(
+            row.requiredLong("LinkID"), row.requiredLong("TranslationID"),
+            textId, petgomoId, true
+        )
+    }
+
 
     fun toOccasion(row: CsvRow): OccasionSource {
     return OccasionSource(
