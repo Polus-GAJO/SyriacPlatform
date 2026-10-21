@@ -1784,3 +1784,16 @@ Non-melodic liturgical texts (prayers/readings/sedros) already exist in Author D
 6. Workflow: assistant makes small, reviewable edits directly in private GitHub repo `Polus-GAJO/SyriacPlatform` branch `main`; user pulls to `D:\SyriacPlatform` and executes local Gradle tests. Ask only for needed tests/results; do not imply remote commits are locally tested.
 
 **Latest verified commit:** `c6326cb`. **Latest verified command:** `:shared:testAndroidHostTest` -> BUILD SUCCESSFUL.
+
+
+---
+
+## 2026-10-22 — Translation milestone: Access and CSV export complete; platform integration next
+
+**Verified by user:** Access now contains `Languages`, `Translations`, `TranslationLinks`; shared translations can be attached to multiple canonical `Texts.TextID` and/or `Petgomo.PetN` sources. Editorial alternatives remain in Access. Exactly one published link per source/language is selected via `modTranslationPublishing`. `frmTextTranslations` supports edit, new, link existing, publish/unpublish, unlink and permanent delete; it opens from `TextsChoose` and `TextsForQolo`. Cascade delete from Translations to TranslationLinks is enabled in Access.
+
+**Export completed and user tested:** `modSchemaExporter.ExportOccasionDataToFolder` exports `Languages.csv`, `Translations.csv`, `TranslationLinks.csv` alongside the existing occasion files. Only links marked `IsPublished=True` and pointing to the occasion's exported canonical texts/Petgomo are included; only their referenced translations and languages are included. User confirmed unpublished alternatives are absent and link counts are correct. Access export commit: `8903ca6`.
+
+**Not yet completed:** loading these three CSVs in Build Tools, resolving shared translations to existing Schema-v1 Text/Petgomo translation arrays, validation/tests, runtime presentation and app language choice. No platform build or UI test has been reported for translations.
+
+**Next sequence:** (1) inspect existing Build Tools and Schema-v1 translation support; (2) add focused loader/mapper/writer tests and implementation; (3) validate source/language uniqueness and shared translation IDs; (4) verify generated package and shared runtime; (5) expose content-language selection and translated text in UI independently of UI localization. Preserve the working non-melodic text and Qolo flows.
