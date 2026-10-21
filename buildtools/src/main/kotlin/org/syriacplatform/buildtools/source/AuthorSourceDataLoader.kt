@@ -23,7 +23,17 @@ class AuthorSourceDataLoader(
                     "but found ${occasionRows.size}."
         }
 
+        val translationFiles = listOf("Languages.csv", "Translations.csv", "TranslationLinks.csv")
+        val present = translationFiles.filter { Files.isRegularFile(directory.resolve(it)) }
+        require(present.isEmpty() || present.size == translationFiles.size) {
+            "Translation export requires all three CSV files or none; found: $present"
+        }
+
         return AuthorSourceData(
+            languages = if (present.isNotEmpty()) readRows(directory, "Languages.csv").map(mapper::toLanguage) else emptyList(),
+            translations = if (present.isNotEmpty()) readRows(directory, "Translations.csv").map(mapper::toTranslation) else emptyList(),
+            translationLinks = if (present.isNotEmpty()) readRows(directory, "TranslationLinks.csv").map(mapper::toTranslationLink) else emptyList(),
+
             occasion = mapper.toOccasion(
                 occasionRows.single()
             ),
