@@ -1510,9 +1510,6 @@ private fun HymnDetailsScreen(
                             }
                         }
                     }
-                } else if (selectedTranslationLanguage != null) {
-                    selectedTranslationLanguage = null
-                    shownTranslation = null
                 }
 
                 if (target is ResolvedLiturgicalItemTarget.NonMelodicText) {
