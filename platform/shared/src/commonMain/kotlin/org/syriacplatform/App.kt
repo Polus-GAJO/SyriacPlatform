@@ -1379,6 +1379,10 @@ private fun HymnDetailsScreen(
         mutableStateOf(0L)
     }
 
+    var selectedTranslationLanguage by remember(liturgicalItemId) {
+        mutableStateOf<String?>(null)
+    }
+
     var selectedMelodyId by remember(liturgicalItemId) {
         mutableStateOf<MelodyId?>(null)
     }
@@ -1464,6 +1468,36 @@ private fun HymnDetailsScreen(
                     )
                 }
 
+                val translatedVerses = when (target) {
+                    is ResolvedLiturgicalItemTarget.NonMelodicText -> target.verses
+                    is ResolvedLiturgicalItemTarget.Qolo -> target.verses
+                    is ResolvedLiturgicalItemTarget.UnresolvedQolo -> target.verses
+                    is ResolvedLiturgicalItemTarget.Text -> emptyList()
+                }
+                val languages = translatedVerses.flatMap { it.text.translations }
+                    .map { it.language }.distinct().sorted()
+                if (languages.isNotEmpty()) {
+                    androidx.compose.foundation.layout.Row(
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        (listOf<String?>(null) + languages).forEach { language ->
+                            Button(
+                                onClick = { selectedTranslationLanguage = language },
+                                enabled = selectedTranslationLanguage != language
+                            ) {
+                                Text(when (language) {
+                                    null -> "Syriac"
+                                    "ar" -> "العربية"
+                                    "en" -> "English"
+                                    "fr" -> "Français"
+                                    else -> language
+                                })
+                            }
+                        }
+                    }
+                }
+
                 if (target is ResolvedLiturgicalItemTarget.NonMelodicText) {
                     Text(
                         text = result.data.item.locationTitle
@@ -1493,6 +1527,7 @@ private fun HymnDetailsScreen(
                                     style = SyriacTextStyles.body(),
                                     textAlign = TextAlign.Right
                                 )
+                                VerseTranslationLine(verse.text.translations, selectedTranslationLanguage)
                             }
                         }
                     }
@@ -2126,6 +2161,7 @@ private fun HymnDetailsScreen(
                                             style =
                                                 SyriacTextStyles.body()
                                         )
+                                        VerseTranslationLine(verse.text.translations, selectedTranslationLanguage)
                                     }
                                 }
                             }
@@ -2146,6 +2182,22 @@ private fun HymnDetailsScreen(
         ) {
             Text("Back")
         }
+    }
+}
+
+@Composable
+private fun VerseTranslationLine(
+    translations: List<org.syriacplatform.content.models.TextTranslation>,
+    language: String?
+) {
+    val translation = translations.firstOrNull { it.language == language }
+    if (translation != null && translation.content.isNotBlank()) {
+        Text(
+            text = translation.content,
+            modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = if (language == "ar") TextAlign.Right else TextAlign.Start
+        )
     }
 }
 
