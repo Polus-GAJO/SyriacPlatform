@@ -14,6 +14,10 @@ import org.syriacplatform.buildtools.source.models.TextSource
 import org.syriacplatform.buildtools.source.models.NoteSource
 import org.syriacplatform.buildtools.source.models.LocationSource
 
+import org.syriacplatform.buildtools.source.models.LanguageSource
+import org.syriacplatform.buildtools.source.models.TranslationSource
+import org.syriacplatform.buildtools.source.models.TranslationLinkSource
+
 data class AuthorSourceData(
     val occasion: OccasionSource,
     val prayers: List<PrayerSource>,
@@ -27,5 +31,8 @@ data class AuthorSourceData(
     val melodies: List<MelodySource>,
     val qintos: List<QintoSource>,
     val locations: List<LocationSource> = emptyList(),
-    val notes: List<NoteSource> = emptyList()
+    val notes: List<NoteSource> = emptyList(),
+    val languages: List<LanguageSource> = emptyList(),
+    val translations: List<TranslationSource> = emptyList(),
+    val translationLinks: List<TranslationLinkSource> = emptyList()
 )
