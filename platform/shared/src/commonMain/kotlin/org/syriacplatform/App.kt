@@ -1480,7 +1480,9 @@ private fun HymnDetailsScreen(
                     is ResolvedLiturgicalItemTarget.UnresolvedQolo -> target.verses
                     is ResolvedLiturgicalItemTarget.Text -> emptyList()
                 }
-                val languages = translatedVerses.flatMap { it.text.translations }
+                val languages = translatedVerses.flatMap { verse ->
+                    verse.petgomo?.translations.orEmpty() + verse.text.translations
+                }.filter { it.content.isNotBlank() }
                     .map { it.language }.distinct().sorted()
                 if (languages.isNotEmpty()) {
                     androidx.compose.foundation.layout.Row(
@@ -1541,7 +1543,11 @@ private fun HymnDetailsScreen(
                                     style = SyriacTextStyles.body(),
                                     textAlign = TextAlign.Right
                                 )
-                                VerseTranslationTrigger(verse.text.translations, selectedTranslationLanguage) { shownTranslation = it }
+                                VerseTranslationTrigger(
+                                            petgomoTranslations = verse.petgomo?.translations.orEmpty(),
+                                            textTranslations = verse.text.translations,
+                                            language = selectedTranslationLanguage
+                                        ) { shownTranslation = it }
                             }
                         }
                     }
@@ -2175,7 +2181,11 @@ private fun HymnDetailsScreen(
                                             style =
                                                 SyriacTextStyles.body()
                                         )
-                                        VerseTranslationTrigger(verse.text.translations, selectedTranslationLanguage) { shownTranslation = it }
+                                        VerseTranslationTrigger(
+                                            petgomoTranslations = verse.petgomo?.translations.orEmpty(),
+                                            textTranslations = verse.text.translations,
+                                            language = selectedTranslationLanguage
+                                        ) { shownTranslation = it }
                                     }
                                 }
                             }
@@ -2226,16 +2236,36 @@ private fun HymnDetailsScreen(
 }
 }
 
+/**
+ * The Petgomo and its following text remain separate content entities.
+ * Only their available translations are combined for display, in Syriac
+ * reading order: Petgomo first, then text. A missing translation does not
+ * suppress the available one.
+ */
+internal fun combinedVerseTranslation(
+    petgomoTranslations: List<org.syriacplatform.content.models.TextTranslation>,
+    textTranslations: List<org.syriacplatform.content.models.TextTranslation>,
+    language: String?
+): String? {
+    if (language == null) return null
+    val parts = listOf(petgomoTranslations, textTranslations).mapNotNull { translations ->
+        translations.firstOrNull { it.language == language && it.content.isNotBlank() }
+            ?.content?.trim()
+    }
+    return parts.takeIf { it.isNotEmpty() }?.joinToString("\n\n")
+}
+
 @Composable
 private fun VerseTranslationTrigger(
-    translations: List<org.syriacplatform.content.models.TextTranslation>,
+    petgomoTranslations: List<org.syriacplatform.content.models.TextTranslation>,
+    textTranslations: List<org.syriacplatform.content.models.TextTranslation>,
     language: String?,
     onShow: (String) -> Unit
 ) {
-    val translation = translations.firstOrNull { it.language == language }
-    if (translation != null && translation.content.isNotBlank()) {
+    val translation = combinedVerseTranslation(petgomoTranslations, textTranslations, language)
+    if (translation != null) {
         androidx.compose.material3.TextButton(
-            onClick = { onShow(translation.content) },
+            onClick = { onShow(translation) },
             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp)
         ) {
             Text(if (language == "ar") "ع" else if (language == "en") "En" else language.orEmpty())
