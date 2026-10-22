@@ -3961,3 +3961,35 @@ No unpublished translation or unrelated occasion links are exported. Shared tran
 3. Wire Access CSVs through Build Tools into existing Schema-v1 `texts` and `petgomo` translation arrays where compatible, with deterministic ordering and explicit validation of at most one published translation per source/language.
 4. Test generated occasion package, shared runtime access, and language selection/display in the app; keep **content translation language** distinct from **UI localization language**.
 5. Ask user to run focused Gradle tests on Windows after each small commit. Do not claim platform-side success before those tests.
+
+
+---
+
+## 2026-10-22 — Translation integration and Access editor handoff
+
+<!-- TRANSLATIONS-APP-ACCESS-HANDOFF-2026-10-22 -->
+
+### Implemented and user-verified
+
+- Access source model remains canonical and independent: `Texts(TextID)`, `Petgomo(PetN)`, `Languages`, `Translations`, and `TranslationLinks`. Published links determine what is exported; drafts and unpublished alternatives remain editorial data.
+- Access occasion CSV export produces `Languages.csv`, `Translations.csv`, `TranslationLinks.csv` scoped to published links of the occasion's included Texts/Petgomo. Earlier user verification covered publication filtering and link counts.
+- Build Tools / package integration now places language-tagged translation arrays on the corresponding canonical Text and Petgomo content. For occasion 379, the user inspected `petgomos.json`: Petgomo ID 3 has Arabic and English translations; IDs 1 and 2 have none. Text translations are also available in the Android reference UI.
+- Android `HymnDetailsScreen` now combines the available Petgomo translation **first** and associated Text translation **second** into one popup, separated by a blank line. Either translation may be absent; the translation trigger is absent when neither exists in the selected language. The content-language selector derives available languages from both entities. Android implementation: `platform/shared/src/commonMain/kotlin/org/syriacplatform/App.kt`, commit `12ce3b8`.
+- **User verified in the Android app** that all three cases work: Text-only, Petgomo-only, and both combined in a single translation popup. Visual styling, colors, and popup formatting are explicitly deferred.
+- The suggested Gradle task `:shared:compileKotlinAndroid` does not exist in this project. The applicable test task is `:shared:testAndroidHostTest`; do not cite the missing task as a Kotlin compilation failure. The user reported app behavior as verified, but no explicit successful Gradle log for the latest translation UI commit was provided in this conversation.
+
+### Access translation editor navigation and controls
+
+- `frmTextTranslations` must **close and reopen** for every new selected `TextID` or `PetN`, passing fresh `OpenArgs` of the form `Text|<id>` or `Petgomo|<id>`. The attempt to keep the form open and switch context through `Tag` was rejected in practice: the source preview changed but stale translations remained. Plain `Requery` did not correct the stale association. This is a **data-integrity-critical** behavior; do not restore in-place context switching without a comprehensive verified rebind of all controls and data operations.
+- `modContextTranslations.OpenContextTranslations` was restored to close/reopen behavior in commit `01a95cc`. It refuses navigation when the translation form is Dirty to avoid silently discarding edits. `CurrentTranslationContext()` remains available for the inline editor helpers; fresh `OpenArgs` is authoritative after reopening.
+- `TextsForQolo` has buttons for Text translations and optional Petgomo translations. `modTextsForQoloPetgomoTranslations` now includes `UpdateQoloPetgomoTranslationButton` and `InstallQoloPetgomoButtonState` (commit `365e02a`): the Petgomo button is enabled for a selected saved row with `PetN > 0`, and disabled otherwise. In a continuous Access form, button Enabled is per control, not independently per visible row. Installer preserves an existing OnCurrent event rather than overwriting it. Installation/testing of this specific event hook has not been independently confirmed.
+- The user **removed** the Petgomo translation button from Access form `PetExist2` because it produced undesirable results. This removal was made locally in Access, **not** via a GitHub form commit. Do not reinstall the button on `PetExist2` or run `InstallPetgomoTranslationsButton "PetExist2"` unless explicitly requested. Keep the reusable `modPetgomoTranslations` VBA module: its presence alone does not cause behavior, and other callers may use it.
+- Access inline helper modules `modTranslationNewInline` and `modTranslationLinkExistingInline` were updated to use `CurrentTranslationContext()` (commits `87f9587`, `6dea36d`). Preserve other established edit/publish/unpublish/unlink/delete workflows.
+
+### Deferred work and restart point
+
+1. Translation display behavior is accepted as complete for now; defer UI visual polish, layout, and colors.
+2. Treat Access `frmTextTranslations` close/reopen navigation as the safe baseline. If investigating future stale-data bugs, test switching to a source with zero translations, switching Text ↔ Petgomo, and all edit/link/publish actions before accepting changes.
+3. Preserve the removal of the `PetExist2` button and the user's choice to leave that form without a translation launcher.
+4. For a new platform phase, first ask which functionality the user wants next. Read the latest `docs/CurrentState.md` and `docs/Roadmap v1.4.md`, then scope a small testable change; do not reopen completed translation integration without a new requirement.
+5. Remote GitHub commits and user-verified app behavior are distinct from an independently logged full Gradle suite. Do not claim full suite success unless logs are supplied.
