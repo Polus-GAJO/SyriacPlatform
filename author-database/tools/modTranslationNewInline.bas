@@ -93,8 +93,8 @@ Public Function SaveNewInlineTranslation() As Boolean
     Dim msg As String
     On Error GoTo Failed
     Set f = Forms(FORM_NAME)
-    If IsNull(f.OpenArgs) Then Err.Raise vbObjectError + 5600, , "No source context."
-    args = Split(CStr(f.OpenArgs), "|")
+    If Len(CurrentTranslationContext()) = 0 Then Err.Raise vbObjectError + 5600, , "No source context."
+    args = Split(CurrentTranslationContext(), "|")
     If UBound(args) <> 1 Then Err.Raise vbObjectError + 5601, , "Invalid source context."
     Select Case args(0)
         Case "Text": targetField = "TextID"
