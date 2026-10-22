@@ -119,15 +119,17 @@ Private Sub OpenContextTranslations(ByVal sourceType As String, ByVal sourceId A
     If sourceType <> "Text" And sourceType <> "Petgomo" Then _
         Err.Raise vbObjectError + 5321, , "Invalid source type."
 
+    ' Always open with fresh OpenArgs: both the source preview and all
+    ' translation operations must refer to the same selected source.
     If CurrentProject.AllForms(BROWSER_NAME).IsLoaded Then
-        ' Tag is writable while OpenArgs is not. Change context without closing.
-        Forms(BROWSER_NAME).Tag = sourceType & "|" & CStr(sourceId)
-        LoadContextTranslationBrowser
-        Forms(BROWSER_NAME).SetFocus
-    Else
-        DoCmd.OpenForm BROWSER_NAME, acNormal, , , , , _
-                       sourceType & "|" & CStr(sourceId)
+        If Forms(BROWSER_NAME).Dirty Then
+            Err.Raise vbObjectError + 5322, , _
+                "Save or cancel translation edits before changing source."
+        End If
+        DoCmd.Close acForm, BROWSER_NAME, acSaveNo
     End If
+    DoCmd.OpenForm BROWSER_NAME, acNormal, , , , , _
+                   sourceType & "|" & CStr(sourceId)
 End Sub
 
 ' All translation operations must read the current, mutable source context.
