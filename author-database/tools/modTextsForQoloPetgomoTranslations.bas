@@ -103,3 +103,61 @@ Failed:
     errMsg = CStr(Err.Number) & " - " & Err.Description
     MsgBox "Cannot open Petgomo translations: " & errMsg, vbExclamation
 End Function
+
+' Refreshes the command button for the currently selected record.
+' In a continuous form, Enabled applies to all displayed button instances,
+' not independently to each row.
+Public Function UpdateQoloPetgomoTranslationButton() As Boolean
+    On Error GoTo Failed
+    Dim f As Form
+    Dim petId As Variant
+    Set f = Forms(SOURCE_FORM)
+    petId = Null
+    On Error Resume Next
+    Err.Clear
+    petId = f.Recordset.Fields("PetN").Value
+    If Err.Number <> 0 Then
+        Err.Clear
+        petId = f.Controls("PetN").Value
+    End If
+    If Err.Number <> 0 Then
+        Err.Clear
+        petId = f.Controls("txtPetN").Value
+    End If
+    On Error GoTo Failed
+    f.Controls("cmdOpenPetgomoTranslations").Enabled = _
+        (Not f.NewRecord) And IsNumeric(Nz(petId, Null)) And (Val(Nz(petId, 0)) > 0)
+    UpdateQoloPetgomoTranslationButton = True
+    Exit Function
+Failed:
+    MsgBox "Cannot update Petgomo translation button: " & Err.Description, vbExclamation
+End Function
+
+' Installs OnCurrent only when no existing handler is present.
+' An existing event is never overwritten.
+Public Sub InstallQoloPetgomoButtonState()
+    Dim f As Form
+    On Error GoTo Failed
+    If CurrentProject.AllForms(SOURCE_FORM).IsLoaded Then
+        MsgBox "Close " & SOURCE_FORM & " before installation.", vbExclamation
+        Exit Sub
+    End If
+    DoCmd.OpenForm SOURCE_FORM, acDesign, , , , acHidden
+    Set f = Forms(SOURCE_FORM)
+    If Len(Nz(f.OnCurrent, "")) = 0 Then
+        f.OnCurrent = "=UpdateQoloPetgomoTranslationButton()"
+        DoCmd.Close acForm, SOURCE_FORM, acSaveYes
+        MsgBox "Petgomo translation button state installed.", vbInformation
+    Else
+        DoCmd.Close acForm, SOURCE_FORM, acSaveNo
+        MsgBox "Form already has an On Current event. Add this call to its existing event procedure:" & vbCrLf & _
+               "UpdateQoloPetgomoTranslationButton", vbInformation
+    End If
+    Exit Sub
+Failed:
+    Dim description As String
+    description = Err.Description
+    On Error Resume Next
+    DoCmd.Close acForm, SOURCE_FORM, acSaveNo
+    MsgBox "Cannot install button state: " & description, vbExclamation
+End Sub
