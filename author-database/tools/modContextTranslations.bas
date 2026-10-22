@@ -116,14 +116,31 @@ End Sub
 
 Private Sub OpenContextTranslations(ByVal sourceType As String, ByVal sourceId As Long)
     If sourceId <= 0 Then Err.Raise vbObjectError + 5320, , "Invalid source ID."
-    ' Access does not re-run OnLoad/OpenArgs when OpenForm targets an already-open form.
-    ' Close and reopen so the new source context is always applied.
+    If sourceType <> "Text" And sourceType <> "Petgomo" Then _
+        Err.Raise vbObjectError + 5321, , "Invalid source type."
+
     If CurrentProject.AllForms(BROWSER_NAME).IsLoaded Then
-        DoCmd.Close acForm, BROWSER_NAME, acSaveNo
+        ' Tag is writable while OpenArgs is not. Change context without closing.
+        Forms(BROWSER_NAME).Tag = sourceType & "|" & CStr(sourceId)
+        LoadContextTranslationBrowser
+        Forms(BROWSER_NAME).SetFocus
+    Else
+        DoCmd.OpenForm BROWSER_NAME, acNormal, , , , , _
+                       sourceType & "|" & CStr(sourceId)
     End If
-    DoCmd.OpenForm BROWSER_NAME, acNormal, , , , , _
-                   sourceType & "|" & CStr(sourceId)
 End Sub
+
+' All translation operations must read the current, mutable source context.
+' OpenArgs is used only for the initial opening of the form.
+Public Function CurrentTranslationContext() As String
+    Dim f As Form
+    Set f = Forms(BROWSER_NAME)
+    If Len(Nz(f.Tag, "")) > 0 Then
+        CurrentTranslationContext = CStr(f.Tag)
+    Else
+        CurrentTranslationContext = Nz(f.OpenArgs, "")
+    End If
+End Function
 
 Public Function LoadContextTranslationBrowser() As Boolean
     On Error GoTo Failed
@@ -135,8 +152,8 @@ Public Function LoadContextTranslationBrowser() As Boolean
     Dim rs As DAO.Recordset
 
     Set f = Forms(BROWSER_NAME)
-    If IsNull(f.OpenArgs) Then Err.Raise vbObjectError + 5300, , "Open this form from a source record."
-    parts = Split(CStr(f.OpenArgs), "|")
+    If Len(CurrentTranslationContext()) = 0 Then Err.Raise vbObjectError + 5300, , "Open this form from a source record."
+    parts = Split(CurrentTranslationContext(), "|")
     If UBound(parts) <> 1 Then Err.Raise vbObjectError + 5301, , "Invalid source argument."
     entityName = parts(0)
     entityId = CLng(parts(1))
@@ -171,7 +188,7 @@ Public Function RefreshContextTranslationList() As Boolean
     Dim parts() As String
     Dim target As String
     Set f = Forms(BROWSER_NAME)
-    If IsNull(f.OpenArgs) Or IsNull(f!cboLanguageFilter) Then Exit Function
+    If Len(CurrentTranslationContext()) = 0 Or IsNull(f!cboLanguageFilter) Then Exit Function
     parts = Split(CStr(f.OpenArgs), "|")
     If UBound(parts) <> 1 Then Exit Function
     If parts(0) = "Text" Then
