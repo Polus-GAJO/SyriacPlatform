@@ -104,8 +104,8 @@ Public Function AttachSelectedTranslation() As Boolean
         " AND LanguageID=" & CLng(f!cboLanguageFilter)) <> 1 Then
         Err.Raise vbObjectError + 5701, , "Translation is not in the selected language."
     End If
-    If IsNull(f.OpenArgs) Then Err.Raise vbObjectError + 5702, , "Missing source context."
-    parts = Split(CStr(f.OpenArgs), "|")
+    If Len(CurrentTranslationContext()) = 0 Then Err.Raise vbObjectError + 5702, , "Missing source context."
+    parts = Split(CurrentTranslationContext(), "|")
     If UBound(parts) <> 1 Then Err.Raise vbObjectError + 5703, , "Invalid source context."
     Select Case parts(0)
         Case "Text": sourceField = "TextID"
