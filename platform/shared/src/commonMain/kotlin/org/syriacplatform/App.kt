@@ -1036,48 +1036,24 @@ private fun ResolvedLiturgicalItemView(
 
         is ResolvedLiturgicalItemTarget.Qolo -> {
             Button(
-                onClick = {
-                    onOpenHymn(
-                        item.item.id
-                    )
-                },
+                onClick = { onOpenHymn(item.item.id) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(
-                        vertical = 8.dp
-                    )
+                    .padding(vertical = 8.dp)
             ) {
-                Column(
-                    modifier =
-                        Modifier.fillMaxWidth(),
-                    horizontalAlignment =
-                        Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = target.qolo.name,
-                        style =
-                            SyriacTextStyles.body(),
-                        textAlign =
-                            TextAlign.Center
-                    )
-
-                    Text(
-                        text =
-                            target.effectiveMelody?.name
-                        ?: "Melody unresolved",
-                        modifier =
-                            Modifier.padding(
-                                top = 4.dp
-                            ),
-                        style =
-                            MaterialTheme.typography.bodyMedium,
-                        textAlign =
-                            TextAlign.Center
-                    )
-                }
+                val locationTitle = item.item.locationTitle
+                    ?.takeIf { it.isNotBlank() }
+                val qoloName = target.qolo.name
+                    .takeIf { it.isNotBlank() }
+                Text(
+                    text = listOfNotNull(locationTitle, qoloName)
+                        .joinToString(" — ")
+                        .ifBlank { "Qolo" },
+                    style = SyriacTextStyles.body(),
+                    textAlign = TextAlign.Center
+                )
             }
-
-          }
+        }
 
         is ResolvedLiturgicalItemTarget.NonMelodicText -> {
             Button(
