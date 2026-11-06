@@ -38,7 +38,8 @@ data class SchemaV1QoloLiturgicalItem(
     val melodyCandidateIds: List<Long> = emptyList(),
 
     override val verses: List<SchemaV1LiturgicalTextRef>,
-    override val noteId: Long? = null
+    override val noteId: Long? = null,
+    val locationTitle: String? = null
 ) : SchemaV1LiturgicalItem
 
 data class SchemaV1UnresolvedQoloLiturgicalItem(
