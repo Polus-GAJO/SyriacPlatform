@@ -421,6 +421,36 @@ fun excludesPrayerNoteFromLiturgicalComposition() {
     }
 
     @Test
+    fun qoloItemRetainsLocationTitle() {
+        val original = loadSource()
+        val linkedIds = original.occasionLinks
+            .filter { it.occasionId == original.occasion.id }
+            .mapNotNull { it.existsInId }
+            .toSet()
+        val existing = original.existsIn.first { item ->
+            item.id in linkedIds &&
+                item.qoloId != null &&
+                item.qoloId != 0L &&
+                item.itemType != "PRAYER_NOTE"
+        }
+        val source = original.copy(
+            existsIn = original.existsIn.map { item ->
+                if (item.id == existing.id) item.copy(locationId = 11L)
+                else item
+            },
+            locations = listOf(
+                org.syriacplatform.buildtools.source.models.LocationSource(11L, "ܩܳܠܳܐ")
+            )
+        )
+        val resolved = mapper.map(source).prayers
+            .flatMap { it.resolvedItems }
+            .single { it.id == existing.id }
+        assertTrue(resolved is SchemaV1QoloLiturgicalItem)
+        assertEquals("ܩܳܠܳܐ", resolved.locationTitle)
+        assertEquals(existing.id, resolved.id)
+    }
+
+    @Test
     fun nonMelodicItemRetainsLocationTitle() {
         val original = loadSource()
         val existing = original.existsIn.first { item ->
