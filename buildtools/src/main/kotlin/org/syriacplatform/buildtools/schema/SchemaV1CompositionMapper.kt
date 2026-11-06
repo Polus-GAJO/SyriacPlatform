@@ -218,6 +218,9 @@ class SchemaV1CompositionMapper(
 
             melodyCandidateIds =
                 melodyCandidateIds,
+            locationTitle = item.locationId?.let { locationId ->
+                source.locations.firstOrNull { it.id == locationId }?.name
+            },
             verses = mapVerses(
                 source = source,
                 existsInId = item.id
