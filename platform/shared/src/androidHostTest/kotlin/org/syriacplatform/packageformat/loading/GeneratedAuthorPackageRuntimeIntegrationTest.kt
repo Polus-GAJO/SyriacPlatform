@@ -312,7 +312,7 @@ class GeneratedAuthorPackageRuntimeIntegrationTest {
 
     /**
      * Occasion 379 is the real author-export translation smoke test:
-     * TextIDs 6064-6066 have published ar/en translations; 6067 does not.
+     * TextIDs 6064-6067 have published ar/en translations.
      * Exercise the complete JSON -> package loader -> runtime index ->
      * resolved liturgical verse path, without changing UI behavior.
      */
@@ -343,7 +343,7 @@ class GeneratedAuthorPackageRuntimeIntegrationTest {
             }
         }
         val canonicalTexts = store.content.texts.associateBy { it.id.value }
-        listOf(6064L, 6065L, 6066L).forEach { textId ->
+        listOf(6064L, 6065L, 6066L, 6067L).forEach { textId ->
             val text = assertNotNull(canonicalTexts[textId], "Missing canonical TextID=$textId")
             assertEquals(
                 setOf("ar", "en"),
@@ -358,10 +358,6 @@ class GeneratedAuthorPackageRuntimeIntegrationTest {
                 assertEquals(text.translations, occurrence.text.translations)
             }
         }
-        assertTrue(
-            assertNotNull(canonicalTexts[6067L]).translations.isEmpty(),
-            "Unpublished TextID=6067 must not contain translations"
-        )
     }
 
     private val occasionId: Long
