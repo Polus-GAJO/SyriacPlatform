@@ -1353,6 +1353,47 @@ End Sub
 
 
 ' ============================================================
+' LEGACY NOTATION INVENTORY (READ-ONLY)
+' Exports legacy image paths and melody/edition relationships for
+' migration assessment. Does not modify the Access tables or copy files.
+' ============================================================
+
+Public Sub ExportLegacyNotationInventory()
+
+    On Error GoTo ErrorHandler
+
+    EnsureFolderExists MEDIA_EXPORT_ROOT
+
+    ExportQueryToCsv _
+        "SELECT MNN, LinkAdres FROM MusicNotes ORDER BY MNN;", _
+        MEDIA_EXPORT_ROOT & "\MusicNotes.csv"
+
+    ExportQueryToCsv _
+        "SELECT MNID, MNN, MelodyN, Edition FROM MNMelody " & _
+        "ORDER BY MelodyN, Edition, MNID;", _
+        MEDIA_EXPORT_ROOT & "\MNMelody.csv"
+
+    MsgBox _
+        "Legacy notation inventory exported (no data changed)." & vbCrLf & _
+        "MusicNotes rows: " & DCount("*", "MusicNotes") & vbCrLf & _
+        "MNMelody rows: " & DCount("*", "MNMelody") & vbCrLf & _
+        MEDIA_EXPORT_ROOT, _
+        vbInformation, _
+        "SyriacPlatform Notation Inventory"
+
+    Exit Sub
+
+ErrorHandler:
+    MsgBox _
+        "Legacy notation inventory export failed." & vbCrLf & _
+        "Error " & Err.Number & ": " & Err.Description, _
+        vbCritical, _
+        "SyriacPlatform Notation Inventory"
+
+End Sub
+
+
+' ============================================================
 ' REPRESENTATIVE DATA EXPORT
 ' ============================================================
 
