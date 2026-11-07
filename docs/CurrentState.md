@@ -3993,3 +3993,13 @@ No unpublished translation or unrelated occasion links are exported. Shared tran
 3. Preserve the removal of the `PetExist2` button and the user's choice to leave that form without a translation launcher.
 4. For a new platform phase, first ask which functionality the user wants next. Read the latest `docs/CurrentState.md` and `docs/Roadmap v1.4.md`, then scope a small testable change; do not reopen completed translation integration without a new requirement.
 5. Remote GitHub commits and user-verified app behavior are distinct from an independently logged full Gradle suite. Do not claim full suite success unless logs are supplied.
+
+---
+
+## 2026-11-07 — Occasion 379 translation and liturgical-label verification
+
+- **Published canonical translations:** The refreshed Occasion 379 author export includes published Arabic (`ar`) and English (`en`) translations for TextIDs **6064, 6065, 6066, and 6067**. The generated package and runtime verse occurrences are checked by `GeneratedAuthorPackageRuntimeIntegrationTest.publishedTranslationsFromGeneratedPreviewReachRuntimeVerses`. The previous assertion that 6067 was unpublished was removed because the authoring data now marks both translations as published (commit `0f0955b`).
+- **Liturgical labels:** Qolo occurrence labels use the liturgical `Location` title before the Qolo name, when present, rather than the Melody name. The separator was changed from an em dash to a colon and space (`: `) in the Android/Compose UI (commit `edc9571`). This is presentation formatting, not a change to source identifiers or mapping.
+- **User verification:** The user ran the Occasion 379 preview and checked the application on a connected Samsung Android phone. They confirmed the Location/Qolo label and the colon separator visually. This does **not** constitute a separate visual verification of every translation or other UI feature.
+- **Automated verification:** The user reported `BUILD SUCCESSFUL` for `./gradlew.bat :buildtools:test :shared:testAndroidHostTest` and for the targeted published-translation runtime integration test. The full-suite run preceded the separator-only UI change; no later full-suite run has been reported.
+- **Repository checkpoint:** The user confirmed synchronization of the translation-test commit `0f0955b`; the subsequent label-formatting commit is `edc9571`. The documentation checkpoint should not be confused with a new application release.
