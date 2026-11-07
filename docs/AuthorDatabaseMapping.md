@@ -1640,3 +1640,9 @@ build outputs before rebuilding a newly selected Occasion. This prevents
 optional PERFORMANCE/timing resources from a previous Occasion from
 remaining in a later APK when the new package does not contain those
 collections.
+
+## 2026-11-07 — Published translation mapping verification
+
+For the Occasion 379 author export, published `TranslationLinks` are mapped through canonical translations and language records into Application Package text translations. Runtime retains the translations on canonical `TextContent` and exposes them through resolved contextual verse occurrences without changing `TextID` or occurrence identity. The integration test verifies nonblank `ar` and `en` translations for TextIDs 6064, 6065, 6066, and 6067, and equality between canonical and occurrence translation lists (commit `0f0955b`). Only published links are eligible; the presence of an authoring translation alone is insufficient.
+
+Separately, `ExistsIn.locationId` supplies the liturgical Location title for Qolo occurrence display; the UI combines that title with the Qolo name using `: `, not the Melody name (UI commit `edc9571`). This display rule does not change the package's melody or media relationships. The Location/Qolo label and separator were visually confirmed by the user on a connected Android phone.
