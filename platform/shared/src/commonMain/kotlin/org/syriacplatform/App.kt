@@ -1047,7 +1047,7 @@ private fun ResolvedLiturgicalItemView(
                     .takeIf { it.isNotBlank() }
                 Text(
                     text = listOfNotNull(locationTitle, qoloName)
-                        .joinToString(" — ")
+                        .joinToString(": ")
                         .ifBlank { "Qolo" },
                     style = SyriacTextStyles.body(),
                     textAlign = TextAlign.Center
