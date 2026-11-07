@@ -104,3 +104,9 @@ User-tested authoring UI: `frmTextTranslations` accessed from `TextsChoose` and 
 ### Required downstream mapping
 
 Build Tools should join `TranslationLinks.TranslationID -> Translations.TranslationID -> Languages.LanguageID` and attach published translations to canonical `TextID` or `PetN` (not to an occurrence or liturgical position). Reuse existing Schema-v1 `translations: [{language, content}]` for Text and Petgomo where supported; retain authored Syriac and occurrence identity. Validate missing references and more than one published translation for a source/language, and preserve content-language choice separately from interface localization. No runtime or UI completion is claimed by this checkpoint.
+
+## Implementation verification update — 2026-11-07
+
+The earlier design/pending statements in this study are historical checkpoints, not the current downstream implementation status. Published translation links exported from Access are now consumed by Build Tools and attached to canonical text content in the generated Application Package. Runtime exposes the canonical translations on resolved verse text occurrences; this is verified for Occasion 379 TextIDs 6064–6067, each with published `ar` and `en` content, by `GeneratedAuthorPackageRuntimeIntegrationTest.publishedTranslationsFromGeneratedPreviewReachRuntimeVerses` (test correction `0f0955b`).
+
+Publication remains a property of the source-to-translation link: existence of a translation record alone does not imply it should be exported. The earlier test expectation that TextID 6067 had no published translations became obsolete after both links were published in the authoring database. Do not infer from the runtime integration test that all translation presentation and language-switching behaviors have been visually verified on Android.
