@@ -1394,6 +1394,108 @@ End Sub
 
 
 ' ============================================================
+' NOTATION SOURCE PREFLIGHT (READ-ONLY)
+' The caller supplies the old notation root; it is never hard-coded.
+' No database records or physical media files are modified.
+' ============================================================
+
+Public Sub CheckLegacyNotationFiles(ByVal legacyRoot As String)
+
+    On Error GoTo ErrorHandler
+
+    Dim db As DAO.Database
+    Dim rs As DAO.Recordset
+    Dim fso As Object
+    Dim report As String
+    Dim relativePath As String
+    Dim fullPath As String
+    Dim extension As String
+    Dim foundCount As Long
+    Dim missingCount As Long
+    Dim invalidCount As Long
+    Dim root As String
+
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    root = Trim$(legacyRoot)
+
+    If Len(root) = 0 Or Not fso.FolderExists(root) Then
+        Err.Raise vbObjectError + 1210, _
+            "CheckLegacyNotationFiles", "Legacy notation root does not exist."
+    End If
+
+    root = fso.GetAbsolutePathName(root)
+    EnsureFolderExists MEDIA_EXPORT_ROOT
+
+    Set db = CurrentDb
+    Set rs = db.OpenRecordset( _
+        "SELECT MNN, LinkAdres FROM MusicNotes ORDER BY MNN;", _
+        dbOpenSnapshot)
+
+    report = "MNN,LinkAdres,Status" & vbCrLf
+
+    Do While Not rs.EOF
+        relativePath = Trim$(Nz(rs!LinkAdres, ""))
+        relativePath = Replace(relativePath, "/", "\")
+
+        If Len(relativePath) = 0 Or _
+            Left$(relativePath, 1) = "\" Or _
+            InStr(relativePath, ":") > 0 Or _
+            InStr(relativePath, "..") > 0 Then
+
+            report = report & CsvValue(rs!MNN) & "," & _
+                CsvValue(relativePath) & "," & CsvValue("INVALID_PATH") & vbCrLf
+            invalidCount = invalidCount + 1
+
+        Else
+            extension = LCase$(fso.GetExtensionName(relativePath))
+            If extension <> "jpg" And extension <> "jpeg" And _
+                extension <> "png" Then
+
+                report = report & CsvValue(rs!MNN) & "," & _
+                    CsvValue(relativePath) & "," & CsvValue("INVALID_EXTENSION") & vbCrLf
+                invalidCount = invalidCount + 1
+
+            Else
+                fullPath = fso.BuildPath(root, relativePath)
+
+                If fso.FileExists(fullPath) Then
+                    report = report & CsvValue(rs!MNN) & "," & _
+                        CsvValue(relativePath) & "," & CsvValue("FOUND") & vbCrLf
+                    foundCount = foundCount + 1
+                Else
+                    report = report & CsvValue(rs!MNN) & "," & _
+                        CsvValue(relativePath) & "," & CsvValue("MISSING") & vbCrLf
+                    missingCount = missingCount + 1
+                End If
+            End If
+        End If
+
+        rs.MoveNext
+    Loop
+
+    rs.Close
+    Set rs = Nothing
+    Set db = Nothing
+
+    WriteUtf8File MEDIA_EXPORT_ROOT & "\NotationSourcePreflight.csv", report
+
+    MsgBox "Notation source preflight completed (read-only)." & vbCrLf & _
+        "Found: " & foundCount & vbCrLf & _
+        "Missing: " & missingCount & vbCrLf & _
+        "Invalid: " & invalidCount & vbCrLf & _
+        MEDIA_EXPORT_ROOT & "\NotationSourcePreflight.csv", _
+        vbInformation, "SyriacPlatform Notation Preflight"
+    Exit Sub
+
+ErrorHandler:
+    MsgBox "Notation preflight failed: " & Err.Number & _
+        " - " & Err.Description, vbCritical, _
+        "SyriacPlatform Notation Preflight"
+
+End Sub
+
+
+' ============================================================
 ' REPRESENTATIVE DATA EXPORT
 ' ============================================================
 
