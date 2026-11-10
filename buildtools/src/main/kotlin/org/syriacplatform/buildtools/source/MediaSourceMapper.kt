@@ -43,7 +43,7 @@ class MediaSourceMapper {
         val role = row.requiredText("Role")
         val sort = row.requiredLong("Sort")
 
-        require(role == RECORDING_ROLE) {
+        require(role in SUPPORTED_MELODY_ROLES) {
             "MelodyMedia ${row["MelodyMediaID"]} has unsupported " +
                     "Role '$role'."
         }
@@ -255,6 +255,9 @@ class MediaSourceMapper {
 
         const val PERFORMANCE_ROLE =
             "PERFORMANCE"
+
+        val SUPPORTED_MELODY_ROLES =
+            setOf(RECORDING_ROLE, "NOTATION")
 
         val SUPPORTED_MEDIA_TYPES =
             setOf(
