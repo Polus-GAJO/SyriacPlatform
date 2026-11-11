@@ -558,6 +558,36 @@
       ]
     },
     {
+      "table": "Languages",
+      "name": "PK_Languages",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "LanguageID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Languages",
+      "name": "UX_Languages_Code",
+      "primary": false,
+      "unique": true,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "LanguageCode",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
       "table": "Location",
       "name": "PrimaryKey",
       "primary": true,
@@ -828,6 +858,136 @@
         {
           "name": "QoloN",
           "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MelodyGroup",
+      "name": "FK_MelodyGroup_Qinto",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "QintoN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MelodyGroup",
+      "name": "FK_MelodyGroup_Qolo",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "QoloN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MelodyGroup",
+      "name": "PK_MelodyGroup",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MelodyGroupID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MelodyGroupMember",
+      "name": "FK_MelodyGroupMember_Group",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MelodyGroupID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MelodyGroupMember",
+      "name": "FK_MelodyGroupMember_Melody",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MelodyN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MelodyGroupMember",
+      "name": "PK_MelodyGroupMember",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MelodyGroupMemberID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MelodyGroupMember",
+      "name": "UX_MelodyGroupMember_Group_Melody",
+      "primary": false,
+      "unique": true,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MelodyGroupID",
+          "ordinal": 0,
+          "descending": false
+        },
+        {
+          "name": "MelodyN",
+          "ordinal": 1,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "MelodyGroupMember",
+      "name": "UX_MelodyGroupMember_Group_Sort",
+      "primary": false,
+      "unique": true,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MelodyGroupID",
+          "ordinal": 0,
+          "descending": false
+        },
+        {
+          "name": "Sort",
+          "ordinal": 1,
           "descending": false
         }
       ]
@@ -1129,6 +1289,36 @@
     },
     {
       "table": "Occasion",
+      "name": "NoteN",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "NoteN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Occasion",
+      "name": "NotesOccasion",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "NoteN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Occasion",
       "name": "OccDay",
       "primary": false,
       "unique": false,
@@ -1413,21 +1603,6 @@
       ]
     },
     {
-      "table": "RofMP3",
-      "name": "PrimaryKey",
-      "primary": true,
-      "unique": true,
-      "required": true,
-      "ignoreNulls": false,
-      "columns": [
-        {
-          "name": "RofMeloN",
-          "ordinal": 0,
-          "descending": false
-        }
-      ]
-    },
-    {
       "table": "SimilarTextsTemp",
       "name": "PrimaryKey",
       "primary": true,
@@ -1482,21 +1657,6 @@
       "columns": [
         {
           "name": "SrcExistsInID",
-          "ordinal": 0,
-          "descending": false
-        }
-      ]
-    },
-    {
-      "table": "tblTempResults",
-      "name": "PrimaryKey",
-      "primary": true,
-      "unique": true,
-      "required": true,
-      "ignoreNulls": false,
-      "columns": [
-        {
-          "name": "TextID",
           "ordinal": 0,
           "descending": false
         }
@@ -1742,6 +1902,156 @@
       "columns": [
         {
           "name": "TextID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "TranslationLinks",
+      "name": "IX_Links_Pet",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "PetN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "TranslationLinks",
+      "name": "IX_Links_Text",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "TextID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "TranslationLinks",
+      "name": "IX_Links_Translation",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "TranslationID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "TranslationLinks",
+      "name": "PK_TranslationLinks",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "LinkID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "TranslationLinks",
+      "name": "relTranslationLinksPetgomo",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "PetN",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "TranslationLinks",
+      "name": "relTranslationLinksText",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "TextID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "TranslationLinks",
+      "name": "TranslationsTranslationLinks",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "TranslationID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Translations",
+      "name": "IX_Translations_Language",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "LanguageID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Translations",
+      "name": "PK_Translations",
+      "primary": true,
+      "unique": true,
+      "required": true,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "TranslationID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "Translations",
+      "name": "relTranslationsLanguage",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "LanguageID",
           "ordinal": 0,
           "descending": false
         }

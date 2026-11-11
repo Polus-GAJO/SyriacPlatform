@@ -215,6 +215,21 @@
           "validationRule": null,
           "validationText": null,
           "description": null
+        },
+        {
+          "name": "ItemType",
+          "ordinal": 9,
+          "type": "ShortText",
+          "daoType": 10,
+          "size": 20,
+          "nullable": true,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": "Is Null Or =\"PRAYER_NOTE\"",
+          "validationText": null,
+          "description": null
         }
       ]
     },
@@ -479,6 +494,58 @@
           "primaryKey": false,
           "autoIncrement": false,
           "allowZeroLength": true,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
+        }
+      ]
+    },
+    {
+      "name": "Languages",
+      "isLinked": false,
+      "sourceTableName": null,
+      "columns": [
+        {
+          "name": "LanguageID",
+          "ordinal": 0,
+          "type": "Long",
+          "daoType": 4,
+          "size": 4,
+          "nullable": true,
+          "primaryKey": true,
+          "autoIncrement": true,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
+        },
+        {
+          "name": "LanguageCode",
+          "ordinal": 1,
+          "type": "ShortText",
+          "daoType": 10,
+          "size": 35,
+          "nullable": false,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
+        },
+        {
+          "name": "LanguageName",
+          "ordinal": 2,
+          "type": "ShortText",
+          "daoType": 10,
+          "size": 100,
+          "nullable": false,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
           "defaultValue": null,
           "validationRule": null,
           "validationText": null,
@@ -882,6 +949,140 @@
       ]
     },
     {
+      "name": "MelodyGroup",
+      "isLinked": false,
+      "sourceTableName": null,
+      "columns": [
+        {
+          "name": "MelodyGroupID",
+          "ordinal": 0,
+          "type": "Long",
+          "daoType": 4,
+          "size": 4,
+          "nullable": true,
+          "primaryKey": true,
+          "autoIncrement": true,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
+        },
+        {
+          "name": "QoloN",
+          "ordinal": 1,
+          "type": "Long",
+          "daoType": 4,
+          "size": 4,
+          "nullable": false,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
+        },
+        {
+          "name": "QintoN",
+          "ordinal": 2,
+          "type": "Long",
+          "daoType": 4,
+          "size": 4,
+          "nullable": true,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
+        },
+        {
+          "name": "GroupName",
+          "ordinal": 3,
+          "type": "ShortText",
+          "daoType": 10,
+          "size": 255,
+          "nullable": true,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
+        }
+      ]
+    },
+    {
+      "name": "MelodyGroupMember",
+      "isLinked": false,
+      "sourceTableName": null,
+      "columns": [
+        {
+          "name": "MelodyGroupMemberID",
+          "ordinal": 0,
+          "type": "Long",
+          "daoType": 4,
+          "size": 4,
+          "nullable": true,
+          "primaryKey": true,
+          "autoIncrement": true,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
+        },
+        {
+          "name": "MelodyGroupID",
+          "ordinal": 1,
+          "type": "Long",
+          "daoType": 4,
+          "size": 4,
+          "nullable": false,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
+        },
+        {
+          "name": "MelodyN",
+          "ordinal": 2,
+          "type": "Long",
+          "daoType": 4,
+          "size": 4,
+          "nullable": false,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
+        },
+        {
+          "name": "Sort",
+          "ordinal": 3,
+          "type": "Long",
+          "daoType": 4,
+          "size": 4,
+          "nullable": false,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
+        }
+      ]
+    },
+    {
       "name": "MelodyMedia",
       "isLinked": false,
       "sourceTableName": null,
@@ -942,8 +1143,8 @@
           "autoIncrement": false,
           "allowZeroLength": true,
           "defaultValue": null,
-          "validationRule": "=\"RECORDING\"",
-          "validationText": "Role must be RECORDING.",
+          "validationRule": "In (\"RECORDING\",\"NOTATION\")",
+          "validationText": "Role must be RECORDING or NOTATION.",
           "description": null
         },
         {
@@ -1153,6 +1354,21 @@
           "validationRule": null,
           "validationText": null,
           "description": null
+        },
+        {
+          "name": "publicationStatus",
+          "ordinal": 2,
+          "type": "ShortText",
+          "daoType": 10,
+          "size": 20,
+          "nullable": false,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
+          "defaultValue": "\"ARCHIVE\"",
+          "validationRule": "In (\"ARCHIVE\",\"PUBLISHED\")",
+          "validationText": "Only ARCHIVE or PUBLISHED is allowed.",
+          "description": null
         }
       ]
     },
@@ -1287,17 +1503,10 @@
           "validationRule": null,
           "validationText": null,
           "description": null
-        }
-      ]
-    },
-    {
-      "name": "Paste Errors",
-      "isLinked": false,
-      "sourceTableName": null,
-      "columns": [
+        },
         {
-          "name": "SubID",
-          "ordinal": 0,
+          "name": "NoteN",
+          "ordinal": 5,
           "type": "Long",
           "daoType": 4,
           "size": 4,
@@ -1305,7 +1514,7 @@
           "primaryKey": false,
           "autoIncrement": false,
           "allowZeroLength": false,
-          "defaultValue": null,
+          "defaultValue": "0",
           "validationRule": null,
           "validationText": null,
           "description": null
@@ -1618,73 +1827,6 @@
       ]
     },
     {
-      "name": "RofMP3",
-      "isLinked": true,
-      "sourceTableName": "RofMP3",
-      "columns": [
-        {
-          "name": "RofMeloN",
-          "ordinal": 0,
-          "type": "Long",
-          "daoType": 4,
-          "size": 4,
-          "nullable": false,
-          "primaryKey": true,
-          "autoIncrement": false,
-          "allowZeroLength": false,
-          "defaultValue": "0",
-          "validationRule": null,
-          "validationText": null,
-          "description": null
-        },
-        {
-          "name": "Melodyserch",
-          "ordinal": 1,
-          "type": "ShortText",
-          "daoType": 10,
-          "size": 255,
-          "nullable": true,
-          "primaryKey": false,
-          "autoIncrement": false,
-          "allowZeroLength": true,
-          "defaultValue": null,
-          "validationRule": null,
-          "validationText": null,
-          "description": null
-        },
-        {
-          "name": "Record",
-          "ordinal": 2,
-          "type": "Boolean",
-          "daoType": 1,
-          "size": 1,
-          "nullable": true,
-          "primaryKey": false,
-          "autoIncrement": false,
-          "allowZeroLength": false,
-          "defaultValue": "=No",
-          "validationRule": null,
-          "validationText": null,
-          "description": null
-        },
-        {
-          "name": "Audiolink",
-          "ordinal": 3,
-          "type": "Unknown(101)",
-          "daoType": 101,
-          "size": 4,
-          "nullable": true,
-          "primaryKey": false,
-          "autoIncrement": false,
-          "allowZeroLength": false,
-          "defaultValue": null,
-          "validationRule": null,
-          "validationText": null,
-          "description": null
-        }
-      ]
-    },
-    {
       "name": "SimilarTextsTemp",
       "isLinked": false,
       "sourceTableName": null,
@@ -1819,28 +1961,6 @@
           "autoIncrement": false,
           "allowZeroLength": false,
           "defaultValue": "No",
-          "validationRule": null,
-          "validationText": null,
-          "description": null
-        }
-      ]
-    },
-    {
-      "name": "tblTempResults",
-      "isLinked": false,
-      "sourceTableName": null,
-      "columns": [
-        {
-          "name": "TextID",
-          "ordinal": 0,
-          "type": "Long",
-          "daoType": 4,
-          "size": 4,
-          "nullable": false,
-          "primaryKey": true,
-          "autoIncrement": false,
-          "allowZeroLength": false,
-          "defaultValue": null,
           "validationRule": null,
           "validationText": null,
           "description": null
@@ -2119,6 +2239,185 @@
           "type": "Long",
           "daoType": 4,
           "size": 4,
+          "nullable": false,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
+        }
+      ]
+    },
+    {
+      "name": "TranslationLinks",
+      "isLinked": false,
+      "sourceTableName": null,
+      "columns": [
+        {
+          "name": "LinkID",
+          "ordinal": 0,
+          "type": "Long",
+          "daoType": 4,
+          "size": 4,
+          "nullable": true,
+          "primaryKey": true,
+          "autoIncrement": true,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
+        },
+        {
+          "name": "TranslationID",
+          "ordinal": 1,
+          "type": "Long",
+          "daoType": 4,
+          "size": 4,
+          "nullable": false,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
+        },
+        {
+          "name": "TextID",
+          "ordinal": 2,
+          "type": "Long",
+          "daoType": 4,
+          "size": 4,
+          "nullable": true,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
+        },
+        {
+          "name": "PetN",
+          "ordinal": 3,
+          "type": "Long",
+          "daoType": 4,
+          "size": 4,
+          "nullable": true,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
+        },
+        {
+          "name": "IsPublished",
+          "ordinal": 4,
+          "type": "Boolean",
+          "daoType": 1,
+          "size": 1,
+          "nullable": true,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
+        }
+      ]
+    },
+    {
+      "name": "Translations",
+      "isLinked": false,
+      "sourceTableName": null,
+      "columns": [
+        {
+          "name": "TranslationID",
+          "ordinal": 0,
+          "type": "Long",
+          "daoType": 4,
+          "size": 4,
+          "nullable": true,
+          "primaryKey": true,
+          "autoIncrement": true,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
+        },
+        {
+          "name": "LanguageID",
+          "ordinal": 1,
+          "type": "Long",
+          "daoType": 4,
+          "size": 4,
+          "nullable": false,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
+        },
+        {
+          "name": "Translation",
+          "ordinal": 2,
+          "type": "LongText",
+          "daoType": 12,
+          "size": 0,
+          "nullable": true,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
+        },
+        {
+          "name": "Translator",
+          "ordinal": 3,
+          "type": "ShortText",
+          "daoType": 10,
+          "size": 255,
+          "nullable": true,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
+        },
+        {
+          "name": "Source",
+          "ordinal": 4,
+          "type": "ShortText",
+          "daoType": 10,
+          "size": 255,
+          "nullable": true,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
+        },
+        {
+          "name": "ReviewStatus",
+          "ordinal": 5,
+          "type": "ShortText",
+          "daoType": 10,
+          "size": 30,
           "nullable": false,
           "primaryKey": false,
           "autoIncrement": false,

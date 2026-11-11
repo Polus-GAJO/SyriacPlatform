@@ -159,7 +159,7 @@
       "referentialIntegrity": true,
       "cascadeUpdate": true,
       "cascadeDelete": true,
-      "attributes": 16781568,
+      "attributes": 4352,
       "columns": [
         {
           "primaryColumn": "ID",
@@ -194,6 +194,66 @@
         {
           "primaryColumn": "ID",
           "foreignColumn": "ExistInTextID"
+        }
+      ]
+    },
+    {
+      "name": "FK_MelodyGroup_Qinto",
+      "primaryTable": "Qinto",
+      "foreignTable": "MelodyGroup",
+      "referentialIntegrity": true,
+      "cascadeUpdate": false,
+      "cascadeDelete": false,
+      "attributes": 0,
+      "columns": [
+        {
+          "primaryColumn": "QintoN",
+          "foreignColumn": "QintoN"
+        }
+      ]
+    },
+    {
+      "name": "FK_MelodyGroup_Qolo",
+      "primaryTable": "Qolos",
+      "foreignTable": "MelodyGroup",
+      "referentialIntegrity": true,
+      "cascadeUpdate": false,
+      "cascadeDelete": false,
+      "attributes": 0,
+      "columns": [
+        {
+          "primaryColumn": "QoloN",
+          "foreignColumn": "QoloN"
+        }
+      ]
+    },
+    {
+      "name": "FK_MelodyGroupMember_Group",
+      "primaryTable": "MelodyGroup",
+      "foreignTable": "MelodyGroupMember",
+      "referentialIntegrity": true,
+      "cascadeUpdate": false,
+      "cascadeDelete": false,
+      "attributes": 0,
+      "columns": [
+        {
+          "primaryColumn": "MelodyGroupID",
+          "foreignColumn": "MelodyGroupID"
+        }
+      ]
+    },
+    {
+      "name": "FK_MelodyGroupMember_Melody",
+      "primaryTable": "Melody",
+      "foreignTable": "MelodyGroupMember",
+      "referentialIntegrity": true,
+      "cascadeUpdate": false,
+      "cascadeDelete": false,
+      "attributes": 0,
+      "columns": [
+        {
+          "primaryColumn": "MelodyN",
+          "foreignColumn": "MelodyN"
         }
       ]
     },
@@ -306,6 +366,21 @@
       "name": "NotesMelody",
       "primaryTable": "Notes",
       "foreignTable": "Melody",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": false,
+      "attributes": 256,
+      "columns": [
+        {
+          "primaryColumn": "NoteN",
+          "foreignColumn": "NoteN"
+        }
+      ]
+    },
+    {
+      "name": "NotesOccasion",
+      "primaryTable": "Notes",
+      "foreignTable": "Occasion",
       "referentialIntegrity": true,
       "cascadeUpdate": true,
       "cascadeDelete": false,
@@ -438,17 +513,47 @@
       ]
     },
     {
-      "name": "RofMP3Melody",
-      "primaryTable": "RofMP3",
-      "foreignTable": "Melody",
-      "referentialIntegrity": false,
+      "name": "relTranslationLinksPetgomo",
+      "primaryTable": "Petgomo",
+      "foreignTable": "TranslationLinks",
+      "referentialIntegrity": true,
       "cascadeUpdate": false,
       "cascadeDelete": false,
-      "attributes": 3,
+      "attributes": 0,
       "columns": [
         {
-          "primaryColumn": "RofMeloN",
-          "foreignColumn": "MelodyN"
+          "primaryColumn": "PetN",
+          "foreignColumn": "PetN"
+        }
+      ]
+    },
+    {
+      "name": "relTranslationLinksText",
+      "primaryTable": "Texts",
+      "foreignTable": "TranslationLinks",
+      "referentialIntegrity": true,
+      "cascadeUpdate": false,
+      "cascadeDelete": false,
+      "attributes": 0,
+      "columns": [
+        {
+          "primaryColumn": "TextID",
+          "foreignColumn": "TextID"
+        }
+      ]
+    },
+    {
+      "name": "relTranslationsLanguage",
+      "primaryTable": "Languages",
+      "foreignTable": "Translations",
+      "referentialIntegrity": true,
+      "cascadeUpdate": false,
+      "cascadeDelete": false,
+      "attributes": 0,
+      "columns": [
+        {
+          "primaryColumn": "LanguageID",
+          "foreignColumn": "LanguageID"
         }
       ]
     },
@@ -539,6 +644,21 @@
         {
           "primaryColumn": "TextID",
           "foreignColumn": "TextID"
+        }
+      ]
+    },
+    {
+      "name": "TranslationsTranslationLinks",
+      "primaryTable": "Translations",
+      "foreignTable": "TranslationLinks",
+      "referentialIntegrity": true,
+      "cascadeUpdate": true,
+      "cascadeDelete": true,
+      "attributes": 4352,
+      "columns": [
+        {
+          "primaryColumn": "TranslationID",
+          "foreignColumn": "TranslationID"
         }
       ]
     }
