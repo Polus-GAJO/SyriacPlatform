@@ -23,6 +23,7 @@ import org.syriacplatform.content.models.MediaTimingSet
 import org.syriacplatform.content.models.PerformanceMedia
 import org.syriacplatform.content.models.TextOccurrenceMediaSegment
 import org.syriacplatform.content.models.Melody
+import org.syriacplatform.content.models.MelodyMedia
 import org.syriacplatform.content.models.MelodyQintoAssignment
 import org.syriacplatform.content.models.Occasion
 import org.syriacplatform.content.models.Note
@@ -57,6 +58,7 @@ class RuntimeContentIndex private constructor(
     val qolosById: Map<QoloId, Qolo>,
     val melodiesById: Map<MelodyId, Melody>,
     val mediaAssetsById: Map<MediaAssetId, MediaAsset>,
+    val melodyMediaByMelodyId: Map<MelodyId, List<MelodyMedia>>,
     val performanceMediaById:
     Map<PerformanceMediaId, PerformanceMedia>,
     val performanceMediaByLiturgicalItemId:
@@ -143,6 +145,9 @@ class RuntimeContentIndex private constructor(
 
                 mediaAssetsById =
                     content.mediaAssets.associateBy { it.id },
+                melodyMediaByMelodyId = content.melodyMedia
+                    .groupBy { it.melodyId }
+                    .mapValues { (_, links) -> links.sortedWith(compareBy<MelodyMedia> { it.sort }.thenBy { it.id }) },
 
                 performanceMediaById =
                     content.performanceMedia.associateBy { it.id },
