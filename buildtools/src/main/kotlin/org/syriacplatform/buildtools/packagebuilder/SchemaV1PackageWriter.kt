@@ -27,6 +27,7 @@ import org.syriacplatform.buildtools.schema.SchemaV1TextLiturgicalItem
 import org.syriacplatform.buildtools.schema.SchemaV1UnresolvedQoloLiturgicalItem
 import org.syriacplatform.buildtools.schema.SchemaV1Text
 import org.syriacplatform.buildtools.schema.SchemaV1TextOccurrence
+import org.syriacplatform.buildtools.schema.SchemaV1MelodyMedia
 import org.syriacplatform.buildtools.schema.SchemaV1PerformanceMedia
 import org.syriacplatform.buildtools.schema.SchemaV1MediaTimingSet
 import org.syriacplatform.buildtools.schema.SchemaV1MediaSegment
@@ -173,6 +174,14 @@ class SchemaV1PackageWriter {
                 packageData.mediaAssets.map(
                     ::mediaAssetJson
                 )
+            )
+        }
+
+        if (packageData.melodyMedia.isNotEmpty()) {
+            writeCollection(
+                contentDirectory,
+                "melody-media.json",
+                packageData.melodyMedia.map(::melodyMediaJson)
             )
         }
 
@@ -636,6 +645,16 @@ class SchemaV1PackageWriter {
         }
     }
 
+
+    private fun melodyMediaJson(
+        item: SchemaV1MelodyMedia
+    ): JsonElement = buildJsonObject {
+        put("id", item.id)
+        put("melodyId", item.melodyId)
+        put("mediaAssetId", item.mediaAssetId)
+        put("role", item.role)
+        put("sort", item.sort)
+    }
 
     private fun performanceMediaJson(
         item: SchemaV1PerformanceMedia
