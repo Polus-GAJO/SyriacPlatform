@@ -231,6 +231,7 @@ notes: List<SchemaV1PackageNote> = emptyList()
                     )
                 },
 
+            melodyMedia = media.melodyMedia,
             performanceMedia = media.performanceMedia,
             mediaTimingSets = media.mediaTimingSets,
             mediaSegments = media.mediaSegments,
