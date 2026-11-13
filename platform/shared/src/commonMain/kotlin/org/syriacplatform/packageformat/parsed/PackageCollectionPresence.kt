@@ -26,6 +26,7 @@ data class PackageCollectionPresence(
     val qintos: Boolean,
     val petgomos: Boolean,
     val melodyQintoAssignments: Boolean,
+    val melodyMedia: Boolean = false,
     val mediaAssets: Boolean = false,
     val performanceMedia: Boolean = false,
     val mediaTimingSets: Boolean = false,
