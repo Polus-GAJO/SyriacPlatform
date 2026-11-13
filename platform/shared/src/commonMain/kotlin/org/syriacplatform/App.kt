@@ -1,6 +1,19 @@
 package org.syriacplatform
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import org.jetbrains.compose.resources.decodeToImageBitmap
+import org.syriacplatform.resources.Res
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -1603,6 +1616,11 @@ private fun HymnDetailsScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
 
+                    MelodyNotationSection(
+                        platform = platform,
+                        melodyId = selectedMelody?.id
+                    )
+
                     val recordingsResult by produceState<Result<List<MediaAsset>>?>(
                         initialValue = null,
                         key1 = platform,
@@ -2306,6 +2324,100 @@ private fun MissingHymnSelectionScreen(
                 )
         ) {
             Text("Back")
+        }
+    }
+}
+
+/**
+ * Experimental notation viewer. The media paths are relative to the
+ * packaged Compose resources, just like ResourcePackageSource.
+ */
+@Composable
+private fun MelodyNotationSection(
+    platform: PlatformContext,
+    melodyId: MelodyId?
+) {
+    val notationResult by produceState<Result<List<MediaAsset>>?>(
+        initialValue = null,
+        key1 = platform,
+        key2 = melodyId
+    ) {
+        value = melodyId?.let { platform.content.loadMelodyNotations(it) }
+    }
+    var showNotation by remember(melodyId) { mutableStateOf(false) }
+    var page by remember(melodyId) { mutableStateOf(0) }
+
+    when (val result = notationResult) {
+        null -> if (melodyId != null) Text("Loading notation...")
+        is Result.Failure -> Text(result.error.message ?: "Notation loading failed")
+        is Result.Success -> {
+            val assets = result.data
+            if (assets.isNotEmpty()) {
+                Button(onClick = {
+                    page = 0
+                    showNotation = true
+                }) {
+                    Text("View notation (${assets.size})")
+                }
+                if (showNotation) {
+                    val asset = assets[page.coerceIn(0, assets.lastIndex)]
+                    val bitmap by produceState<ImageBitmap?>(
+                        initialValue = null,
+                        key1 = asset.path
+                    ) {
+                        value = try {
+                            Res.readBytes("files/${asset.path}").decodeToImageBitmap()
+                        } catch (_: Exception) {
+                            null
+                        }
+                    }
+                    var zoom by remember(asset.path) { mutableStateOf(1f) }
+                    val transformState = rememberTransformableState { zoomChange, _, _ ->
+                        zoom = (zoom * zoomChange).coerceIn(1f, 5f)
+                    }
+                    AlertDialog(
+                        onDismissRequest = { showNotation = false },
+                        title = { Text("Notation ${page + 1} / ${assets.size}") },
+                        text = {
+                            Column {
+                                if (bitmap == null) {
+                                    Text("Loading image, or image unavailable")
+                                } else {
+                                    Box(
+                                        modifier = Modifier.fillMaxWidth().heightIn(min = 200.dp, max = 540.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Image(
+                                            bitmap = bitmap!!,
+                                            contentDescription = "Notation page ${page + 1}",
+                                            contentScale = ContentScale.Fit,
+                                            modifier = Modifier.fillMaxWidth()
+                                                .transformable(transformState)
+                                                .graphicsLayer(scaleX = zoom, scaleY = zoom)
+                                        )
+                                    }
+                                }
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    TextButton(
+                                        enabled = page > 0,
+                                        onClick = { page-- }
+                                    ) { Text("Previous") }
+                                    TextButton(
+                                        enabled = page < assets.lastIndex,
+                                        onClick = { page++ }
+                                    ) { Text("Next") }
+                                    TextButton(onClick = { zoom = 1f }) { Text("Reset zoom") }
+                                }
+                            }
+                        },
+                        confirmButton = {
+                            TextButton(onClick = { showNotation = false }) {
+                                Text("Close")
+                            }
+                        }
+                    )
+                }
+            }
         }
     }
 }
