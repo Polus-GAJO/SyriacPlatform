@@ -7,6 +7,7 @@ import org.syriacplatform.common.types.ErrorCode
 import org.syriacplatform.common.types.PlatformError
 import org.syriacplatform.packageformat.dto.EntryPointJsonDto
 import org.syriacplatform.packageformat.dto.LiturgicalItemJsonDto
+import org.syriacplatform.packageformat.dto.MelodyMediaJsonDto
 import org.syriacplatform.packageformat.dto.MediaAssetJsonDto
 import org.syriacplatform.packageformat.dto.MediaSegmentJsonDto
 import org.syriacplatform.packageformat.dto.MediaTimingSetJsonDto
@@ -343,6 +344,16 @@ class ApplicationPackageLoader(
             }
 
 
+        val melodyMedia =
+            when (val result = parseCollection<MelodyMediaJsonDto, org.syriacplatform.content.models.MelodyMedia>(
+                bytes = files.melodyMedia,
+                path = PackagePaths.MELODY_MEDIA,
+                mapper = { dto -> Result.Success(dto.toDomain()) }
+            )) {
+                is Result.Success -> result.data
+                is Result.Failure -> return PackageLoadResult.Failure(result.error)
+            }
+
         val performanceMedia =
             when (
                 val result =
@@ -431,6 +442,7 @@ class ApplicationPackageLoader(
                 melodyQintoAssignments =
                     melodyQintoAssignments,
                 mediaAssets = mediaAssets,
+                melodyMedia = melodyMedia,
                 performanceMedia = performanceMedia,
                 mediaTimingSets = mediaTimingSets,
                 mediaSegments = mediaSegments,
@@ -516,6 +528,7 @@ class ApplicationPackageLoader(
                         files.melodyQintoAssignments != null,
                     mediaAssets =
                         files.mediaAssets != null,
+                    melodyMedia = files.melodyMedia != null,
                     performanceMedia =
                         files.performanceMedia != null,
                     mediaTimingSets =
@@ -702,6 +715,7 @@ class ApplicationPackageLoader(
                 source.readBytesOrNull(
                     PackagePaths.MELODIES
                 ),
+            melodyMedia = source.readBytesOrNull(PackagePaths.MELODY_MEDIA),
             mediaAssets =
                 source.readBytesOrNull(
                     PackagePaths.MEDIA_ASSETS
@@ -753,6 +767,7 @@ class ApplicationPackageLoader(
         val petgomos: ByteArray?,
         val qolos: ByteArray?,
         val melodies: ByteArray?,
+        val melodyMedia: ByteArray?,
         val mediaAssets: ByteArray?,
         val performanceMedia: ByteArray?,
         val mediaTimingSets: ByteArray?,
