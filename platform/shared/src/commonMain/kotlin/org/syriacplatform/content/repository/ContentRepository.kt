@@ -51,6 +51,10 @@ interface ContentRepository {
         id: MediaAssetId
     ): Result<MediaAsset>
 
+    suspend fun loadMelodyNotations(
+        id: MelodyId
+    ): Result<List<MediaAsset>>
+
     suspend fun loadMelodyRecordings(
         id: MelodyId
     ): Result<List<MediaAsset>>
