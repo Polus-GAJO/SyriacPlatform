@@ -175,6 +175,9 @@ private class FakeIntervalContentService(
     override suspend fun loadLiturgicalItem(liturgicalItemId: LiturgicalItemId): Result<ResolvedLiturgicalItem> =
         unsupported()
 
+    override suspend fun loadMelodyNotations(melodyId: MelodyId): Result<List<MediaAsset>> =
+        Result.Success(emptyList())
+
     override suspend fun loadMelodyRecordings(melodyId: MelodyId): Result<List<MediaAsset>> =
         Result.Success(emptyList())
 
