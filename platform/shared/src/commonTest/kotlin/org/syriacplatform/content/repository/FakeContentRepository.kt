@@ -186,6 +186,10 @@ class FakeContentRepository : ContentRepository {
         )
     }
 
+    override suspend fun loadMelodyNotations(
+        id: MelodyId
+    ): Result<List<MediaAsset>> = Result.Success(emptyList())
+
     override suspend fun loadMelodyRecordings(
         id: MelodyId
     ): Result<List<MediaAsset>> {
