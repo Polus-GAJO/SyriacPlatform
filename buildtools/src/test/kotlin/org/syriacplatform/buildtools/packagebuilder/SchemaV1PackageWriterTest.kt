@@ -50,6 +50,60 @@ class SchemaV1PackageWriterTest {
         }
 
     @Test
+    fun writesMelodyMediaRelationshipsWithNotationRoleAndSort() {
+        val source = loader.load(representativeExportDirectory())
+        val canonical = canonicalMapper.map(source)
+        val composition = previewSlice.create(compositionMapper.map(source))
+        val navigation = navigationMapper.map(source, composition)
+        val assembled = assembler.assemble(
+            canonical = canonical,
+            composition = composition,
+            navigation = navigation,
+            config = OccasionPackageBuildConfig.developmentPreview(
+                occasionId = source.occasion.id
+            )
+        )
+        val packageData = assembled.copy(
+            melodyMedia = listOf(
+                org.syriacplatform.buildtools.schema.SchemaV1MelodyMedia(
+                    id = 42L,
+                    melodyId = 100L,
+                    mediaAssetId = 20L,
+                    role = "NOTATION",
+                    sort = 2L
+                ),
+                org.syriacplatform.buildtools.schema.SchemaV1MelodyMedia(
+                    id = 43L,
+                    melodyId = 100L,
+                    mediaAssetId = 21L,
+                    role = "RECORDING",
+                    sort = 1L
+                )
+            )
+        )
+        val output = Files.createTempDirectory("melody-media-writer-test")
+        try {
+            writer.write(packageData, output)
+            val relationships = readCollection(
+                output.resolve("content").resolve("melody-media.json")
+            )
+            assertEquals(2, relationships.size)
+            assertEquals("NOTATION",
+                relationships[0].jsonObject.getValue("role").jsonPrimitive.content)
+            assertEquals("100",
+                relationships[0].jsonObject.getValue("melodyId").jsonPrimitive.content)
+            assertEquals("20",
+                relationships[0].jsonObject.getValue("mediaAssetId").jsonPrimitive.content)
+            assertEquals("2",
+                relationships[0].jsonObject.getValue("sort").jsonPrimitive.content)
+            assertEquals("RECORDING",
+                relationships[1].jsonObject.getValue("role").jsonPrimitive.content)
+        } finally {
+            output.toFile().deleteRecursively()
+        }
+    }
+
+    @Test
     fun writesPhysicalSchemaV1DevelopmentPreviewPackage() {
         val source =
             loader.load(
