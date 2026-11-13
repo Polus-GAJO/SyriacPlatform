@@ -9,6 +9,7 @@ import org.syriacplatform.common.types.MelodyId
 import org.syriacplatform.common.types.QoloId
 import org.syriacplatform.content.models.MediaAsset
 import org.syriacplatform.content.models.Melody
+import org.syriacplatform.content.models.MelodyMedia
 
 class RuntimeMediaLookupTest {
 
@@ -110,9 +111,48 @@ class RuntimeMediaLookupTest {
         )
     }
 
+    @Test
+    fun resolvesNotationAssetsInSortOrderAndIgnoresRecordings() {
+        val melody = Melody(
+            id = MelodyId(40L),
+            qoloId = QoloId(1L),
+            name = "Test",
+            searchName = "Test",
+            hasRecording = false,
+            recordingIds = emptyList()
+        )
+        val first = mediaAsset(1004L, "IMAGE", "media/notation/first.jpg")
+        val second = mediaAsset(726L, "IMAGE", "media/notation/second.jpg")
+        val recording = mediaAsset(50L, "AUDIO", "media/audio/recording.mp3")
+        val links = listOf(
+            MelodyMedia(2L, melody.id, second.id, "NOTATION", 2),
+            MelodyMedia(3L, melody.id, recording.id, "RECORDING", 0),
+            MelodyMedia(1L, melody.id, first.id, "NOTATION", 1)
+        )
+        val resolver = resolver(
+            melodies = listOf(melody),
+            mediaAssets = listOf(second, recording, first),
+            melodyMedia = links
+        )
+
+        val result = assertIs<Result.Success<List<MediaAsset>>>(
+            resolver.resolveMelodyNotations(melody.id)
+        )
+        assertEquals(listOf(first, second), result.data)
+    }
+
+    @Test
+    fun missingMelodyNotationReturnsFailure() {
+        val resolver = resolver(emptyList(), emptyList())
+        assertIs<Result.Failure>(
+            resolver.resolveMelodyNotations(MelodyId(999L))
+        )
+    }
+
     private fun resolver(
         melodies: List<Melody>,
-        mediaAssets: List<MediaAsset>
+        mediaAssets: List<MediaAsset>,
+        melodyMedia: List<MelodyMedia> = emptyList()
     ): RuntimeContentResolver {
         val content =
             RuntimeContent(
@@ -127,7 +167,8 @@ class RuntimeMediaLookupTest {
                 melodies = melodies,
                 qintos = emptyList(),
                 melodyQintoAssignments = emptyList(),
-                mediaAssets = mediaAssets
+                mediaAssets = mediaAssets,
+                melodyMedia = melodyMedia
             )
 
         return RuntimeContentResolver(
