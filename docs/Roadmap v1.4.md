@@ -1797,3 +1797,17 @@ Non-melodic liturgical texts (prayers/readings/sedros) already exist in Author D
 **Not yet completed:** loading these three CSVs in Build Tools, resolving shared translations to existing Schema-v1 Text/Petgomo translation arrays, validation/tests, runtime presentation and app language choice. No platform build or UI test has been reported for translations.
 
 **Next sequence:** (1) inspect existing Build Tools and Schema-v1 translation support; (2) add focused loader/mapper/writer tests and implementation; (3) validate source/language uniqueness and shared translation IDs; (4) verify generated package and shared runtime; (5) expose content-language selection and translated text in UI independently of UI localization. Preserve the working non-melodic text and Qolo flows.
+
+---
+
+## 2026-11-13 — Notation viewer checkpoint and priority review
+
+**Verified user-visible milestone:** Melody-linked notation images are displayed in the Android Reference Application; the user also confirmed that switching portrait/landscape now preserves the current view. Full-screen notation viewer includes ordered page navigation and pinch zoom. Related implementation is on branch `feature/notation-media-selection`, through commit `7e36791`.
+
+**Engineering interpretation:** The real-content vertical slice now spans notation authoring/export, media-aware package generation, runtime lookup, ContentService, and Android presentation. This does not mean the notation reader or the application lifecycle is production-complete.
+
+**Recommended immediate milestone: durable navigation/viewer state.** Current `MainActivity` handles `orientation|screenSize` itself, so ordinary rotation no longer recreates the in-memory platform. Other Activity recreation or process termination may still reset the app. Introduce state restoration for the current destination and selected contextual IDs, then the selected Melody and notation viewer/page, using a small testable change sequence. Keep source content identities separate from UI state.
+
+**Acceptance criteria:** navigating to a hymn and opening a specific notation page survives an Android Activity recreation; ordinary rotation continues to work; returning Back remains correct; existing shared tests and Android build pass. Verify process-death behavior separately if included; do not conflate it with configuration-change handling.
+
+**After this milestone:** improve notation image loading/errors and zoom/pan; verify representative content cases and regressions; defer cosmetic styling, immersive mode and speculative infrastructure. Earlier roadmap sections remain historical references unless superseded by newer verified checkpoints.
