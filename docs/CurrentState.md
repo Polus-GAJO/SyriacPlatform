@@ -4003,3 +4003,30 @@ No unpublished translation or unrelated occasion links are exported. Shared tran
 - **User verification:** The user ran the Occasion 379 preview and checked the application on a connected Samsung Android phone. They confirmed the Location/Qolo label and the colon separator visually. This does **not** constitute a separate visual verification of every translation or other UI feature.
 - **Automated verification:** The user reported `BUILD SUCCESSFUL` for `./gradlew.bat :buildtools:test :shared:testAndroidHostTest` and for the targeted published-translation runtime integration test. The full-suite run preceded the separator-only UI change; no later full-suite run has been reported.
 - **Repository checkpoint:** The user confirmed synchronization of the translation-test commit `0f0955b`; the subsequent label-formatting commit is `edc9571`. The documentation checkpoint should not be confused with a new application release.
+
+---
+
+## 2026-11-13 — Notation media and Android reference-viewer checkpoint
+
+**Branch:** `feature/notation-media-selection`. **Latest implementation commit:** `7e36791` (rotation handling). This checkpoint supplements earlier milestones; historical “next” sections above may be superseded.
+
+### Implemented and observed
+
+- Author-export / Build Tools / Schema-v1 package path now includes ordered Melody-to-MediaAsset notation links (`MelodyMedia` role `NOTATION`) and selected physical notation images. Occasion 379 development preview previously showed 20 notation links, 19 image assets, 6 recordings, and 11 melodies; these are fixture-specific counts, not a universal content contract.
+- Shared runtime indexes and resolves `resolveMelodyNotations(MelodyId)`, filtering the `NOTATION` role and retaining authored order. The lookup is available through `ContentRepository`, `ContentService`, and `PlatformContext.content.loadMelodyNotations(...)`.
+- `HymnDetailsScreen` uses the selected effective/candidate Melody and offers `View notation` only when notation assets exist. It reads image bytes from packaged Compose resources (`files/<MediaAsset.path>`), displays ordered pages with Previous/Next, pinch zoom, reset, and Close.
+- The notation viewer now uses a full-size Compose `Dialog` with `DialogProperties(usePlatformDefaultWidth = false)`, not a small `AlertDialog`; system-safe drawing insets remain respected. This is **not** Android immersive mode.
+- `androidApp/src/main/AndroidManifest.xml` declares `configChanges="orientation|screenSize"` for `MainActivity`. This prevents the usual Activity recreation on rotation, preserving the in-memory `PlatformContext`, navigation, and open notation viewer. It does **not** restore state after process death or other Activity recreation.
+- The user explicitly confirmed that notation images appeared in the Android UI, and later confirmed rotation now works correctly. The user also reported `:shared:testAndroidHostTest` BUILD SUCCESSFUL after updating the test service fakes. A complete post-rotation Gradle log was not supplied in this exchange; do not claim one.
+
+### Important implementation boundaries / follow-up
+
+- The image decoder and `Res.readBytes` currently live in the experimental Compose UI; the canonical content service returns metadata, not decoded images. Keep that distinction.
+- Notation image-load failure currently shares the same placeholder as loading. Improve explicit error/loading handling and zoom/pan usability when the viewer is polished.
+- `configChanges` is a pragmatic Android prototype fix, not a substitute for saved navigation and selection state. Long-term restoration should cover destination, selected Occasion/Prayer/LiturgicalItem, Melody, notation page and viewer visibility after recreation.
+- Do not infer that all Android sizes/orientations, iOS, or process-death restoration have been verified.
+- Maintain authored media ordering, existing audio behavior, translations, Notes, non-melodic texts and canonical-vs-occurrence identity.
+
+### Proposed next priority
+
+**Application state restoration and navigation lifecycle**, implemented incrementally and tested across Activity recreation, rather than further notation styling. First inventory `App.kt` remembered selections and `NavigationController` state; define a minimal saved-state contract and focused tests. Keep rotation working. After that, revisit reading usability (image pan/zoom and loading states), then broader representative-content and cross-platform verification.
