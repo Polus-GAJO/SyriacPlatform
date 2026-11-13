@@ -218,6 +218,38 @@ class SchemaV1PackageMediaSelectorTest {
         }
     }
 
+    @Test
+    fun selectsNotationAlongsideRecordingsWithoutDuplicatingSharedAssets() {
+        val media = SchemaV1CanonicalMedia(
+            mediaAssets = listOf(
+                SchemaV1MediaAsset(10L, "AUDIO", "audio/media-000010.mp3"),
+                SchemaV1MediaAsset(20L, "NOTATION", "notation/media-000020.png"),
+                SchemaV1MediaAsset(30L, "NOTATION", "notation/media-000030.jpg")
+            ),
+            melodyMedia = listOf(
+                SchemaV1MelodyMedia(1L, 100L, 10L, "RECORDING", 1L),
+                SchemaV1MelodyMedia(2L, 100L, 20L, "NOTATION", 2L),
+                SchemaV1MelodyMedia(3L, 100L, 30L, "NOTATION", 1L),
+                SchemaV1MelodyMedia(4L, 200L, 20L, "NOTATION", 1L)
+            )
+        )
+
+        val selected = selector.select(media, setOf(100L, 200L))
+
+        assertEquals(listOf(10L, 20L, 30L), selected.mediaAssets.map { it.id })
+        assertEquals(listOf(1L, 3L, 2L, 4L), selected.melodyMedia.map { it.id })
+        assertEquals(listOf("RECORDING", "NOTATION", "NOTATION", "NOTATION"),
+            selected.melodyMedia.map { it.role })
+
+        val singleMelody = selector.select(media, setOf(100L))
+        assertEquals(listOf(1L, 3L, 2L), singleMelody.melodyMedia.map { it.id })
+        assertEquals(listOf(10L, 20L, 30L), singleMelody.mediaAssets.map { it.id })
+
+        val noMelodies = selector.select(media, emptySet())
+        assertTrue(noMelodies.melodyMedia.isEmpty())
+        assertTrue(noMelodies.mediaAssets.isEmpty())
+    }
+
     private fun canonicalMedia(): SchemaV1CanonicalMedia {
         return SchemaV1CanonicalMedia(
             mediaAssets = listOf(
