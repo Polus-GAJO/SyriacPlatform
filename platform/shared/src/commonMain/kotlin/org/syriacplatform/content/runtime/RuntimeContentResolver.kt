@@ -305,6 +305,31 @@ class RuntimeContentResolver(
         )
     }
 
+    /**
+     * Resolve published notation images in the melody's author-defined order.
+     * A melody with no notation returns an empty list.
+     */
+    fun resolveMelodyNotations(
+        id: MelodyId
+    ): Result<List<MediaAsset>> {
+        if (store.index.melodiesById[id] == null) {
+            return notFound("Melody", id.value)
+        }
+
+        val notationAssets = mutableListOf<MediaAsset>()
+        val links = store.index.melodyMediaByMelodyId[id].orEmpty()
+            .filter { it.role == "NOTATION" }
+
+        links.forEach { link ->
+            when (val result = resolveMediaAsset(link.mediaAssetId)) {
+                is Result.Success -> notationAssets.add(result.data)
+                is Result.Failure -> return result
+            }
+        }
+
+        return Result.Success(notationAssets)
+    }
+
     fun resolveMelodyRecordings(
         id: MelodyId
     ): Result<List<MediaAsset>> {
