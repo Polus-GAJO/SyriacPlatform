@@ -317,6 +317,13 @@ class ApplicationPackageContentRepository(
         }
     }
 
+    override suspend fun loadMelodyNotations(
+        id: MelodyId
+    ): Result<List<MediaAsset>> = when (val storeResult = loadStore()) {
+        is Result.Success -> RuntimeContentResolver(storeResult.data).resolveMelodyNotations(id)
+        is Result.Failure -> storeResult
+    }
+
     override suspend fun loadMelodyRecordings(
         id: MelodyId
     ): Result<List<MediaAsset>> {
