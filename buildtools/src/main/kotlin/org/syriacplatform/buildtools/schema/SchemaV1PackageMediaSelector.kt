@@ -19,7 +19,7 @@ class SchemaV1PackageMediaSelector {
             canonicalMedia.melodyMedia
                 .filter {
                     it.melodyId in melodyIds &&
-                            it.role == RECORDING_ROLE
+                            (it.role == RECORDING_ROLE || it.role == NOTATION_ROLE)
                 }
                 .sortedWith(
                     compareBy<SchemaV1MelodyMedia> { it.melodyId }
@@ -113,6 +113,7 @@ class SchemaV1PackageMediaSelector {
 
     private companion object {
         const val RECORDING_ROLE = "RECORDING"
+        const val NOTATION_ROLE = "NOTATION"
         const val PERFORMANCE_ROLE = "PERFORMANCE"
     }
 }
