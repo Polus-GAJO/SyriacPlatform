@@ -8,6 +8,7 @@ import org.syriacplatform.content.models.MediaTimingSet
 import org.syriacplatform.content.models.PerformanceMedia
 import org.syriacplatform.content.models.TextOccurrenceMediaSegment
 import org.syriacplatform.content.models.Melody
+import org.syriacplatform.content.models.MelodyMedia
 import org.syriacplatform.content.models.MelodyQintoAssignment
 import org.syriacplatform.content.models.Occasion
 import org.syriacplatform.content.models.Petgomo
@@ -43,6 +44,7 @@ data class ParsedApplicationPackage(
     val melodies: List<Melody>,
     val qintos: List<Qinto>,
     val melodyQintoAssignments: List<MelodyQintoAssignment>,
+    val melodyMedia: List<MelodyMedia> = emptyList(),
     val mediaAssets: List<MediaAsset> = emptyList(),
     val performanceMedia: List<PerformanceMedia> = emptyList(),
     val mediaTimingSets: List<MediaTimingSet> = emptyList(),
