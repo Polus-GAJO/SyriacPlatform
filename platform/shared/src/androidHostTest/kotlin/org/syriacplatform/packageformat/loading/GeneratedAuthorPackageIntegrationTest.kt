@@ -149,12 +149,29 @@ class GeneratedAuthorPackageIntegrationTest {
 
             val performanceMediaAssetIds =
                 packageData.performanceMedia
-                  .map { it.mediaAssetId }
-                  .toSet()
+                    .map { it.mediaAssetId }
+                    .toSet()
 
-           assertEquals(
-             mediaAssetIds,
-             recordingIds + performanceMediaAssetIds
+            val melodyMediaAssetIds =
+                packageData.melodyMedia
+                    .map { it.mediaAssetId }
+                    .toSet()
+
+            assertTrue(
+                melodyMediaAssetIds.all { it in mediaAssetIds },
+                "Melody-media links must reference packaged assets"
+            )
+
+            assertTrue(
+                packageData.melodyMedia.all { link ->
+                    packageData.melodies.any { it.id == link.melodyId }
+                },
+                "Melody-media links must reference packaged melodies"
+            )
+
+            assertEquals(
+                mediaAssetIds,
+                recordingIds + performanceMediaAssetIds + melodyMediaAssetIds
             )
 
             /*
