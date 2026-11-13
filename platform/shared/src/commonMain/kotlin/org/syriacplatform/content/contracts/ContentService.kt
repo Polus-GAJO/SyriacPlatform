@@ -50,6 +50,10 @@ interface ContentService : PlatformService {
         liturgicalItemId: LiturgicalItemId
     ): Result<ResolvedLiturgicalItem>
 
+    suspend fun loadMelodyNotations(
+        melodyId: MelodyId
+    ): Result<List<MediaAsset>>
+
     suspend fun loadMelodyRecordings(
         melodyId: MelodyId
     ): Result<List<MediaAsset>>
