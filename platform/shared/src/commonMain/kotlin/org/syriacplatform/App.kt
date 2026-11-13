@@ -7,7 +7,8 @@ import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.material3.AlertDialog
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
@@ -2375,44 +2376,67 @@ private fun MelodyNotationSection(
                     val transformState = rememberTransformableState { zoomChange, _, _ ->
                         zoom = (zoom * zoomChange).coerceIn(1f, 5f)
                     }
-                    AlertDialog(
+                    Dialog(
                         onDismissRequest = { showNotation = false },
-                        title = { Text("Notation ${page + 1} / ${assets.size}") },
-                        text = {
-                            Column {
-                                if (bitmap == null) {
-                                    Text("Loading image, or image unavailable")
-                                } else {
-                                    Box(
-                                        modifier = Modifier.fillMaxWidth().heightIn(min = 200.dp, max = 540.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
+                        properties = DialogProperties(usePlatformDefaultWidth = false)
+                    ) {
+                        Surface(
+                            modifier = Modifier.fillMaxSize(),
+                            color = MaterialTheme.colorScheme.surface
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .safeDrawingPadding()
+                                    .padding(12.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        "Notation ${page + 1} / ${assets.size}",
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                    TextButton(onClick = { showNotation = false }) {
+                                        Text("Close")
+                                    }
+                                }
+                                Box(
+                                    modifier = Modifier.fillMaxWidth().weight(1f),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    if (bitmap == null) {
+                                        Text("Loading image, or image unavailable")
+                                    } else {
                                         Image(
                                             bitmap = bitmap!!,
                                             contentDescription = "Notation page ${page + 1}",
                                             contentScale = ContentScale.Fit,
-                                            modifier = Modifier.fillMaxWidth()
+                                            modifier = Modifier.fillMaxSize()
                                                 .transformable(transformState)
                                                 .graphicsLayer(scaleX = zoom, scaleY = zoom)
                                         )
                                     }
                                 }
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
                                     TextButton(
                                         enabled = page > 0,
                                         onClick = { page-- }
                                     ) { Text("Previous") }
+                                    TextButton(onClick = { zoom = 1f }) {
+                                        Text("Reset zoom")
+                                    }
                                     TextButton(
                                         enabled = page < assets.lastIndex,
                                         onClick = { page++ }
                                     ) { Text("Next") }
-                                    TextButton(onClick = { zoom = 1f }) { Text("Reset zoom") }
                                 }
-                            }
-                        },
-                        confirmButton = {
-                            TextButton(onClick = { showNotation = false }) {
-                                Text("Close")
                             }
                         }
                     )
