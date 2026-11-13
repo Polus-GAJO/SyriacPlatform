@@ -36,6 +36,9 @@ object PackagePaths {
     const val MELODIES =
         "content/melodies.json"
 
+    const val MELODY_MEDIA =
+        "content/melody-media.json"
+
     const val MEDIA_ASSETS =
         "content/media-assets.json"
 
