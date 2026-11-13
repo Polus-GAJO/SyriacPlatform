@@ -87,6 +87,10 @@ class DefaultContentService(
         )
     }
 
+    override suspend fun loadMelodyNotations(
+        melodyId: MelodyId
+    ): Result<List<MediaAsset>> = repository.loadMelodyNotations(melodyId)
+
     override suspend fun loadMelodyRecordings(
         melodyId: MelodyId
     ): Result<List<MediaAsset>> {
