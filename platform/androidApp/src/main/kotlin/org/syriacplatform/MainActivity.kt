@@ -17,6 +17,7 @@ import org.syriacplatform.common.types.OccasionId
 import org.syriacplatform.common.types.PrayerSequenceId
 import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.common.types.QoloId
+import org.syriacplatform.common.types.MelodyId
 
 class MainActivity : ComponentActivity() {
 
@@ -67,6 +68,9 @@ class MainActivity : ComponentActivity() {
         snapshot.prayerSequenceId?.let { outState.putLong("session.prayer", it.value) }
         snapshot.liturgicalItemId?.let { outState.putLong("session.item", it.value) }
         snapshot.qoloId?.let { outState.putLong("session.qolo", it.value) }
+        snapshot.melodyId?.let { outState.putLong("session.melody", it.value) }
+        outState.putBoolean("session.notationOpen", snapshot.notationViewerOpen)
+        outState.putInt("session.notationPage", snapshot.notationPage)
         super.onSaveInstanceState(outState)
     }
 
@@ -84,7 +88,11 @@ class MainActivity : ComponentActivity() {
             liturgicalItemId = if (saved.containsKey("session.item"))
                 LiturgicalItemId(saved.getLong("session.item")) else null,
             qoloId = if (saved.containsKey("session.qolo"))
-                QoloId(saved.getLong("session.qolo")) else null
+                QoloId(saved.getLong("session.qolo")) else null,
+            melodyId = if (saved.containsKey("session.melody"))
+                MelodyId(saved.getLong("session.melody")) else null,
+            notationViewerOpen = saved.getBoolean("session.notationOpen", false),
+            notationPage = saved.getInt("session.notationPage", 0)
         )
     }
 
