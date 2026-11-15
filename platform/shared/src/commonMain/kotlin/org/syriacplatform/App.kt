@@ -248,6 +248,7 @@ fun App(
                             selectedLiturgicalItemId =
                                 liturgicalItemId
 
+                            publishSession(AppDestination.HYMN_DETAILS)
                             platform.navigation.navigateTo(
                                 AppDestination.HYMN_DETAILS
                             )
