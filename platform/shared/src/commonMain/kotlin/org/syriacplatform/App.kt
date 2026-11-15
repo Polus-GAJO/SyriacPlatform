@@ -31,6 +31,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.collectAsState
@@ -66,6 +67,7 @@ import org.syriacplatform.content.runtime.ResolvedPerformanceMedia
 import org.syriacplatform.content.runtime.RuntimeOccasion
 import org.syriacplatform.context.PlatformContext
 import org.syriacplatform.navigation.AppDestination
+import org.syriacplatform.navigation.AppSessionState
 import org.syriacplatform.common.types.PrayerSequenceId
 import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.presentation.theme.SyriacTextStyles
@@ -74,25 +76,27 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun App(
-    platform: PlatformContext
+    platform: PlatformContext,
+    initialSession: AppSessionState = AppSessionState(),
+    onSessionChanged: (AppSessionState) -> Unit = {}
 ) {
     val navigationState by
     platform.navigation.state.collectAsState()
 
     var selectedOccasionId by remember {
-        mutableStateOf<OccasionId?>(null)
+        mutableStateOf<OccasionId?>(initialSession.occasionId)
     }
 
     var selectedPrayerSequenceId by remember {
-        mutableStateOf<PrayerSequenceId?>(null)
+        mutableStateOf<PrayerSequenceId?>(initialSession.prayerSequenceId)
     }
 
     var selectedLiturgicalItemId by remember {
-        mutableStateOf<LiturgicalItemId?>(null)
+        mutableStateOf<LiturgicalItemId?>(initialSession.liturgicalItemId)
     }
 
     var selectedQoloId by remember {
-        mutableStateOf<QoloId?>(null)
+        mutableStateOf<QoloId?>(initialSession.qoloId)
     }
 
     val preferredRecordingIds =
@@ -102,6 +106,18 @@ fun App(
                 MediaAssetId
             >()
         }
+
+    SideEffect {
+        onSessionChanged(
+            AppSessionState(
+                destination = navigationState.currentDestination,
+                occasionId = selectedOccasionId,
+                prayerSequenceId = selectedPrayerSequenceId,
+                liturgicalItemId = selectedLiturgicalItemId,
+                qoloId = selectedQoloId
+            ).normalized()
+        )
+    }
 
     MaterialTheme {
         when (navigationState.currentDestination) {
