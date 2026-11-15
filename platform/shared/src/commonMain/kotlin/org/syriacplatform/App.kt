@@ -164,19 +164,12 @@ fun App(
                         notationOpen = notationOpenSession,
                         notationPage = notationPageSession,
                         onMelodyChanged = { melodyId ->
-                            melodySession = melodyId
-                            onSessionChanged(
-                                AppSessionState(
-                                    destination = AppDestination.HYMN_DETAILS,
-                                    occasionId = selectedOccasionId,
-                                    prayerSequenceId = selectedPrayerSequenceId,
-                                    liturgicalItemId = selectedLiturgicalItemId,
-                                    qoloId = selectedQoloId,
-                                    melodyId = melodyId,
-                                    notationViewerOpen = false,
-                                    notationPage = 0
-                                ).normalized()
-                            )
+                            if (melodySession != melodyId) {
+                                melodySession = melodyId
+                                notationOpenSession = false
+                                notationPageSession = 0
+                            }
+                            publishSession(AppDestination.HYMN_DETAILS)
                         },
                         onNotationChanged = { open, page ->
                             notationOpenSession = open
@@ -1623,6 +1616,13 @@ private fun HymnDetailsScreen(
                                         melody.id == selectedMelodyId
                                     }
                             }
+
+                    LaunchedEffect(selectedMelody?.id) {
+                        if (selectedMelody != null && selectedMelodyId != selectedMelody.id) {
+                            selectedMelodyId = selectedMelody.id
+                            onMelodyChanged(selectedMelody.id)
+                        }
+                    }
 
                     Text(
                         text = target.qolo.name,
