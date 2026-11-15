@@ -2456,12 +2456,11 @@ private fun MelodyNotationSection(
                     var zoom by rememberSaveable(asset.path) { mutableStateOf(1f) }
                     var panX by rememberSaveable(asset.path) { mutableStateOf(0f) }
                     var panY by rememberSaveable(asset.path) { mutableStateOf(0f) }
-                    var pan: Offset
-                        get() = Offset(panX, panY)
-                        set(value) {
-                            panX = value.x
-                            panY = value.y
-                        }
+                    val pan = Offset(panX, panY)
+                    fun setPan(value: Offset) {
+                        panX = value.x
+                        panY = value.y
+                    }
                     var viewportWidth by remember { mutableStateOf(0f) }
                     var viewportHeight by remember { mutableStateOf(0f) }
 
@@ -2484,7 +2483,7 @@ private fun MelodyNotationSection(
 
                     val transformState = rememberTransformableState { zoomChange, panChange, _ ->
                         val nextZoom = (zoom * zoomChange).coerceIn(1f, 5f)
-                        pan = constrainedPan(pan + panChange, nextZoom)
+                        setPan(constrainedPan(pan + panChange, nextZoom))
                         zoom = nextZoom
                     }
                     Dialog(
@@ -2529,7 +2528,7 @@ private fun MelodyNotationSection(
                                                 .onSizeChanged {
                                                     viewportWidth = it.width.toFloat()
                                                     viewportHeight = it.height.toFloat()
-                                                    pan = constrainedPan(pan, zoom)
+                                                    setPan(constrainedPan(pan, zoom))
                                                 }
                                                 .transformable(transformState)
                                                 .graphicsLayer(
@@ -2552,7 +2551,7 @@ private fun MelodyNotationSection(
                                     ) { Text("Previous") }
                                     TextButton(onClick = {
                                         zoom = 1f
-                                        pan = Offset.Zero
+                                        setPan(Offset.Zero)
                                     }) {
                                         Text("Reset zoom")
                                     }
