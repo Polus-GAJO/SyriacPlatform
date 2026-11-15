@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
         platformContext =
             platform
 
-        Log.d(sessionLogTag, "onCreate savedBundle=${savedInstanceState != null} keys=${savedInstanceState?.keySet()?.filter { it.startsWith(\"session.\") }}")
+        Log.d(sessionLogTag, "onCreate savedBundle=${savedInstanceState != null} keys=${savedInstanceState?.keySet()?.filter { it.startsWith("session.") }}")
         sessionSnapshot = restoreSession(savedInstanceState).normalized()
         Log.d(sessionLogTag, "RESTORED $sessionSnapshot")
         platform.navigation.navigateTo(sessionSnapshot.destination)
@@ -83,7 +83,7 @@ class MainActivity : ComponentActivity() {
         outState.putBoolean("session.notationOpen", snapshot.notationViewerOpen)
         outState.putInt("session.notationPage", snapshot.notationPage)
         super.onSaveInstanceState(outState)
-        Log.d(sessionLogTag, "SAVED keys=${outState.keySet().filter { it.startsWith(\"session.\") }}")
+        Log.d(sessionLogTag, "SAVED keys=${outState.keySet().filter { it.startsWith("session.") }}")
     }
 
     private fun restoreSession(saved: Bundle?): AppSessionState {
