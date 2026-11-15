@@ -12,6 +12,8 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.ContentScale
 import org.jetbrains.compose.resources.decodeToImageBitmap
 import org.syriacplatform.resources.Res
@@ -2451,8 +2453,31 @@ private fun MelodyNotationSection(
                         }
                     }
                     var zoom by remember(asset.path) { mutableStateOf(1f) }
-                    val transformState = rememberTransformableState { zoomChange, _, _ ->
-                        zoom = (zoom * zoomChange).coerceIn(1f, 5f)
+                    var pan by remember(asset.path) { mutableStateOf(Offset.Zero) }
+                    var viewportWidth by remember { mutableStateOf(0f) }
+                    var viewportHeight by remember { mutableStateOf(0f) }
+
+                    fun constrainedPan(candidate: Offset, scale: Float): Offset {
+                        val image = bitmap ?: return Offset.Zero
+                        if (viewportWidth <= 0f || viewportHeight <= 0f) return Offset.Zero
+                        val fit = minOf(
+                            viewportWidth / image.width,
+                            viewportHeight / image.height
+                        )
+                        val horizontalLimit =
+                            ((image.width * fit * scale - viewportWidth) / 2f).coerceAtLeast(0f)
+                        val verticalLimit =
+                            ((image.height * fit * scale - viewportHeight) / 2f).coerceAtLeast(0f)
+                        return Offset(
+                            candidate.x.coerceIn(-horizontalLimit, horizontalLimit),
+                            candidate.y.coerceIn(-verticalLimit, verticalLimit)
+                        )
+                    }
+
+                    val transformState = rememberTransformableState { zoomChange, panChange, _ ->
+                        val nextZoom = (zoom * zoomChange).coerceIn(1f, 5f)
+                        pan = constrainedPan(pan + panChange, nextZoom)
+                        zoom = nextZoom
                     }
                     Dialog(
                         onDismissRequest = { showNotation = false },
@@ -2493,8 +2518,18 @@ private fun MelodyNotationSection(
                                             contentDescription = "Notation page ${page + 1}",
                                             contentScale = ContentScale.Fit,
                                             modifier = Modifier.fillMaxSize()
+                                                .onSizeChanged {
+                                                    viewportWidth = it.width.toFloat()
+                                                    viewportHeight = it.height.toFloat()
+                                                    pan = constrainedPan(pan, zoom)
+                                                }
                                                 .transformable(transformState)
-                                                .graphicsLayer(scaleX = zoom, scaleY = zoom)
+                                                .graphicsLayer(
+                                                    scaleX = zoom,
+                                                    scaleY = zoom,
+                                                    translationX = pan.x,
+                                                    translationY = pan.y
+                                                )
                                         )
                                     }
                                 }
@@ -2507,7 +2542,10 @@ private fun MelodyNotationSection(
                                         enabled = page > 0,
                                         onClick = { page-- }
                                     ) { Text("Previous") }
-                                    TextButton(onClick = { zoom = 1f }) {
+                                    TextButton(onClick = {
+                                        zoom = 1f
+                                        pan = Offset.Zero
+                                    }) {
                                         Text("Reset zoom")
                                     }
                                     TextButton(
