@@ -163,10 +163,36 @@ fun App(
                         initialMelodyId = melodySession,
                         notationOpen = notationOpenSession,
                         notationPage = notationPageSession,
-                        onMelodyChanged = { melodySession = it },
+                        onMelodyChanged = { melodyId ->
+                            melodySession = melodyId
+                            onSessionChanged(
+                                AppSessionState(
+                                    destination = AppDestination.HYMN_DETAILS,
+                                    occasionId = selectedOccasionId,
+                                    prayerSequenceId = selectedPrayerSequenceId,
+                                    liturgicalItemId = selectedLiturgicalItemId,
+                                    qoloId = selectedQoloId,
+                                    melodyId = melodyId,
+                                    notationViewerOpen = false,
+                                    notationPage = 0
+                                ).normalized()
+                            )
+                        },
                         onNotationChanged = { open, page ->
                             notationOpenSession = open
                             notationPageSession = page
+                            onSessionChanged(
+                                AppSessionState(
+                                    destination = AppDestination.HYMN_DETAILS,
+                                    occasionId = selectedOccasionId,
+                                    prayerSequenceId = selectedPrayerSequenceId,
+                                    liturgicalItemId = selectedLiturgicalItemId,
+                                    qoloId = selectedQoloId,
+                                    melodyId = melodySession,
+                                    notationViewerOpen = open,
+                                    notationPage = page
+                                ).normalized()
+                            )
                         },
                         onRecordingSelected = {
                                 melodyId,
