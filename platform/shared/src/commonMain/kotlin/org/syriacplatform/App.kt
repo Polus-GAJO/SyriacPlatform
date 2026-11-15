@@ -99,6 +99,10 @@ fun App(
         mutableStateOf<QoloId?>(initialSession.qoloId)
     }
 
+    var melodySession by remember { mutableStateOf(initialSession.melodyId) }
+    var notationOpenSession by remember { mutableStateOf(initialSession.notationViewerOpen) }
+    var notationPageSession by remember { mutableStateOf(initialSession.notationPage) }
+
     val preferredRecordingIds =
         remember {
             mutableStateMapOf<
@@ -114,7 +118,10 @@ fun App(
                 occasionId = selectedOccasionId,
                 prayerSequenceId = selectedPrayerSequenceId,
                 liturgicalItemId = selectedLiturgicalItemId,
-                qoloId = selectedQoloId
+                qoloId = selectedQoloId,
+                melodyId = melodySession,
+                notationViewerOpen = notationOpenSession,
+                notationPage = notationPageSession
             ).normalized()
         )
     }
@@ -148,6 +155,14 @@ fun App(
                             liturgicalItemId,
                         preferredRecordingIds =
                             preferredRecordingIds,
+                        initialMelodyId = melodySession,
+                        notationOpen = notationOpenSession,
+                        notationPage = notationPageSession,
+                        onMelodyChanged = { melodySession = it },
+                        onNotationChanged = { open, page ->
+                            notationOpenSession = open
+                            notationPageSession = page
+                        },
                         onRecordingSelected = {
                                 melodyId,
                                 recordingId ->
@@ -1343,6 +1358,11 @@ private fun HymnDetailsScreen(
     platform: PlatformContext,
     audioService: AudioService?,
     liturgicalItemId: LiturgicalItemId,
+    initialMelodyId: MelodyId?,
+    notationOpen: Boolean,
+    notationPage: Int,
+    onMelodyChanged: (MelodyId?) -> Unit,
+    onNotationChanged: (Boolean, Int) -> Unit,
     preferredRecordingIds:
         Map<MelodyId, MediaAssetId>,
     onRecordingSelected:
@@ -1394,7 +1414,7 @@ private fun HymnDetailsScreen(
     }
 
     var selectedMelodyId by remember(liturgicalItemId) {
-        mutableStateOf<MelodyId?>(null)
+        mutableStateOf<MelodyId?>(initialMelodyId)
     }
 
     var selectedRecordingId by remember(liturgicalItemId) {
@@ -1599,6 +1619,8 @@ private fun HymnDetailsScreen(
                                         audioService?.stop()
                                         selectedRecordingId = null
                                         selectedMelodyId = melody.id
+                                        onMelodyChanged(melody.id)
+                                        onNotationChanged(false, 0)
                                         seekPositionMs = 0L
                                         isSeeking = false
                                     }
@@ -1635,7 +1657,10 @@ private fun HymnDetailsScreen(
 
                     MelodyNotationSection(
                         platform = platform,
-                        melodyId = selectedMelody?.id
+                        melodyId = selectedMelody?.id,
+                        initialOpen = notationOpen,
+                        initialPage = notationPage,
+                        onNotationChanged = onNotationChanged
                     )
 
                     val recordingsResult by produceState<Result<List<MediaAsset>>?>(
@@ -2352,7 +2377,10 @@ private fun MissingHymnSelectionScreen(
 @Composable
 private fun MelodyNotationSection(
     platform: PlatformContext,
-    melodyId: MelodyId?
+    melodyId: MelodyId?,
+    initialOpen: Boolean,
+    initialPage: Int,
+    onNotationChanged: (Boolean, Int) -> Unit
 ) {
     val notationResult by produceState<Result<List<MediaAsset>>?>(
         initialValue = null,
@@ -2361,8 +2389,9 @@ private fun MelodyNotationSection(
     ) {
         value = melodyId?.let { platform.content.loadMelodyNotations(it) }
     }
-    var showNotation by remember(melodyId) { mutableStateOf(false) }
-    var page by remember(melodyId) { mutableStateOf(0) }
+    var showNotation by remember(melodyId) { mutableStateOf(initialOpen) }
+    var page by remember(melodyId) { mutableStateOf(initialPage) }
+    SideEffect { onNotationChanged(showNotation, page) }
 
     when (val result = notationResult) {
         null -> if (melodyId != null) Text("Loading notation...")
