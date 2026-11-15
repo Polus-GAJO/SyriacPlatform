@@ -111,10 +111,10 @@ fun App(
             >()
         }
 
-    SideEffect {
+    fun publishSession(destination: AppDestination) {
         onSessionChanged(
             AppSessionState(
-                destination = navigationState.currentDestination,
+                destination = destination,
                 occasionId = selectedOccasionId,
                 prayerSequenceId = selectedPrayerSequenceId,
                 liturgicalItemId = selectedLiturgicalItemId,
@@ -124,6 +124,10 @@ fun App(
                 notationPage = notationPageSession
             ).normalized()
         )
+    }
+
+    SideEffect {
+        publishSession(navigationState.currentDestination)
     }
 
     MaterialTheme {
@@ -136,6 +140,7 @@ fun App(
                         selectedOccasionId =
                             occasionId
 
+                        publishSession(AppDestination.OCCASION_DETAILS)
                         platform.navigation.navigateTo(
                             AppDestination.OCCASION_DETAILS
                         )
@@ -203,6 +208,7 @@ fun App(
                             selectedPrayerSequenceId =
                                 prayerSequenceId
 
+                            publishSession(AppDestination.PRAYER_DETAILS)
                             platform.navigation.navigateTo(
                                 AppDestination.PRAYER_DETAILS
                             )
