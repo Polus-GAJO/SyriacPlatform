@@ -41,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -2452,8 +2453,15 @@ private fun MelodyNotationSection(
                             null
                         }
                     }
-                    var zoom by remember(asset.path) { mutableStateOf(1f) }
-                    var pan by remember(asset.path) { mutableStateOf(Offset.Zero) }
+                    var zoom by rememberSaveable(asset.path) { mutableStateOf(1f) }
+                    var panX by rememberSaveable(asset.path) { mutableStateOf(0f) }
+                    var panY by rememberSaveable(asset.path) { mutableStateOf(0f) }
+                    var pan: Offset
+                        get() = Offset(panX, panY)
+                        set(value) {
+                            panX = value.x
+                            panY = value.y
+                        }
                     var viewportWidth by remember { mutableStateOf(0f) }
                     var viewportHeight by remember { mutableStateOf(0f) }
 
