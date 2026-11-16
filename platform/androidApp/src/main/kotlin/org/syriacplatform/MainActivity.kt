@@ -1,7 +1,6 @@
 package org.syriacplatform
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -43,8 +42,6 @@ class RetainedPlatformModel : ViewModel() {
 
 class MainActivity : ComponentActivity() {
 
-    private val sessionLogTag = "SyriacSession"
-
     private var sessionSnapshot = AppSessionState()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,9 +51,7 @@ class MainActivity : ComponentActivity() {
         val platform = ViewModelProvider(this)[RetainedPlatformModel::class.java]
             .getOrCreate(this)
 
-        Log.d(sessionLogTag, "onCreate savedBundle=${savedInstanceState != null} keys=${savedInstanceState?.keySet()?.filter { it.startsWith("session.") }}")
         sessionSnapshot = restoreSession(savedInstanceState).normalized()
-        Log.d(sessionLogTag, "RESTORED $sessionSnapshot")
         platform.navigation.navigateTo(sessionSnapshot.destination)
 
         setContent {
@@ -64,9 +59,6 @@ class MainActivity : ComponentActivity() {
                 platform = platform,
                 initialSession = sessionSnapshot,
                 onSessionChanged = { updated ->
-                    if (sessionSnapshot != updated) {
-                        Log.d(sessionLogTag, "COMPOSE old=$sessionSnapshot new=$updated")
-                    }
                     sessionSnapshot = updated
                 }
             )
@@ -75,7 +67,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         val snapshot = sessionSnapshot.normalized()
-        Log.d(sessionLogTag, "SAVE $snapshot")
         outState.putString("session.destination", snapshot.destination.name)
         snapshot.occasionId?.let { outState.putLong("session.occasion", it.value) }
         snapshot.prayerSequenceId?.let { outState.putLong("session.prayer", it.value) }
@@ -85,7 +76,6 @@ class MainActivity : ComponentActivity() {
         outState.putBoolean("session.notationOpen", snapshot.notationViewerOpen)
         outState.putInt("session.notationPage", snapshot.notationPage)
         super.onSaveInstanceState(outState)
-        Log.d(sessionLogTag, "SAVED keys=${outState.keySet().filter { it.startsWith("session.") }}")
     }
 
     private fun restoreSession(saved: Bundle?): AppSessionState {
@@ -109,8 +99,6 @@ class MainActivity : ComponentActivity() {
             notationPage = saved.getInt("session.notationPage", 0)
         )
     }
-
-
 }
 
 @Preview
