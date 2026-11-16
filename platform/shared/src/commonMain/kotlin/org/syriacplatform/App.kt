@@ -199,8 +199,11 @@ fun App(
                                 recordingId
                         },
                         onBack = {
-                            selectedLiturgicalItemId =
-                                null
+                            selectedLiturgicalItemId = null
+                            melodySession = null
+                            notationOpenSession = false
+                            notationPageSession = 0
+                            publishSession(AppDestination.PRAYER_DETAILS)
 
                             platform.navigation.navigateTo(
                                 AppDestination.PRAYER_DETAILS
@@ -210,6 +213,7 @@ fun App(
                 } else {
                     MissingHymnSelectionScreen(
                         onBack = {
+                            publishSession(AppDestination.PRAYER_DETAILS)
                             platform.navigation.navigateTo(
                                 AppDestination.PRAYER_DETAILS
                             )
@@ -238,6 +242,11 @@ fun App(
                         onBack = {
                             selectedOccasionId = null
                             selectedPrayerSequenceId = null
+                            selectedLiturgicalItemId = null
+                            melodySession = null
+                            notationOpenSession = false
+                            notationPageSession = 0
+                            publishSession(AppDestination.HOME)
 
                             platform.navigation.navigateTo(
                                 AppDestination.HOME
@@ -247,6 +256,7 @@ fun App(
                 } else {
                     MissingOccasionSelectionScreen(
                         onBack = {
+                            publishSession(AppDestination.HOME)
                             platform.navigation.navigateTo(
                                 AppDestination.HOME
                             )
@@ -277,6 +287,11 @@ fun App(
                         },
                         onBack = {
                             selectedPrayerSequenceId = null
+                            selectedLiturgicalItemId = null
+                            melodySession = null
+                            notationOpenSession = false
+                            notationPageSession = 0
+                            publishSession(AppDestination.OCCASION_DETAILS)
 
                             platform.navigation.navigateTo(
                                 AppDestination.OCCASION_DETAILS
@@ -286,6 +301,7 @@ fun App(
                 } else {
                     MissingPrayerSelectionScreen(
                         onBack = {
+                            publishSession(AppDestination.OCCASION_DETAILS)
                             platform.navigation.navigateTo(
                                 AppDestination.OCCASION_DETAILS
                             )
@@ -303,14 +319,15 @@ fun App(
                         platform = platform,
                         qoloId = qoloId,
                         onBack = {
-                            selectedQoloId =
-                                null
+                            selectedQoloId = null
 
                             if (selectedOccasionId != null) {
+                                publishSession(AppDestination.OCCASION_DETAILS)
                                 platform.navigation.navigateTo(
                                     AppDestination.OCCASION_DETAILS
                                 )
                             } else {
+                                publishSession(AppDestination.HOME)
                                 platform.navigation.navigateTo(
                                     AppDestination.HOME
                                 )
@@ -321,6 +338,7 @@ fun App(
                     MissingQoloSelectionScreen(
                         onBack = {
                             if (selectedOccasionId != null) {
+                                publishSession(AppDestination.OCCASION_DETAILS)
                                 platform.navigation.navigateTo(
                                     AppDestination.OCCASION_DETAILS
                                 )
