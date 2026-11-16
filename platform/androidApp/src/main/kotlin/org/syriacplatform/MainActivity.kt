@@ -5,6 +5,8 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
@@ -20,12 +22,28 @@ import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.common.types.QoloId
 import org.syriacplatform.common.types.MelodyId
 
+class RetainedPlatformModel : ViewModel() {
+    private var retained: PlatformContext? = null
+
+    fun getOrCreate(activity: ComponentActivity): PlatformContext {
+        retained?.let { return it }
+        val backend = AndroidAudioPlayerBackend(activity.applicationContext)
+        val dependencies = DefaultPlatformDependencies.create().copy(
+            audioPlayerBackend = backend
+        )
+        return PlatformBootstrap.create(dependencies).also { retained = it }
+    }
+
+    override fun onCleared() {
+        retained?.shutdown()
+        retained = null
+        super.onCleared()
+    }
+}
+
 class MainActivity : ComponentActivity() {
 
     private val sessionLogTag = "SyriacSession"
-
-    private var platformContext: PlatformContext? =
-        null
 
     private var sessionSnapshot = AppSessionState()
 
@@ -33,24 +51,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        val backend =
-            AndroidAudioPlayerBackend(this)
-
-        val dependencies =
-            DefaultPlatformDependencies
-                .create()
-                .copy(
-                    audioPlayerBackend =
-                        backend
-                )
-
-        val platform =
-            PlatformBootstrap.create(
-                dependencies = dependencies
-            )
-
-        platformContext =
-            platform
+        val platform = ViewModelProvider(this)[RetainedPlatformModel::class.java]
+            .getOrCreate(this)
 
         Log.d(sessionLogTag, "onCreate savedBundle=${savedInstanceState != null} keys=${savedInstanceState?.keySet()?.filter { it.startsWith("session.") }}")
         sessionSnapshot = restoreSession(savedInstanceState).normalized()
@@ -108,11 +110,7 @@ class MainActivity : ComponentActivity() {
         )
     }
 
-    override fun onDestroy() {
-        platformContext?.shutdown()
-        platformContext = null
-        super.onDestroy()
-    }
+
 }
 
 @Preview
