@@ -2424,6 +2424,12 @@ private fun MissingHymnSelectionScreen(
     }
 }
 
+private sealed interface NotationImageState {
+    data object Loading : NotationImageState
+    data class Loaded(val bitmap: ImageBitmap) : NotationImageState
+    data object Failed : NotationImageState
+}
+
 /**
  * Experimental notation viewer. The media paths are relative to the
  * packaged Compose resources, just like ResourcePackageSource.
@@ -2461,16 +2467,19 @@ private fun MelodyNotationSection(
                 }
                 if (showNotation) {
                     val asset = assets[page.coerceIn(0, assets.lastIndex)]
-                    val bitmap by produceState<ImageBitmap?>(
-                        initialValue = null,
+                    val imageState by produceState<NotationImageState>(
+                        initialValue = NotationImageState.Loading,
                         key1 = asset.path
                     ) {
                         value = try {
-                            Res.readBytes("files/${asset.path}").decodeToImageBitmap()
+                            NotationImageState.Loaded(
+                                Res.readBytes("files/${asset.path}").decodeToImageBitmap()
+                            )
                         } catch (_: Exception) {
-                            null
+                            NotationImageState.Failed
                         }
                     }
+                    val bitmap = (imageState as? NotationImageState.Loaded)?.bitmap
                     var zoom by rememberSaveable(asset.path) { mutableStateOf(1f) }
                     var panX by rememberSaveable(asset.path) { mutableStateOf(0f) }
                     var panY by rememberSaveable(asset.path) { mutableStateOf(0f) }
@@ -2535,11 +2544,13 @@ private fun MelodyNotationSection(
                                     modifier = Modifier.fillMaxWidth().weight(1f),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    if (bitmap == null) {
-                                        Text("Loading image, or image unavailable")
-                                    } else {
-                                        Image(
-                                            bitmap = bitmap!!,
+                                    when (val state = imageState) {
+                                        NotationImageState.Loading ->
+                                            Text("Loading notation image...")
+                                        NotationImageState.Failed ->
+                                            Text("Unable to display this notation image.")
+                                        is NotationImageState.Loaded -> Image(
+                                            bitmap = state.bitmap,
                                             contentDescription = "Notation page ${page + 1}",
                                             contentScale = ContentScale.Fit,
                                             modifier = Modifier.fillMaxSize()
