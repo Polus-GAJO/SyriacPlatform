@@ -20,7 +20,7 @@ import org.syriacplatform.content.contracts.ContentService
  * - exactly one interval is played;
  * - more than one interval is ambiguous package/runtime data.
  */
-data class ActiveTextInterval(val mediaAssetId: MediaAssetId, val startMs: Long, val endMs: Long)
+data class ActiveTextInterval(val mediaAssetId: MediaAssetId, val startMs: Long, val endMs: Long, val textOccurrenceId: TextOccurrenceId)
 
 class PerformanceTextOccurrencePlaybackController(
     private val contentService: ContentService,
@@ -63,7 +63,7 @@ class PerformanceTextOccurrencePlaybackController(
                 )
                 if (playbackResult is Result.Success) {
                     _activeInterval.value = ActiveTextInterval(
-                        interval.mediaAsset.id, interval.startMs, interval.endMs
+                        interval.mediaAsset.id, interval.startMs, interval.endMs, textOccurrenceId
                     )
                 }
                 playbackResult
