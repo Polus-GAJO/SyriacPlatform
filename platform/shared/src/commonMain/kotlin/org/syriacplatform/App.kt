@@ -1879,7 +1879,13 @@ private fun HymnDetailsScreen(
                                 Button(
                                     enabled = audioService != null,
                                     onClick = {
-                                        if (playbackState.mediaAssetId == selectedRecording.id &&
+                                        if (activeTextInterval?.mediaAssetId == playbackState.mediaAssetId) {
+                                            platform.performanceTextPlayback?.clearActiveInterval()
+                                            pendingAutoPlayId = selectedRecording.id
+                                            if (audioService?.load(selectedRecording) is Result.Failure) {
+                                                pendingAutoPlayId = null
+                                            }
+                                        } else if (playbackState.mediaAssetId == selectedRecording.id &&
                                             playbackState.status == PlaybackStatus.Playing
                                         ) {
                                             audioService?.pause()
