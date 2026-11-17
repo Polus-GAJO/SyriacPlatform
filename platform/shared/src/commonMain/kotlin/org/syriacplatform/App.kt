@@ -1651,10 +1651,64 @@ private fun HymnDetailsScreen(
                         }
                     }
 
-                    Text(
-                        text = target.qolo.name,
-                        style = SyriacTextStyles.body()
-                    )
+                    val fullHymnRecording =
+                        (performanceMediaResult as? Result.Success)
+                            ?.data
+                            ?.let { available ->
+                                available.firstOrNull {
+                                    it.performance.id == selectedPerformanceId
+                                } ?: available.firstOrNull()
+                            }
+                            ?.mediaAsset
+
+                    androidx.compose.foundation.layout.Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        androidx.compose.material3.IconButton(
+                            enabled = audioService != null && fullHymnRecording != null,
+                            onClick = {
+                                val recording = fullHymnRecording
+                                if (recording != null) {
+                                    val isFullHymn =
+                                        activeTextInterval == null &&
+                                            playbackState.mediaAssetId == recording.id
+                                    when {
+                                        isFullHymn && playbackState.status == PlaybackStatus.Playing ->
+                                            audioService?.pause()
+                                        isFullHymn &&
+                                            (playbackState.status == PlaybackStatus.Paused ||
+                                                playbackState.status == PlaybackStatus.Ready) ->
+                                            audioService?.play()
+                                        else -> {
+                                            platform.performanceTextPlayback?.clearActiveInterval()
+                                            pendingAutoPlayId = recording.id
+                                            if (audioService?.load(recording) is Result.Failure) {
+                                                pendingAutoPlayId = null
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        ) {
+                            val playingFullHymn =
+                                fullHymnRecording != null &&
+                                    activeTextInterval == null &&
+                                    playbackState.mediaAssetId == fullHymnRecording.id &&
+                                    playbackState.status == PlaybackStatus.Playing
+                            Text(
+                                if (playingFullHymn) "Ⅱ" else "▶",
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        }
+                        Text(
+                            text = target.qolo.name,
+                            modifier = Modifier.weight(1f),
+                            style = SyriacTextStyles.body(),
+                            textAlign = TextAlign.Right
+                        )
+                    }
 
                     if (
                         effectiveMelody == null &&
