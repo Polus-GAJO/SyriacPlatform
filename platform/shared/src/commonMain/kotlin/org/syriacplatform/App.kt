@@ -48,6 +48,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.RoundedCornerShape
+import org.syriacplatform.presentation.audio.CompactAudioPlayer
+import androidx.compose.foundation.layout.PaddingValues
 import org.syriacplatform.audio.contracts.AudioService
 import org.syriacplatform.audio.models.PlaybackState
 import org.syriacplatform.audio.models.PlaybackStatus
@@ -1869,201 +1871,35 @@ private fun HymnDetailsScreen(
                             }
 
                             if (selectedRecording != null) {
-                                when (
-                                    val status =
-                                        playbackState.status
+                                Button(
+                                    enabled = audioService != null,
+                                    onClick = {
+                                        if (playbackState.mediaAssetId == selectedRecording.id &&
+                                            playbackState.status == PlaybackStatus.Playing
+                                        ) {
+                                            audioService?.pause()
+                                        } else if (playbackState.mediaAssetId == selectedRecording.id &&
+                                            playbackState.status != PlaybackStatus.Idle &&
+                                            playbackState.status != PlaybackStatus.Error
+                                        ) {
+                                            if (playbackState.status == PlaybackStatus.Ended) {
+                                                audioService?.seekTo(0L)
+                                            }
+                                            audioService?.play()
+                                        } else {
+                                            pendingAutoPlayId = selectedRecording.id
+                                            if (audioService?.load(selectedRecording) is Result.Failure) {
+                                                pendingAutoPlayId = null
+                                            }
+                                        }
+                                    },
+                                    modifier = Modifier.padding(bottom = 8.dp)
                                 ) {
-                                    PlaybackStatus.Playing -> {
-                                        Button(
-                                            enabled =
-                                                audioService != null,
-                                            onClick = {
-                                                audioService?.pause()
-                                            },
-                                            modifier =
-                                                Modifier.padding(
-                                                    bottom = 8.dp
-                                                )
-                                        ) {
-                                            Text("Pause")
-                                        }
-                                    }
-
-                                    PlaybackStatus.Paused -> {
-                                        Button(
-                                            enabled =
-                                                audioService != null,
-                                            onClick = {
-                                                audioService?.play()
-                                            },
-                                            modifier =
-                                                Modifier.padding(
-                                                    bottom = 8.dp
-                                                )
-                                        ) {
-                                            Text("Play")
-                                        }
-                                    }
-
-                                    PlaybackStatus.Ready,
-                                    PlaybackStatus.Ended -> {
-                                        Button(
-                                            enabled =
-                                                audioService != null &&
-                                                playbackState.mediaAssetId ==
-                                                    selectedRecording.id,
-                                            onClick = {
-                                                audioService?.play()
-                                            },
-                                            modifier =
-                                                Modifier.padding(
-                                                    bottom = 8.dp
-                                                )
-                                        ) {
-                                            Text("Play")
-                                        }
-                                    }
-
-                                    PlaybackStatus.Loading -> {
-                                        Button(
-                                            enabled = false,
-                                            onClick = {},
-                                            modifier =
-                                                Modifier.padding(
-                                                    bottom = 8.dp
-                                                )
-                                        ) {
-                                            Text("Loading...")
-                                        }
-                                    }
-
-                                    PlaybackStatus.Error,
-                                    PlaybackStatus.Idle -> {
-                                        Button(
-                                            enabled =
-                                                audioService != null,
-                                            onClick = {
-                                                if (
-                                                    audioService !=
-                                                        null
-                                                ) {
-                                                    pendingAutoPlayId =
-                                                        selectedRecording.id
-
-                                                    if (
-                                                        audioService.load(
-                                                            selectedRecording
-                                                        )
-                                                        is Result.Failure
-                                                    ) {
-                                                        pendingAutoPlayId =
-                                                            null
-                                                    }
-                                                }
-                                            },
-                                            modifier =
-                                                Modifier.padding(
-                                                    bottom = 8.dp
-                                                )
-                                        ) {
-                                            Text("Play recording")
-                                        }
-                                    }
-                                }
-
-                                if (
-                                    playbackState.mediaAssetId ==
-                                    selectedRecording.id &&
-                                    playbackState.status != PlaybackStatus.Idle &&
-                                    playbackState.status != PlaybackStatus.Ended &&
-                                    playbackState.status != PlaybackStatus.Error
-                                ) {
-                                    Button(
-                                        enabled =
-                                            audioService != null,
-                                        onClick = {
-                                            pendingAutoPlayId =
-                                                null
-                                            audioService?.stop()
-                                        },
-                                        modifier =
-                                            Modifier.padding(
-                                                bottom = 8.dp
-                                            )
-                                    ) {
-                                        Text("Stop")
-                                    }
-                                }
-
-                                if (
-                                    playbackState.mediaAssetId ==
-                                    selectedRecording.id
-                                ) {
-                                    Text("Audio: ${playbackState.status}")
-
                                     Text(
-                                        "Position: ${playbackState.positionMs} ms"
+                                        if (playbackState.mediaAssetId == selectedRecording.id &&
+                                            playbackState.status == PlaybackStatus.Playing
+                                        ) "Pause" else "Play recording"
                                     )
-
-                                    playbackState.durationMs
-                                        ?.takeIf { duration ->
-                                            duration > 0L
-                                        }
-                                        ?.let { duration ->
-                                            val sliderValue =
-                                                seekPositionMs
-                                                    .coerceIn(
-                                                        0L,
-                                                        duration
-                                                    )
-                                                    .toFloat()
-
-                                            Slider(
-                                                value =
-                                                    sliderValue,
-                                                onValueChange = {
-                                                        value ->
-                                                    isSeeking =
-                                                        true
-
-                                                    seekPositionMs =
-                                                        value
-                                                            .toLong()
-                                                            .coerceIn(
-                                                                0L,
-                                                                duration
-                                                            )
-                                                },
-                                                onValueChangeFinished = {
-                                                    audioService?.seekTo(
-                                                        seekPositionMs
-                                                            .coerceIn(
-                                                                0L,
-                                                                duration
-                                                            )
-                                                    )
-
-                                                    isSeeking =
-                                                        false
-                                                },
-                                                valueRange =
-                                                    0f..duration.toFloat(),
-                                                enabled =
-                                                    audioService != null &&
-                                                    playbackState.status !=
-                                                        PlaybackStatus.Loading &&
-                                                    playbackState.status !=
-                                                        PlaybackStatus.Error &&
-                                                    playbackState.status !=
-                                                        PlaybackStatus.Idle,
-                                                modifier =
-                                                    Modifier.fillMaxWidth()
-                                            )
-
-                                            Text(
-                                                "Duration: $duration ms"
-                                            )
-                                        }
                                 }
                             } else {
                                 Text("No recording available")
@@ -2198,7 +2034,8 @@ private fun HymnDetailsScreen(
                                 .fillMaxWidth()
                                 .weight(1f),
                             verticalArrangement =
-                                Arrangement.spacedBy(12.dp)
+                                Arrangement.spacedBy(12.dp),
+                            contentPadding = PaddingValues(bottom = 92.dp)
                         ) {
                             items(target.verses) { verse ->
                                 Surface(
@@ -2296,6 +2133,35 @@ private fun HymnDetailsScreen(
         ) {
             Text("Back")
         }
+    }
+    if (audioService != null &&
+        playbackState.mediaAssetId != null &&
+        playbackState.status != PlaybackStatus.Idle &&
+        playbackState.status != PlaybackStatus.Error
+    ) {
+        CompactAudioPlayer(
+            title = "التسجيل الصوتي",
+            status = playbackState.status,
+            positionMs = playbackState.positionMs,
+            durationMs = playbackState.durationMs,
+            onTogglePlayback = {
+                when (playbackState.status) {
+                    PlaybackStatus.Playing -> audioService.pause()
+                    PlaybackStatus.Ready, PlaybackStatus.Paused -> audioService.play()
+                    PlaybackStatus.Ended -> {
+                        audioService.seekTo(0L)
+                        audioService.play()
+                    }
+                    else -> Unit
+                }
+            },
+            onSeek = { position -> audioService.seekTo(position) },
+            onClose = {
+                pendingAutoPlayId = null
+                audioService.stop()
+            },
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
     shownTranslation?.let { translation ->
         androidx.compose.material3.Surface(
