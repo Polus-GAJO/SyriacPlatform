@@ -1,5 +1,8 @@
 package org.syriacplatform.audio
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import org.syriacplatform.common.types.MediaAssetId
 import org.syriacplatform.audio.contracts.AudioService
 import org.syriacplatform.common.result.Result
 import org.syriacplatform.common.types.ErrorCode
@@ -17,10 +20,16 @@ import org.syriacplatform.content.contracts.ContentService
  * - exactly one interval is played;
  * - more than one interval is ambiguous package/runtime data.
  */
+data class ActiveTextInterval(val mediaAssetId: MediaAssetId, val startMs: Long, val endMs: Long)
+
 class PerformanceTextOccurrencePlaybackController(
     private val contentService: ContentService,
     private val audioService: AudioService
 ) {
+    private val _activeInterval = MutableStateFlow<ActiveTextInterval?>(null)
+    val activeInterval = _activeInterval.asStateFlow()
+
+    fun clearActiveInterval() { _activeInterval.value = null }
 
     suspend fun play(
         performanceId: PerformanceMediaId,
@@ -39,6 +48,7 @@ class PerformanceTextOccurrencePlaybackController(
                 is Result.Failure -> return result
             }
 
+        clearActiveInterval()
         return when (intervals.size) {
             0 ->
                 Result.Success(Unit)
@@ -46,11 +56,17 @@ class PerformanceTextOccurrencePlaybackController(
             1 -> {
                 val interval = intervals.single()
 
-                audioService.playInterval(
+                val playbackResult = audioService.playInterval(
                     mediaAsset = interval.mediaAsset,
                     startMs = interval.startMs,
                     endMs = interval.endMs
                 )
+                if (playbackResult is Result.Success) {
+                    _activeInterval.value = ActiveTextInterval(
+                        interval.mediaAsset.id, interval.startMs, interval.endMs
+                    )
+                }
+                playbackResult
             }
 
             else ->
