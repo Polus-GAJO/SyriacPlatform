@@ -2151,7 +2151,18 @@ private fun HymnDetailsScreen(
         playbackState.status != PlaybackStatus.Idle &&
         playbackState.status != PlaybackStatus.Error
     ) {
+        val segmentNumber = (
+            (itemResult as? Result.Success)?.data?.target
+                as? ResolvedLiturgicalItemTarget.Qolo
+        )?.verses?.indexOfFirst { verse ->
+            verse.id == activeTextInterval?.textOccurrenceId
+        }?.takeIf { it >= 0 }?.plus(1)
         CompactAudioPlayer(
+            title = if (activeTextInterval?.mediaAssetId == playbackState.mediaAssetId) {
+                segmentNumber?.let { "المقطع $it" } ?: "المقطع"
+            } else {
+                "الترتيلة كاملة"
+            },
             status = playbackState.status,
             positionMs = playbackState.positionMs,
             durationMs = playbackState.durationMs,
