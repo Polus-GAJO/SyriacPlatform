@@ -65,6 +65,7 @@ fun CompactAudioPlayer(
             Text(
                 text = title,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Right,
                 style = MaterialTheme.typography.labelSmall
             )
         Row(
