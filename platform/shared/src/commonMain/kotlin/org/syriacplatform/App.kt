@@ -1438,6 +1438,10 @@ private fun HymnDetailsScreen(
     }
 
     val playbackState = rememberPlaybackState(audioService)
+    val activeTextInterval by (
+        platform.performanceTextPlayback?.activeInterval
+            ?: remember { kotlinx.coroutines.flow.MutableStateFlow<org.syriacplatform.audio.ActiveTextInterval?>(null) }
+    ).collectAsState()
 
     val coroutineScope =
         rememberCoroutineScope()
@@ -1832,6 +1836,7 @@ private fun HymnDetailsScreen(
                                                     null
 
                                                 audioService?.stop()
+                                                platform.performanceTextPlayback?.clearActiveInterval()
 
                                                 selectedRecordingId =
                                                     recording.id
@@ -1887,6 +1892,7 @@ private fun HymnDetailsScreen(
                                             }
                                             audioService?.play()
                                         } else {
+                                            platform.performanceTextPlayback?.clearActiveInterval()
                                             pendingAutoPlayId = selectedRecording.id
                                             if (audioService?.load(selectedRecording) is Result.Failure) {
                                                 pendingAutoPlayId = null
@@ -2143,21 +2149,37 @@ private fun HymnDetailsScreen(
             status = playbackState.status,
             positionMs = playbackState.positionMs,
             durationMs = playbackState.durationMs,
+            intervalStartMs = activeTextInterval?.takeIf {
+                it.mediaAssetId == playbackState.mediaAssetId
+            }?.startMs,
+            intervalEndMs = activeTextInterval?.takeIf {
+                it.mediaAssetId == playbackState.mediaAssetId
+            }?.endMs,
             onTogglePlayback = {
                 when (playbackState.status) {
                     PlaybackStatus.Playing -> audioService.pause()
                     PlaybackStatus.Ready, PlaybackStatus.Paused -> audioService.play()
                     PlaybackStatus.Ended -> {
-                        audioService.seekTo(0L)
+                        audioService.seekTo(activeTextInterval?.takeIf {
+                            it.mediaAssetId == playbackState.mediaAssetId
+                        }?.startMs ?: 0L)
                         audioService.play()
                     }
                     else -> Unit
                 }
             },
-            onSeek = { position -> audioService.seekTo(position) },
+            onSeek = { position ->
+                val interval = activeTextInterval?.takeIf {
+                    it.mediaAssetId == playbackState.mediaAssetId
+                }
+                audioService.seekTo(
+                    if (interval != null) position.coerceIn(interval.startMs, interval.endMs) else position
+                )
+            },
             onClose = {
                 pendingAutoPlayId = null
                 audioService.stop()
+                platform.performanceTextPlayback?.clearActiveInterval()
             },
             modifier = Modifier.align(Alignment.BottomCenter)
         )
