@@ -1,6 +1,14 @@
 package org.syriacplatform.presentation.audio
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,7 +24,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import org.syriacplatform.audio.models.PlaybackStatus
@@ -28,17 +34,20 @@ import org.syriacplatform.audio.models.PlaybackStatus
  */
 @Composable
 fun CompactAudioPlayer(
-    title: String,
     status: PlaybackStatus,
     positionMs: Long,
     durationMs: Long?,
+    intervalStartMs: Long? = null,
+    intervalEndMs: Long? = null,
     onTogglePlayback: () -> Unit,
     onSeek: (Long) -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val duration = (durationMs ?: 0L).coerceAtLeast(0L)
-    val position = positionMs.coerceIn(0L, duration)
+    val start = intervalStartMs ?: 0L
+    val end = intervalEndMs ?: durationMs ?: 0L
+    val duration = (end - start).coerceAtLeast(0L)
+    val position = (positionMs - start).coerceIn(0L, duration)
     val canSeek = duration > 0L &&
         status != PlaybackStatus.Loading &&
         status != PlaybackStatus.Error &&
@@ -46,36 +55,52 @@ fun CompactAudioPlayer(
     val playing = status == PlaybackStatus.Playing
 
     Surface(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 6.dp),
+        modifier = modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 3.dp),
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.90f),
         shadowElevation = 5.dp
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    title,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.labelMedium
-                )
-                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(formatAudioTime(position), style = MaterialTheme.typography.labelSmall)
-                        Slider(
-                            value = if (duration > 0L) position.toFloat() / duration else 0f,
-                            onValueChange = { fraction ->
-                                if (canSeek) onSeek((fraction * duration).toLong().coerceIn(0L, duration))
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(formatAudioTime(position), style = MaterialTheme.typography.labelSmall)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 6.dp)
+                            .height(24.dp)
+                            .pointerInput(start, duration, canSeek) {
+                                detectTapGestures { offset ->
+                                    if (canSeek) {
+                                        val fraction = (1f - offset.x / size.width)
+                                            .coerceIn(0f, 1f)
+                                        onSeek(start + (fraction * duration).toLong())
+                                    }
+                                }
                             },
-                            enabled = canSeek,
-                            modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().height(3.dp)
+                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), RoundedCornerShape(3.dp))
                         )
-                        Text(formatAudioTime(duration), style = MaterialTheme.typography.labelSmall)
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            Box(
+                                modifier = Modifier.fillMaxWidth(
+                                    if (duration > 0L) position.toFloat() / duration else 0f
+                                ).height(3.dp)
+                                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(3.dp))
+                            )
+                        }
                     }
+                    Text(formatAudioTime(duration), style = MaterialTheme.typography.labelSmall)
                 }
             }
             IconButton(
