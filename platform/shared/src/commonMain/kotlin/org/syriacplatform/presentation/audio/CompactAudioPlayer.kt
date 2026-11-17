@@ -34,6 +34,7 @@ import org.syriacplatform.audio.models.PlaybackStatus
  */
 @Composable
 fun CompactAudioPlayer(
+    title: String,
     status: PlaybackStatus,
     positionMs: Long,
     durationMs: Long?,
@@ -60,8 +61,14 @@ fun CompactAudioPlayer(
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.90f),
         shadowElevation = 5.dp
     ) {
+        Column(modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)) {
+            Text(
+                text = title,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp),
+                style = MaterialTheme.typography.labelSmall
+            )
         Row(
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+            modifier = Modifier,
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
@@ -112,6 +119,7 @@ fun CompactAudioPlayer(
             IconButton(onClick = onClose) {
                 Text("×", style = MaterialTheme.typography.titleLarge)
             }
+        }
         }
     }
 }
