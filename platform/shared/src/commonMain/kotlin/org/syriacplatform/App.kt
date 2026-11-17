@@ -2140,7 +2140,6 @@ private fun HymnDetailsScreen(
         playbackState.status != PlaybackStatus.Error
     ) {
         CompactAudioPlayer(
-            title = "التسجيل الصوتي",
             status = playbackState.status,
             positionMs = playbackState.positionMs,
             durationMs = playbackState.durationMs,
