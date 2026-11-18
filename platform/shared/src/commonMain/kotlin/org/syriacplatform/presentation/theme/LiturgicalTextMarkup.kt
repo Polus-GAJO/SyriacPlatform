@@ -38,8 +38,13 @@ object LiturgicalTextMarkup {
         while (index < source.length) {
             if (source[index] == '[') {
                 val close = source.indexOf(']', index + 1)
-                if (close > index + 1 && source.substring(index + 1, close).none { it == '[' }) {
-                    append(source.substring(index + 1, close), true)
+                if (close > index + 1) {
+                    val inner = source.substring(index + 1, close)
+                    if (inner.none { it == '[' }) {
+                        append(inner, true)
+                    } else {
+                        append(source.substring(index, close + 1), false)
+                    }
                     index = close + 1
                     continue
                 }
