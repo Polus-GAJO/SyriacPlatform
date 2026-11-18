@@ -7,6 +7,7 @@ import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.TextButton
@@ -1458,11 +1459,11 @@ private fun HymnDetailsScreen(
         mutableStateOf(0L)
     }
 
-    var selectedTranslationLanguage by remember(liturgicalItemId) {
+    var selectedTranslationLanguage by rememberSaveable(liturgicalItemId.value) {
         mutableStateOf<String?>(null)
     }
 
-    var shownTranslation by remember(liturgicalItemId) {
+    var shownTranslation by rememberSaveable(liturgicalItemId.value) {
         mutableStateOf<String?>(null)
     }
 
@@ -2253,11 +2254,11 @@ private fun HymnDetailsScreen(
             ) { Text("العودة") }
         }
     }
-    if (audioService != null &&
+    val audioPlayerVisible = audioService != null &&
         playbackState.mediaAssetId != null &&
         playbackState.status != PlaybackStatus.Idle &&
         playbackState.status != PlaybackStatus.Error
-    ) {
+    if (audioPlayerVisible && audioService != null) {
         val segmentNumber = (
             (itemResult as? Result.Success)?.data?.target
                 as? ResolvedLiturgicalItemTarget.Qolo
@@ -2313,7 +2314,8 @@ private fun HymnDetailsScreen(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 64.dp),
+                .padding(horizontal = 12.dp)
+                .padding(bottom = if (audioPlayerVisible) 64.dp else 0.dp),
             shape = RoundedCornerShape(12.dp),
             color = MaterialTheme.colorScheme.surface.copy(alpha = 0.93f),
             shadowElevation = 8.dp
@@ -2367,7 +2369,8 @@ private fun VerseTranslationTrigger(
     if (translation != null) {
         androidx.compose.material3.TextButton(
             onClick = { onShow(translation) },
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 2.dp, vertical = 0.dp),
+            modifier = Modifier.widthIn(min = 0.dp)
         ) {
             Text(if (language == "ar") "ع" else if (language == "en") "En" else language.orEmpty())
         }
