@@ -851,10 +851,6 @@ private fun PrayerDetailsScreen(
                             if (queueActive) {
                                 androidx.compose.material3.TextButton(
                                     enabled = queueState.currentIndex != null,
-                                    onClick = { queueController?.previous() }
-                                ) { Text("⏭") }
-                                androidx.compose.material3.TextButton(
-                                    enabled = queueState.currentIndex != null,
                                     onClick = { queueController?.next() }
                                 ) { Text("⏮") }
                                 androidx.compose.material3.TextButton(
@@ -874,6 +870,10 @@ private fun PrayerDetailsScreen(
                                     Text(if (queueState.status == PlaybackQueueStatus.Playing)
                                         "Ⅱ إيقاف مؤقت" else "▶ متابعة")
                                 }
+                                androidx.compose.material3.TextButton(
+                                    enabled = queueState.currentIndex != null,
+                                    onClick = { queueController?.previous() }
+                                ) { Text("⏭") }
                             } else {
                                 Button(
                                     enabled = queueController != null,
