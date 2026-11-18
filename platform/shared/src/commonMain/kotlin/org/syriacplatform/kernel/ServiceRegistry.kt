@@ -17,6 +17,15 @@ class ServiceRegistry {
         serviceType: KClass<T>,
         service: T
     ): Result<T> {
+        if (services.containsKey(serviceType)) {
+            return Result.Failure(
+                PlatformError(
+                    code = ErrorCode.INVALID_STATE,
+                    message = "Service is already registered: ${serviceType.simpleName}"
+                )
+            )
+        }
+
         services[serviceType] = service
         return Result.Success(service)
     }
