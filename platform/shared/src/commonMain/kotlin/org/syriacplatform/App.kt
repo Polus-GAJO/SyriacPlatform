@@ -1859,7 +1859,7 @@ private fun HymnDetailsScreen(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                                     if (selectedRecording != null && availableRecordings.isNotEmpty()) {
-                                                        Button(
+                                                        androidx.compose.material3.TextButton(
                                                             enabled = audioService != null,
                                                             onClick = {
                                                                 if (activeTextInterval?.mediaAssetId == playbackState.mediaAssetId) {
@@ -2139,32 +2139,37 @@ private fun HymnDetailsScreen(
                                     }
                                     )
                                 ) {
-                                    Column(
-                                        modifier =
-                                            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp)
+                                    androidx.compose.runtime.CompositionLocalProvider(
+                                        androidx.compose.ui.platform.LocalLayoutDirection provides
+                                            androidx.compose.ui.unit.LayoutDirection.Ltr
                                     ) {
-                                        verse.petgomo?.let { petgomo ->
-                                            Text(
-                                                text = petgomo.syriac,
-                                                modifier =
-                                                    Modifier.fillMaxWidth(),
-                                                style =
-                                                    SyriacTextStyles.body()
-                                            )
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth()
+                                                .padding(horizontal = 12.dp, vertical = 10.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                verse.petgomo?.let { petgomo ->
+                                                    Text(
+                                                        text = petgomo.syriac,
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        style = SyriacTextStyles.body(),
+                                                        textAlign = TextAlign.Right
+                                                    )
+                                                }
+                                                Text(
+                                                    text = verse.text.syriac,
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    style = SyriacTextStyles.body(),
+                                                    textAlign = TextAlign.Right
+                                                )
+                                            }
+                                            VerseTranslationTrigger(
+                                                petgomoTranslations = verse.petgomo?.translations.orEmpty(),
+                                                textTranslations = verse.text.translations,
+                                                language = selectedTranslationLanguage
+                                            ) { shownTranslation = it }
                                         }
-
-                                        Text(
-                                            text = verse.text.syriac,
-                                            modifier =
-                                                Modifier.fillMaxWidth(),
-                                            style =
-                                                SyriacTextStyles.body()
-                                        )
-                                        VerseTranslationTrigger(
-                                            petgomoTranslations = verse.petgomo?.translations.orEmpty(),
-                                            textTranslations = verse.text.translations,
-                                            language = selectedTranslationLanguage
-                                        ) { shownTranslation = it }
                                     }
                                 }
                             }
