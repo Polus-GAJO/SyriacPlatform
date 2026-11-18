@@ -4,17 +4,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontFamily
 import org.jetbrains.compose.resources.Font
 import org.syriacplatform.resources.Res
+import org.syriacplatform.resources.amiri_regular
+import org.syriacplatform.resources.noto_sans
 import org.syriacplatform.resources.serto_jerusalem
 
 /**
- * Font-family registry for liturgical content.
+ * Shared bundled font families for liturgical content.
  *
- * Syriac is connected to the existing bundled Serto Jerusalem resource.
- * Arabic (Traditional Arabic) and Latin (Noto Sans) must not silently use
- * platform fallbacks: add and verify their font resources before enabling
- * them here. This keeps the existing UI unchanged.
+ * Font resources travel with the application, rather than depending on
+ * fonts installed on Android, macOS or other host systems.
  */
 object LiturgicalFontFamilies {
     @Composable
     fun syriac(): FontFamily = FontFamily(Font(Res.font.serto_jerusalem))
+
+    @Composable
+    fun arabic(): FontFamily = FontFamily(Font(Res.font.amiri_regular))
+
+    @Composable
+    fun latin(): FontFamily = FontFamily(Font(Res.font.noto_sans))
+
+    @Composable
+    fun forLanguage(language: LiturgicalLanguage): FontFamily = when (language) {
+        LiturgicalLanguage.Syriac -> syriac()
+        LiturgicalLanguage.Arabic -> arabic()
+        LiturgicalLanguage.English, LiturgicalLanguage.French -> latin()
+    }
 }
