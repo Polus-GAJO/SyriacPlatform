@@ -5,6 +5,7 @@ import org.syriacplatform.content.contracts.ContentService
 import org.syriacplatform.context.PlatformContext
 import org.syriacplatform.kernel.PlatformKernel
 import org.syriacplatform.navigation.contracts.NavigationService
+import org.syriacplatform.user.contracts.PreferencesService
 
 /**
  * نقطة البناء المركزية لمنصة SyriacPlatform.
@@ -51,12 +52,18 @@ object PlatformBootstrap {
             )
         }
 
+        kernel.registerService(
+            PreferencesService::class,
+            services.preferences
+        )
+
         kernel.initialize()
 
         return PlatformContext(
             kernel = kernel,
             content = services.content,
             navigation = services.navigation,
+            preferences = services.preferences,
             audio = services.audio,
             performanceTextPlayback =
                 services.performanceTextPlayback
