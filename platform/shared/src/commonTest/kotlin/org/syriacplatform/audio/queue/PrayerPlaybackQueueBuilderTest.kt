@@ -227,7 +227,7 @@ private class FakeContentService(
         melodyId: MelodyId
     ): Result<List<MediaAsset>> =
         Result.Success(
-            recordings[melodyId]
+            emptyList()
                 ?: emptyList()
         )
 
