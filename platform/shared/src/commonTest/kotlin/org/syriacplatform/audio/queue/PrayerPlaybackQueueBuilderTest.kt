@@ -226,10 +226,7 @@ private class FakeContentService(
     override suspend fun loadMelodyRecordings(
         melodyId: MelodyId
     ): Result<List<MediaAsset>> =
-        Result.Success(
-            emptyList()
-                ?: emptyList()
-        )
+        Result.Success(emptyList())
 
     override suspend fun loadPerformanceMedia(
         liturgicalItemId: LiturgicalItemId
