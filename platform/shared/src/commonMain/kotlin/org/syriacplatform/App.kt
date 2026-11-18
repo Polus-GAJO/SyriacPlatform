@@ -778,7 +778,7 @@ private fun PrayerDetailsScreen(
             .background(
                 MaterialTheme.colorScheme.primaryContainer
             )
-            .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 8.dp)
+            .padding(start = 24.dp, end = 24.dp, top = 72.dp, bottom = 8.dp)
     ) {
         when (
             val result =
