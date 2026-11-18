@@ -4030,3 +4030,41 @@ No unpublished translation or unrelated occasion links are exported. Shared tran
 ### Proposed next priority
 
 **Application state restoration and navigation lifecycle**, implemented incrementally and tested across Activity recreation, rather than further notation styling. First inventory `App.kt` remembered selections and `NavigationController` state; define a minimal saved-state contract and focused tests. Keep rotation working. After that, revisit reading usability (image pan/zoom and loading states), then broader representative-content and cross-platform verification.
+
+
+---
+
+## 2026-11-18 — Android liturgical reading, notation, translation and prayer playback checkpoint
+
+<!-- ANDROID-READING-PLAYBACK-ACCEPTED-2026-11-18 -->
+
+**Branch:** `feature/notation-media-selection`. **Implementation through:** `2e052d0` (prayer playback toolbar order). This checkpoint supersedes the 2026-11-13 proposal to prioritize viewer styling/state restoration immediately: the user now considers the current hymn, notation, audio, and translation experience satisfactory and explicitly wants to return to database services. Earlier milestones remain historical.
+
+### User-accepted Android behavior
+
+- The contextual hymn-details view and non-melodic-text view share verse rendering and translation interaction. Each verse shows a number and, when a translation exists in the selected language, a compact adjacent trigger; its spacing and vertical placement were adjusted for Syriac readability. The Arabic trigger remains `ع` and English `en`.
+- The translation selector is independent of UI localization. Translation content combines contextual Petgomo first and canonical Text second, where present. Translation popup placement accounts for the audio mini-player: it sits above the player when visible, and at the bottom when no player is visible. Translation selection and popup state are retained across ordinary rotation.
+- The hymn view presents selected melody recordings and notation media without confusing them with contextual prayer-performance recordings. The notation reader supports multiple pages, zoom and rotation continuity. Contextual Notes and non-melodic text grouping remain available. The user explicitly reported satisfaction with the hymn, notation, playback and translation pages.
+- The prayer-details `تشغيل الكل` action now builds its queue from `ContentService.loadPerformanceMedia(liturgicalItemId)` rather than `loadMelodyRecordings(melodyId)`. In authored prayer-item order, it takes the first returned contextual performance recording for each item and skips items with no performance recording. This deliberately selects **one performance per liturgical occurrence**, not every melody candidate or every performance alternative.
+- The prayer queue uses `PlaybackQueueController` and `AudioService` to start the first available recording, advance automatically on completion, pause/resume, stop, and jump to previous/next recordings. The compact playback toolbar is right-aligned; the user approved the RTL-oriented symbols and final order (left-to-right): next, stop, pause/resume, previous. The previous control is at the far right.
+- Opening an individual hymn or leaving the prayer stops the prayer queue, avoiding overlapping playback sessions.
+
+### Implementation locations and decisions
+
+- `platform/shared/src/commonMain/kotlin/org/syriacplatform/App.kt`: `PrayerDetailsScreen`, `HymnDetailsScreen`, shared verse/translation UI and notation viewer.
+- `platform/shared/src/commonMain/kotlin/org/syriacplatform/audio/queue/PrayerPlaybackQueueBuilder.kt`: contextual performance queue selection, no melody-based fallback.
+- `platform/shared/src/commonMain/kotlin/org/syriacplatform/audio/queue/PlaybackQueueController.kt`: queue lifecycle and previous/next navigation.
+- `platform/shared/src/commonMain/kotlin/org/syriacplatform/audio/queue/PlaybackQueueEntry.kt`: queue entry owns a `LiturgicalItemId` and `MediaAsset`; optional legacy `melodyId` is retained for source compatibility and is not the basis of the new prayer queue.
+- `platform/shared/src/commonTest/kotlin/org/syriacplatform/audio/queue/PrayerPlaybackQueueBuilderTest.kt`: updated focused scenarios for first contextual recording, ordered items, and missing recordings.
+- Do not replace contextual `PERFORMANCE` relationships with `RECORDING` links to melodies; the two have different purposes. Do not silently choose a different performance when the first is available.
+
+### Verification boundaries
+
+- The user confirmed the latest Android prayer playback and toolbar arrangement work well, and approved the current hymn/notation/translation experience.
+- The user has **no liturgical occurrence with multiple performance recordings** in the current test data. Selection of the first among multiple contextual recordings is implemented and covered by a focused test case, but has **not** been visually verified on a real multi-performance occurrence.
+- No independent Gradle execution was available to the assistant. Do not infer a fresh full-suite success from GitHub commits or user acceptance alone. Before substantial database-service changes, run `:shared:testAndroidHostTest`, `:buildtools:test`, and `:androidApp:assembleDebug` as applicable.
+- Ordinary Android rotation is handled via manifest `configChanges`; process-death restoration, all device sizes, and iOS remain unverified. These are deferred, not declared complete.
+
+### Next engineering focus — database and content services
+
+The user explicitly requests a return to improving **database services** rather than more UI polishing. Before implementing anything, inspect the current `ContentService`, `ContentRepository`, runtime index/resolver, package-loading boundaries, and relevant tests; distinguish platform database/content-service improvements from Access Author Database editorial changes. Agree on a narrow requirement, preserve canonical content vs. liturgical occurrence identity and authored ordering, add focused tests, and use small commits. Do not assume the next task is translation UI or notation styling.
