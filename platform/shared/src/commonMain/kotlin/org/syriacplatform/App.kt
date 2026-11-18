@@ -621,7 +621,8 @@ private fun OccasionDetailsScreen(
                                     style = LiturgicalTextStyles.note(
                                         MaterialTheme.typography.bodyMedium,
                                         LiturgicalLanguage.Arabic
-                                    )
+                                    ),
+                                    textAlign = TextAlign.Right
                                 )
                             }
                         }
