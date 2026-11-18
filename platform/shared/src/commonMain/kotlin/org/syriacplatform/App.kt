@@ -1678,7 +1678,7 @@ private fun HymnDetailsScreen(
                             textAlign = TextAlign.Center
                         )
                         androidx.compose.material3.IconButton(
-                            modifier = Modifier.align(Alignment.CenterStart),
+                            modifier = Modifier.align(Alignment.CenterEnd),
                             enabled = audioService != null && fullHymnRecording != null,
                             onClick = {
                                 val recording = fullHymnRecording
