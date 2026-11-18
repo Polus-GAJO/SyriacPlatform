@@ -5,6 +5,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertSame
+import kotlin.test.assertFailsWith
 import org.syriacplatform.common.types.ErrorCode
 import org.syriacplatform.common.result.Result
 import org.syriacplatform.common.types.QoloId
@@ -113,6 +114,83 @@ class PlatformKernelTest {
         kernel.initialize()
         assertEquals(RuntimeState.Ready, original.runtimeState)
         assertEquals(RuntimeState.NotInitialized, replacement.runtimeState)
+    }
+
+    @Test
+    fun failedInitializationRollsBackPreviouslyInitializedServices() {
+        val events = mutableListOf<String>()
+        val kernel = PlatformKernel()
+        kernel.registerService(FirstLifecycleService::class, FirstLifecycleService(events))
+        kernel.registerService(FailingLifecycleService::class, FailingLifecycleService(events))
+
+        assertFailsWith<IllegalStateException> { kernel.initialize() }
+
+        assertEquals(
+            listOf("first:init", "failing:init", "failing:shutdown", "first:shutdown"),
+            events
+        )
+    }
+
+    @Test
+    fun shutdownReleasesServicesInReverseRegistrationOrder() {
+        val events = mutableListOf<String>()
+        val kernel = PlatformKernel()
+        kernel.registerService(FirstLifecycleService::class, FirstLifecycleService(events))
+        kernel.registerService(SecondLifecycleService::class, SecondLifecycleService(events))
+
+        kernel.initialize()
+        kernel.shutdown()
+
+        assertEquals(
+            listOf("first:init", "second:init", "second:shutdown", "first:shutdown"),
+            events
+        )
+    }
+
+    private class FirstLifecycleService(private val events: MutableList<String>) : PlatformService {
+        override val metadata = ServiceMetadata("First", "1.0")
+        override var runtimeState = RuntimeState.NotInitialized
+            private set
+
+        override fun initialize() {
+            events.add("first:init")
+            runtimeState = RuntimeState.Ready
+        }
+
+        override fun shutdown() {
+            events.add("first:shutdown")
+            runtimeState = RuntimeState.NotInitialized
+        }
+    }
+
+    private class SecondLifecycleService(private val events: MutableList<String>) : PlatformService {
+        override val metadata = ServiceMetadata("Second", "1.0")
+        override var runtimeState = RuntimeState.NotInitialized
+            private set
+
+        override fun initialize() {
+            events.add("second:init")
+            runtimeState = RuntimeState.Ready
+        }
+
+        override fun shutdown() {
+            events.add("second:shutdown")
+            runtimeState = RuntimeState.NotInitialized
+        }
+    }
+
+    private class FailingLifecycleService(private val events: MutableList<String>) : PlatformService {
+        override val metadata = ServiceMetadata("Failing", "1.0")
+        override val runtimeState = RuntimeState.Error
+
+        override fun initialize() {
+            events.add("failing:init")
+            throw IllegalStateException("Simulated initialization failure")
+        }
+
+        override fun shutdown() {
+            events.add("failing:shutdown")
+        }
     }
 
     private class RecordingPlatformService :
