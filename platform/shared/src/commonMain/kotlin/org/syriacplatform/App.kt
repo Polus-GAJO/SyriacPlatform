@@ -2202,7 +2202,7 @@ private fun HymnDetailsScreen(
             ) {
                 toolbarLanguages.forEach { language ->
                     androidx.compose.material3.DropdownMenuItem(
-                        text = { Text(language) },
+                        text = { Text(if (language == "ar") "ع" else language) },
                         onClick = {
                             selectedTranslationLanguage =
                                 if (selectedTranslationLanguage == language) null else language
@@ -2367,13 +2367,13 @@ private fun VerseTranslationTrigger(
 ) {
     val translation = combinedVerseTranslation(petgomoTranslations, textTranslations, language)
     if (translation != null) {
-        androidx.compose.material3.TextButton(
-            onClick = { onShow(translation) },
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 2.dp, vertical = 0.dp),
-            modifier = Modifier.widthIn(min = 0.dp)
-        ) {
-            Text(if (language == "ar") "ع" else if (language == "en") "En" else language.orEmpty())
-        }
+        Text(
+            text = if (language == "ar") "ع" else if (language == "en") "en" else language.orEmpty(),
+            modifier = Modifier
+                .clickable { onShow(translation) }
+                .padding(horizontal = 4.dp, vertical = 8.dp),
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
 
