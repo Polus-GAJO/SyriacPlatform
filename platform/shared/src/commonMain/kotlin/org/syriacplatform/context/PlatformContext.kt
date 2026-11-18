@@ -5,6 +5,7 @@ import org.syriacplatform.audio.contracts.AudioService
 import org.syriacplatform.content.contracts.ContentService
 import org.syriacplatform.kernel.PlatformKernel
 import org.syriacplatform.navigation.contracts.NavigationService
+import org.syriacplatform.user.contracts.PreferencesService
 
 /**
  * الواجهة الرسمية التي تتعامل معها التطبيقات المستهلكة للمنصة.
@@ -16,6 +17,7 @@ class PlatformContext internal constructor(
     internal val kernel: PlatformKernel,
     val content: ContentService,
     val navigation: NavigationService,
+    val preferences: PreferencesService,
     val audio: AudioService? = null,
     val performanceTextPlayback: PerformanceTextOccurrencePlaybackController? = null
 ) {
