@@ -80,6 +80,7 @@ import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.presentation.theme.SyriacTextStyles
 import org.syriacplatform.presentation.theme.LiturgicalAnnotatedText
 import org.syriacplatform.presentation.theme.LiturgicalColors
+import org.syriacplatform.presentation.theme.LiturgicalFontFamilies
 import kotlinx.coroutines.launch
 
 
@@ -2352,7 +2353,13 @@ private fun HymnDetailsScreen(
                 Text(
                     text = translation,
                     modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontFamily = when (selectedTranslationLanguage) {
+                            "ar" -> LiturgicalFontFamilies.arabic()
+                            "en", "fr" -> LiturgicalFontFamilies.latin()
+                            else -> MaterialTheme.typography.bodyLarge.fontFamily
+                        }
+                    ),
                     textAlign = if (selectedTranslationLanguage == "ar") TextAlign.Right else TextAlign.Start
                 )
                 androidx.compose.material3.TextButton(onClick = { shownTranslation = null }) {
