@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
 import androidx.compose.material3.MaterialTheme
@@ -1597,28 +1598,16 @@ private fun HymnDetailsScreen(
                         modifier = Modifier.fillMaxWidth().weight(1f),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        items(target.verses) { verse ->
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                verse.petgomo?.let { petgomo ->
-                                    Text(
-                                        text = petgomo.syriac,
-                                        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-                                        style = SyriacTextStyles.body(),
-                                        textAlign = TextAlign.Right
-                                    )
-                                }
-                                Text(
-                                    text = verse.text.syriac,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    style = SyriacTextStyles.body(),
-                                    textAlign = TextAlign.Right
-                                )
-                                VerseTranslationTrigger(
-                                            petgomoTranslations = verse.petgomo?.translations.orEmpty(),
-                                            textTranslations = verse.text.translations,
-                                            language = selectedTranslationLanguage
-                                        ) { shownTranslation = it }
-                            }
+                        itemsIndexed(target.verses) { index, verse ->
+                            VerseTextWithTranslation(
+                                verseNumber = index + 1,
+                                petgomo = verse.petgomo?.syriac,
+                                syriacText = verse.text.syriac,
+                                petgomoTranslations = verse.petgomo?.translations.orEmpty(),
+                                textTranslations = verse.text.translations,
+                                language = selectedTranslationLanguage,
+                                onShowTranslation = { shownTranslation = it }
+                            )
                         }
                     }
                 } else if (target is ResolvedLiturgicalItemTarget.Qolo) {
@@ -2090,7 +2079,7 @@ private fun HymnDetailsScreen(
                                     )
                                 }
                             }
-                            items(target.verses) { verse ->
+                            itemsIndexed(target.verses) { verseIndex, verse ->
                                 Surface(
                                     shape = RoundedCornerShape(4.dp),
                                     color = MaterialTheme.colorScheme.surfaceVariant,
@@ -2140,38 +2129,15 @@ private fun HymnDetailsScreen(
                                     }
                                     )
                                 ) {
-                                    androidx.compose.runtime.CompositionLocalProvider(
-                                        androidx.compose.ui.platform.LocalLayoutDirection provides
-                                            androidx.compose.ui.unit.LayoutDirection.Ltr
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth()
-                                                .padding(horizontal = 12.dp, vertical = 10.dp),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Column(modifier = Modifier.weight(1f)) {
-                                                verse.petgomo?.let { petgomo ->
-                                                    Text(
-                                                        text = petgomo.syriac,
-                                                        modifier = Modifier.fillMaxWidth(),
-                                                        style = SyriacTextStyles.body(),
-                                                        textAlign = TextAlign.Right
-                                                    )
-                                                }
-                                                Text(
-                                                    text = verse.text.syriac,
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    style = SyriacTextStyles.body(),
-                                                    textAlign = TextAlign.Right
-                                                )
-                                            }
-                                            VerseTranslationTrigger(
-                                                petgomoTranslations = verse.petgomo?.translations.orEmpty(),
-                                                textTranslations = verse.text.translations,
-                                                language = selectedTranslationLanguage
-                                            ) { shownTranslation = it }
-                                        }
-                                    }
+                                    VerseTextWithTranslation(
+                                        verseNumber = verseIndex + 1,
+                                        petgomo = verse.petgomo?.syriac,
+                                        syriacText = verse.text.syriac,
+                                        petgomoTranslations = verse.petgomo?.translations.orEmpty(),
+                                        textTranslations = verse.text.translations,
+                                        language = selectedTranslationLanguage,
+                                        onShowTranslation = { shownTranslation = it }
+                                    )
                                 }
                             }
                         }
@@ -2359,6 +2325,56 @@ internal fun combinedVerseTranslation(
 }
 
 @Composable
+private fun VerseTextWithTranslation(
+    verseNumber: Int,
+    petgomo: String?,
+    syriacText: String,
+    petgomoTranslations: List<org.syriacplatform.content.models.TextTranslation>,
+    textTranslations: List<org.syriacplatform.content.models.TextTranslation>,
+    language: String?,
+    onShowTranslation: (String) -> Unit
+) {
+    androidx.compose.runtime.CompositionLocalProvider(
+        androidx.compose.ui.platform.LocalLayoutDirection provides androidx.compose.ui.unit.LayoutDirection.Ltr
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Top
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                petgomo?.let {
+                    Text(
+                        text = it,
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                        style = SyriacTextStyles.body(),
+                        textAlign = TextAlign.Right
+                    )
+                }
+                Text(
+                    text = syriacText,
+                    modifier = Modifier.fillMaxWidth(),
+                    style = SyriacTextStyles.body(),
+                    textAlign = TextAlign.Right
+                )
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = verseNumber.toString(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                VerseTranslationTrigger(
+                    petgomoTranslations = petgomoTranslations,
+                    textTranslations = textTranslations,
+                    language = language,
+                    onShow = onShowTranslation
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun VerseTranslationTrigger(
     petgomoTranslations: List<org.syriacplatform.content.models.TextTranslation>,
     textTranslations: List<org.syriacplatform.content.models.TextTranslation>,
@@ -2371,7 +2387,7 @@ private fun VerseTranslationTrigger(
             text = if (language == "ar") "ع" else if (language == "en") "en" else language.orEmpty(),
             modifier = Modifier
                 .clickable { onShow(translation) }
-                .padding(horizontal = 4.dp, vertical = 8.dp),
+                .padding(start = 2.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
             style = MaterialTheme.typography.bodyMedium
         )
     }
