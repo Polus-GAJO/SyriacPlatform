@@ -20,6 +20,7 @@ import org.syriacplatform.common.types.PrayerSequenceId
 import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.common.types.QoloId
 import org.syriacplatform.common.types.MelodyId
+import org.syriacplatform.user.storage.AndroidUserPreferencesStore
 
 class RetainedPlatformModel : ViewModel() {
     private var retained: PlatformContext? = null
@@ -28,7 +29,8 @@ class RetainedPlatformModel : ViewModel() {
         retained?.let { return it }
         val backend = AndroidAudioPlayerBackend(activity.applicationContext)
         val dependencies = DefaultPlatformDependencies.create().copy(
-            audioPlayerBackend = backend
+            audioPlayerBackend = backend,
+            userPreferencesStore = AndroidUserPreferencesStore(activity.applicationContext)
         )
         return PlatformBootstrap.create(dependencies).also { retained = it }
     }
