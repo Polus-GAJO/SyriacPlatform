@@ -836,164 +836,80 @@ private fun PrayerDetailsScreen(
 
                     PrayerSequenceNotes(platform, sequence.sequence.noteIds)
 
-                    Button(
-                        enabled =
-                            queueController != null &&
-                            queueState.status !=
-                                PlaybackQueueStatus.Loading &&
-                            queueState.status !=
-                                PlaybackQueueStatus.Playing,
-                        onClick = {
-                            playAllMessage = null
-
-                            coroutineScope.launch {
-                                when (
-                                    val buildResult =
-                                        PrayerPlaybackQueueBuilder(
-                                            platform.content
-                                        ).build(
-                                            sequence =
-                                                sequence,
-                                            preferredRecordingIds =
-                                                preferredRecordingIds
-                                        )
-                                ) {
-                                    is Result.Failure -> {
-                                        playAllMessage =
-                                            buildResult
-                                                .error
-                                                .message
-                                                ?: "Play All queue build failed"
+                    val queueActive = queueState.status == PlaybackQueueStatus.Loading ||
+                        queueState.status == PlaybackQueueStatus.Playing ||
+                        queueState.status == PlaybackQueueStatus.Paused
+                    androidx.compose.runtime.CompositionLocalProvider(
+                        androidx.compose.ui.platform.LocalLayoutDirection provides
+                            androidx.compose.ui.unit.LayoutDirection.Ltr
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 8.dp),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (queueActive) {
+                                androidx.compose.material3.TextButton(
+                                    enabled = queueState.currentIndex != null,
+                                    onClick = { queueController?.previous() }
+                                ) { Text("⏮") }
+                                androidx.compose.material3.TextButton(
+                                    enabled = queueState.currentIndex != null,
+                                    onClick = { queueController?.next() }
+                                ) { Text("⏭") }
+                                androidx.compose.material3.TextButton(
+                                    onClick = {
+                                        playAllMessage = null
+                                        queueController?.stop()
                                     }
-
-                                    is Result.Success -> {
-                                        val entries =
-                                            buildResult.data
-
-                                        if (entries.isEmpty()) {
-                                            playAllMessage =
-                                                "No recordings available for this prayer"
-                                        } else {
-                                            when (
-                                                val startResult =
-                                                    queueController
-                                                        ?.start(
-                                                            entries
-                                                        )
-                                            ) {
-                                                null -> {
-                                                    playAllMessage =
-                                                        "Audio service unavailable"
-                                                }
-
-                                                is Result.Failure -> {
-                                                    playAllMessage =
-                                                        startResult
-                                                            .error
-                                                            .message
-                                                            ?: "Play All failed"
-                                                }
-
+                                ) { Text("■ إيقاف") }
+                                Button(
+                                    enabled = queueState.status != PlaybackQueueStatus.Loading,
+                                    onClick = {
+                                        if (queueState.status == PlaybackQueueStatus.Playing)
+                                            queueController?.pause()
+                                        else queueController?.resume()
+                                    }
+                                ) {
+                                    Text(if (queueState.status == PlaybackQueueStatus.Playing)
+                                        "Ⅱ إيقاف مؤقت" else "▶ متابعة")
+                                }
+                            } else {
+                                Button(
+                                    enabled = queueController != null,
+                                    onClick = {
+                                        playAllMessage = null
+                                        coroutineScope.launch {
+                                            when (val built = PrayerPlaybackQueueBuilder(platform.content)
+                                                .build(sequence)) {
+                                                is Result.Failure ->
+                                                    playAllMessage = "تعذّر إعداد قائمة التسجيلات"
                                                 is Result.Success -> {
-                                                    playAllMessage =
-                                                        null
+                                                    if (built.data.isEmpty()) {
+                                                        playAllMessage = "لا توجد تسجيلات أداء لهذه الصلاة"
+                                                    } else {
+                                                        when (queueController?.start(built.data)) {
+                                                            is Result.Success -> playAllMessage = null
+                                                            else -> playAllMessage = "تعذّر بدء تشغيل التسجيلات"
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
                                     }
-                                }
+                                ) { Text("تشغيل الكل") }
                             }
-                        },
-                        modifier =
-                            Modifier.padding(
-                                top = 12.dp,
-                                bottom = 8.dp
-                            )
-                    ) {
-                        Text("Play All")
+                        }
                     }
-
-                    when (queueState.status) {
-                        PlaybackQueueStatus.Playing -> {
-                            Button(
-                                onClick = {
-                                    queueController?.pause()
-                                },
-                                modifier =
-                                    Modifier.padding(
-                                        bottom = 8.dp
-                                    )
-                            ) {
-                                Text("Pause All")
-                            }
-                        }
-
-                        PlaybackQueueStatus.Paused -> {
-                            Button(
-                                onClick = {
-                                    queueController?.resume()
-                                },
-                                modifier =
-                                    Modifier.padding(
-                                        bottom = 8.dp
-                                    )
-                            ) {
-                                Text("Resume All")
-                            }
-                        }
-
-                        PlaybackQueueStatus.Loading -> {
+                    if (queueActive) {
+                        val number = queueState.currentIndex?.plus(1)
+                        if (number != null) {
                             Text(
-                                "Play All: Loading..."
+                                text = "التسجيل $number من ${queueState.entries.size}",
+                                modifier = Modifier.fillMaxWidth(),
+                                style = MaterialTheme.typography.labelSmall,
+                                textAlign = TextAlign.Right
                             )
-                        }
-
-                        PlaybackQueueStatus.Completed -> {
-                            Text(
-                                "Play All: Completed"
-                            )
-                        }
-
-                        PlaybackQueueStatus.Error -> {
-                            Text(
-                                "Play All: Error"
-                            )
-                        }
-
-                        PlaybackQueueStatus.Idle -> Unit
-                    }
-
-                    if (
-                        queueState.status ==
-                            PlaybackQueueStatus.Loading ||
-                        queueState.status ==
-                            PlaybackQueueStatus.Playing ||
-                        queueState.status ==
-                            PlaybackQueueStatus.Paused
-                    ) {
-                        val currentNumber =
-                            queueState.currentIndex
-                                ?.plus(1)
-
-                        if (currentNumber != null) {
-                            Text(
-                                "Play All item: " +
-                                    "$currentNumber / " +
-                                    "${queueState.entries.size}"
-                            )
-                        }
-
-                        Button(
-                            onClick = {
-                                playAllMessage = null
-                                queueController?.stop()
-                            },
-                            modifier =
-                                Modifier.padding(
-                                    bottom = 8.dp
-                                )
-                        ) {
-                            Text("Stop All")
                         }
                     }
 
