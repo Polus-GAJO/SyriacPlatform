@@ -1560,7 +1560,7 @@ private fun HymnDetailsScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.primaryContainer)
-            .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 8.dp)
+            .padding(start = 24.dp, end = 24.dp, top = 80.dp, bottom = 8.dp)
     ) {
         when (val result = itemResult) {
             null -> Text("Loading...")
@@ -1858,9 +1858,59 @@ private fun HymnDetailsScreen(
                             }
 
                             if (availableRecordings.isNotEmpty()) {
-                                androidx.compose.material3.TextButton(
-                                    onClick = { melodyRecordingsExpanded = !melodyRecordingsExpanded }
-                                ) { Text("التسجيلات المتاحة") }
+                                androidx.compose.runtime.CompositionLocalProvider(
+                                    androidx.compose.ui.platform.LocalLayoutDirection provides
+                                        androidx.compose.ui.unit.LayoutDirection.Ltr
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                                    if (selectedRecording != null && availableRecordings.isNotEmpty()) {
+                                                        Button(
+                                                            enabled = audioService != null,
+                                                            onClick = {
+                                                                if (activeTextInterval?.mediaAssetId == playbackState.mediaAssetId) {
+                                                                    platform.performanceTextPlayback?.clearActiveInterval()
+                                                                    pendingAutoPlayId = selectedRecording.id
+                                                                    if (audioService?.load(selectedRecording) is Result.Failure) {
+                                                                        pendingAutoPlayId = null
+                                                                    }
+                                                                } else if (playbackState.mediaAssetId == selectedRecording.id &&
+                                                                    playbackState.status == PlaybackStatus.Playing
+                                                                ) {
+                                                                    audioService?.pause()
+                                                                } else if (playbackState.mediaAssetId == selectedRecording.id &&
+                                                                    playbackState.status != PlaybackStatus.Idle &&
+                                                                    playbackState.status != PlaybackStatus.Error
+                                                                ) {
+                                                                    if (playbackState.status == PlaybackStatus.Ended) {
+                                                                        audioService?.seekTo(0L)
+                                                                    }
+                                                                    audioService?.play()
+                                                                } else {
+                                                                    platform.performanceTextPlayback?.clearActiveInterval()
+                                                                    pendingAutoPlayId = selectedRecording.id
+                                                                    if (audioService?.load(selectedRecording) is Result.Failure) {
+                                                                        pendingAutoPlayId = null
+                                                                    }
+                                                                }
+                                                            },
+                                                            modifier = Modifier.padding(bottom = 8.dp)
+                                                        ) {
+                                                            Text(
+                                                                if (playbackState.mediaAssetId == selectedRecording.id &&
+                                                                    playbackState.status == PlaybackStatus.Playing
+                                                                ) "إيقاف اللحن مؤقتًا" else "سماع اللحن"
+                                                            )
+                                                        }
+                                                    }
+                                        androidx.compose.material3.TextButton(
+                                            onClick = { melodyRecordingsExpanded = !melodyRecordingsExpanded }
+                                        ) { Text("التسجيلات المتاحة") }
+                                    }
+                                }
                                 if (melodyRecordingsExpanded) availableRecordings.forEach {
                                         recording ->
 
@@ -1920,45 +1970,7 @@ private fun HymnDetailsScreen(
                                 }
                             }
 
-                            if (selectedRecording != null) {
-                                Button(
-                                    enabled = audioService != null,
-                                    onClick = {
-                                        if (activeTextInterval?.mediaAssetId == playbackState.mediaAssetId) {
-                                            platform.performanceTextPlayback?.clearActiveInterval()
-                                            pendingAutoPlayId = selectedRecording.id
-                                            if (audioService?.load(selectedRecording) is Result.Failure) {
-                                                pendingAutoPlayId = null
-                                            }
-                                        } else if (playbackState.mediaAssetId == selectedRecording.id &&
-                                            playbackState.status == PlaybackStatus.Playing
-                                        ) {
-                                            audioService?.pause()
-                                        } else if (playbackState.mediaAssetId == selectedRecording.id &&
-                                            playbackState.status != PlaybackStatus.Idle &&
-                                            playbackState.status != PlaybackStatus.Error
-                                        ) {
-                                            if (playbackState.status == PlaybackStatus.Ended) {
-                                                audioService?.seekTo(0L)
-                                            }
-                                            audioService?.play()
-                                        } else {
-                                            platform.performanceTextPlayback?.clearActiveInterval()
-                                            pendingAutoPlayId = selectedRecording.id
-                                            if (audioService?.load(selectedRecording) is Result.Failure) {
-                                                pendingAutoPlayId = null
-                                            }
-                                        }
-                                    },
-                                    modifier = Modifier.padding(bottom = 8.dp)
-                                ) {
-                                    Text(
-                                        if (playbackState.mediaAssetId == selectedRecording.id &&
-                                            playbackState.status == PlaybackStatus.Playing
-                                        ) "Pause" else "Play recording"
-                                    )
-                                }
-                            }
+
                         }
                     }
 
