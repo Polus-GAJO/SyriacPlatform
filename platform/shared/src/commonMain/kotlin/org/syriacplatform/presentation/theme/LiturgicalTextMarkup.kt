@@ -4,7 +4,7 @@ package org.syriacplatform.presentation.theme
  * A color-only, UI-independent representation of liturgical text.
  *
  * Square brackets mark red spans and are removed from the displayed text.
- * Syriac full stop and the exact word ܗܠܠܘܝܗ are always red.
+ * Syriac full stop and ܗܠܠܘܝܗ (with or without Syriac vowel marks) are always red.
  * Unmatched or nested brackets are preserved literally rather than losing text.
  */
 data class LiturgicalColorSpan(val start: Int, val endExclusive: Int)
@@ -17,6 +17,27 @@ data class ParsedLiturgicalText(
 object LiturgicalTextMarkup {
     private const val HALLELUJAH = "ܗܠܠܘܝܗ"
     private const val SYRIAC_FULL_STOP = '܀'
+
+    private fun isSyriacMark(char: Char): Boolean = char in '\u0730'..'\u074A'
+
+    private fun isSyriacLetter(char: Char): Boolean =
+        char in '\u0710'..'\u072F' || char in '\u074D'..'\u074F'
+
+    /** Match Hallelujah without discarding vowel marks or matching within longer words. */
+    private fun hallelujahEnd(source: String, start: Int): Int? {
+        if (start > 0 && (isSyriacLetter(source[start - 1]) ||
+                    isSyriacMark(source[start - 1]))) return null
+
+        var cursor = start
+        for (letter in HALLELUJAH) {
+            if (cursor >= source.length || source[cursor] != letter) return null
+            cursor++
+            while (cursor < source.length && isSyriacMark(source[cursor])) cursor++
+        }
+        if (cursor < source.length && isSyriacLetter(source[cursor])) return null
+        return cursor
+    }
+
 
     fun parse(source: String, allRed: Boolean = false): ParsedLiturgicalText {
         if (allRed) {
@@ -49,9 +70,12 @@ object LiturgicalTextMarkup {
                     continue
                 }
             }
-            if (source.startsWith(HALLELUJAH, index)) {
-                append(HALLELUJAH, true)
-                index += HALLELUJAH.length
+            val matchEnd = if (source[index] == HALLELUJAH[0]) {
+                hallelujahEnd(source, index)
+            } else null
+            if (matchEnd != null) {
+                append(source.substring(index, matchEnd), true)
+                index = matchEnd
                 continue
             }
             val char = source[index]
