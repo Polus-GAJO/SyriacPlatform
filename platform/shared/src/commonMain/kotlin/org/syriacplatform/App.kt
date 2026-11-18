@@ -1364,6 +1364,10 @@ private fun HymnDetailsScreen(
     val coroutineScope =
         rememberCoroutineScope()
 
+    // Remember the user's last explicitly chosen translation language.
+    // A preference alone never opens translations automatically.
+    val userPreferences by platform.preferences.preferences.collectAsState()
+
     var pendingAutoPlayId by remember(liturgicalItemId) {
         mutableStateOf<MediaAssetId?>(null)
     }
@@ -1470,6 +1474,10 @@ private fun HymnDetailsScreen(
     val toolbarLanguages = toolbarVerses.flatMap { verse ->
         verse.petgomo?.translations.orEmpty() + verse.text.translations
     }.filter { it.content.isNotBlank() }.map { it.language }.distinct().sorted()
+    val preferredTranslationLanguage = userPreferences.translationLanguage
+    val orderedToolbarLanguages = toolbarLanguages.sortedWith(
+        compareBy<String> { it != preferredTranslationLanguage }.thenBy { it }
+    )
 
     androidx.compose.foundation.layout.Box(
         modifier = Modifier.fillMaxSize().safeDrawingPadding()
@@ -2201,14 +2209,24 @@ private fun HymnDetailsScreen(
                 expanded = translationMenuOpen,
                 onDismissRequest = { translationMenuOpen = false }
             ) {
-                toolbarLanguages.forEach { language ->
+                orderedToolbarLanguages.forEach { language ->
                     androidx.compose.material3.DropdownMenuItem(
                         text = { Text(if (language == "ar") "ع" else language) },
                         onClick = {
-                            selectedTranslationLanguage =
+                            val newSelection =
                                 if (selectedTranslationLanguage == language) null else language
+                            selectedTranslationLanguage = newSelection
                             shownTranslation = null
                             translationMenuOpen = false
+                            if (newSelection != null &&
+                                userPreferences.translationLanguage != newSelection
+                            ) {
+                                coroutineScope.launch {
+                                    platform.preferences.update(
+                                        userPreferences.copy(translationLanguage = newSelection)
+                                    )
+                                }
+                            }
                         }
                     )
                 }
