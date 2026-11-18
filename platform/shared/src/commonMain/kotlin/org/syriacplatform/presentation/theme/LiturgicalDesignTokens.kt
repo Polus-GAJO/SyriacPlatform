@@ -7,8 +7,8 @@ import androidx.compose.ui.unit.sp
 /**
  * Central design references for liturgical content.
  *
- * The 26/30/25 sizes are the approved starting proportions for Serto Jerusalem,
- * Traditional Arabic and Noto Sans respectively. They are not automatically
+ * The 26/22/25 sizes are the approved starting proportions for Serto Jerusalem,
+ * Amiri and Noto Sans respectively. They are not automatically
  * applied to existing screens; migrate each usage after visual verification.
  */
 object LiturgicalColors {
@@ -34,7 +34,7 @@ enum class LiturgicalTextRole {
 
 object LiturgicalTypography {
     const val SyriacBaseSp = 26f
-    const val ArabicBaseSp = 30f
+    const val ArabicBaseSp = 22f
     const val LatinBaseSp = 25f
     const val LandscapeContentMultiplier = 1.05f
 
