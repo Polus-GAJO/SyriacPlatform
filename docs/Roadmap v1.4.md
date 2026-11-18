@@ -1811,3 +1811,35 @@ Non-melodic liturgical texts (prayers/readings/sedros) already exist in Author D
 **Acceptance criteria:** navigating to a hymn and opening a specific notation page survives an Android Activity recreation; ordinary rotation continues to work; returning Back remains correct; existing shared tests and Android build pass. Verify process-death behavior separately if included; do not conflate it with configuration-change handling.
 
 **After this milestone:** improve notation image loading/errors and zoom/pan; verify representative content cases and regressions; defer cosmetic styling, immersive mode and speculative infrastructure. Earlier roadmap sections remain historical references unless superseded by newer verified checkpoints.
+
+
+---
+
+## 2026-11-18 — Accepted Android reading/playback milestone and next priority
+
+<!-- ROADMAP-ANDROID-READING-PLAYBACK-2026-11-18 -->
+
+**Status:** Current Android reference-app experience accepted by the user; next focus is database/content services. **Branch:** `feature/notation-media-selection`; implementation through `2e052d0`. See `docs/CurrentState.md`, checkpoint `ANDROID-READING-PLAYBACK-ACCEPTED-2026-11-18`, for implementation details and verification limits.
+
+### Completed for the current Android reference scope
+
+- Hymn and non-melodic text presentation, contextual verse numbers, optional Arabic/English translation triggers and translation popup.
+- Melody notation media viewing, multiple notation pages and pinch zoom, with ordinary rotation preserving the current UI.
+- Melody audio controls on hymn details, distinct from occurrence-level performance audio.
+- Prayer `تشغيل الكل`: one first contextual `PERFORMANCE` recording per liturgical item, in prayer order, skipping unavailable recordings; automatic advance; pause/resume, previous/next and stop; right-aligned Arabic/RTL-oriented controls. The user verified the working behavior and accepted the final toolbar layout.
+
+### Remaining verification and deferred work
+
+- Verify first-of-multiple `PERFORMANCE` selection with real multi-recording author data when such a case becomes available.
+- Run appropriate Gradle regression suites for future changes; the latest complete suite is not independently established by this checkpoint.
+- Durable restoration after Activity recreation/process death, iOS, broader device/layout checks, and advanced notation viewer error/zoom polish remain deferred.
+- Do not interpret completion of the Android reading UI as completion of all Phase 9 media lifecycle, timing, or cross-platform work.
+
+### Immediate next milestone — database/content-service review
+
+1. Review existing `ContentService`, `ContentRepository`, runtime indexes/resolvers and Author Database/export boundaries; identify the specific service improvement desired before changing contracts.
+2. Preserve authored ordering, contextual `LiturgicalItemId`, published translation rules, `RECORDING` vs. `PERFORMANCE` semantics, and package validation.
+3. Select one small, testable database-service improvement; add focused tests and verify with the user's Windows Gradle workflow.
+4. Defer further Android UI refinements unless a functional regression is discovered.
+
+This newer priority supersedes the 2026-11-13 immediate recommendation to implement saved navigation/viewer state first. It does not erase that deferred requirement.
