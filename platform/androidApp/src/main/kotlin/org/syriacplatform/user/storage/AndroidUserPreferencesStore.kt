@@ -9,9 +9,12 @@ import org.syriacplatform.user.models.UserPreferences
  * Device-local preferences, independent of the published content packages.
  * Uses application context so it never retains an Activity across rotation.
  */
-class AndroidUserPreferencesStore(context: Context) : UserPreferencesStore {
+class AndroidUserPreferencesStore(
+    context: Context,
+    preferencesFileName: String = "syriacplatform.user.preferences.v1"
+) : UserPreferencesStore {
     private val storage = context.applicationContext.getSharedPreferences(
-        "syriacplatform.user.preferences.v1",
+        preferencesFileName,
         Context.MODE_PRIVATE
     )
 
