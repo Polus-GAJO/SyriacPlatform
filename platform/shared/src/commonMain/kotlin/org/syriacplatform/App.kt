@@ -1522,6 +1522,18 @@ private fun HymnDetailsScreen(
         }
     }
 
+    var translationMenuOpen by remember { mutableStateOf(false) }
+    val toolbarTarget = (itemResult as? Result.Success)?.data?.target
+    val toolbarVerses = when (toolbarTarget) {
+        is ResolvedLiturgicalItemTarget.Qolo -> toolbarTarget.verses
+        is ResolvedLiturgicalItemTarget.NonMelodicText -> toolbarTarget.verses
+        is ResolvedLiturgicalItemTarget.UnresolvedQolo -> toolbarTarget.verses
+        else -> emptyList()
+    }
+    val toolbarLanguages = toolbarVerses.flatMap { verse ->
+        verse.petgomo?.translations.orEmpty() + verse.text.translations
+    }.filter { it.content.isNotBlank() }.map { it.language }.distinct().sorted()
+
     androidx.compose.foundation.layout.Box(
         modifier = Modifier.fillMaxSize().safeDrawingPadding()
     ) {
@@ -1541,18 +1553,6 @@ private fun HymnDetailsScreen(
             is Result.Success -> {
                 val target = result.data.target
 
-                val occurrenceNoteText =
-                    (occurrenceNoteResult as? Result.Success)?.data?.text
-                if (!occurrenceNoteText.isNullOrBlank()) {
-                    Text(
-                        text = occurrenceNoteText,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-
                 val translatedVerses = when (target) {
                     is ResolvedLiturgicalItemTarget.NonMelodicText -> target.verses
                     is ResolvedLiturgicalItemTarget.Qolo -> target.verses
@@ -1563,35 +1563,6 @@ private fun HymnDetailsScreen(
                     verse.petgomo?.translations.orEmpty() + verse.text.translations
                 }.filter { it.content.isNotBlank() }
                     .map { it.language }.distinct().sorted()
-                if (languages.isNotEmpty()) {
-                    androidx.compose.foundation.layout.Row(
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        languages.forEach { language ->
-                            androidx.compose.material3.TextButton(
-                                onClick = {
-                                    selectedTranslationLanguage =
-                                        if (selectedTranslationLanguage == language) null else language
-                                    shownTranslation = null
-                                },
-                                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp)
-                            ) {
-                                Text(
-                                    when (language) {
-                                        "ar" -> "ع"
-                                        "en" -> "En"
-                                        "fr" -> "Fr"
-                                        else -> language
-                                    },
-                                    color = if (selectedTranslationLanguage == language)
-                                        MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
-                }
 
                 if (target is ResolvedLiturgicalItemTarget.NonMelodicText) {
                     Text(
@@ -2104,6 +2075,16 @@ private fun HymnDetailsScreen(
                                 Arrangement.spacedBy(12.dp),
                             contentPadding = PaddingValues(bottom = 92.dp)
                         ) {
+                            item {
+                                val note = (occurrenceNoteResult as? Result.Success)?.data?.text
+                                if (!note.isNullOrBlank()) {
+                                    Text(
+                                        text = note,
+                                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                            }
                             items(target.verses) { verse ->
                                 Surface(
                                     shape = RoundedCornerShape(4.dp),
@@ -2191,14 +2172,50 @@ private fun HymnDetailsScreen(
             }
         }
 
-        Button(
-            onClick = {
-                audioService?.stop()
-                onBack()
-            },
-            modifier = Modifier.padding(top = 8.dp)
+    }
+    androidx.compose.material3.Surface(
+        modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f),
+        shadowElevation = 3.dp
+    ) {
+        androidx.compose.foundation.layout.Box(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)
         ) {
-            Text("Back")
+            androidx.compose.material3.TextButton(
+                onClick = { translationMenuOpen = true },
+                enabled = toolbarLanguages.isNotEmpty(),
+                modifier = Modifier.align(Alignment.CenterStart)
+            ) { Text("الترجمة") }
+            androidx.compose.material3.DropdownMenu(
+                expanded = translationMenuOpen,
+                onDismissRequest = { translationMenuOpen = false }
+            ) {
+                toolbarLanguages.forEach { language ->
+                    androidx.compose.material3.DropdownMenuItem(
+                        text = { Text(language) },
+                        onClick = {
+                            selectedTranslationLanguage =
+                                if (selectedTranslationLanguage == language) null else language
+                            shownTranslation = null
+                            translationMenuOpen = false
+                        }
+                    )
+                }
+                if (selectedTranslationLanguage != null) {
+                    androidx.compose.material3.DropdownMenuItem(
+                        text = { Text("إخفاء الترجمة") },
+                        onClick = {
+                            selectedTranslationLanguage = null
+                            shownTranslation = null
+                            translationMenuOpen = false
+                        }
+                    )
+                }
+            }
+            androidx.compose.material3.TextButton(
+                onClick = { audioService?.stop(); onBack() },
+                modifier = Modifier.align(Alignment.CenterEnd)
+            ) { Text("العودة") }
         }
     }
     if (audioService != null &&
