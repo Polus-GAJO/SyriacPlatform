@@ -63,6 +63,30 @@ class PlaybackQueueController(
         return loadCurrentEntry()
     }
 
+    /** Previous recording, or restart the first recording. */
+    fun previous(): Result<Unit> {
+        val index = _state.value.currentIndex ?: return invalidState("No active recording.")
+        return jumpTo(if (index > 0) index - 1 else index)
+    }
+
+    /** Next recording, or stop when the last recording is reached. */
+    fun next(): Result<Unit> {
+        val index = _state.value.currentIndex ?: return invalidState("No active recording.")
+        return if (index + 1 >= _state.value.entries.size) stop() else jumpTo(index + 1)
+    }
+
+    private fun jumpTo(index: Int): Result<Unit> {
+        val state = _state.value
+        if (index !in state.entries.indices) return invalidArgument("Recording index out of range.")
+        pendingAutoPlay = false
+        when (val stopped = audioService.stop()) {
+            is Result.Failure -> return stopped
+            is Result.Success -> Unit
+        }
+        _state.value = state.copy(status = PlaybackQueueStatus.Loading, currentIndex = index)
+        return loadCurrentEntry()
+    }
+
     fun pause(): Result<Unit> =
         audioService.pause()
 
