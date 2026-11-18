@@ -1524,6 +1524,7 @@ private fun HymnDetailsScreen(
 
     var translationMenuOpen by remember { mutableStateOf(false) }
     var notationOpenRequest by remember { mutableStateOf(0) }
+    var notationRequestedPage by remember { mutableStateOf(0) }
     var notationChoiceOpen by remember { mutableStateOf(false) }
     val toolbarTarget = (itemResult as? Result.Success)?.data?.target
     val toolbarVerses = when (toolbarTarget) {
@@ -1770,6 +1771,7 @@ private fun HymnDetailsScreen(
                         initialPage = notationPage,
                         onNotationChanged = onNotationChanged,
                         openRequest = notationOpenRequest,
+                        requestedPage = notationRequestedPage,
                         showInlineButton = false
                     )
 
@@ -2233,7 +2235,10 @@ private fun HymnDetailsScreen(
             androidx.compose.material3.TextButton(
                 enabled = notationCount > 0,
                 onClick = {
-                    if (notationCount == 1) notationOpenRequest++
+                    if (notationCount == 1) {
+                        notationRequestedPage = 0
+                        notationOpenRequest++
+                    }
                     else notationChoiceOpen = true
                 },
                 modifier = Modifier.align(Alignment.Center)
@@ -2247,7 +2252,7 @@ private fun HymnDetailsScreen(
                         text = { Text("النوتة ${index + 1}") },
                         onClick = {
                             notationChoiceOpen = false
-                            onNotationChanged(false, index)
+                            notationRequestedPage = index
                             notationOpenRequest++
                         }
                     )
@@ -2459,6 +2464,7 @@ private fun MelodyNotationSection(
     initialPage: Int,
     onNotationChanged: (Boolean, Int) -> Unit,
     openRequest: Int = 0,
+    requestedPage: Int = 0,
     showInlineButton: Boolean = true
 ) {
     val notationResult by produceState<Result<List<MediaAsset>>?>(
@@ -2472,7 +2478,7 @@ private fun MelodyNotationSection(
     var page by remember(melodyId) { mutableStateOf(initialPage) }
     LaunchedEffect(openRequest) {
         if (openRequest > 0) {
-            page = initialPage
+            page = requestedPage
             showNotation = true
         }
     }
