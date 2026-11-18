@@ -81,6 +81,9 @@ import org.syriacplatform.presentation.theme.SyriacTextStyles
 import org.syriacplatform.presentation.theme.LiturgicalAnnotatedText
 import org.syriacplatform.presentation.theme.LiturgicalColors
 import org.syriacplatform.presentation.theme.LiturgicalFontFamilies
+import org.syriacplatform.presentation.theme.LiturgicalTextStyles
+import org.syriacplatform.presentation.theme.LiturgicalLanguage
+import org.syriacplatform.presentation.theme.LiturgicalNoteText
 import kotlinx.coroutines.launch
 
 
@@ -2118,9 +2121,12 @@ private fun HymnDetailsScreen(
                                 val note = (occurrenceNoteResult as? Result.Success)?.data?.text
                                 if (!note.isNullOrBlank()) {
                                     Text(
-                                        text = note,
+                                        text = LiturgicalNoteText.annotated(note),
                                         modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                                        style = MaterialTheme.typography.bodyMedium,
+                                        style = LiturgicalTextStyles.note(
+                                            MaterialTheme.typography.bodyMedium,
+                                            LiturgicalLanguage.Arabic
+                                        ),
                                         textAlign = TextAlign.Right
                                     )
                                 }
