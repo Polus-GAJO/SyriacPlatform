@@ -1927,7 +1927,7 @@ private fun HymnDetailsScreen(
                                                     selectedRecording?.id ==
                                                     recording.id
                                                 ) {
-                                                    "[Selected] $performerName"
+                                                    "✓ $performerName"
                                                 } else {
                                                     performerName
                                                 }
@@ -1980,17 +1980,6 @@ private fun HymnDetailsScreen(
                         }
                     }
 
-                    Text(
-                        text = "Performance recordings",
-                        modifier =
-                            Modifier.padding(
-                                top = 12.dp,
-                                bottom = 8.dp
-                            ),
-                        style =
-                            MaterialTheme.typography.titleSmall
-                    )
-
                     val selectedPerformance =
                         when (
                             val performances =
@@ -2023,7 +2012,12 @@ private fun HymnDetailsScreen(
                                     Text(
                                         "No performance recording available"
                                     )
-                                } else {
+                                } else if (available.size > 1) {
+                                    Text(
+                                        text = "تسجيلات الترتيلة",
+                                        modifier = Modifier.padding(top = 12.dp, bottom = 8.dp),
+                                        style = MaterialTheme.typography.titleSmall
+                                    )
                                     available.forEach { resolved ->
                                         val performerName =
                                             resolved.mediaAsset.performer
