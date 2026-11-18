@@ -1560,7 +1560,7 @@ private fun HymnDetailsScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.primaryContainer)
-            .padding(start = 24.dp, end = 24.dp, top = 80.dp, bottom = 8.dp)
+            .padding(start = 24.dp, end = 24.dp, top = 50.dp, bottom = 8.dp)
     ) {
         when (val result = itemResult) {
             null -> Text("Loading...")
@@ -1744,7 +1744,7 @@ private fun HymnDetailsScreen(
                                 Text(
                                     text =
                                         if (selectedMelodyId == melody.id) {
-                                            "[Selected] ${melody.name}"
+                                            "✓ ${melody.name}"
                                         } else {
                                             melody.name
                                         },
@@ -1754,17 +1754,13 @@ private fun HymnDetailsScreen(
                         }
                     }
 
-                    Text(
-                        text =
-                            selectedMelody?.name
-                                ?: if (target.melodyCandidates.isNotEmpty()) {
-                                    "Select a melody"
-                                } else {
-                                    "Melody unresolved"
-                                },
-                        modifier = Modifier.padding(top = 6.dp, bottom = 12.dp),
-                        style = MaterialTheme.typography.titleMedium
-                    )
+                    selectedMelody?.name?.takeIf { it.isNotBlank() }?.let { melodyName ->
+                        Text(
+                            text = melodyName,
+                            modifier = Modifier.padding(top = 6.dp, bottom = 12.dp),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
 
                     MelodyNotationSection(
                         platform = platform,
@@ -1793,11 +1789,7 @@ private fun HymnDetailsScreen(
                     }
 
                     when (val recordings = recordingsResult) {
-                        null -> {
-                            if (selectedMelody != null) {
-                                Text("Loading recordings...")
-                            }
-                        }
+                        null -> Unit
 
                         is Result.Failure -> {
                             Text(
@@ -2064,12 +2056,7 @@ private fun HymnDetailsScreen(
                                 null
                             }
 
-                            null -> {
-                                Text(
-                                    "Loading performance recordings..."
-                                )
-                                null
-                            }
+                            null -> null
                         }
 
                     performancePlaybackMessage?.let { message ->
@@ -2099,7 +2086,8 @@ private fun HymnDetailsScreen(
                                     Text(
                                         text = note,
                                         modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                                        style = MaterialTheme.typography.bodyMedium
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        textAlign = TextAlign.Right
                                     )
                                 }
                             }
