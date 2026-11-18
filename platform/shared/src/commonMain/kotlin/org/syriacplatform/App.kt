@@ -1502,28 +1502,147 @@ private fun HymnDetailsScreen(
                     .map { it.language }.distinct().sorted()
 
                 if (target is ResolvedLiturgicalItemTarget.NonMelodicText) {
-                    Text(
-                        text = result.data.item.locationTitle
-                            ?.takeIf { it.isNotBlank() }
-                            ?: "Text",
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                        style = SyriacTextStyles.body(),
-                        textAlign = TextAlign.Center
-                    )
+                    val availablePerformances =
+                        (performanceMediaResult as? Result.Success)?.data.orEmpty()
+                    val selectedPerformance =
+                        availablePerformances.firstOrNull {
+                            it.performance.id == selectedPerformanceId
+                        } ?: availablePerformances.firstOrNull()
+                    val fullTextRecording = selectedPerformance?.mediaAsset
+
+                    androidx.compose.runtime.CompositionLocalProvider(
+                        androidx.compose.ui.platform.LocalLayoutDirection provides
+                            androidx.compose.ui.unit.LayoutDirection.Ltr
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = result.data.item.locationTitle
+                                    ?.takeIf { it.isNotBlank() } ?: "Text",
+                                modifier = Modifier.weight(1f),
+                                style = SyriacTextStyles.body(),
+                                textAlign = TextAlign.Center
+                            )
+                            androidx.compose.material3.IconButton(
+                                enabled = audioService != null && fullTextRecording != null,
+                                onClick = {
+                                    val recording = fullTextRecording
+                                    if (recording != null) {
+                                        val isFullRecording =
+                                            activeTextInterval == null &&
+                                                playbackState.mediaAssetId == recording.id
+                                        when {
+                                            isFullRecording &&
+                                                playbackState.status == PlaybackStatus.Playing ->
+                                                audioService?.pause()
+                                            isFullRecording &&
+                                                (playbackState.status == PlaybackStatus.Paused ||
+                                                    playbackState.status == PlaybackStatus.Ready) ->
+                                                audioService?.play()
+                                            else -> {
+                                                platform.performanceTextPlayback?.clearActiveInterval()
+                                                pendingAutoPlayId = recording.id
+                                                if (audioService?.load(recording) is Result.Failure) {
+                                                    pendingAutoPlayId = null
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ) {
+                                Text(
+                                    if (fullTextRecording != null &&
+                                        activeTextInterval == null &&
+                                        playbackState.mediaAssetId == fullTextRecording.id &&
+                                        playbackState.status == PlaybackStatus.Playing
+                                    ) "Ⅱ" else "▶",
+                                    style = MaterialTheme.typography.titleLarge
+                                )
+                            }
+                        }
+                    }
+                    if (availablePerformances.size > 1) {
+                        androidx.compose.material3.TextButton(
+                            onClick = {
+                                performanceRecordingsExpanded = !performanceRecordingsExpanded
+                            }
+                        ) { Text("التسجيلات المتاحة") }
+                        if (performanceRecordingsExpanded) {
+                            availablePerformances.forEach { resolved ->
+                                Button(
+                                    enabled = audioService != null,
+                                    onClick = {
+                                        if (selectedPerformanceId != resolved.performance.id) {
+                                            pendingAutoPlayId = null
+                                            audioService?.stop()
+                                            platform.performanceTextPlayback?.clearActiveInterval()
+                                            selectedPerformanceId = resolved.performance.id
+                                            performancePlaybackMessage = null
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)
+                                ) {
+                                    val performer = resolved.mediaAsset.performer
+                                        ?.takeIf { it.isNotBlank() } ?: "تسجيل النص"
+                                    Text(
+                                        if (selectedPerformance?.performance?.id ==
+                                            resolved.performance.id
+                                        ) "✓ $performer" else performer
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    if (performanceMediaResult is Result.Failure) {
+                        Text("تعذّر تحميل تسجيلات النص")
+                    }
+                    performancePlaybackMessage?.let { message ->
+                        Text(text = message, modifier = Modifier.padding(bottom = 8.dp))
+                    }
                     LazyColumn(
                         modifier = Modifier.fillMaxWidth().weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(bottom = 92.dp)
                     ) {
                         itemsIndexed(target.verses) { index, verse ->
-                            VerseTextWithTranslation(
-                                verseNumber = index + 1,
-                                petgomo = verse.petgomo?.syriac,
-                                syriacText = verse.text.syriac,
-                                petgomoTranslations = verse.petgomo?.translations.orEmpty(),
-                                textTranslations = verse.text.translations,
-                                language = selectedTranslationLanguage,
-                                onShowTranslation = { shownTranslation = it }
-                            )
+                            Surface(
+                                shape = RoundedCornerShape(4.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                modifier = Modifier.fillMaxWidth().clickable(
+                                    enabled = selectedPerformance != null &&
+                                        platform.performanceTextPlayback != null,
+                                    onClick = {
+                                        val performance = selectedPerformance
+                                        val playback = platform.performanceTextPlayback
+                                        if (performance != null && playback != null) {
+                                            performancePlaybackMessage = null
+                                            coroutineScope.launch {
+                                                when (val playResult = playback.play(
+                                                    performanceId = performance.performance.id,
+                                                    textOccurrenceId = verse.id
+                                                )) {
+                                                    is Result.Success -> performancePlaybackMessage = null
+                                                    is Result.Failure -> performancePlaybackMessage =
+                                                        playResult.error.message
+                                                            ?: "Performance text playback failed"
+                                                }
+                                            }
+                                        }
+                                    }
+                                )
+                            ) {
+                                VerseTextWithTranslation(
+                                    verseNumber = index + 1,
+                                    petgomo = verse.petgomo?.syriac,
+                                    syriacText = verse.text.syriac,
+                                    petgomoTranslations = verse.petgomo?.translations.orEmpty(),
+                                    textTranslations = verse.text.translations,
+                                    language = selectedTranslationLanguage,
+                                    onShowTranslation = { shownTranslation = it }
+                                )
+                            }
                         }
                     }
                 } else if (target is ResolvedLiturgicalItemTarget.Qolo) {
@@ -2141,12 +2260,16 @@ private fun HymnDetailsScreen(
         playbackState.status != PlaybackStatus.Idle &&
         playbackState.status != PlaybackStatus.Error
     if (audioPlayerVisible && audioService != null) {
-        val segmentNumber = (
-            (itemResult as? Result.Success)?.data?.target
-                as? ResolvedLiturgicalItemTarget.Qolo
-        )?.verses?.indexOfFirst { verse ->
+        val segmentVerses = when (
+            val target = (itemResult as? Result.Success)?.data?.target
+        ) {
+            is ResolvedLiturgicalItemTarget.Qolo -> target.verses
+            is ResolvedLiturgicalItemTarget.NonMelodicText -> target.verses
+            else -> emptyList()
+        }
+        val segmentNumber = segmentVerses.indexOfFirst { verse ->
             verse.id == activeTextInterval?.textOccurrenceId
-        }?.takeIf { it >= 0 }?.plus(1)
+        }.takeIf { it >= 0 }?.plus(1)
         CompactAudioPlayer(
             title = if (activeTextInterval?.mediaAssetId == playbackState.mediaAssetId) {
                 segmentNumber?.let { "المقطع $it" } ?: "المقطع"
