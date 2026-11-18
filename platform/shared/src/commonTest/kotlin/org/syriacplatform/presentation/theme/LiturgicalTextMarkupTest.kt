@@ -20,7 +20,7 @@ class LiturgicalTextMarkupTest {
     @Test
     fun syriacFullStopIsAlwaysRed() {
         assertEquals(
-            ParsedLiturgicalText("ܫܠܡܐ܀", listOf(LiturgicalColorSpan(5, 6))),
+            ParsedLiturgicalText("ܫܠܡܐ܀", listOf(LiturgicalColorSpan(4, 5))),
             LiturgicalTextMarkup.parse("ܫܠܡܐ܀")
         )
     }
