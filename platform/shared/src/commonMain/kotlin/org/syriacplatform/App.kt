@@ -1661,12 +1661,24 @@ private fun HymnDetailsScreen(
                             }
                             ?.mediaAsset
 
-                    androidx.compose.foundation.layout.Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    androidx.compose.runtime.CompositionLocalProvider(
+                        androidx.compose.ui.platform.LocalLayoutDirection provides
+                            androidx.compose.ui.unit.LayoutDirection.Ltr
                     ) {
+                    androidx.compose.foundation.layout.Box(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = target.qolo.name,
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .fillMaxWidth()
+                                .padding(horizontal = 52.dp),
+                            style = SyriacTextStyles.body(),
+                            textAlign = TextAlign.Center
+                        )
                         androidx.compose.material3.IconButton(
+                            modifier = Modifier.align(Alignment.CenterStart),
                             enabled = audioService != null && fullHymnRecording != null,
                             onClick = {
                                 val recording = fullHymnRecording
@@ -1702,12 +1714,7 @@ private fun HymnDetailsScreen(
                                 style = MaterialTheme.typography.titleLarge
                             )
                         }
-                        Text(
-                            text = target.qolo.name,
-                            modifier = Modifier.weight(1f),
-                            style = SyriacTextStyles.body(),
-                            textAlign = TextAlign.Right
-                        )
+                    }
                     }
 
                     if (
