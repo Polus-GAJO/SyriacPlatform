@@ -39,400 +39,33 @@ import org.syriacplatform.kernel.ServiceMetadata
 class PrayerPlaybackQueueBuilderTest {
 
     @Test
-    fun multipleMelodyCandidatesAreAllQueuedInOrder() =
-        runTest {
-            val melody10 =
-                melody(
-                    id = 10L,
-                    qoloId = 100L
-                )
-            val melody11 =
-                melody(
-                    id = 11L,
-                    qoloId = 100L
-                )
-            val melody12 =
-                melody(
-                    id = 12L,
-                    qoloId = 100L
-                )
-
-            val content =
-                FakeContentService(
-                    recordings =
-                        mapOf(
-                            melody10.id to
-                                listOf(
-                                    recording(1000L)
-                                ),
-                            melody11.id to
-                                listOf(
-                                    recording(1100L)
-                                ),
-                            melody12.id to
-                                listOf(
-                                    recording(1200L)
-                                )
-                        )
-                )
-
-            val result =
-                PrayerPlaybackQueueBuilder(
-                    content
-                ).build(
-                    sequence(
-                        qoloItem(
-                            itemId = 1L,
-                            qoloId = 100L,
-                            effectiveMelody = null,
-                            candidates =
-                                listOf(
-                                    melody10,
-                                    melody11,
-                                    melody12
-                                )
-                        )
-                    )
-                )
-
-            val entries =
-                assertIs<
-                    Result.Success<
-                        List<PlaybackQueueEntry>
-                    >
-                >(result).data
-
-            assertEquals(
-                listOf(
-                    MelodyId(10L),
-                    MelodyId(11L),
-                    MelodyId(12L)
-                ),
-                entries.map {
-                    it.melodyId
-                }
+    fun firstContextualRecordingPerItemInPrayerOrder() = runTest {
+        val content = FakeContentService(
+            performances = mapOf(
+                LiturgicalItemId(1L) to listOf(recording(101L), recording(102L)),
+                LiturgicalItemId(2L) to listOf(recording(201L))
             )
-
-            assertEquals(
-                listOf(
-                    MediaAssetId(1000L),
-                    MediaAssetId(1100L),
-                    MediaAssetId(1200L)
-                ),
-                entries.map {
-                    it.mediaAsset.id
-                }
+        )
+        val result = PrayerPlaybackQueueBuilder(content).build(
+            sequence(
+                qoloItem(1L, 100L, null),
+                qoloItem(2L, 200L, null),
+                qoloItem(3L, 300L, null)
             )
-        }
+        )
+        val entries = assertIs<Result.Success<List<PlaybackQueueEntry>>>(result).data
+        assertEquals(listOf(MediaAssetId(101L), MediaAssetId(201L)), entries.map { it.mediaAsset.id })
+        assertEquals(listOf(LiturgicalItemId(1L), LiturgicalItemId(2L)), entries.map { it.liturgicalItemId })
+    }
 
     @Test
-    fun effectiveMelodyIsQueuedWithoutAlsoQueuingCandidates() =
-        runTest {
-            val effective =
-                melody(
-                    id = 20L,
-                    qoloId = 200L
-                )
-            val alternate =
-                melody(
-                    id = 21L,
-                    qoloId = 200L
-                )
-
-            val content =
-                FakeContentService(
-                    recordings =
-                        mapOf(
-                            effective.id to
-                                listOf(
-                                    recording(2000L)
-                                ),
-                            alternate.id to
-                                listOf(
-                                    recording(2100L)
-                                )
-                        )
-                )
-
-            val result =
-                PrayerPlaybackQueueBuilder(
-                    content
-                ).build(
-                    sequence(
-                        qoloItem(
-                            itemId = 2L,
-                            qoloId = 200L,
-                            effectiveMelody =
-                                effective,
-                            candidates =
-                                listOf(
-                                    alternate
-                                )
-                        )
-                    )
-                )
-
-            val entries =
-                assertIs<
-                    Result.Success<
-                        List<PlaybackQueueEntry>
-                    >
-                >(result).data
-
-            assertEquals(
-                listOf(
-                    MelodyId(20L)
-                ),
-                entries.map {
-                    it.melodyId
-                }
-            )
-        }
-
-    @Test
-    fun preferredRecordingIsUsedButOnlyOneRecordingIsQueued() =
-        runTest {
-            val melody =
-                melody(
-                    id = 30L,
-                    qoloId = 300L
-                )
-
-            val content =
-                FakeContentService(
-                    recordings =
-                        mapOf(
-                            melody.id to
-                                listOf(
-                                    recording(3000L),
-                                    recording(3001L)
-                                )
-                        )
-                )
-
-            val result =
-                PrayerPlaybackQueueBuilder(
-                    content
-                ).build(
-                    sequence(
-                        qoloItem(
-                            itemId = 3L,
-                            qoloId = 300L,
-                            effectiveMelody =
-                                melody
-                        )
-                    ),
-                    preferredRecordingIds =
-                        mapOf(
-                            melody.id to
-                                MediaAssetId(3001L)
-                        )
-                )
-
-            val entries =
-                assertIs<
-                    Result.Success<
-                        List<PlaybackQueueEntry>
-                    >
-                >(result).data
-
-            assertEquals(
-                1,
-                entries.size
-            )
-            assertEquals(
-                MediaAssetId(3001L),
-                entries.single()
-                    .mediaAsset.id
-            )
-        }
-
-    @Test
-    fun firstRecordingIsUsedWhenNoPreferenceExists() =
-        runTest {
-            val melody =
-                melody(
-                    id = 40L,
-                    qoloId = 400L
-                )
-
-            val content =
-                FakeContentService(
-                    recordings =
-                        mapOf(
-                            melody.id to
-                                listOf(
-                                    recording(4000L),
-                                    recording(4001L)
-                                )
-                        )
-                )
-
-            val result =
-                PrayerPlaybackQueueBuilder(
-                    content
-                ).build(
-                    sequence(
-                        qoloItem(
-                            itemId = 4L,
-                            qoloId = 400L,
-                            effectiveMelody =
-                                melody
-                        )
-                    )
-                )
-
-            val entries =
-                assertIs<
-                    Result.Success<
-                        List<PlaybackQueueEntry>
-                    >
-                >(result).data
-
-            assertEquals(
-                1,
-                entries.size
-            )
-            assertEquals(
-                MediaAssetId(4000L),
-                entries.single()
-                    .mediaAsset.id
-            )
-        }
-
-    @Test
-    fun invalidPreferenceFallsBackToFirstCanonicalRecording() =
-        runTest {
-            val melody =
-                melody(
-                    id = 50L,
-                    qoloId = 500L
-                )
-
-            val content =
-                FakeContentService(
-                    recordings =
-                        mapOf(
-                            melody.id to
-                                listOf(
-                                    recording(5000L),
-                                    recording(5001L)
-                                )
-                        )
-                )
-
-            val result =
-                PrayerPlaybackQueueBuilder(
-                    content
-                ).build(
-                    sequence(
-                        qoloItem(
-                            itemId = 5L,
-                            qoloId = 500L,
-                            effectiveMelody =
-                                melody
-                        )
-                    ),
-                    preferredRecordingIds =
-                        mapOf(
-                            melody.id to
-                                MediaAssetId(9999L)
-                        )
-                )
-
-            val entries =
-                assertIs<
-                    Result.Success<
-                        List<PlaybackQueueEntry>
-                    >
-                >(result).data
-
-            assertEquals(
-                MediaAssetId(5000L),
-                entries.single()
-                    .mediaAsset.id
-            )
-        }
-
-    @Test
-    fun melodyWithoutRecordingIsSkippedAndPrayerOrderIsPreserved() =
-        runTest {
-            val first =
-                melody(
-                    id = 60L,
-                    qoloId = 600L
-                )
-            val silent =
-                melody(
-                    id = 61L,
-                    qoloId = 610L
-                )
-            val last =
-                melody(
-                    id = 62L,
-                    qoloId = 620L
-                )
-
-            val content =
-                FakeContentService(
-                    recordings =
-                        mapOf(
-                            first.id to
-                                listOf(
-                                    recording(6000L)
-                                ),
-                            silent.id to
-                                emptyList(),
-                            last.id to
-                                listOf(
-                                    recording(6200L)
-                                )
-                        )
-                )
-
-            val result =
-                PrayerPlaybackQueueBuilder(
-                    content
-                ).build(
-                    sequence(
-                        qoloItem(
-                            itemId = 6L,
-                            qoloId = 600L,
-                            effectiveMelody =
-                                first
-                        ),
-                        qoloItem(
-                            itemId = 7L,
-                            qoloId = 610L,
-                            effectiveMelody =
-                                silent
-                        ),
-                        qoloItem(
-                            itemId = 8L,
-                            qoloId = 620L,
-                            effectiveMelody =
-                                last
-                        )
-                    )
-                )
-
-            val entries =
-                assertIs<
-                    Result.Success<
-                        List<PlaybackQueueEntry>
-                    >
-                >(result).data
-
-            assertEquals(
-                listOf(
-                    LiturgicalItemId(6L),
-                    LiturgicalItemId(8L)
-                ),
-                entries.map {
-                    it.liturgicalItemId
-                }
-            )
-        }
+    fun missingContextualRecordingsProduceEmptyQueue() = runTest {
+        val content = FakeContentService(performances = emptyMap())
+        val result = PrayerPlaybackQueueBuilder(content).build(
+            sequence(qoloItem(1L, 100L, null))
+        )
+        assertEquals(emptyList(), assertIs<Result.Success<List<PlaybackQueueEntry>>>(result).data)
+    }
 
     private fun sequence(
         vararg items: ResolvedLiturgicalItem
@@ -535,8 +168,7 @@ class PrayerPlaybackQueueBuilderTest {
 }
 
 private class FakeContentService(
-    private val recordings:
-        Map<MelodyId, List<MediaAsset>>
+    private val performances: Map<LiturgicalItemId, List<MediaAsset>>
 ) : ContentService {
 
     override val metadata =
@@ -602,7 +234,20 @@ private class FakeContentService(
     override suspend fun loadPerformanceMedia(
         liturgicalItemId: LiturgicalItemId
     ): Result<List<ResolvedPerformanceMedia>> =
-        Result.Success(emptyList())
+        Result.Success(
+            performances[liturgicalItemId].orEmpty().mapIndexed { index, asset ->
+                ResolvedPerformanceMedia(
+                    performance = org.syriacplatform.content.models.PerformanceMedia(
+                        id = PerformanceMediaId(asset.id.value),
+                        liturgicalItemId = liturgicalItemId,
+                        mediaAssetId = asset.id,
+                        role = "PERFORMANCE",
+                        sort = index.toLong()
+                    ),
+                    mediaAsset = asset
+                )
+            }
+        )
 
     override suspend fun loadPerformanceTextOccurrenceIntervals(
         performanceId: PerformanceMediaId,
