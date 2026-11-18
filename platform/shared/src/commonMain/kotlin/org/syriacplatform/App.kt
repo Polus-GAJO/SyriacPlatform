@@ -614,11 +614,14 @@ private fun OccasionDetailsScreen(
                         if (!noteText.isNullOrBlank()) {
                             item {
                                 Text(
-                                    text = noteText,
+                                    text = LiturgicalNoteText.annotated(noteText),
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(bottom = 12.dp),
-                                    style = MaterialTheme.typography.bodyMedium
+                                    style = LiturgicalTextStyles.note(
+                                        MaterialTheme.typography.bodyMedium,
+                                        LiturgicalLanguage.Arabic
+                                    )
                                 )
                             }
                         }
