@@ -1526,6 +1526,8 @@ private fun HymnDetailsScreen(
     var notationOpenRequest by remember { mutableStateOf(0) }
     var notationRequestedPage by remember { mutableStateOf(0) }
     var notationChoiceOpen by remember { mutableStateOf(false) }
+    var melodyRecordingsExpanded by remember(liturgicalItemId) { mutableStateOf(false) }
+    var performanceRecordingsExpanded by remember(liturgicalItemId) { mutableStateOf(false) }
     val toolbarTarget = (itemResult as? Result.Success)?.data?.target
     val toolbarVerses = when (toolbarTarget) {
         is ResolvedLiturgicalItemTarget.Qolo -> toolbarTarget.verses
@@ -1855,26 +1857,17 @@ private fun HymnDetailsScreen(
                                 }
                             }
 
-                            if (availableRecordings.size > 1) {
-                                Text(
-                                    text = "Recordings",
-                                    modifier =
-                                        Modifier.padding(
-                                            bottom = 8.dp
-                                        ),
-                                    style =
-                                        MaterialTheme.typography.titleSmall
-                                )
-
-                                availableRecordings.forEach {
+                            if (availableRecordings.isNotEmpty()) {
+                                androidx.compose.material3.TextButton(
+                                    onClick = { melodyRecordingsExpanded = !melodyRecordingsExpanded }
+                                ) { Text("التسجيلات المتاحة") }
+                                if (melodyRecordingsExpanded) availableRecordings.forEach {
                                         recording ->
 
                                     val performerName =
                                         recording.performer
-                                            ?.takeIf {
-                                                it.isNotBlank()
-                                            }
-                                            ?: "Recording ${recording.id.value}"
+                                            ?.takeIf { it.isNotBlank() }
+                                            ?: "تسجيل لحن"
 
                                     Button(
                                         enabled =
@@ -1965,8 +1958,6 @@ private fun HymnDetailsScreen(
                                         ) "Pause" else "Play recording"
                                     )
                                 }
-                            } else {
-                                Text("No recording available")
                             }
                         }
                     }
@@ -1999,24 +1990,19 @@ private fun HymnDetailsScreen(
                                     }
                                 }
 
-                                if (available.isEmpty()) {
-                                    Text(
-                                        "No performance recording available"
-                                    )
-                                } else if (available.size > 1) {
-                                    Text(
-                                        text = "تسجيلات الترتيلة",
-                                        modifier = Modifier.padding(top = 12.dp, bottom = 8.dp),
-                                        style = MaterialTheme.typography.titleSmall
-                                    )
-                                    available.forEach { resolved ->
+                                if (available.size > 1) {
+                                    androidx.compose.material3.TextButton(
+                                        onClick = {
+                                            performanceRecordingsExpanded = !performanceRecordingsExpanded
+                                        }
+                                    ) { Text("تسجيلات الترتيلة المتاحة") }
+                                    if (performanceRecordingsExpanded) available.forEach { resolved ->
                                         val performerName =
                                             resolved.mediaAsset.performer
                                                 ?.takeIf {
                                                     it.isNotBlank()
                                                 }
-                                                ?: "Performance " +
-                                                    resolved.performance.id.value
+                                                ?: "تسجيل ترتيلة"
 
                                         Button(
                                             enabled =
@@ -2046,7 +2032,7 @@ private fun HymnDetailsScreen(
                                                     selected?.performance?.id ==
                                                     resolved.performance.id
                                                 ) {
-                                                    "[Selected] $performerName"
+                                                    "✓ $performerName"
                                                 } else {
                                                     performerName
                                                 }
