@@ -4,6 +4,8 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertSame
+import org.syriacplatform.common.types.ErrorCode
 import org.syriacplatform.common.result.Result
 import org.syriacplatform.common.types.QoloId
 
@@ -86,6 +88,31 @@ class PlatformKernelTest {
             1,
             service.shutdownCount
         )
+    }
+
+    @Test
+    fun duplicateRegistrationIsRejectedAndOriginalServiceRemainsRegistered() {
+        val kernel = PlatformKernel()
+        val original = RecordingPlatformService()
+        val replacement = RecordingPlatformService()
+
+        assertIs<Result.Success<*>>(
+            kernel.registerService(RecordingPlatformService::class, original)
+        )
+
+        val duplicate = assertIs<Result.Failure>(
+            kernel.registerService(RecordingPlatformService::class, replacement)
+        )
+        assertEquals(ErrorCode.INVALID_STATE, duplicate.error.code)
+
+        val resolved = assertIs<Result.Success<*>>(
+            kernel.resolveService(RecordingPlatformService::class)
+        )
+        assertSame(original, resolved.data)
+
+        kernel.initialize()
+        assertEquals(RuntimeState.Ready, original.runtimeState)
+        assertEquals(RuntimeState.NotInitialized, replacement.runtimeState)
     }
 
     private class RecordingPlatformService :
