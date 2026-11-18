@@ -53,7 +53,7 @@ class PlatformKernel(
                 if (firstFailure == null) {
                     firstFailure = failure
                 } else {
-                    firstFailure?.addSuppressed(failure)
+                    firstFailure.addSuppressed(failure)
                 }
             }
         }
