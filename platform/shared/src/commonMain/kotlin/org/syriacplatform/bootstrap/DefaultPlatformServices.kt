@@ -8,6 +8,8 @@ import org.syriacplatform.content.contracts.ContentService
 import org.syriacplatform.content.services.DefaultContentService
 import org.syriacplatform.navigation.contracts.NavigationService
 import org.syriacplatform.navigation.services.DefaultNavigationService
+import org.syriacplatform.user.contracts.PreferencesService
+import org.syriacplatform.user.services.DefaultPreferencesService
 
 /**
  * ينشئ خدمات المنصة الافتراضية باستعمال
@@ -44,9 +46,13 @@ object DefaultPlatformServices {
                 )
             }
 
+        val preferencesService: PreferencesService =
+            DefaultPreferencesService(dependencies.userPreferencesStore)
+
         return PlatformServices(
             content = contentService,
             navigation = navigationService,
+            preferences = preferencesService,
             audio = audioService,
             performanceTextPlayback = performanceTextPlayback
         )
