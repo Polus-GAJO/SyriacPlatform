@@ -2357,9 +2357,13 @@ private fun VerseTextWithTranslation(
                     textAlign = TextAlign.Right
                 )
             }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                modifier = Modifier.padding(start = 5.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Text(
                     text = verseNumber.toString(),
+                    modifier = Modifier.padding(top = 10.dp),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -2387,7 +2391,7 @@ private fun VerseTranslationTrigger(
             text = if (language == "ar") "ع" else if (language == "en") "en" else language.orEmpty(),
             modifier = Modifier
                 .clickable { onShow(translation) }
-                .padding(start = 2.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+                .padding(start = 5.dp, end = 3.dp, top = 6.dp, bottom = 6.dp),
             style = MaterialTheme.typography.bodyMedium
         )
     }
