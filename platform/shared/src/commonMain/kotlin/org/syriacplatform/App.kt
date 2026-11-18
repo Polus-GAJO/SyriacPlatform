@@ -78,6 +78,8 @@ import org.syriacplatform.navigation.AppSessionState
 import org.syriacplatform.common.types.PrayerSequenceId
 import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.presentation.theme.SyriacTextStyles
+import org.syriacplatform.presentation.theme.LiturgicalAnnotatedText
+import org.syriacplatform.presentation.theme.LiturgicalColors
 import kotlinx.coroutines.launch
 
 
@@ -2401,16 +2403,18 @@ private fun VerseTextWithTranslation(
             Column(modifier = Modifier.weight(1f)) {
                 petgomo?.let {
                     Text(
-                        text = it,
+                        text = remember(it) { LiturgicalAnnotatedText.fromSource(it, allRed = true) },
                         modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
                         style = SyriacTextStyles.body(),
+                        color = LiturgicalColors.Red,
                         textAlign = TextAlign.Right
                     )
                 }
                 Text(
-                    text = syriacText,
+                    text = remember(syriacText) { LiturgicalAnnotatedText.fromSource(syriacText) },
                     modifier = Modifier.fillMaxWidth(),
                     style = SyriacTextStyles.body(),
+                    color = LiturgicalColors.Black,
                     textAlign = TextAlign.Right
                 )
             }
