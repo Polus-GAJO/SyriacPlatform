@@ -852,11 +852,11 @@ private fun PrayerDetailsScreen(
                                 androidx.compose.material3.TextButton(
                                     enabled = queueState.currentIndex != null,
                                     onClick = { queueController?.previous() }
-                                ) { Text("⏮") }
+                                ) { Text("⏭") }
                                 androidx.compose.material3.TextButton(
                                     enabled = queueState.currentIndex != null,
                                     onClick = { queueController?.next() }
-                                ) { Text("⏭") }
+                                ) { Text("⏮") }
                                 androidx.compose.material3.TextButton(
                                     onClick = {
                                         playAllMessage = null
