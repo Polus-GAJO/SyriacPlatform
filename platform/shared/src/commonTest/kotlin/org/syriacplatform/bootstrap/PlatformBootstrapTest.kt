@@ -9,6 +9,8 @@ import org.syriacplatform.common.types.RuntimeState
 import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.content.repository.FakeContentRepository
 import org.syriacplatform.navigation.AppDestination
+import org.syriacplatform.user.models.UserPreferences
+import org.syriacplatform.user.storage.InMemoryUserPreferencesStore
 
 class PlatformBootstrapTest {
 
@@ -72,6 +74,30 @@ class PlatformBootstrapTest {
             platform.navigation.state.value.currentDestination
         )
     }
+    @Test
+    fun preferencesServiceUsesInjectedStoreAndIsReady() = runTest {
+        val store = InMemoryUserPreferencesStore()
+        val platform = PlatformBootstrap.create(
+            dependencies = PlatformDependencies(
+                contentRepository = FakeContentRepository(),
+                userPreferencesStore = store
+            )
+        )
+
+        assertEquals(RuntimeState.Ready, platform.preferences.runtimeState)
+        val updated = UserPreferences(
+            interfaceLanguage = "en",
+            translationLanguage = "ar",
+            fontScale = 1.2f
+        )
+        platform.preferences.update(updated)
+        assertEquals(updated, store.preferences.value)
+        assertEquals(updated, platform.preferences.preferences.value)
+
+        platform.shutdown()
+        assertEquals(RuntimeState.NotInitialized, platform.preferences.runtimeState)
+    }
+
     @Test
     fun contentServiceLoadsAllQolos() = runTest {
         val platform = PlatformBootstrap.create(
