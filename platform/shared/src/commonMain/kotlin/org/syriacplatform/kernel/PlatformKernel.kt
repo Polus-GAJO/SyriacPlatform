@@ -21,15 +21,43 @@ class PlatformKernel(
     }
 
     fun initialize() {
+        val initialized = mutableListOf<PlatformService>()
         registry.forEachService { service ->
-            service.initialize()
+            try {
+                service.initialize()
+                initialized.add(service)
+            } catch (failure: Throwable) {
+                // The failing service may have acquired resources before throwing.
+                // Release it, then roll back already initialized services in reverse order.
+                val toClose = listOf(service) + initialized.asReversed()
+                toClose.forEach { initializedService ->
+                    try {
+                        initializedService.shutdown()
+                    } catch (cleanupFailure: Throwable) {
+                        failure.addSuppressed(cleanupFailure)
+                    }
+                }
+                throw failure
+            }
         }
     }
 
     fun shutdown() {
-        registry.forEachService { service ->
-            service.shutdown()
+        val registered = mutableListOf<PlatformService>()
+        registry.forEachService { registered.add(it) }
+        var firstFailure: Throwable? = null
+        registered.asReversed().forEach { service ->
+            try {
+                service.shutdown()
+            } catch (failure: Throwable) {
+                if (firstFailure == null) {
+                    firstFailure = failure
+                } else {
+                    firstFailure?.addSuppressed(failure)
+                }
+            }
         }
+        firstFailure?.let { throw it }
     }
 
     fun <T : PlatformService> resolveService(
