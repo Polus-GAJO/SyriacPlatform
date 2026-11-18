@@ -534,7 +534,7 @@ private fun OccasionDetailsScreen(
             .background(
                 MaterialTheme.colorScheme.primaryContainer
             )
-            .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 8.dp)
+            .padding(start = 24.dp, end = 24.dp, top = 60.dp, bottom = 8.dp)
     ) {
         when (
             val result =
@@ -1523,6 +1523,8 @@ private fun HymnDetailsScreen(
     }
 
     var translationMenuOpen by remember { mutableStateOf(false) }
+    var notationOpenRequest by remember { mutableStateOf(0) }
+    var notationChoiceOpen by remember { mutableStateOf(false) }
     val toolbarTarget = (itemResult as? Result.Success)?.data?.target
     val toolbarVerses = when (toolbarTarget) {
         is ResolvedLiturgicalItemTarget.Qolo -> toolbarTarget.verses
@@ -1530,6 +1532,20 @@ private fun HymnDetailsScreen(
         is ResolvedLiturgicalItemTarget.UnresolvedQolo -> toolbarTarget.verses
         else -> emptyList()
     }
+    val toolbarMelodyId = (toolbarTarget as? ResolvedLiturgicalItemTarget.Qolo)
+        ?.let { target ->
+            target.effectiveMelody?.id
+                ?: target.melodyCandidates.firstOrNull { it.id == selectedMelodyId }?.id
+                ?: target.melodyCandidates.singleOrNull()?.id
+        }
+    val toolbarNotations by produceState<Result<List<MediaAsset>>?>(
+        initialValue = null,
+        key1 = platform,
+        key2 = toolbarMelodyId
+    ) {
+        value = toolbarMelodyId?.let { platform.content.loadMelodyNotations(it) }
+    }
+    val notationCount = (toolbarNotations as? Result.Success)?.data?.size ?: 0
     val toolbarLanguages = toolbarVerses.flatMap { verse ->
         verse.petgomo?.translations.orEmpty() + verse.text.translations
     }.filter { it.content.isNotBlank() }.map { it.language }.distinct().sorted()
@@ -1752,7 +1768,9 @@ private fun HymnDetailsScreen(
                         melodyId = selectedMelody?.id,
                         initialOpen = notationOpen,
                         initialPage = notationPage,
-                        onNotationChanged = onNotationChanged
+                        onNotationChanged = onNotationChanged,
+                        openRequest = notationOpenRequest,
+                        showInlineButton = false
                     )
 
                     val recordingsResult by produceState<Result<List<MediaAsset>>?>(
@@ -2213,6 +2231,29 @@ private fun HymnDetailsScreen(
                 }
             }
             androidx.compose.material3.TextButton(
+                enabled = notationCount > 0,
+                onClick = {
+                    if (notationCount == 1) notationOpenRequest++
+                    else notationChoiceOpen = true
+                },
+                modifier = Modifier.align(Alignment.Center)
+            ) { Text("النوتة") }
+            androidx.compose.material3.DropdownMenu(
+                expanded = notationChoiceOpen,
+                onDismissRequest = { notationChoiceOpen = false }
+            ) {
+                repeat(notationCount) { index ->
+                    androidx.compose.material3.DropdownMenuItem(
+                        text = { Text("النوتة ${index + 1}") },
+                        onClick = {
+                            notationChoiceOpen = false
+                            onNotationChanged(false, index)
+                            notationOpenRequest++
+                        }
+                    )
+                }
+            }
+            androidx.compose.material3.TextButton(
                 onClick = { audioService?.stop(); onBack() },
                 modifier = Modifier.align(Alignment.CenterEnd)
             ) { Text("العودة") }
@@ -2416,7 +2457,9 @@ private fun MelodyNotationSection(
     melodyId: MelodyId?,
     initialOpen: Boolean,
     initialPage: Int,
-    onNotationChanged: (Boolean, Int) -> Unit
+    onNotationChanged: (Boolean, Int) -> Unit,
+    openRequest: Int = 0,
+    showInlineButton: Boolean = true
 ) {
     val notationResult by produceState<Result<List<MediaAsset>>?>(
         initialValue = null,
@@ -2427,6 +2470,12 @@ private fun MelodyNotationSection(
     }
     var showNotation by remember(melodyId) { mutableStateOf(initialOpen) }
     var page by remember(melodyId) { mutableStateOf(initialPage) }
+    LaunchedEffect(openRequest) {
+        if (openRequest > 0) {
+            page = initialPage
+            showNotation = true
+        }
+    }
     SideEffect { onNotationChanged(showNotation, page) }
 
     when (val result = notationResult) {
@@ -2435,11 +2484,13 @@ private fun MelodyNotationSection(
         is Result.Success -> {
             val assets = result.data
             if (assets.isNotEmpty()) {
-                Button(onClick = {
-                    page = 0
-                    showNotation = true
-                }) {
-                    Text("View notation (${assets.size})")
+                if (showInlineButton) {
+                    Button(onClick = {
+                        page = 0
+                        showNotation = true
+                    }) {
+                        Text("View notation (${assets.size})")
+                    }
                 }
                 if (showNotation) {
                     val asset = assets[page.coerceIn(0, assets.lastIndex)]
