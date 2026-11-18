@@ -1383,7 +1383,7 @@ private fun MissingQoloSelectionScreen(
     ) {
         Text(
             text =
-                "No Qolo was selected.",
+                "لم تُحدَّد ترتيلة لعرضها.",
             textAlign =
                 TextAlign.Center
         )
@@ -1563,10 +1563,10 @@ private fun HymnDetailsScreen(
             .padding(start = 24.dp, end = 24.dp, top = 50.dp, bottom = 8.dp)
     ) {
         when (val result = itemResult) {
-            null -> Text("Loading...")
+            null -> Text("جارٍ تحميل الترتيلة…")
 
             is Result.Failure -> {
-                Text(result.error.message ?: "Hymn loading failed")
+                Text("تعذّر تحميل الترتيلة")
             }
 
             is Result.Success -> {
@@ -1712,7 +1712,7 @@ private fun HymnDetailsScreen(
                         target.melodyCandidates.size > 1
                     ) {
                         Text(
-                            text = "Melodies",
+                            text = "الألحان المتاحة",
                             modifier =
                                 Modifier.padding(
                                     top = 8.dp,
@@ -1793,8 +1793,7 @@ private fun HymnDetailsScreen(
 
                         is Result.Failure -> {
                             Text(
-                                recordings.error.message
-                                    ?: "Recordings loading failed"
+                                "تعذّر تحميل تسجيلات اللحن"
                             )
                         }
 
@@ -2050,8 +2049,7 @@ private fun HymnDetailsScreen(
 
                             is Result.Failure -> {
                                 Text(
-                                    performances.error.message
-                                        ?: "Performance recordings loading failed"
+                                    "تعذّر تحميل تسجيلات الترتيلة"
                                 )
                                 null
                             }
@@ -2070,7 +2068,7 @@ private fun HymnDetailsScreen(
                     }
 
                     if (target.verses.isEmpty()) {
-                        Text("No verses available")
+                        Text("لا يوجد نص متاح لهذه الترتيلة")
                     } else {
                         LazyColumn(
                             modifier = Modifier
@@ -2173,7 +2171,7 @@ private fun HymnDetailsScreen(
                         }
                     }
                 } else {
-                    Text("Selected liturgical item is not a Qolo.")
+                    Text("تعذّر عرض هذه الترتيلة")
                 }
             }
         }
