@@ -32,4 +32,27 @@
     <string name="segment">Segment %1$d</string>
     <string name="whole_hymn">Complete hymn</string>
     <string name="segment_generic">Segment</string>
+    <string name="available_recordings">Available recordings</string>
+    <string name="text_recording">Text recording</string>
+    <string name="text_recordings_failed">Unable to load text recordings</string>
+    <string name="melodies_available">Available melodies</string>
+    <string name="melody_recordings_failed">Unable to load melody recordings</string>
+    <string name="melody_recording">Melody recording</string>
+    <string name="hymn_recordings_available">Available hymn recordings</string>
+    <string name="hymn_recording">Hymn recording</string>
+    <string name="hymn_recordings_failed">Unable to load hymn recordings</string>
+    <string name="hymn_text_unavailable">No text available for this hymn</string>
+    <string name="listen_melody">Listen to melody</string>
+    <string name="pause_melody">Pause melody</string>
+    <string name="notation_loading">Loading notation…</string>
+    <string name="notation_failed">Unable to load notation</string>
+    <string name="view_notation">View notation (%1$d)</string>
+    <string name="notation_progress">Notation %1$d / %2$d</string>
+    <string name="close">Close</string>
+    <string name="notation_image_loading">Loading notation image…</string>
+    <string name="notation_image_failed">Unable to display this notation image</string>
+    <string name="notation_page">Notation page %1$d</string>
+    <string name="previous">Previous</string>
+    <string name="reset_zoom">Reset zoom</string>
+    <string name="next">Next</string>
 </resources>
