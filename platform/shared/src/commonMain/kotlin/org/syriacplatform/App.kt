@@ -895,7 +895,7 @@ private fun PrayerDetailsScreen(
                                     onClick = { queueController?.previous() }
                                 ) { Text("⏭") }
                             } else {
-                                Button(
+                                TextButton(
                                     enabled = queueController != null,
                                     onClick = {
                                         playAllMessage = null
