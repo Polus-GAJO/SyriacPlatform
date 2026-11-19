@@ -21,4 +21,14 @@
     <string name="recording_progress">Recording %1$d of %2$d</string>
     <string name="liturgical_items_empty">No liturgical items available</string>
     <string name="prayer_not_selected">No prayer selected</string>
+    <string name="hymn_loading">Loading hymn…</string>
+    <string name="hymn_failed">Unable to load hymn</string>
+    <string name="hymn_unavailable">Unable to display this hymn</string>
+    <string name="translation">Translation</string>
+    <string name="hide_translation">Hide translation</string>
+    <string name="notation">Notation</string>
+    <string name="notation_number">Notation %1$d</string>
+    <string name="return_to_prayer">Back</string>
+    <string name="segment">Segment %1$d</string>
+    <string name="whole_hymn">Complete hymn</string>
 </resources>
