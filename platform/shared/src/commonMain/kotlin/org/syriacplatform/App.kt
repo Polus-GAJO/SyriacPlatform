@@ -71,6 +71,15 @@ import org.syriacplatform.resources.notation_page
 import org.syriacplatform.resources.previous
 import org.syriacplatform.resources.reset_zoom
 import org.syriacplatform.resources.next
+import org.syriacplatform.resources.qolo_unresolved
+import org.syriacplatform.resources.qolo_details
+import org.syriacplatform.resources.qolo_failed
+import org.syriacplatform.resources.poetic_meter
+import org.syriacplatform.resources.occasion_not_selected
+import org.syriacplatform.resources.qolo_not_selected
+import org.syriacplatform.resources.hymn_not_selected
+import org.syriacplatform.resources.performance_playback_failed
+import org.syriacplatform.resources.generic_text
 import org.syriacplatform.resources.whole_hymn
 import org.jetbrains.compose.resources.stringResource
 import org.syriacplatform.presentation.locale.LocalAppLocale
@@ -696,7 +705,7 @@ private fun OccasionDetailsScreen(
         ) {
             null -> {
                 Text(
-                    text = "Loading..."
+                    text = stringResource(Res.string.loading)
                 )
             }
 
@@ -1237,7 +1246,7 @@ private fun ResolvedLiturgicalItemView(
                 Text(
                     text = item.item.locationTitle
                         ?.takeIf { it.isNotBlank() }
-                        ?: "Text",
+                        ?: stringResource(Res.string.generic_text),
                     style = LiturgicalTextStyles.section(),
                     textAlign = TextAlign.Center
                 )
@@ -1255,7 +1264,7 @@ private fun ResolvedLiturgicalItemView(
                     Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Qolo unresolved",
+                    text = stringResource(Res.string.qolo_unresolved),
                     style =
                         MaterialTheme.typography.titleMedium,
                     textAlign =
@@ -1327,7 +1336,7 @@ private fun QoloDetailsScreen(
             Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Qolo Details",
+            text = stringResource(Res.string.qolo_details),
             style =
                 MaterialTheme.typography.headlineMedium
         )
@@ -1338,7 +1347,7 @@ private fun QoloDetailsScreen(
         ) {
             null -> {
                 Text(
-                    text = "Loading...",
+                    text = stringResource(Res.string.loading),
                     modifier =
                         Modifier.padding(
                             top = 24.dp
@@ -1350,7 +1359,7 @@ private fun QoloDetailsScreen(
                 Text(
                     text =
                         result.error.message
-                            ?: "Qolo loading failed",
+                            ?: stringResource(Res.string.qolo_failed),
                     modifier =
                         Modifier.padding(
                             top = 24.dp
@@ -1380,7 +1389,7 @@ private fun QoloDetailsScreen(
                         poeticMeter ->
                     Text(
                         text =
-                            "Poetic meter: $poeticMeter",
+                            stringResource(Res.string.poetic_meter, poeticMeter.toString()),
                         modifier =
                             Modifier.padding(
                                 top = 12.dp
@@ -1400,7 +1409,7 @@ private fun QoloDetailsScreen(
                 )
         ) {
             Text(
-                text = "Back"
+                text = stringResource(Res.string.back)
             )
         }
     }
@@ -1424,7 +1433,7 @@ private fun MissingOccasionSelectionScreen(
     ) {
         Text(
             text =
-                "No Occasion was selected.",
+                stringResource(Res.string.occasion_not_selected),
             textAlign =
                 TextAlign.Center
         )
@@ -1437,7 +1446,7 @@ private fun MissingOccasionSelectionScreen(
                 )
         ) {
             Text(
-                text = "Back"
+                text = stringResource(Res.string.back)
             )
         }
     }
@@ -1461,7 +1470,7 @@ private fun MissingQoloSelectionScreen(
     ) {
         Text(
             text =
-                "لم تُحدَّد ترتيلة لعرضها.",
+                stringResource(Res.string.qolo_not_selected),
             textAlign =
                 TextAlign.Center
         )
@@ -1474,7 +1483,7 @@ private fun MissingQoloSelectionScreen(
                 )
         ) {
             Text(
-                text = "Back"
+                text = stringResource(Res.string.back)
             )
         }
     }
@@ -1688,7 +1697,7 @@ private fun HymnDetailsScreen(
                         ) {
                             Text(
                                 text = result.data.item.locationTitle
-                                    ?.takeIf { it.isNotBlank() } ?: "Text",
+                                    ?.takeIf { it.isNotBlank() } ?: stringResource(Res.string.generic_text),
                                 modifier = Modifier.weight(1f),
                                 style = LiturgicalTextStyles.section(),
                                 textAlign = TextAlign.Center
@@ -1804,7 +1813,7 @@ private fun HymnDetailsScreen(
                                                     is Result.Success -> performancePlaybackMessage = null
                                                     is Result.Failure -> performancePlaybackMessage =
                                                         playResult.error.message
-                                                            ?: "Performance text playback failed"
+                                                            ?: stringResource(Res.string.performance_playback_failed)
                                                 }
                                             }
                                         }
@@ -2370,7 +2379,7 @@ private fun HymnDetailsScreen(
                                                             playResult
                                                                 .error
                                                                 .message
-                                                                ?: "Performance text playback failed"
+                                                                ?: stringResource(Res.string.performance_playback_failed)
                                                     }
                                                 }
                                             }
@@ -2717,7 +2726,7 @@ private fun MissingHymnSelectionScreen(
     ) {
         Text(
             text =
-                "No Hymn was selected.",
+                stringResource(Res.string.hymn_not_selected),
             textAlign =
                 TextAlign.Center
         )
@@ -2729,7 +2738,7 @@ private fun MissingHymnSelectionScreen(
                     top = 24.dp
                 )
         ) {
-            Text("Back")
+            Text(stringResource(Res.string.back))
         }
     }
 }
