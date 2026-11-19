@@ -45,6 +45,15 @@ object LiturgicalTextStyles {
         color = LiturgicalColors.Red
     )
 
+    /** Section headings in other languages retain their existing Material text size. */
+    @Composable
+    fun section(base: TextStyle, language: LiturgicalLanguage): TextStyle =
+        withLanguageFont(base, language).copy(
+            textDirection = if (language == LiturgicalLanguage.Arabic ||
+                language == LiturgicalLanguage.Syriac) TextDirection.Rtl else TextDirection.Ltr,
+            color = LiturgicalColors.Red
+        )
+
     /** Preserve each description's current Material typography and language until reviewed. */
     fun secondary(base: TextStyle): TextStyle = base.copy(color = LiturgicalColors.Black)
 
