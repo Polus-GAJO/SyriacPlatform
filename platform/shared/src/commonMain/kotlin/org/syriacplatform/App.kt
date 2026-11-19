@@ -587,7 +587,8 @@ private fun OccasionDetailsScreen(
                                 Modifier.padding(
                                     top = 8.dp,
                                     bottom = 16.dp
-                                )
+                                ),
+                            style = LiturgicalTextStyles.secondary(MaterialTheme.typography.bodyLarge)
                         )
                     }
 
@@ -842,7 +843,8 @@ private fun PrayerDetailsScreen(
                                 Modifier.padding(
                                     top = 8.dp,
                                     bottom = 16.dp
-                                )
+                                ),
+                            style = LiturgicalTextStyles.secondary(MaterialTheme.typography.bodyLarge)
                         )
                     }
 
@@ -1763,8 +1765,10 @@ private fun HymnDetailsScreen(
                                     top = 8.dp,
                                     bottom = 8.dp
                                 ),
-                            style =
-                                MaterialTheme.typography.titleSmall
+                            style = LiturgicalTextStyles.section(
+                                MaterialTheme.typography.titleSmall,
+                                LiturgicalLanguage.Arabic
+                            )
                         )
 
                         target.melodyCandidates.forEach { melody ->
