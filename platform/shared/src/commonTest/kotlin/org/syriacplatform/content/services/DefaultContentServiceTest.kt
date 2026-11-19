@@ -121,6 +121,60 @@ class DefaultContentServiceTest {
         }
 
     @Test
+    fun loadMissingOccasionPreservesRepositoryError() =
+        runTest {
+            val failure = assertIs<Result.Failure>(
+                service.loadOccasion(OccasionId(999))
+            )
+            assertEquals(
+                org.syriacplatform.common.types.ErrorCode.CONTENT_NOT_FOUND,
+                failure.error.code
+            )
+        }
+
+    @Test
+    fun loadMissingMelodyRecordingsPreservesRepositoryError() =
+        runTest {
+            val failure = assertIs<Result.Failure>(
+                service.loadMelodyRecordings(MelodyId(999L))
+            )
+            assertEquals(
+                org.syriacplatform.common.types.ErrorCode.CONTENT_NOT_FOUND,
+                failure.error.code
+            )
+        }
+
+    @Test
+    fun loadMelodyNotationsReturnsRepositoryResult() =
+        runTest {
+            val success = assertIs<Result.Success<List<org.syriacplatform.content.models.MediaAsset>>>(
+                service.loadMelodyNotations(MelodyId(1067L))
+            )
+            assertEquals(emptyList(), success.data)
+        }
+
+    @Test
+    fun loadPerformanceMediaReturnsRepositoryResult() =
+        runTest {
+            val success = assertIs<Result.Success<List<org.syriacplatform.content.runtime.ResolvedPerformanceMedia>>>(
+                service.loadPerformanceMedia(org.syriacplatform.common.types.LiturgicalItemId(1L))
+            )
+            assertEquals(emptyList(), success.data)
+        }
+
+    @Test
+    fun loadPerformanceTextOccurrenceIntervalsReturnsRepositoryResult() =
+        runTest {
+            val success = assertIs<Result.Success<List<org.syriacplatform.content.runtime.ResolvedPerformanceTextOccurrenceInterval>>>(
+                service.loadPerformanceTextOccurrenceIntervals(
+                    org.syriacplatform.common.types.PerformanceMediaId(1L),
+                    org.syriacplatform.common.types.TextOccurrenceId(1L)
+                )
+            )
+            assertEquals(emptyList(), success.data)
+        }
+
+    @Test
     fun loadMelodyRecordingsPreservesAllRecordingsAndPerformers() =
         runTest {
             val result =
