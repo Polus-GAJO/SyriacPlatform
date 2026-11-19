@@ -430,6 +430,7 @@ class SchemaV1PackageWriter {
                     put("id", item.id)
                     put("type", "qolo")
                     item.locationTitle?.let { put("locationTitle", it) }
+                    item.qintoTitle?.let { put("qintoTitle", it) }
                     item.noteId?.let { put("noteId", it) }
                     put("targetId", item.qoloId)
 
