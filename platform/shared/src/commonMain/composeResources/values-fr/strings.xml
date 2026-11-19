@@ -21,4 +21,14 @@
     <string name="recording_progress">Enregistrement %1$d sur %2$d</string>
     <string name="liturgical_items_empty">Aucun élément liturgique disponible</string>
     <string name="prayer_not_selected">Aucune prière sélectionnée</string>
+    <string name="hymn_loading">Chargement du chant…</string>
+    <string name="hymn_failed">Impossible de charger le chant</string>
+    <string name="hymn_unavailable">Impossible d’afficher ce chant</string>
+    <string name="translation">Traduction</string>
+    <string name="hide_translation">Masquer la traduction</string>
+    <string name="notation">Partition</string>
+    <string name="notation_number">Partition %1$d</string>
+    <string name="return_to_prayer">Retour</string>
+    <string name="segment">Segment %1$d</string>
+    <string name="whole_hymn">Chant complet</string>
 </resources>
