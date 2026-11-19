@@ -55,4 +55,13 @@
     <string name="previous">السابق</string>
     <string name="reset_zoom">إعادة ضبط التكبير</string>
     <string name="next">التالي</string>
+    <string name="qolo_unresolved">ترتيلة غير محددة</string>
+    <string name="qolo_details">تفاصيل الترتيلة</string>
+    <string name="qolo_failed">تعذّر تحميل الترتيلة</string>
+    <string name="poetic_meter">الوزن الشعري: %1$s</string>
+    <string name="occasion_not_selected">لم تُحدَّد مناسبة</string>
+    <string name="qolo_not_selected">لم تُحدَّد ترتيلة لعرضها</string>
+    <string name="hymn_not_selected">لم تُحدَّد ترتيلة</string>
+    <string name="performance_playback_failed">تعذّر تشغيل تسجيل النص</string>
+    <string name="generic_text">نص</string>
 </resources>
