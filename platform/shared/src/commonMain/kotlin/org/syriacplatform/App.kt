@@ -18,6 +18,12 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.ContentScale
 import org.jetbrains.compose.resources.decodeToImageBitmap
 import org.syriacplatform.resources.Res
+import org.syriacplatform.resources.settings_font_size
+import org.syriacplatform.resources.settings_font_size_value
+import org.syriacplatform.resources.settings_save
+import org.syriacplatform.resources.settings_interface_language
+import org.jetbrains.compose.resources.stringResource
+import org.syriacplatform.presentation.locale.LocalAppLocale
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,6 +42,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.key
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateMapOf
@@ -109,7 +116,7 @@ fun App(
     val preferencesScope = rememberCoroutineScope()
     var fontSizeDialogOpen by remember { mutableStateOf(false) }
     var languageDialogOpen by remember { mutableStateOf(false) }
-    val uiLanguage = userPreferences.interfaceLanguage ?: "ar"
+    val uiLanguage = userPreferences.interfaceLanguage
 
     var selectedOccasionId by remember {
         mutableStateOf<OccasionId?>(initialSession.occasionId)
@@ -158,7 +165,11 @@ fun App(
         publishSession(navigationState.currentDestination)
     }
 
-    CompositionLocalProvider(LocalDensity provides scaledDensity) {
+    CompositionLocalProvider(
+        LocalDensity provides scaledDensity,
+        LocalAppLocale provides uiLanguage
+    ) {
+    key(uiLanguage) {
     MaterialTheme {
         when (navigationState.currentDestination) {
 
@@ -167,7 +178,7 @@ fun App(
                     platform = platform,
                     onOpenFontSize = { fontSizeDialogOpen = true },
                     onOpenLanguage = { languageDialogOpen = true },
-                    uiLanguage = uiLanguage,
+
                     onOpenOccasion = { occasionId ->
                         selectedOccasionId =
                             occasionId
@@ -386,7 +397,7 @@ fun App(
         Dialog(onDismissRequest = { languageDialogOpen = false }) {
             Surface(shape = RoundedCornerShape(16.dp)) {
                 Column(modifier = Modifier.padding(24.dp)) {
-                    Text(interfaceLabel(uiLanguage, "language"))
+                    Text(stringResource(Res.string.settings_interface_language))
                     listOf("ar" to "العربية", "en" to "English", "fr" to "Français", "de" to "Deutsch").forEach { (code, label) ->
                         TextButton(onClick = {
                             preferencesScope.launch {
@@ -408,7 +419,7 @@ fun App(
         Dialog(onDismissRequest = { fontSizeDialogOpen = false }) {
             Surface(shape = RoundedCornerShape(16.dp)) {
                 Column(modifier = Modifier.padding(24.dp)) {
-                    Text(interfaceLabel(uiLanguage, "fontSize") + ": ${(draftScale * 100).toInt()}%")
+                    Text(stringResource(Res.string.settings_font_size_value, (draftScale * 100).toInt()))
                     Slider(
                         value = draftScale,
                         onValueChange = { draftScale = it },
@@ -427,12 +438,13 @@ fun App(
                             }
                             fontSizeDialogOpen = false
                         }) {
-                            Text(interfaceLabel(uiLanguage, "save"))
+                            Text(stringResource(Res.string.settings_save))
                         }
                     }
                 }
             }
         }
+    }
     }
     }
 }
@@ -442,7 +454,6 @@ private fun HomeScreen(
     platform: PlatformContext,
     onOpenFontSize: () -> Unit,
     onOpenLanguage: () -> Unit,
-    uiLanguage: String,
     onOpenOccasion: (OccasionId) -> Unit
 ) {
     val occasionsResult by
@@ -467,10 +478,10 @@ private fun HomeScreen(
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             TextButton(onClick = onOpenFontSize) {
-                Text(interfaceLabel(uiLanguage, "fontSize"))
+                Text(stringResource(Res.string.settings_font_size))
             }
             TextButton(onClick = onOpenLanguage) {
-                Text(interfaceLabel(uiLanguage, "language"))
+                Text(stringResource(Res.string.settings_interface_language))
             }
         }
         when (
@@ -2858,13 +2869,3 @@ private fun MelodyNotationSection(
     }
 }
 
-/** Initial shared interface labels; content and translation languages remain independent. */
-private fun interfaceLabel(language: String, key: String): String {
-    val labels = when (language) {
-        "en" -> mapOf("fontSize" to "Font size", "save" to "Save", "language" to "Interface language")
-        "fr" -> mapOf("fontSize" to "Taille du texte", "save" to "Enregistrer", "language" to "Langue de l’interface")
-        "de" -> mapOf("fontSize" to "Schriftgröße", "save" to "Speichern", "language" to "Sprache der Benutzeroberfläche")
-        else -> mapOf("fontSize" to "حجم الخط", "save" to "حفظ", "language" to "لغة الواجهة")
-    }
-    return labels.getValue(key)
-}
