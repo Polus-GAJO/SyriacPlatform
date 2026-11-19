@@ -11,4 +11,14 @@
     <string name="occasion_failed">Unable to load occasion</string>
     <string name="prayers_empty">No prayer sequences available</string>
     <string name="back">Back</string>
+    <string name="prayer_failed">Unable to load prayer</string>
+    <string name="prayer_not_found">Prayer sequence not found</string>
+    <string name="queue_prepare_failed">Unable to prepare recording queue</string>
+    <string name="queue_empty">No performance recordings for this prayer</string>
+    <string name="queue_start_failed">Unable to start recordings</string>
+    <string name="play_all">Play all</string>
+    <string name="stop_playback">Stop</string>
+    <string name="recording_progress">Recording %1$d of %2$d</string>
+    <string name="liturgical_items_empty">No liturgical items available</string>
+    <string name="prayer_not_selected">No prayer selected</string>
 </resources>
