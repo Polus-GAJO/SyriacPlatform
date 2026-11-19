@@ -505,7 +505,7 @@ private fun LiturgicalBackNavigation(onClick: () -> Unit) {
     ) {
         TextButton(onClick = onClick) {
             Text(
-                text = "← رجوع",
+                text = "رجوع →",
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
