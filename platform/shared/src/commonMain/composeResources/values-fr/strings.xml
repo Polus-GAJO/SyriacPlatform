@@ -1,0 +1,8 @@
+<resources>
+    <string name="settings_font_size">Taille du texte</string>
+    <string name="settings_font_size_value">Taille du texte : %1$d %%</string>
+    <string name="settings_save">Enregistrer</string>
+    <string name="settings_reset_font_size">100%%</string>
+    <string name="settings_interface_language">Langue de l’interface</string>
+    <string name="settings_system_language">Langue de l’appareil</string>
+</resources>
