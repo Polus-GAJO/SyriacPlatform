@@ -1590,7 +1590,13 @@ private fun HymnDetailsScreen(
                             onClick = {
                                 performanceRecordingsExpanded = !performanceRecordingsExpanded
                             }
-                        ) { Text("التسجيلات المتاحة") }
+                        ) { Text(
+                            text = "التسجيلات المتاحة",
+                            style = LiturgicalTextStyles.secondary(
+                                MaterialTheme.typography.bodyMedium,
+                                LiturgicalLanguage.Arabic
+                            )
+                        ) }
                         if (performanceRecordingsExpanded) {
                             availablePerformances.forEach { resolved ->
                                 Button(
@@ -1807,7 +1813,10 @@ private fun HymnDetailsScreen(
                         Text(
                             text = melodyName,
                             modifier = Modifier.padding(top = 6.dp, bottom = 12.dp),
-                            style = MaterialTheme.typography.titleMedium
+                            style = LiturgicalTextStyles.secondary(
+                                MaterialTheme.typography.titleMedium,
+                                LiturgicalLanguage.Syriac
+                            )
                         )
                     }
 
@@ -1948,7 +1957,13 @@ private fun HymnDetailsScreen(
                                                     }
                                         androidx.compose.material3.TextButton(
                                             onClick = { melodyRecordingsExpanded = !melodyRecordingsExpanded }
-                                        ) { Text("التسجيلات المتاحة") }
+                                        ) { Text(
+                            text = "التسجيلات المتاحة",
+                            style = LiturgicalTextStyles.secondary(
+                                MaterialTheme.typography.bodyMedium,
+                                LiturgicalLanguage.Arabic
+                            )
+                        ) }
                                     }
                                 }
                                 if (melodyRecordingsExpanded) availableRecordings.forEach {
@@ -2047,7 +2062,13 @@ private fun HymnDetailsScreen(
                                         onClick = {
                                             performanceRecordingsExpanded = !performanceRecordingsExpanded
                                         }
-                                    ) { Text("تسجيلات الترتيلة المتاحة") }
+                                    ) { Text(
+                            text = "تسجيلات الترتيلة المتاحة",
+                            style = LiturgicalTextStyles.secondary(
+                                MaterialTheme.typography.bodyMedium,
+                                LiturgicalLanguage.Arabic
+                            )
+                        ) }
                                     if (performanceRecordingsExpanded) available.forEach { resolved ->
                                         val performerName =
                                             resolved.mediaAsset.performer
