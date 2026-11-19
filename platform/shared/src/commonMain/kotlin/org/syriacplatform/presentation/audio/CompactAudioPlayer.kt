@@ -30,7 +30,7 @@ import org.syriacplatform.audio.models.PlaybackStatus
 
 /**
  * Compact visual controller only. The caller owns AudioService and playback state.
- * RTL is applied to the seek bar itself, independently of the app's text direction.
+ * The seek bar follows the interface layout direction, including tap-to-seek mapping.
  */
 @Composable
 fun CompactAudioPlayer(
@@ -54,6 +54,7 @@ fun CompactAudioPlayer(
         status != PlaybackStatus.Error &&
         status != PlaybackStatus.Idle
     val playing = status == PlaybackStatus.Playing
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     Surface(
         modifier = modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 3.dp),
@@ -73,7 +74,7 @@ fun CompactAudioPlayer(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+            CompositionLocalProvider(LocalLayoutDirection provides if (isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr) {
                 Row(
                     modifier = Modifier.weight(1f),
                     verticalAlignment = Alignment.CenterVertically
@@ -87,7 +88,7 @@ fun CompactAudioPlayer(
                             .pointerInput(start, duration, canSeek) {
                                 detectTapGestures { offset ->
                                     if (canSeek) {
-                                        val fraction = (1f - offset.x / size.width)
+                                        val fraction = (if (isRtl) 1f - offset.x / size.width else offset.x / size.width)
                                             .coerceIn(0f, 1f)
                                         onSeek(start + (fraction * duration).toLong())
                                     }
