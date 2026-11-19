@@ -658,7 +658,7 @@ private fun OccasionListItem(
 private fun LiturgicalBackNavigation(onClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.End
+        horizontalArrangement = Arrangement.Start
     ) {
         TextButton(onClick = onClick) {
             Text(
@@ -2430,7 +2430,7 @@ private fun HymnDetailsScreen(
             androidx.compose.material3.TextButton(
                 onClick = { translationMenuOpen = true },
                 enabled = toolbarLanguages.isNotEmpty(),
-                modifier = Modifier.align(Alignment.CenterStart)
+                modifier = Modifier.align(Alignment.CenterEnd)
             ) { Text(stringResource(Res.string.translation)) }
             androidx.compose.material3.DropdownMenu(
                 expanded = translationMenuOpen,
@@ -2496,7 +2496,7 @@ private fun HymnDetailsScreen(
             }
             androidx.compose.material3.TextButton(
                 onClick = { audioService?.stop(); onBack() },
-                modifier = Modifier.align(Alignment.CenterEnd)
+                modifier = Modifier.align(Alignment.CenterStart)
             ) { Text(stringResource(Res.string.return_to_prayer)) }
         }
     }
