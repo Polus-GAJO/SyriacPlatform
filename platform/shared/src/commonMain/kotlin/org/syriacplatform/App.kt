@@ -1016,9 +1016,11 @@ private fun PrayerDetailsScreen(
                     val queueActive = queueState.status == PlaybackQueueStatus.Loading ||
                         queueState.status == PlaybackQueueStatus.Playing ||
                         queueState.status == PlaybackQueueStatus.Paused
+                    // Keep the original Arabic queue order; mirror it for Latin UI languages.
+                    val queueLayoutDirection = if (LocalLayoutDirection.current == LayoutDirection.Rtl)
+                        LayoutDirection.Ltr else LayoutDirection.Rtl
                     androidx.compose.runtime.CompositionLocalProvider(
-                        androidx.compose.ui.platform.LocalLayoutDirection provides
-                            androidx.compose.ui.unit.LayoutDirection.Ltr
+                        LocalLayoutDirection provides queueLayoutDirection
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 8.dp),
@@ -2427,10 +2429,10 @@ private fun HymnDetailsScreen(
         androidx.compose.foundation.layout.Box(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)
         ) {
+            Box(modifier = Modifier.align(Alignment.CenterEnd)) {
             androidx.compose.material3.TextButton(
                 onClick = { translationMenuOpen = true },
                 enabled = toolbarLanguages.isNotEmpty(),
-                modifier = Modifier.align(Alignment.CenterEnd)
             ) { Text(stringResource(Res.string.translation)) }
             androidx.compose.material3.DropdownMenu(
                 expanded = translationMenuOpen,
@@ -2468,6 +2470,8 @@ private fun HymnDetailsScreen(
                     )
                 }
             }
+            }
+            Box(modifier = Modifier.align(Alignment.Center)) {
             androidx.compose.material3.TextButton(
                 enabled = notationCount > 0,
                 onClick = {
@@ -2477,7 +2481,6 @@ private fun HymnDetailsScreen(
                     }
                     else notationChoiceOpen = true
                 },
-                modifier = Modifier.align(Alignment.Center)
             ) { Text(stringResource(Res.string.notation)) }
             androidx.compose.material3.DropdownMenu(
                 expanded = notationChoiceOpen,
@@ -2493,6 +2496,7 @@ private fun HymnDetailsScreen(
                         }
                     )
                 }
+            }
             }
             androidx.compose.material3.TextButton(
                 onClick = { audioService?.stop(); onBack() },
