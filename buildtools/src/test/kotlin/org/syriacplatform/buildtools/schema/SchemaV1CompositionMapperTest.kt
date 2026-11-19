@@ -17,6 +17,31 @@ class SchemaV1CompositionMapperTest {
         SchemaV1CompositionMapper()
 
     @Test
+    fun qoloOccurrenceCarriesItsOwnQintoTitleFromAuthorSource() {
+        val original = loadSource()
+        val linkedIds = original.occasionLinks
+            .filter { it.occasionId == original.occasion.id }
+            .mapNotNull { it.existsInId }
+            .toSet()
+        val occurrence = original.existsIn.first {
+            it.id in linkedIds && it.qoloId != null && (it.qintoId ?: 0L) > 0L
+        }
+        val qintoId = requireNotNull(occurrence.qintoId)
+        val expected = "ܩܰܕܡܳܝܬܳܐ"
+        val source = original.copy(
+            qintos = original.qintos.map {
+                if (it.id == qintoId) it.copy(name = expected) else it
+            }
+        )
+        val result = mapper.map(source).prayers
+            .flatMap { it.resolvedItems }
+            .filterIsInstance<SchemaV1QoloLiturgicalItem>()
+            .single { it.id == occurrence.id }
+
+        assertEquals(expected, result.qintoTitle)
+    }
+
+    @Test
     fun buildsRepresentativeOccasionCompositionDraft() {
         val draft = mapRepresentativeSource()
 
