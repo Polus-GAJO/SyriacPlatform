@@ -198,7 +198,37 @@ class ApplicationPackageContentRepositoryTest {
             )
         }
 
-    private fun createRepository():
+    @Test
+    fun loadOccasionReturnsContentNotFoundForUnknownId() =
+        runTest {
+            val result = createRuntimeTraversalRepository()
+                .loadOccasion(OccasionId(999))
+
+            val failure = assertIs<Result.Failure>(result)
+            assertEquals(
+                org.syriacplatform.common.types.ErrorCode.CONTENT_NOT_FOUND,
+                failure.error.code
+            )
+        }
+
+    @Test
+    fun invalidPackageFailureIsReturnedByContentReads() =
+        runTest {
+            val repository = createRepository(
+                manifestJson = """{"invalid":"manifest"}"""
+            )
+
+            val first = assertIs<Result.Failure>(repository.loadAllQolos())
+            val second = assertIs<Result.Failure>(
+                repository.loadQolo(QoloId(438))
+            )
+
+            assertEquals(first.error.code, second.error.code)
+        }
+
+    private fun createRepository(
+        manifestJson: String = validManifestJson()
+    ):
             ApplicationPackageContentRepository {
 
         val emptyCollection =
@@ -209,8 +239,7 @@ class ApplicationPackageContentRepositoryTest {
             FakePackageSource(
                 files = mapOf(
                     PackagePaths.MANIFEST to
-                            validManifestJson()
-                                .encodeToByteArray(),
+                            manifestJson.encodeToByteArray(),
 
                     PackagePaths.ENTRY_POINTS to
                             emptyCollection,
