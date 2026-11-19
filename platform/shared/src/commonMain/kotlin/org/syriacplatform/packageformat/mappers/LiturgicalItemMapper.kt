@@ -190,7 +190,8 @@ internal fun LiturgicalItemJsonDto.toDomain(): Result<LiturgicalItem> {
             id = LiturgicalItemId(id),
             target = resolvedTarget,
             noteId = noteId,
-            locationTitle = locationTitle
+            locationTitle = locationTitle,
+            qintoTitle = if (type.trim().lowercase() == "qolo") qintoTitle else null
         )
     )
 }
