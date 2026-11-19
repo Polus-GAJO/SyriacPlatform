@@ -11,4 +11,14 @@
     <string name="occasion_failed">Impossible de charger l’occasion</string>
     <string name="prayers_empty">Aucune séquence de prière disponible</string>
     <string name="back">Retour</string>
+    <string name="prayer_failed">Impossible de charger la prière</string>
+    <string name="prayer_not_found">Séquence de prière introuvable</string>
+    <string name="queue_prepare_failed">Impossible de préparer la liste des enregistrements</string>
+    <string name="queue_empty">Aucun enregistrement de cette prière</string>
+    <string name="queue_start_failed">Impossible de démarrer les enregistrements</string>
+    <string name="play_all">Tout écouter</string>
+    <string name="stop_playback">Arrêter</string>
+    <string name="recording_progress">Enregistrement %1$d sur %2$d</string>
+    <string name="liturgical_items_empty">Aucun élément liturgique disponible</string>
+    <string name="prayer_not_selected">Aucune prière sélectionnée</string>
 </resources>
