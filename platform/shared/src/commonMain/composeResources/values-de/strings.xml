@@ -21,4 +21,14 @@
     <string name="recording_progress">Aufnahme %1$d von %2$d</string>
     <string name="liturgical_items_empty">Keine liturgischen Elemente verfügbar</string>
     <string name="prayer_not_selected">Kein Gebet ausgewählt</string>
+    <string name="hymn_loading">Gesang wird geladen…</string>
+    <string name="hymn_failed">Gesang konnte nicht geladen werden</string>
+    <string name="hymn_unavailable">Dieser Gesang kann nicht angezeigt werden</string>
+    <string name="translation">Übersetzung</string>
+    <string name="hide_translation">Übersetzung ausblenden</string>
+    <string name="notation">Noten</string>
+    <string name="notation_number">Notenblatt %1$d</string>
+    <string name="return_to_prayer">Zurück</string>
+    <string name="segment">Abschnitt %1$d</string>
+    <string name="whole_hymn">Gesamter Gesang</string>
 </resources>
