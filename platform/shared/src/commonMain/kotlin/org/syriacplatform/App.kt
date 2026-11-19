@@ -108,6 +108,8 @@ fun App(
     }
     val preferencesScope = rememberCoroutineScope()
     var fontSizeDialogOpen by remember { mutableStateOf(false) }
+    var languageDialogOpen by remember { mutableStateOf(false) }
+    val uiLanguage = userPreferences.interfaceLanguage ?: "ar"
 
     var selectedOccasionId by remember {
         mutableStateOf<OccasionId?>(initialSession.occasionId)
@@ -164,6 +166,8 @@ fun App(
                 HomeScreen(
                     platform = platform,
                     onOpenFontSize = { fontSizeDialogOpen = true },
+                    onOpenLanguage = { languageDialogOpen = true },
+                    uiLanguage = uiLanguage,
                     onOpenOccasion = { occasionId ->
                         selectedOccasionId =
                             occasionId
@@ -378,6 +382,25 @@ fun App(
             }
         }
     }
+    if (languageDialogOpen) {
+        Dialog(onDismissRequest = { languageDialogOpen = false }) {
+            Surface(shape = RoundedCornerShape(16.dp)) {
+                Column(modifier = Modifier.padding(24.dp)) {
+                    Text(interfaceLabel(uiLanguage, "language"))
+                    listOf("ar" to "العربية", "en" to "English", "fr" to "Français", "de" to "Deutsch").forEach { (code, label) ->
+                        TextButton(onClick = {
+                            preferencesScope.launch {
+                                platform.preferences.update(userPreferences.copy(interfaceLanguage = code))
+                            }
+                            languageDialogOpen = false
+                        }) {
+                            Text((if (uiLanguage == code) "✓ " else "") + label)
+                        }
+                    }
+                }
+            }
+        }
+    }
     if (fontSizeDialogOpen) {
         var draftScale by remember(userPreferences.fontScale) {
             mutableStateOf(userPreferences.fontScale)
@@ -385,7 +408,7 @@ fun App(
         Dialog(onDismissRequest = { fontSizeDialogOpen = false }) {
             Surface(shape = RoundedCornerShape(16.dp)) {
                 Column(modifier = Modifier.padding(24.dp)) {
-                    Text("حجم الخط: ${(draftScale * 100).toInt()}%")
+                    Text(interfaceLabel(uiLanguage, "fontSize") + ": ${(draftScale * 100).toInt()}%")
                     Slider(
                         value = draftScale,
                         onValueChange = { draftScale = it },
@@ -404,7 +427,7 @@ fun App(
                             }
                             fontSizeDialogOpen = false
                         }) {
-                            Text("حفظ")
+                            Text(interfaceLabel(uiLanguage, "save"))
                         }
                     }
                 }
@@ -418,6 +441,8 @@ fun App(
 private fun HomeScreen(
     platform: PlatformContext,
     onOpenFontSize: () -> Unit,
+    onOpenLanguage: () -> Unit,
+    uiLanguage: String,
     onOpenOccasion: (OccasionId) -> Unit
 ) {
     val occasionsResult by
@@ -440,8 +465,13 @@ private fun HomeScreen(
         horizontalAlignment =
             Alignment.CenterHorizontally
     ) {
-        TextButton(onClick = onOpenFontSize) {
-            Text("حجم الخط")
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            TextButton(onClick = onOpenFontSize) {
+                Text(interfaceLabel(uiLanguage, "fontSize"))
+            }
+            TextButton(onClick = onOpenLanguage) {
+                Text(interfaceLabel(uiLanguage, "language"))
+            }
         }
         when (
             val result =
@@ -2826,4 +2856,15 @@ private fun MelodyNotationSection(
             }
         }
     }
+}
+
+/** Initial shared interface labels; content and translation languages remain independent. */
+private fun interfaceLabel(language: String, key: String): String {
+    val labels = when (language) {
+        "en" -> mapOf("fontSize" to "Font size", "save" to "Save", "language" to "Interface language")
+        "fr" -> mapOf("fontSize" to "Taille du texte", "save" to "Enregistrer", "language" to "Langue de l’interface")
+        "de" -> mapOf("fontSize" to "Schriftgröße", "save" to "Speichern", "language" to "Sprache der Benutzeroberfläche")
+        else -> mapOf("fontSize" to "حجم الخط", "save" to "حفظ", "language" to "لغة الواجهة")
+    }
+    return labels.getValue(key)
 }
