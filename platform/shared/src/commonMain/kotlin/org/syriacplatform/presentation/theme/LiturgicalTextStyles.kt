@@ -57,6 +57,15 @@ object LiturgicalTextStyles {
     /** Preserve each description's current Material typography and language until reviewed. */
     fun secondary(base: TextStyle): TextStyle = base.copy(color = LiturgicalColors.Black)
 
+    /** Secondary labels in a known language, without changing their size. */
+    @Composable
+    fun secondary(base: TextStyle, language: LiturgicalLanguage): TextStyle =
+        withLanguageFont(base, language).copy(
+            textDirection = if (language == LiturgicalLanguage.Arabic ||
+                language == LiturgicalLanguage.Syriac) TextDirection.Rtl else TextDirection.Ltr,
+            color = LiturgicalColors.Black
+        )
+
     @Composable
     fun withLanguageFont(base: TextStyle, language: LiturgicalLanguage): TextStyle =
         base.copy(fontFamily = LiturgicalFontFamilies.forLanguage(language))
