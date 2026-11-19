@@ -32,4 +32,27 @@
     <string name="segment">Abschnitt %1$d</string>
     <string name="whole_hymn">Gesamter Gesang</string>
     <string name="segment_generic">Abschnitt</string>
+    <string name="available_recordings">Verfügbare Aufnahmen</string>
+    <string name="text_recording">Textaufnahme</string>
+    <string name="text_recordings_failed">Textaufnahmen konnten nicht geladen werden</string>
+    <string name="melodies_available">Verfügbare Melodien</string>
+    <string name="melody_recordings_failed">Melodieaufnahmen konnten nicht geladen werden</string>
+    <string name="melody_recording">Melodieaufnahme</string>
+    <string name="hymn_recordings_available">Verfügbare Gesangsaufnahmen</string>
+    <string name="hymn_recording">Gesangsaufnahme</string>
+    <string name="hymn_recordings_failed">Gesangsaufnahmen konnten nicht geladen werden</string>
+    <string name="hymn_text_unavailable">Für diesen Gesang ist kein Text verfügbar</string>
+    <string name="listen_melody">Melodie anhören</string>
+    <string name="pause_melody">Melodie pausieren</string>
+    <string name="notation_loading">Noten werden geladen…</string>
+    <string name="notation_failed">Noten konnten nicht geladen werden</string>
+    <string name="view_notation">Noten anzeigen (%1$d)</string>
+    <string name="notation_progress">Notenblatt %1$d / %2$d</string>
+    <string name="close">Schließen</string>
+    <string name="notation_image_loading">Notenbild wird geladen…</string>
+    <string name="notation_image_failed">Dieses Notenbild kann nicht angezeigt werden</string>
+    <string name="notation_page">Notenseite %1$d</string>
+    <string name="previous">Zurück</string>
+    <string name="reset_zoom">Zoom zurücksetzen</string>
+    <string name="next">Weiter</string>
 </resources>
