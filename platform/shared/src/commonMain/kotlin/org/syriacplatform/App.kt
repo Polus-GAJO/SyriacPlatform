@@ -1837,11 +1837,14 @@ private fun HymnDetailsScreen(
                     selectedMelody?.name?.takeIf { it.isNotBlank() }?.let { melodyName ->
                         Text(
                             text = melodyName,
-                            modifier = Modifier.padding(top = 6.dp, bottom = 12.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 6.dp, bottom = 12.dp),
                             style = LiturgicalTextStyles.secondary(
                                 MaterialTheme.typography.titleMedium,
                                 LiturgicalLanguage.Syriac
-                            )
+                            ),
+                            textAlign = TextAlign.Right
                         )
                     }
 
