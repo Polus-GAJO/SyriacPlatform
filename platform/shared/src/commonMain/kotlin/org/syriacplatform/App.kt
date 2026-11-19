@@ -47,6 +47,7 @@ import org.syriacplatform.resources.notation
 import org.syriacplatform.resources.notation_number
 import org.syriacplatform.resources.return_to_prayer
 import org.syriacplatform.resources.segment
+import org.syriacplatform.resources.segment_generic
 import org.syriacplatform.resources.whole_hymn
 import org.jetbrains.compose.resources.stringResource
 import org.syriacplatform.presentation.locale.LocalAppLocale
@@ -2474,7 +2475,7 @@ private fun HymnDetailsScreen(
         }.takeIf { it >= 0 }?.plus(1)
         CompactAudioPlayer(
             title = if (activeTextInterval?.mediaAssetId == playbackState.mediaAssetId) {
-                segmentNumber?.let { stringResource(Res.string.segment, it) } ?: stringResource(Res.string.segment, 1)
+                segmentNumber?.let { stringResource(Res.string.segment, it) } ?: stringResource(Res.string.segment_generic)
             } else {
                 stringResource(Res.string.whole_hymn)
             },
