@@ -498,6 +498,21 @@ private fun OccasionListItem(
 }
 
 @Composable
+private fun LiturgicalBackNavigation(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.End
+    ) {
+        TextButton(onClick = onClick) {
+            Text(
+                text = "← رجوع",
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
 private fun OccasionDetailsScreen(
     platform: PlatformContext,
     occasionId: OccasionId,
@@ -533,8 +548,10 @@ private fun OccasionDetailsScreen(
             .background(
                 MaterialTheme.colorScheme.primaryContainer
             )
-            .padding(start = 24.dp, end = 24.dp, top = 60.dp, bottom = 8.dp)
+            .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 8.dp)
     ) {
+        LiturgicalBackNavigation(onClick = onBack)
+
         when (
             val result =
                 occasionResult
@@ -671,15 +688,6 @@ private fun OccasionDetailsScreen(
             }
         }
 
-        Button(
-            onClick = onBack,
-            modifier =
-                Modifier.padding(top = 8.dp)
-        ) {
-            Text(
-                text = "Back"
-            )
-        }
     }
 }
 
@@ -786,8 +794,13 @@ private fun PrayerDetailsScreen(
             .background(
                 MaterialTheme.colorScheme.primaryContainer
             )
-            .padding(start = 24.dp, end = 24.dp, top = 72.dp, bottom = 8.dp)
+            .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 8.dp)
     ) {
+        LiturgicalBackNavigation(onClick = {
+            queueController?.stop()
+            onBack()
+        })
+
         when (
             val result =
                 occasionResult
@@ -963,18 +976,6 @@ private fun PrayerDetailsScreen(
             }
         }
 
-        Button(
-            onClick = {
-                queueController?.stop()
-                onBack()
-            },
-            modifier =
-                Modifier.padding(top = 8.dp)
-        ) {
-            Text(
-                text = "Back"
-            )
-        }
     }
 }
 
