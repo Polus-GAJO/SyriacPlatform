@@ -29,6 +29,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -1610,7 +1611,11 @@ private fun HymnDetailsScreen(
                                             performancePlaybackMessage = null
                                         }
                                     },
-                                    modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)
+                                    modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
                                 ) {
                                     val performer = resolved.mediaAsset.performer
                                         ?.takeIf { it.isNotBlank() } ?: "تسجيل النص"
@@ -1794,7 +1799,11 @@ private fun HymnDetailsScreen(
                                 modifier =
                                     Modifier
                                         .fillMaxWidth()
-                                        .padding(bottom = 6.dp)
+                                        .padding(bottom = 6.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
                             ) {
                                 Text(
                                     text =
@@ -2008,7 +2017,11 @@ private fun HymnDetailsScreen(
                                                 .fillMaxWidth()
                                                 .padding(
                                                     bottom = 6.dp
-                                                )
+                                                ),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
                                     ) {
                                         Text(
                                             text =
@@ -2098,7 +2111,11 @@ private fun HymnDetailsScreen(
                                                     .fillMaxWidth()
                                                     .padding(
                                                         bottom = 6.dp
-                                                    )
+                                                    ),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
                                         ) {
                                             Text(
                                                 if (
