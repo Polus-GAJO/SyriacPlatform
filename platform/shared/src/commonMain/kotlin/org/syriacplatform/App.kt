@@ -1838,7 +1838,7 @@ private fun HymnDetailsScreen(
                         Text(
                             text = (itemResult as? Result.Success)?.data?.item?.qintoTitle
                                 ?.takeIf { it.isNotBlank() }
-                                ?.let { "ܩܺܝܢܬܳܐ $it: $melodyName" }
+                                ?.let { "ܩܺܝܢܬܳܐ $it : $melodyName" }
                                 ?: melodyName,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -1847,7 +1847,7 @@ private fun HymnDetailsScreen(
                                 MaterialTheme.typography.titleMedium,
                                 LiturgicalLanguage.Syriac
                             ),
-                            textAlign = TextAlign.Right
+                            textAlign = TextAlign.Center
                         )
                     }
 
