@@ -55,4 +55,13 @@
     <string name="previous">Zurück</string>
     <string name="reset_zoom">Zoom zurücksetzen</string>
     <string name="next">Weiter</string>
+    <string name="qolo_unresolved">Nicht aufgelöster Gesang</string>
+    <string name="qolo_details">Gesangsdetails</string>
+    <string name="qolo_failed">Gesang konnte nicht geladen werden</string>
+    <string name="poetic_meter">Versmaß: %1$s</string>
+    <string name="occasion_not_selected">Kein Anlass ausgewählt</string>
+    <string name="qolo_not_selected">Kein Gesang zur Anzeige ausgewählt</string>
+    <string name="hymn_not_selected">Kein Gesang ausgewählt</string>
+    <string name="performance_playback_failed">Textaufnahme konnte nicht abgespielt werden</string>
+    <string name="generic_text">Text</string>
 </resources>
