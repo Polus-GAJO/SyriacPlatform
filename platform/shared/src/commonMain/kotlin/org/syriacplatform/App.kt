@@ -118,6 +118,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import org.syriacplatform.presentation.audio.CompactAudioPlayer
@@ -175,6 +177,13 @@ fun App(
     var fontSizeDialogOpen by remember { mutableStateOf(false) }
     var languageDialogOpen by remember { mutableStateOf(false) }
     val uiLanguage = userPreferences.interfaceLanguage
+    // Keep the device direction when the user has not chosen an interface language.
+    val deviceLayoutDirection = LocalLayoutDirection.current
+    val interfaceLayoutDirection = when (uiLanguage) {
+        "ar" -> LayoutDirection.Rtl
+        "en", "fr", "de" -> LayoutDirection.Ltr
+        else -> deviceLayoutDirection
+    }
 
     var selectedOccasionId by remember {
         mutableStateOf<OccasionId?>(initialSession.occasionId)
@@ -225,7 +234,8 @@ fun App(
 
     CompositionLocalProvider(
         LocalDensity provides scaledDensity,
-        LocalAppLocale provides uiLanguage
+        LocalAppLocale provides uiLanguage,
+        LocalLayoutDirection provides interfaceLayoutDirection
     ) {
     MaterialTheme {
         when (navigationState.currentDestination) {
