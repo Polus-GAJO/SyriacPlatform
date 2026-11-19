@@ -16,14 +16,14 @@ enum class LiturgicalTitleLevel { Occasion, Prayer, Hymn }
 
 object LiturgicalTextStyles {
     /**
-     * Keep all three title levels at the currently approved 26sp for now.
-     * Levels are distinct so a later hierarchy can be introduced centrally.
+     * Use the approved 32/29/26sp hierarchy for occasion, prayer and hymn titles.
+     * Keep these levels centralized for future visual adjustments.
      */
     @Composable
     fun title(level: LiturgicalTitleLevel): TextStyle {
         val sizeSp = when (level) {
-            LiturgicalTitleLevel.Occasion -> LiturgicalTypography.SyriacBaseSp
-            LiturgicalTitleLevel.Prayer -> LiturgicalTypography.SyriacBaseSp
+            LiturgicalTitleLevel.Occasion -> 32f
+            LiturgicalTitleLevel.Prayer -> 29f
             LiturgicalTitleLevel.Hymn -> LiturgicalTypography.SyriacBaseSp
         }
         return TextStyle(
