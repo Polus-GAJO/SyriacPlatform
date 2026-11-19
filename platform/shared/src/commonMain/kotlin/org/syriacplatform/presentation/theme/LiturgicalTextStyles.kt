@@ -30,9 +30,23 @@ object LiturgicalTextStyles {
             fontFamily = LiturgicalFontFamilies.syriac(),
             fontSize = sizeSp.sp,
             textAlign = TextAlign.Center,
-            textDirection = TextDirection.Rtl
+            textDirection = TextDirection.Rtl,
+            color = LiturgicalColors.Red
         )
     }
+
+    /** Section headings retain the existing Syriac body size until visual review. */
+    @Composable
+    fun section(): TextStyle = TextStyle(
+        fontFamily = LiturgicalFontFamilies.syriac(),
+        fontSize = LiturgicalTypography.SyriacBaseSp.sp,
+        textAlign = TextAlign.Center,
+        textDirection = TextDirection.Rtl,
+        color = LiturgicalColors.Red
+    )
+
+    /** Preserve each description's current Material typography and language until reviewed. */
+    fun secondary(base: TextStyle): TextStyle = base.copy(color = LiturgicalColors.Black)
 
     @Composable
     fun withLanguageFont(base: TextStyle, language: LiturgicalLanguage): TextStyle =
