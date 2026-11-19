@@ -473,7 +473,11 @@ private fun OccasionListItem(
     Button(
         onClick = onClick,
         modifier =
-            Modifier.fillMaxWidth()
+            Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     ) {
         Column(
             modifier = Modifier
@@ -642,7 +646,11 @@ private fun OccasionDetailsScreen(
                                     )
                                 },
                                 modifier =
-                                    Modifier.fillMaxWidth()
+                                    Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             ) {
                                 Column(
                                     modifier =
@@ -1066,7 +1074,11 @@ private fun ResolvedLiturgicalItemView(
                 onClick = { onOpenHymn(item.item.id) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp)
+                    .padding(vertical = 8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             ) {
                 val locationTitle = item.item.locationTitle
                     ?.takeIf { it.isNotBlank() }
@@ -1087,7 +1099,11 @@ private fun ResolvedLiturgicalItemView(
                 onClick = { onOpenHymn(item.item.id) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp)
+                    .padding(vertical = 8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             ) {
                 Text(
                     text = item.item.locationTitle
