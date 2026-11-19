@@ -48,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import org.syriacplatform.presentation.audio.CompactAudioPlayer
@@ -2368,6 +2369,11 @@ private fun HymnDetailsScreen(
                             "ar" -> LiturgicalFontFamilies.arabic()
                             "en", "fr" -> LiturgicalFontFamilies.latin()
                             else -> MaterialTheme.typography.bodyLarge.fontFamily
+                        },
+                        textDirection = if (selectedTranslationLanguage == "ar") {
+                            TextDirection.Rtl
+                        } else {
+                            TextDirection.Ltr
                         }
                     ),
                     textAlign = if (selectedTranslationLanguage == "ar") TextAlign.Right else TextAlign.Start
