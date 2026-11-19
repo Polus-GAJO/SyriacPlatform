@@ -83,6 +83,7 @@ import org.syriacplatform.presentation.theme.LiturgicalAnnotatedText
 import org.syriacplatform.presentation.theme.LiturgicalColors
 import org.syriacplatform.presentation.theme.LiturgicalFontFamilies
 import org.syriacplatform.presentation.theme.LiturgicalTextStyles
+import org.syriacplatform.presentation.theme.LiturgicalTitleLevel
 import org.syriacplatform.presentation.theme.LiturgicalLanguage
 import org.syriacplatform.presentation.theme.LiturgicalNoteText
 import kotlinx.coroutines.launch
@@ -484,7 +485,7 @@ private fun OccasionListItem(
         ) {
             Text(
                 text = occasion.name,
-                style = SyriacTextStyles.body(),
+                style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Occasion),
                 textAlign = TextAlign.Center
             )
 
@@ -572,7 +573,7 @@ private fun OccasionDetailsScreen(
                 Text(
                     text = runtimeOccasion.occasion.name,
                     modifier = Modifier.fillMaxWidth(),
-                    style = SyriacTextStyles.body(),
+                    style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Occasion),
                     textAlign = TextAlign.Center
                 )
 
@@ -649,7 +650,7 @@ private fun OccasionDetailsScreen(
                                 ) {
                                     Text(
                                         text = sequence.prayer.name,
-                                        style = SyriacTextStyles.body(),
+                                        style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Prayer),
                                         textAlign = TextAlign.Center
                                     )
 
@@ -829,7 +830,7 @@ private fun PrayerDetailsScreen(
                     Text(
                         text = sequence.prayer.name,
                         modifier = Modifier.fillMaxWidth(),
-                        style = SyriacTextStyles.body(),
+                        style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Prayer),
                         textAlign = TextAlign.Center
                     )
 
@@ -1708,7 +1709,7 @@ private fun HymnDetailsScreen(
                                 .align(Alignment.Center)
                                 .fillMaxWidth()
                                 .padding(horizontal = 52.dp),
-                            style = SyriacTextStyles.body(),
+                            style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Hymn),
                             textAlign = TextAlign.Center
                         )
                         androidx.compose.material3.IconButton(
