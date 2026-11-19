@@ -879,7 +879,7 @@ private fun PrayerDetailsScreen(
                                         queueController?.stop()
                                     }
                                 ) { Text("■ إيقاف") }
-                                Button(
+                                TextButton(
                                     enabled = queueState.status != PlaybackQueueStatus.Loading,
                                     onClick = {
                                         if (queueState.status == PlaybackQueueStatus.Playing)
@@ -887,8 +887,9 @@ private fun PrayerDetailsScreen(
                                         else queueController?.resume()
                                     }
                                 ) {
-                                    Text(if (queueState.status == PlaybackQueueStatus.Playing)
-                                        "Ⅱ إيقاف مؤقت" else "▶ متابعة")
+                                    Text(
+                                        if (queueState.status == PlaybackQueueStatus.Playing) "⏸" else "▶"
+                                    )
                                 }
                                 androidx.compose.material3.TextButton(
                                     enabled = queueState.currentIndex != null,
