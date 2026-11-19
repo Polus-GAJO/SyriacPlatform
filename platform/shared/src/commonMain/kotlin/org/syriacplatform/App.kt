@@ -393,22 +393,6 @@ private fun HomeScreen(
         horizontalAlignment =
             Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "SyriacPlatform",
-            style =
-                MaterialTheme.typography.headlineMedium
-        )
-
-        Text(
-            text = "Occasions",
-            modifier = Modifier.padding(
-                top = 8.dp,
-                bottom = 24.dp
-            ),
-            style =
-                MaterialTheme.typography.titleLarge
-        )
-
         when (
             val result =
                 occasionsResult
