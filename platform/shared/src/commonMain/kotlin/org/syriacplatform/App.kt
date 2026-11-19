@@ -1525,6 +1525,8 @@ private fun HymnDetailsScreen(
     }
 
     val playbackState = rememberPlaybackState(audioService)
+    // Resolve the localized fallback during composition, not inside playback callbacks.
+    val performancePlaybackFailedLabel = stringResource(Res.string.performance_playback_failed)
     val activeTextInterval by (
         platform.performanceTextPlayback?.activeInterval
             ?: remember { kotlinx.coroutines.flow.MutableStateFlow<org.syriacplatform.audio.ActiveTextInterval?>(null) }
@@ -1813,7 +1815,7 @@ private fun HymnDetailsScreen(
                                                     is Result.Success -> performancePlaybackMessage = null
                                                     is Result.Failure -> performancePlaybackMessage =
                                                         playResult.error.message
-                                                            ?: stringResource(Res.string.performance_playback_failed)
+                                                            ?: performancePlaybackFailedLabel
                                                 }
                                             }
                                         }
@@ -2379,7 +2381,7 @@ private fun HymnDetailsScreen(
                                                             playResult
                                                                 .error
                                                                 .message
-                                                                ?: stringResource(Res.string.performance_playback_failed)
+                                                                ?: performancePlaybackFailedLabel
                                                     }
                                                 }
                                             }
