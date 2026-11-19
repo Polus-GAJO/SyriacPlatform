@@ -35,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateMapOf
@@ -48,6 +49,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
@@ -98,6 +101,13 @@ fun App(
 ) {
     val navigationState by
     platform.navigation.state.collectAsState()
+    val userPreferences by platform.preferences.preferences.collectAsState()
+    val systemDensity = LocalDensity.current
+    val scaledDensity = remember(systemDensity, userPreferences.fontScale) {
+        Density(systemDensity.density, systemDensity.fontScale * userPreferences.fontScale)
+    }
+    val preferencesScope = rememberCoroutineScope()
+    var fontSizeDialogOpen by remember { mutableStateOf(false) }
 
     var selectedOccasionId by remember {
         mutableStateOf<OccasionId?>(initialSession.occasionId)
@@ -146,12 +156,14 @@ fun App(
         publishSession(navigationState.currentDestination)
     }
 
+    CompositionLocalProvider(LocalDensity provides scaledDensity) {
     MaterialTheme {
         when (navigationState.currentDestination) {
 
             AppDestination.HOME -> {
                 HomeScreen(
                     platform = platform,
+                    onOpenFontSize = { fontSizeDialogOpen = true },
                     onOpenOccasion = { occasionId ->
                         selectedOccasionId =
                             occasionId
@@ -366,11 +378,46 @@ fun App(
             }
         }
     }
+    if (fontSizeDialogOpen) {
+        var draftScale by remember(userPreferences.fontScale) {
+            mutableStateOf(userPreferences.fontScale)
+        }
+        Dialog(onDismissRequest = { fontSizeDialogOpen = false }) {
+            Surface(shape = RoundedCornerShape(16.dp)) {
+                Column(modifier = Modifier.padding(24.dp)) {
+                    Text("حجم الخط: ${(draftScale * 100).toInt()}%")
+                    Slider(
+                        value = draftScale,
+                        onValueChange = { draftScale = it },
+                        valueRange = 0.8f..1.6f,
+                        steps = 7
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        TextButton(onClick = { draftScale = 1f }) {
+                            Text("100%")
+                        }
+                        TextButton(onClick = {
+                            preferencesScope.launch {
+                                platform.preferences.update(
+                                    userPreferences.copy(fontScale = draftScale)
+                                )
+                            }
+                            fontSizeDialogOpen = false
+                        }) {
+                            Text("حفظ")
+                        }
+                    }
+                }
+            }
+        }
+    }
+    }
 }
 
 @Composable
 private fun HomeScreen(
     platform: PlatformContext,
+    onOpenFontSize: () -> Unit,
     onOpenOccasion: (OccasionId) -> Unit
 ) {
     val occasionsResult by
@@ -393,6 +440,9 @@ private fun HomeScreen(
         horizontalAlignment =
             Alignment.CenterHorizontally
     ) {
+        TextButton(onClick = onOpenFontSize) {
+            Text("حجم الخط")
+        }
         when (
             val result =
                 occasionsResult
