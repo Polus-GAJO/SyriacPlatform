@@ -55,4 +55,13 @@
     <string name="previous">Précédent</string>
     <string name="reset_zoom">Réinitialiser le zoom</string>
     <string name="next">Suivant</string>
+    <string name="qolo_unresolved">Chant non résolu</string>
+    <string name="qolo_details">Détails du chant</string>
+    <string name="qolo_failed">Impossible de charger le chant</string>
+    <string name="poetic_meter">Mètre poétique : %1$s</string>
+    <string name="occasion_not_selected">Aucune occasion sélectionnée</string>
+    <string name="qolo_not_selected">Aucun chant sélectionné pour l’affichage</string>
+    <string name="hymn_not_selected">Aucun chant sélectionné</string>
+    <string name="performance_playback_failed">Impossible de lire l’enregistrement du texte</string>
+    <string name="generic_text">Texte</string>
 </resources>
