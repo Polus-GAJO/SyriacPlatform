@@ -12,5 +12,6 @@ data class LiturgicalItem(
     val id: LiturgicalItemId,
     val target: LiturgicalItemTarget,
     val noteId: Long? = null,
-    val locationTitle: String? = null
+    val locationTitle: String? = null,
+    val qintoTitle: String? = null
 )
