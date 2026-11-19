@@ -499,7 +499,7 @@ private fun OccasionListItem(
                             top = 4.dp
                         ),
                     style =
-                        MaterialTheme.typography.bodyMedium,
+                        LiturgicalTextStyles.secondary(MaterialTheme.typography.bodyMedium),
                     textAlign =
                         TextAlign.Center
                 )
@@ -663,7 +663,7 @@ private fun OccasionDetailsScreen(
                                                     top = 4.dp
                                                 ),
                                             style =
-                                                MaterialTheme.typography.bodyMedium,
+                                                LiturgicalTextStyles.secondary(MaterialTheme.typography.bodyMedium),
                                             textAlign =
                                                 TextAlign.Center
                                         )
@@ -1073,7 +1073,7 @@ private fun ResolvedLiturgicalItemView(
                     text = listOfNotNull(locationTitle, qoloName)
                         .joinToString(": ")
                         .ifBlank { "Qolo" },
-                    style = SyriacTextStyles.body(),
+                    style = LiturgicalTextStyles.section(),
                     textAlign = TextAlign.Center
                 )
             }
@@ -1090,7 +1090,7 @@ private fun ResolvedLiturgicalItemView(
                     text = item.item.locationTitle
                         ?.takeIf { it.isNotBlank() }
                         ?: "Text",
-                    style = SyriacTextStyles.body(),
+                    style = LiturgicalTextStyles.section(),
                     textAlign = TextAlign.Center
                 )
             }
@@ -1542,7 +1542,7 @@ private fun HymnDetailsScreen(
                                 text = result.data.item.locationTitle
                                     ?.takeIf { it.isNotBlank() } ?: "Text",
                                 modifier = Modifier.weight(1f),
-                                style = SyriacTextStyles.body(),
+                                style = LiturgicalTextStyles.section(),
                                 textAlign = TextAlign.Center
                             )
                             androidx.compose.material3.IconButton(
