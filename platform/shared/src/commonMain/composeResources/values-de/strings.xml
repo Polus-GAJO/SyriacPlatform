@@ -11,4 +11,14 @@
     <string name="occasion_failed">Anlass konnte nicht geladen werden</string>
     <string name="prayers_empty">Keine Gebetsfolgen verfügbar</string>
     <string name="back">Zurück</string>
+    <string name="prayer_failed">Gebet konnte nicht geladen werden</string>
+    <string name="prayer_not_found">Gebetsfolge nicht gefunden</string>
+    <string name="queue_prepare_failed">Aufnahmeliste konnte nicht vorbereitet werden</string>
+    <string name="queue_empty">Keine Aufnahmen für dieses Gebet verfügbar</string>
+    <string name="queue_start_failed">Aufnahmen konnten nicht gestartet werden</string>
+    <string name="play_all">Alle abspielen</string>
+    <string name="stop_playback">Stopp</string>
+    <string name="recording_progress">Aufnahme %1$d von %2$d</string>
+    <string name="liturgical_items_empty">Keine liturgischen Elemente verfügbar</string>
+    <string name="prayer_not_selected">Kein Gebet ausgewählt</string>
 </resources>
