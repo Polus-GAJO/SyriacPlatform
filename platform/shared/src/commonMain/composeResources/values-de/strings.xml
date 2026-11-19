@@ -5,4 +5,10 @@
     <string name="settings_reset_font_size">100%</string>
     <string name="settings_interface_language">Sprache der Benutzeroberfläche</string>
     <string name="settings_system_language">Gerätesprache</string>
+    <string name="loading">Wird geladen…</string>
+    <string name="occasions_failed">Anlässe konnten nicht geladen werden</string>
+    <string name="occasions_empty">Keine Anlässe verfügbar</string>
+    <string name="occasion_failed">Anlass konnte nicht geladen werden</string>
+    <string name="prayers_empty">Keine Gebetsfolgen verfügbar</string>
+    <string name="back">Zurück</string>
 </resources>
