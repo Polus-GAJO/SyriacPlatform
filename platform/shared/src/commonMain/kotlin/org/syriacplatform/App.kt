@@ -1019,6 +1019,7 @@ private fun PrayerDetailsScreen(
                     // Keep the original Arabic queue order; mirror it for Latin UI languages.
                     val queueLayoutDirection = if (LocalLayoutDirection.current == LayoutDirection.Rtl)
                         LayoutDirection.Ltr else LayoutDirection.Rtl
+                    val arabicQueueControls = LocalLayoutDirection.current == LayoutDirection.Rtl
                     androidx.compose.runtime.CompositionLocalProvider(
                         LocalLayoutDirection provides queueLayoutDirection
                     ) {
@@ -1031,7 +1032,7 @@ private fun PrayerDetailsScreen(
                                 androidx.compose.material3.TextButton(
                                     enabled = queueState.currentIndex != null,
                                     onClick = { queueController?.next() }
-                                ) { Text("⏮") }
+                                ) { Text(if (arabicQueueControls) "⏮" else "⏭") }
                                 androidx.compose.material3.TextButton(
                                     onClick = {
                                         playAllMessage = null
@@ -1053,7 +1054,7 @@ private fun PrayerDetailsScreen(
                                 androidx.compose.material3.TextButton(
                                     enabled = queueState.currentIndex != null,
                                     onClick = { queueController?.previous() }
-                                ) { Text("⏭") }
+                                ) { Text(if (arabicQueueControls) "⏭" else "⏮") }
                             } else {
                                 TextButton(
                                     enabled = queueController != null,
