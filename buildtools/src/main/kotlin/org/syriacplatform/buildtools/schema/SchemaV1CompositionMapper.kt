@@ -221,6 +221,9 @@ class SchemaV1CompositionMapper(
             locationTitle = item.locationId?.let { locationId ->
                 source.locations.firstOrNull { it.id == locationId }?.name
             },
+            qintoTitle = item.qintoId?.takeIf { it > 0L }?.let { qintoId ->
+                source.qintos.firstOrNull { it.id == qintoId }?.name?.takeIf { it.isNotBlank() }
+            },
             verses = mapVerses(
                 source = source,
                 existsInId = item.id
