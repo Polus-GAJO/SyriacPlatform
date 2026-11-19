@@ -2,6 +2,7 @@ package org.syriacplatform.presentation.theme
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextDirection
 
 /**
  * Language-aware liturgical styles. The caller supplies the current size,
@@ -16,5 +17,8 @@ object LiturgicalTextStyles {
 
     @Composable
     fun note(base: TextStyle, language: LiturgicalLanguage): TextStyle =
-        withLanguageFont(base, language)
+        withLanguageFont(base, language).copy(
+            textDirection = if (language == LiturgicalLanguage.Arabic ||
+                language == LiturgicalLanguage.Syriac) TextDirection.Rtl else TextDirection.Ltr
+        )
 }
