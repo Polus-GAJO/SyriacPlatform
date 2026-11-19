@@ -32,4 +32,27 @@
     <string name="segment">المقطع %1$d</string>
     <string name="whole_hymn">الترتيلة كاملة</string>
     <string name="segment_generic">المقطع</string>
+    <string name="available_recordings">التسجيلات المتاحة</string>
+    <string name="text_recording">تسجيل النص</string>
+    <string name="text_recordings_failed">تعذّر تحميل تسجيلات النص</string>
+    <string name="melodies_available">الألحان المتاحة</string>
+    <string name="melody_recordings_failed">تعذّر تحميل تسجيلات اللحن</string>
+    <string name="melody_recording">تسجيل لحن</string>
+    <string name="hymn_recordings_available">تسجيلات الترتيلة المتاحة</string>
+    <string name="hymn_recording">تسجيل ترتيلة</string>
+    <string name="hymn_recordings_failed">تعذّر تحميل تسجيلات الترتيلة</string>
+    <string name="hymn_text_unavailable">لا يوجد نص متاح لهذه الترتيلة</string>
+    <string name="listen_melody">سماع اللحن</string>
+    <string name="pause_melody">إيقاف اللحن مؤقتًا</string>
+    <string name="notation_loading">جارٍ تحميل النوتة…</string>
+    <string name="notation_failed">تعذّر تحميل النوتة</string>
+    <string name="view_notation">عرض النوتة (%1$d)</string>
+    <string name="notation_progress">النوتة %1$d / %2$d</string>
+    <string name="close">إغلاق</string>
+    <string name="notation_image_loading">جارٍ تحميل صورة النوتة…</string>
+    <string name="notation_image_failed">تعذّر عرض صورة النوتة</string>
+    <string name="notation_page">صفحة النوتة %1$d</string>
+    <string name="previous">السابق</string>
+    <string name="reset_zoom">إعادة ضبط التكبير</string>
+    <string name="next">التالي</string>
 </resources>
