@@ -28,6 +28,16 @@ import org.syriacplatform.resources.occasions_empty
 import org.syriacplatform.resources.occasion_failed
 import org.syriacplatform.resources.prayers_empty
 import org.syriacplatform.resources.back
+import org.syriacplatform.resources.prayer_failed
+import org.syriacplatform.resources.prayer_not_found
+import org.syriacplatform.resources.queue_prepare_failed
+import org.syriacplatform.resources.queue_empty
+import org.syriacplatform.resources.queue_start_failed
+import org.syriacplatform.resources.play_all
+import org.syriacplatform.resources.stop_playback
+import org.syriacplatform.resources.recording_progress
+import org.syriacplatform.resources.liturgical_items_empty
+import org.syriacplatform.resources.prayer_not_selected
 import org.jetbrains.compose.resources.stringResource
 import org.syriacplatform.presentation.locale.LocalAppLocale
 import androidx.compose.foundation.clickable
@@ -901,7 +911,7 @@ private fun PrayerDetailsScreen(
         ) {
             null -> {
                 Text(
-                    text = "Loading..."
+                    text = stringResource(Res.string.loading)
                 )
             }
 
@@ -909,7 +919,7 @@ private fun PrayerDetailsScreen(
                 Text(
                     text =
                         result.error.message
-                            ?: "Prayer loading failed"
+                            ?: stringResource(Res.string.prayer_failed)
                 )
             }
 
@@ -925,7 +935,7 @@ private fun PrayerDetailsScreen(
                 if (sequence == null) {
                     Text(
                         text =
-                            "Prayer sequence was not found."
+                            stringResource(Res.string.prayer_not_found)
                     )
                 } else {
                     Text(
@@ -972,7 +982,7 @@ private fun PrayerDetailsScreen(
                                         playAllMessage = null
                                         queueController?.stop()
                                     }
-                                ) { Text("■ إيقاف") }
+                                ) { Text("■ " + stringResource(Res.string.stop_playback)) }
                                 TextButton(
                                     enabled = queueState.status != PlaybackQueueStatus.Loading,
                                     onClick = {
@@ -998,21 +1008,21 @@ private fun PrayerDetailsScreen(
                                             when (val built = PrayerPlaybackQueueBuilder(platform.content)
                                                 .build(sequence)) {
                                                 is Result.Failure ->
-                                                    playAllMessage = "تعذّر إعداد قائمة التسجيلات"
+                                                    playAllMessage = "prepare"
                                                 is Result.Success -> {
                                                     if (built.data.isEmpty()) {
-                                                        playAllMessage = "لا توجد تسجيلات أداء لهذه الصلاة"
+                                                        playAllMessage = "empty"
                                                     } else {
                                                         when (queueController?.start(built.data)) {
                                                             is Result.Success -> playAllMessage = null
-                                                            else -> playAllMessage = "تعذّر بدء تشغيل التسجيلات"
+                                                            else -> playAllMessage = "start"
                                                         }
                                                     }
                                                 }
                                             }
                                         }
                                     }
-                                ) { Text("تشغيل الكل") }
+                                ) { Text(stringResource(Res.string.play_all)) }
                             }
                         }
                     }
@@ -1020,7 +1030,7 @@ private fun PrayerDetailsScreen(
                         val number = queueState.currentIndex?.plus(1)
                         if (number != null) {
                             Text(
-                                text = "التسجيل $number من ${queueState.entries.size}",
+                                text = stringResource(Res.string.recording_progress, number, queueState.entries.size),
                                 modifier = Modifier.fillMaxWidth(),
                                 style = MaterialTheme.typography.labelSmall,
                                 textAlign = TextAlign.Right
@@ -1031,7 +1041,12 @@ private fun PrayerDetailsScreen(
                     playAllMessage?.let {
                             message ->
                         Text(
-                            text = message,
+                            text = when (message) {
+                                "prepare" -> stringResource(Res.string.queue_prepare_failed)
+                                "empty" -> stringResource(Res.string.queue_empty)
+                                "start" -> stringResource(Res.string.queue_start_failed)
+                                else -> message
+                            },
                             modifier =
                                 Modifier.padding(
                                     bottom = 8.dp
@@ -1042,7 +1057,7 @@ private fun PrayerDetailsScreen(
                     if (sequence.items.isEmpty()) {
                         Text(
                             text =
-                                "No liturgical items available"
+                                stringResource(Res.string.liturgical_items_empty)
                         )
                     } else {
                         LazyColumn(
@@ -1092,7 +1107,7 @@ private fun MissingPrayerSelectionScreen(
     ) {
         Text(
             text =
-                "No Prayer was selected.",
+                stringResource(Res.string.prayer_not_selected),
             textAlign =
                 TextAlign.Center
         )
@@ -1103,7 +1118,7 @@ private fun MissingPrayerSelectionScreen(
                 Modifier.padding(top = 8.dp)
         ) {
             Text(
-                text = "Back"
+                text = stringResource(Res.string.back)
             )
         }
     }
