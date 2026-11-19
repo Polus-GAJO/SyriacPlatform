@@ -55,4 +55,13 @@
     <string name="previous">Previous</string>
     <string name="reset_zoom">Reset zoom</string>
     <string name="next">Next</string>
+    <string name="qolo_unresolved">Unresolved hymn</string>
+    <string name="qolo_details">Hymn details</string>
+    <string name="qolo_failed">Unable to load hymn</string>
+    <string name="poetic_meter">Poetic meter: %1$s</string>
+    <string name="occasion_not_selected">No occasion selected</string>
+    <string name="qolo_not_selected">No hymn selected for display</string>
+    <string name="hymn_not_selected">No hymn selected</string>
+    <string name="performance_playback_failed">Unable to play text recording</string>
+    <string name="generic_text">Text</string>
 </resources>
