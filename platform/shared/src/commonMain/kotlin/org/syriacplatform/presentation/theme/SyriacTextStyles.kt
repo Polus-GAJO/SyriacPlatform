@@ -3,6 +3,7 @@ package org.syriacplatform.presentation.theme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.sp
 
 object SyriacTextStyles {
@@ -10,6 +11,7 @@ object SyriacTextStyles {
     fun body(): TextStyle = TextStyle(
         fontFamily = LiturgicalFontFamilies.syriac(),
         fontSize = LiturgicalTypography.SyriacBaseSp.sp,
-        textAlign = TextAlign.Right
+        textAlign = TextAlign.Right,
+        textDirection = TextDirection.Rtl
     )
 }
