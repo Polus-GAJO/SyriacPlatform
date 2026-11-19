@@ -48,6 +48,29 @@ import org.syriacplatform.resources.notation_number
 import org.syriacplatform.resources.return_to_prayer
 import org.syriacplatform.resources.segment
 import org.syriacplatform.resources.segment_generic
+import org.syriacplatform.resources.available_recordings
+import org.syriacplatform.resources.text_recording
+import org.syriacplatform.resources.text_recordings_failed
+import org.syriacplatform.resources.melodies_available
+import org.syriacplatform.resources.melody_recordings_failed
+import org.syriacplatform.resources.melody_recording
+import org.syriacplatform.resources.hymn_recordings_available
+import org.syriacplatform.resources.hymn_recording
+import org.syriacplatform.resources.hymn_recordings_failed
+import org.syriacplatform.resources.hymn_text_unavailable
+import org.syriacplatform.resources.listen_melody
+import org.syriacplatform.resources.pause_melody
+import org.syriacplatform.resources.notation_loading
+import org.syriacplatform.resources.notation_failed
+import org.syriacplatform.resources.view_notation
+import org.syriacplatform.resources.notation_progress
+import org.syriacplatform.resources.close
+import org.syriacplatform.resources.notation_image_loading
+import org.syriacplatform.resources.notation_image_failed
+import org.syriacplatform.resources.notation_page
+import org.syriacplatform.resources.previous
+import org.syriacplatform.resources.reset_zoom
+import org.syriacplatform.resources.next
 import org.syriacplatform.resources.whole_hymn
 import org.jetbrains.compose.resources.stringResource
 import org.syriacplatform.presentation.locale.LocalAppLocale
@@ -1714,7 +1737,7 @@ private fun HymnDetailsScreen(
                                 performanceRecordingsExpanded = !performanceRecordingsExpanded
                             }
                         ) { Text(
-                            text = "التسجيلات المتاحة",
+                            text = stringResource(Res.string.available_recordings),
                             style = LiturgicalTextStyles.secondary(
                                 MaterialTheme.typography.bodyMedium,
                                 LiturgicalLanguage.Arabic
@@ -1740,7 +1763,7 @@ private fun HymnDetailsScreen(
                                         )
                                 ) {
                                     val performer = resolved.mediaAsset.performer
-                                        ?.takeIf { it.isNotBlank() } ?: "تسجيل النص"
+                                        ?.takeIf { it.isNotBlank() } ?: stringResource(Res.string.text_recording)
                                     Text(
                                         if (selectedPerformance?.performance?.id ==
                                             resolved.performance.id
@@ -1751,7 +1774,7 @@ private fun HymnDetailsScreen(
                         }
                     }
                     if (performanceMediaResult is Result.Failure) {
-                        Text("تعذّر تحميل تسجيلات النص")
+                        Text(stringResource(Res.string.text_recordings_failed))
                     }
                     performancePlaybackMessage?.let { message ->
                         Text(text = message, modifier = Modifier.padding(bottom = 8.dp))
@@ -1892,7 +1915,7 @@ private fun HymnDetailsScreen(
                         target.melodyCandidates.size > 1
                     ) {
                         Text(
-                            text = "الألحان المتاحة",
+                            text = stringResource(Res.string.melodies_available),
                             modifier =
                                 Modifier.padding(
                                     top = 8.dp,
@@ -1987,9 +2010,7 @@ private fun HymnDetailsScreen(
                         null -> Unit
 
                         is Result.Failure -> {
-                            Text(
-                                "تعذّر تحميل تسجيلات اللحن"
-                            )
+                            Text(stringResource(Res.string.melody_recordings_failed))
                         }
 
                         is Result.Success -> {
@@ -2088,14 +2109,14 @@ private fun HymnDetailsScreen(
                                                             Text(
                                                                 if (playbackState.mediaAssetId == selectedRecording.id &&
                                                                     playbackState.status == PlaybackStatus.Playing
-                                                                ) "إيقاف اللحن مؤقتًا" else "سماع اللحن"
+                                                                ) stringResource(Res.string.pause_melody) else stringResource(Res.string.listen_melody)
                                                             )
                                                         }
                                                     }
                                         androidx.compose.material3.TextButton(
                                             onClick = { melodyRecordingsExpanded = !melodyRecordingsExpanded }
                                         ) { Text(
-                            text = "التسجيلات المتاحة",
+                            text = stringResource(Res.string.available_recordings),
                             style = LiturgicalTextStyles.secondary(
                                 MaterialTheme.typography.bodyMedium,
                                 LiturgicalLanguage.Arabic
@@ -2109,7 +2130,7 @@ private fun HymnDetailsScreen(
                                     val performerName =
                                         recording.performer
                                             ?.takeIf { it.isNotBlank() }
-                                            ?: "تسجيل لحن"
+                                            ?: stringResource(Res.string.melody_recording)
 
                                     Button(
                                         enabled =
@@ -2204,7 +2225,7 @@ private fun HymnDetailsScreen(
                                             performanceRecordingsExpanded = !performanceRecordingsExpanded
                                         }
                                     ) { Text(
-                            text = "تسجيلات الترتيلة المتاحة",
+                            text = stringResource(Res.string.hymn_recordings_available),
                             style = LiturgicalTextStyles.secondary(
                                 MaterialTheme.typography.bodyMedium,
                                 LiturgicalLanguage.Arabic
@@ -2216,7 +2237,7 @@ private fun HymnDetailsScreen(
                                                 ?.takeIf {
                                                     it.isNotBlank()
                                                 }
-                                                ?: "تسجيل ترتيلة"
+                                                ?: stringResource(Res.string.hymn_recording)
 
                                         Button(
                                             enabled =
@@ -2264,7 +2285,7 @@ private fun HymnDetailsScreen(
 
                             is Result.Failure -> {
                                 Text(
-                                    "تعذّر تحميل تسجيلات الترتيلة"
+                                    stringResource(Res.string.hymn_recordings_failed)
                                 )
                                 null
                             }
@@ -2283,7 +2304,7 @@ private fun HymnDetailsScreen(
                     }
 
                     if (target.verses.isEmpty()) {
-                        Text("لا يوجد نص متاح لهذه الترتيلة")
+                        Text(stringResource(Res.string.hymn_text_unavailable))
                     } else {
                         LazyColumn(
                             modifier = Modifier
@@ -2752,8 +2773,8 @@ private fun MelodyNotationSection(
     SideEffect { onNotationChanged(showNotation, page) }
 
     when (val result = notationResult) {
-        null -> if (melodyId != null) Text("Loading notation...")
-        is Result.Failure -> Text(result.error.message ?: "Notation loading failed")
+        null -> if (melodyId != null) Text(stringResource(Res.string.notation_loading))
+        is Result.Failure -> Text(result.error.message ?: stringResource(Res.string.notation_failed))
         is Result.Success -> {
             val assets = result.data
             if (assets.isNotEmpty()) {
@@ -2762,7 +2783,7 @@ private fun MelodyNotationSection(
                         page = 0
                         showNotation = true
                     }) {
-                        Text("View notation (${assets.size})")
+                        Text(stringResource(Res.string.view_notation, assets.size))
                     }
                 }
                 if (showNotation) {
@@ -2833,11 +2854,11 @@ private fun MelodyNotationSection(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        "Notation ${page + 1} / ${assets.size}",
+                                        stringResource(Res.string.notation_progress, page + 1, assets.size),
                                         style = MaterialTheme.typography.titleMedium
                                     )
                                     TextButton(onClick = { showNotation = false }) {
-                                        Text("Close")
+                                        Text(stringResource(Res.string.close))
                                     }
                                 }
                                 Box(
@@ -2846,12 +2867,12 @@ private fun MelodyNotationSection(
                                 ) {
                                     when (val state = imageState) {
                                         NotationImageState.Loading ->
-                                            Text("Loading notation image...")
+                                            Text(stringResource(Res.string.notation_image_loading))
                                         NotationImageState.Failed ->
-                                            Text("Unable to display this notation image.")
+                                            Text(stringResource(Res.string.notation_image_failed))
                                         is NotationImageState.Loaded -> Image(
                                             bitmap = state.bitmap,
-                                            contentDescription = "Notation page ${page + 1}",
+                                            contentDescription = stringResource(Res.string.notation_page, page + 1),
                                             contentScale = ContentScale.Fit,
                                             modifier = Modifier.fillMaxSize()
                                                 .onSizeChanged {
@@ -2877,17 +2898,17 @@ private fun MelodyNotationSection(
                                     TextButton(
                                         enabled = page > 0,
                                         onClick = { page-- }
-                                    ) { Text("Previous") }
+                                    ) { Text(stringResource(Res.string.previous)) }
                                     TextButton(onClick = {
                                         zoom = 1f
                                         setPan(Offset.Zero)
                                     }) {
-                                        Text("Reset zoom")
+                                        Text(stringResource(Res.string.reset_zoom))
                                     }
                                     TextButton(
                                         enabled = page < assets.lastIndex,
                                         onClick = { page++ }
-                                    ) { Text("Next") }
+                                    ) { Text(stringResource(Res.string.next)) }
                                 }
                             }
                         }
