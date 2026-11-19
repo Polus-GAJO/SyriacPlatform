@@ -38,6 +38,16 @@ import org.syriacplatform.resources.stop_playback
 import org.syriacplatform.resources.recording_progress
 import org.syriacplatform.resources.liturgical_items_empty
 import org.syriacplatform.resources.prayer_not_selected
+import org.syriacplatform.resources.hymn_loading
+import org.syriacplatform.resources.hymn_failed
+import org.syriacplatform.resources.hymn_unavailable
+import org.syriacplatform.resources.translation
+import org.syriacplatform.resources.hide_translation
+import org.syriacplatform.resources.notation
+import org.syriacplatform.resources.notation_number
+import org.syriacplatform.resources.return_to_prayer
+import org.syriacplatform.resources.segment
+import org.syriacplatform.resources.whole_hymn
 import org.jetbrains.compose.resources.stringResource
 import org.syriacplatform.presentation.locale.LocalAppLocale
 import androidx.compose.foundation.clickable
@@ -1615,10 +1625,10 @@ private fun HymnDetailsScreen(
             .padding(start = 24.dp, end = 24.dp, top = 50.dp, bottom = 8.dp)
     ) {
         when (val result = itemResult) {
-            null -> Text("جارٍ تحميل الترتيلة…")
+            null -> Text(stringResource(Res.string.hymn_loading))
 
             is Result.Failure -> {
-                Text("تعذّر تحميل الترتيلة")
+                Text(stringResource(Res.string.hymn_failed))
             }
 
             is Result.Success -> {
@@ -2360,7 +2370,7 @@ private fun HymnDetailsScreen(
                         }
                     }
                 } else {
-                    Text("تعذّر عرض هذه الترتيلة")
+                    Text(stringResource(Res.string.hymn_unavailable))
                 }
             }
         }
@@ -2378,7 +2388,7 @@ private fun HymnDetailsScreen(
                 onClick = { translationMenuOpen = true },
                 enabled = toolbarLanguages.isNotEmpty(),
                 modifier = Modifier.align(Alignment.CenterStart)
-            ) { Text("الترجمة") }
+            ) { Text(stringResource(Res.string.translation)) }
             androidx.compose.material3.DropdownMenu(
                 expanded = translationMenuOpen,
                 onDismissRequest = { translationMenuOpen = false }
@@ -2406,7 +2416,7 @@ private fun HymnDetailsScreen(
                 }
                 if (selectedTranslationLanguage != null) {
                     androidx.compose.material3.DropdownMenuItem(
-                        text = { Text("إخفاء الترجمة") },
+                        text = { Text(stringResource(Res.string.hide_translation)) },
                         onClick = {
                             selectedTranslationLanguage = null
                             shownTranslation = null
@@ -2425,14 +2435,14 @@ private fun HymnDetailsScreen(
                     else notationChoiceOpen = true
                 },
                 modifier = Modifier.align(Alignment.Center)
-            ) { Text("النوتة") }
+            ) { Text(stringResource(Res.string.notation)) }
             androidx.compose.material3.DropdownMenu(
                 expanded = notationChoiceOpen,
                 onDismissRequest = { notationChoiceOpen = false }
             ) {
                 repeat(notationCount) { index ->
                     androidx.compose.material3.DropdownMenuItem(
-                        text = { Text("النوتة ${index + 1}") },
+                        text = { Text(stringResource(Res.string.notation_number, index + 1)) },
                         onClick = {
                             notationChoiceOpen = false
                             notationRequestedPage = index
@@ -2444,7 +2454,7 @@ private fun HymnDetailsScreen(
             androidx.compose.material3.TextButton(
                 onClick = { audioService?.stop(); onBack() },
                 modifier = Modifier.align(Alignment.CenterEnd)
-            ) { Text("العودة") }
+            ) { Text(stringResource(Res.string.return_to_prayer)) }
         }
     }
     val audioPlayerVisible = audioService != null &&
@@ -2464,9 +2474,9 @@ private fun HymnDetailsScreen(
         }.takeIf { it >= 0 }?.plus(1)
         CompactAudioPlayer(
             title = if (activeTextInterval?.mediaAssetId == playbackState.mediaAssetId) {
-                segmentNumber?.let { "المقطع $it" } ?: "المقطع"
+                segmentNumber?.let { stringResource(Res.string.segment, it) } ?: stringResource(Res.string.segment, 1)
             } else {
-                "الترتيلة كاملة"
+                stringResource(Res.string.whole_hymn)
             },
             status = playbackState.status,
             positionMs = playbackState.positionMs,
