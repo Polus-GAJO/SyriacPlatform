@@ -32,4 +32,27 @@
     <string name="segment">Segment %1$d</string>
     <string name="whole_hymn">Chant complet</string>
     <string name="segment_generic">Segment</string>
+    <string name="available_recordings">Enregistrements disponibles</string>
+    <string name="text_recording">Enregistrement du texte</string>
+    <string name="text_recordings_failed">Impossible de charger les enregistrements du texte</string>
+    <string name="melodies_available">Mélodies disponibles</string>
+    <string name="melody_recordings_failed">Impossible de charger les enregistrements de la mélodie</string>
+    <string name="melody_recording">Enregistrement de la mélodie</string>
+    <string name="hymn_recordings_available">Enregistrements du chant disponibles</string>
+    <string name="hymn_recording">Enregistrement du chant</string>
+    <string name="hymn_recordings_failed">Impossible de charger les enregistrements du chant</string>
+    <string name="hymn_text_unavailable">Aucun texte disponible pour ce chant</string>
+    <string name="listen_melody">Écouter la mélodie</string>
+    <string name="pause_melody">Mettre la mélodie en pause</string>
+    <string name="notation_loading">Chargement de la partition…</string>
+    <string name="notation_failed">Impossible de charger la partition</string>
+    <string name="view_notation">Voir la partition (%1$d)</string>
+    <string name="notation_progress">Partition %1$d / %2$d</string>
+    <string name="close">Fermer</string>
+    <string name="notation_image_loading">Chargement de l’image de la partition…</string>
+    <string name="notation_image_failed">Impossible d’afficher cette image de partition</string>
+    <string name="notation_page">Page de partition %1$d</string>
+    <string name="previous">Précédent</string>
+    <string name="reset_zoom">Réinitialiser le zoom</string>
+    <string name="next">Suivant</string>
 </resources>
