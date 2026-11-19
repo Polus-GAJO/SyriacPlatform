@@ -22,6 +22,12 @@ import org.syriacplatform.resources.settings_font_size
 import org.syriacplatform.resources.settings_font_size_value
 import org.syriacplatform.resources.settings_save
 import org.syriacplatform.resources.settings_interface_language
+import org.syriacplatform.resources.loading
+import org.syriacplatform.resources.occasions_failed
+import org.syriacplatform.resources.occasions_empty
+import org.syriacplatform.resources.occasion_failed
+import org.syriacplatform.resources.prayers_empty
+import org.syriacplatform.resources.back
 import org.jetbrains.compose.resources.stringResource
 import org.syriacplatform.presentation.locale.LocalAppLocale
 import androidx.compose.foundation.clickable
@@ -487,7 +493,7 @@ private fun HomeScreen(
         ) {
             null -> {
                 Text(
-                    text = "Loading..."
+                    text = stringResource(Res.string.loading)
                 )
             }
 
@@ -495,7 +501,7 @@ private fun HomeScreen(
                 Text(
                     text =
                         result.error.message
-                            ?: "Occasions loading failed",
+                            ?: stringResource(Res.string.occasions_failed),
                     textAlign =
                         TextAlign.Center
                 )
@@ -508,7 +514,7 @@ private fun HomeScreen(
                 if (occasions.isEmpty()) {
                     Text(
                         text =
-                            "No Occasions available"
+                            stringResource(Res.string.occasions_empty)
                     )
                 } else {
                     LazyColumn(
@@ -593,7 +599,7 @@ private fun LiturgicalBackNavigation(onClick: () -> Unit) {
     ) {
         TextButton(onClick = onClick) {
             Text(
-                text = "رجوع →",
+                text = stringResource(Res.string.back),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -654,7 +660,7 @@ private fun OccasionDetailsScreen(
                 Text(
                     text =
                         result.error.message
-                            ?: "Occasion loading failed",
+                            ?: stringResource(Res.string.occasion_failed),
                     textAlign =
                         TextAlign.Center
                 )
@@ -693,7 +699,7 @@ private fun OccasionDetailsScreen(
                 ) {
                     Text(
                         text =
-                            "No prayer sequences available",
+                            stringResource(Res.string.prayers_empty),
                         modifier =
                             Modifier.padding(
                                 top = 24.dp
