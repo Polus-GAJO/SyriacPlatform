@@ -1,5 +1,7 @@
 # SyriacPlatform --- Current State
 
+> **2026-11-19 supplemental checkpoint:** Interface localization (Arabic, English, French, German), Android RTL/LTR navigation, playback controls, dropdown anchoring, and regression guidance are documented in [InterfaceLocalizationAndDirection.md](InterfaceLocalizationAndDirection.md). This supplemental record does not retroactively change the historical baseline or branch metadata below.
+
 **Document:** CurrentState\
 **Status:** Active implementation reference\
 **Last updated:** 2026-10-14\
