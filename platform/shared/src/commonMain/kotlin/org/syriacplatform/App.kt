@@ -1836,7 +1836,10 @@ private fun HymnDetailsScreen(
 
                     selectedMelody?.name?.takeIf { it.isNotBlank() }?.let { melodyName ->
                         Text(
-                            text = melodyName,
+                            text = (itemResult as? Result.Success)?.data?.item?.qintoTitle
+                                ?.takeIf { it.isNotBlank() }
+                                ?.let { "ܩܺܝܢܬܳܐ $it: $melodyName" }
+                                ?: melodyName,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 6.dp, bottom = 12.dp),
