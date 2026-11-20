@@ -2141,3 +2141,130 @@ Private Function CsvValue(ByVal value As Variant) As String
     CsvValue = """" & text & """"
 
 End Function
+
+
+' ============================================================
+' BOOK EXPORT (Shhimo and other book-based collections)
+' Reuses the existing UTF-8 CSV writer; does not alter Occasion.
+' ============================================================
+
+Public Sub ExportBookData(ByVal bookId As Long)
+    On Error GoTo ErrorHandler
+
+    If bookId <= 0 Then
+        Err.Raise vbObjectError + 1100, "ExportBookData", _
+            "BookN must be positive."
+    End If
+
+    Dim outputRoot As String
+    Dim ids As String
+    Dim verseIds As String
+    Dim textIds As String
+    Dim petIds As String
+    Dim eligibleLinks As String
+    Dim translationIds As String
+    Dim languageIds As String
+
+    outputRoot = OCCASION_EXPORT_ROOT & "\book-" & CStr(bookId)
+    EnsureFolderExists outputRoot
+
+    ids = "SELECT E.ID FROM ExistsIn AS E WHERE E.BookN=" & CStr(bookId)
+    verseIds = "SELECT ET.ID FROM ExistsInText AS ET " & _
+        "WHERE ET.ExistsInID IN (" & ids & ")"
+    textIds = "SELECT DISTINCT ET.TextID FROM ExistsInText AS ET " & _
+        "WHERE ET.TextID Is Not Null AND ET.ExistsInID IN (" & ids & ")"
+    petIds = "SELECT DISTINCT PE.PetN FROM PetExis AS PE " & _
+        "WHERE PE.PetN Is Not Null AND PE.ExistInTextID IN (" & verseIds & ")"
+
+    ExportQueryToCsv _
+        "SELECT E.* FROM ExistsIn AS E WHERE E.BookN=" & CStr(bookId) & _
+        " ORDER BY E.DayN, E.PrayerN, E.Sort, E.ID;", _
+        outputRoot & "\ExistsIn.csv"
+
+    ExportQueryToCsv _
+        "SELECT ET.* FROM ExistsInText AS ET WHERE ET.ExistsInID IN (" & ids & _
+        ") ORDER BY ET.ExistsInID, ET.SortInPra, ET.ID;", _
+        outputRoot & "\ExistsInText.csv"
+
+    ExportQueryToCsv _
+        "SELECT PE.* FROM PetExis AS PE WHERE PE.ExistInTextID IN (" & verseIds & _
+        ") ORDER BY PE.ExistInTextID, PE.PetExistID;", _
+        outputRoot & "\PetExis.csv"
+
+    ExportQueryToCsv _
+        "SELECT P.* FROM Prayers AS P WHERE P.PrayerN IN (" & _
+        "SELECT DISTINCT E.PrayerN FROM ExistsIn AS E WHERE E.BookN=" & _
+        CStr(bookId) & " AND E.PrayerN Is Not Null) ORDER BY P.PrayerN;", _
+        outputRoot & "\Prayers.csv"
+
+    ExportQueryToCsv _
+        "SELECT Q.* FROM Qolos AS Q WHERE Q.QoloN IN (" & _
+        "SELECT DISTINCT E.QoloN FROM ExistsIn AS E WHERE E.BookN=" & _
+        CStr(bookId) & " AND E.QoloN Is Not Null) ORDER BY Q.QoloN;", _
+        outputRoot & "\Qolos.csv"
+
+    ExportQueryToCsv _
+        "SELECT Q.* FROM Qinto AS Q WHERE Q.QintoN IN (" & _
+        "SELECT DISTINCT E.QintoN FROM ExistsIn AS E WHERE E.BookN=" & _
+        CStr(bookId) & " AND E.QintoN Is Not Null) ORDER BY Q.QintoN;", _
+        outputRoot & "\Qinto.csv"
+
+    ExportQueryToCsv _
+        "SELECT M.* FROM Melody AS M WHERE M.QoloN IN (" & _
+        "SELECT DISTINCT E.QoloN FROM ExistsIn AS E WHERE E.BookN=" & _
+        CStr(bookId) & " AND E.QoloN Is Not Null) ORDER BY M.MelodyN;", _
+        outputRoot & "\Melody.csv"
+
+    ExportQueryToCsv _
+        "SELECT T.* FROM Texts AS T WHERE T.TextID IN (" & textIds & _
+        ") ORDER BY T.TextID;", outputRoot & "\Texts.csv"
+
+    ExportQueryToCsv _
+        "SELECT P.* FROM Petgomo AS P WHERE P.PetN IN (" & petIds & _
+        ") ORDER BY P.PetN;", outputRoot & "\Petgomo.csv"
+
+    ExportQueryToCsv _
+        "SELECT L.LocationN, L.Location FROM Location AS L " & _
+        "WHERE L.LocationN IN (SELECT DISTINCT E.LocationN FROM ExistsIn AS E " & _
+        "WHERE E.BookN=" & CStr(bookId) & _
+        " AND E.LocationN Is Not Null) ORDER BY L.LocationN;", _
+        outputRoot & "\Location.csv"
+
+    ExportQueryToCsv _
+        "SELECT N.NoteN, N.Note, N.publicationStatus FROM Notes AS N " & _
+        "WHERE N.publicationStatus='PUBLISHED' AND N.NoteN IN (" & _
+        "SELECT DISTINCT E.NoteN FROM ExistsIn AS E WHERE E.BookN=" & _
+        CStr(bookId) & " AND E.NoteN Is Not Null) ORDER BY N.NoteN;", _
+        outputRoot & "\Notes.csv"
+
+    eligibleLinks = "SELECT L.LinkID, L.TranslationID FROM TranslationLinks AS L " & _
+        "WHERE L.IsPublished=True AND (" & _
+        "(L.TextID Is Not Null AND L.TextID IN (" & textIds & ")) OR " & _
+        "(L.PetN Is Not Null AND L.PetN IN (" & petIds & ")))"
+    translationIds = "SELECT DISTINCT X.TranslationID FROM (" & eligibleLinks & ") AS X"
+    languageIds = "SELECT DISTINCT T.LanguageID FROM Translations AS T " & _
+        "WHERE T.TranslationID IN (" & translationIds & ")"
+
+    ExportQueryToCsv _
+        "SELECT L.* FROM TranslationLinks AS L WHERE L.LinkID IN (" & _
+        "SELECT X.LinkID FROM (" & eligibleLinks & ") AS X) ORDER BY L.LinkID;", _
+        outputRoot & "\TranslationLinks.csv"
+
+    ExportQueryToCsv _
+        "SELECT T.* FROM Translations AS T WHERE T.TranslationID IN (" & _
+        translationIds & ") ORDER BY T.TranslationID;", _
+        outputRoot & "\Translations.csv"
+
+    ExportQueryToCsv _
+        "SELECT G.* FROM Languages AS G WHERE G.LanguageID IN (" & _
+        languageIds & ") ORDER BY G.LanguageID;", _
+        outputRoot & "\Languages.csv"
+
+    MsgBox "Book " & bookId & " exported successfully:" & vbCrLf & _
+        outputRoot, vbInformation, "SyriacPlatform Book Export"
+    Exit Sub
+
+ErrorHandler:
+    MsgBox "Book export failed: " & Err.Number & vbCrLf & _
+        Err.Description, vbCritical, "SyriacPlatform Book Export"
+End Sub
