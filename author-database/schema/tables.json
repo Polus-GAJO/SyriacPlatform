@@ -230,6 +230,21 @@
           "validationRule": "Is Null Or =\"PRAYER_NOTE\"",
           "validationText": null,
           "description": null
+        },
+        {
+          "name": "MelodyGroupID",
+          "ordinal": 10,
+          "type": "Long",
+          "daoType": 4,
+          "size": 4,
+          "nullable": true,
+          "primaryKey": false,
+          "autoIncrement": false,
+          "allowZeroLength": false,
+          "defaultValue": null,
+          "validationRule": null,
+          "validationText": null,
+          "description": null
         }
       ]
     },

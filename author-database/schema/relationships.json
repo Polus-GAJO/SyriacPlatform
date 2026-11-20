@@ -288,6 +288,21 @@
       ]
     },
     {
+      "name": "MelodyGroupExistsIn",
+      "primaryTable": "MelodyGroup",
+      "foreignTable": "ExistsIn",
+      "referentialIntegrity": true,
+      "cascadeUpdate": false,
+      "cascadeDelete": false,
+      "attributes": 0,
+      "columns": [
+        {
+          "primaryColumn": "MelodyGroupID",
+          "foreignColumn": "MelodyGroupID"
+        }
+      ]
+    },
+    {
       "name": "MelodyMelodyMedia",
       "primaryTable": "Melody",
       "foreignTable": "MelodyMedia",

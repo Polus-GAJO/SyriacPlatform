@@ -169,6 +169,36 @@
     },
     {
       "table": "ExistsIn",
+      "name": "MelodyGroupExistsIn",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MelodyGroupID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsIn",
+      "name": "MelodyGroupID",
+      "primary": false,
+      "unique": false,
+      "required": false,
+      "ignoreNulls": false,
+      "columns": [
+        {
+          "name": "MelodyGroupID",
+          "ordinal": 0,
+          "descending": false
+        }
+      ]
+    },
+    {
+      "table": "ExistsIn",
       "name": "NotesExistsIn",
       "primary": false,
       "unique": false,
