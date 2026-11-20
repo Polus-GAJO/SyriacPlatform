@@ -144,3 +144,21 @@ tasks.register<JavaExec>(
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.register<JavaExec>("buildBookPrayerPreview") {
+    group = "syriacplatform"
+    description = "Builds a book/day/prayer Schema-v1 development preview from CSV."
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("org.syriacplatform.buildtools.packagebuilder.BookPrayerPreviewBuildMainKt")
+    val bookId = providers.gradleProperty("bookId")
+    val dayId = providers.gradleProperty("dayId")
+    val prayerId = providers.gradleProperty("prayerId")
+    val sourceDir = providers.gradleProperty("sourceDir")
+    val outputDir = providers.gradleProperty("outputDir")
+    doFirst {
+        args(
+            bookId.get(), dayId.get(), prayerId.get(),
+            sourceDir.get(), outputDir.get()
+        )
+    }
+}
