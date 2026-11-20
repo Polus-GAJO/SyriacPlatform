@@ -50,7 +50,10 @@ fun main(args: Array<String>) {
         melodies = rows("Melody.csv").map(mapper::toMelody),
         qintos = rows("Qinto.csv").map(mapper::toQinto),
         locations = rows("Location.csv").map(mapper::toLocation),
-        notes = rows("Notes.csv").map(mapper::toNote)
+        notes = rows("Notes.csv").map(mapper::toNote),
+        languages = rows("Languages.csv").map(mapper::toLanguage),
+        translations = rows("Translations.csv").map(mapper::toTranslation),
+        translationLinks = rows("TranslationLinks.csv").map(mapper::toTranslationLink)
     )
     val previewId = 1L
     val packageData = BookPrayerPreviewPackageBuilder().build(
