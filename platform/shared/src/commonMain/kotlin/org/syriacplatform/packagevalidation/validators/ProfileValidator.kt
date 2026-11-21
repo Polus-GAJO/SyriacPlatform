@@ -68,11 +68,8 @@ class ProfileValidator :
                 }
 
                 PackageProfile.SHHIMA -> {
-                    requireCollection(
-                        presence.entryPoints,
-                        "entryPoints"
-                    )
-
+                    // Daily Book navigation is stored in book-daily-navigation.json.
+                    // Unlike Occasion packages, Shhima does not require entry points.
                     requireCollection(
                         presence.prayers,
                         "prayers"
