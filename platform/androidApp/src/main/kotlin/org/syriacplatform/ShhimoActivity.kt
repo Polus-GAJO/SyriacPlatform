@@ -3,8 +3,6 @@ package org.syriacplatform
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import org.syriacplatform.packageformat.loading.PackageSource
 import org.syriacplatform.presentation.shhimo.ShhimoDailyScreen
 
@@ -24,14 +22,10 @@ class ShhimoActivity : ComponentActivity() {
                 }
         }
         setContent {
-            MaterialTheme {
-                Surface {
-                    ShhimoDailyScreen(
-                        source = source,
-                        onOpenLiturgicalItem = { /* Detail view follows in next iteration. */ }
-                    )
-                }
-            }
+            ShhimoDailyScreen(
+                source = source,
+                onOpenLiturgicalItem = { /* Detail view follows in next iteration. */ }
+            )
         }
     }
 }
