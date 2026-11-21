@@ -26,18 +26,18 @@ fun ShhimoHymnDetails(
     onBack: () -> Unit
 ) {
     val services = remember(source) {
-        val content = DefaultContentService(
+        val contentService = DefaultContentService(
             ApplicationPackageContentRepository(
                 ApplicationPackageLoader(source),
                 CoreCompatibilityDefaults.CURRENT
             )
         ).also { it.initialize() }
-        val preferences = DefaultPreferencesService(
+        val preferencesService = DefaultPreferencesService(
             InMemoryUserPreferencesStore()
         ).also { it.initialize() }
         object : HymnDetailsServices {
-            override val content = content
-            override val preferences = preferences
+            override val content = contentService
+            override val preferences = preferencesService
             override val performanceTextPlayback = null
         }
     }
