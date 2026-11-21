@@ -264,7 +264,11 @@ fun App(
 
                 if (liturgicalItemId != null) {
                     HymnDetailsScreen(
-                        platform = platform,
+                        services = object : HymnDetailsServices {
+                            override val content = platform.content
+                            override val preferences = platform.preferences
+                            override val performanceTextPlayback = platform.performanceTextPlayback
+                        },
                         audioService = platform.audio,
                         liturgicalItemId =
                             liturgicalItemId,
@@ -1670,7 +1674,7 @@ private sealed interface NotationImageState {
  */
 @Composable
 internal fun MelodyNotationSection(
-    platform: PlatformContext,
+    content: org.syriacplatform.content.contracts.ContentService,
     melodyId: MelodyId?,
     initialOpen: Boolean,
     initialPage: Int,
@@ -1681,10 +1685,10 @@ internal fun MelodyNotationSection(
 ) {
     val notationResult by produceState<Result<List<MediaAsset>>?>(
         initialValue = null,
-        key1 = platform,
+        key1 = content,
         key2 = melodyId
     ) {
-        value = melodyId?.let { platform.content.loadMelodyNotations(it) }
+        value = melodyId?.let { content.loadMelodyNotations(it) }
     }
     var showNotation by remember(melodyId) { mutableStateOf(initialOpen) }
     var page by remember(melodyId) { mutableStateOf(initialPage) }
