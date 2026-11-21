@@ -2,6 +2,7 @@ package org.syriacplatform.buildtools.packagebuilder
 
 import java.nio.file.Files
 import java.nio.file.Path
+import org.syriacplatform.buildtools.schema.SchemaV1MediaAsset
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
@@ -11,7 +12,7 @@ import kotlinx.serialization.json.put
 class ShhimoDailyPackageWriter(
     private val contentWriter: SchemaV1PackageWriter = SchemaV1PackageWriter()
 ) {
-    fun write(bookId: Long, data: ShhimoDailyPackage, output: Path) {
+    fun write(bookId: Long, data: ShhimoDailyPackage, output: Path, mediaLibraryRoot: Path? = null, sourceMediaAssets: List<SchemaV1MediaAsset> = emptyList()) {
         require(bookId > 0L)
         require(data.content.entryPoints.isEmpty() && data.content.occasions.isEmpty()) {
             "Book packages must not contain Occasion navigation."
@@ -23,7 +24,7 @@ class ShhimoDailyPackageWriter(
             data.content.prayerSequences.map { it.id }.toSet()) {
             "Daily navigation and prayer sequences differ."
         }
-        contentWriter.write(data.content, output)
+        contentWriter.write(data.content, output, mediaLibraryRoot, sourceMediaAssets)
         val navigation = buildJsonObject {
             put("bookId", bookId)
             put("days", buildJsonArray {
