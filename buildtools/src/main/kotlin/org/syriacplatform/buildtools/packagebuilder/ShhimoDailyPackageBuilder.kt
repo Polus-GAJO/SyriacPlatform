@@ -66,7 +66,7 @@ class ShhimoDailyPackageBuilder(
         return ShhimoDailyPackage(
             content = assembled.copy(
                 manifest = assembled.manifest.copy(
-                    profile = "Book",
+                    profile = "Shhima",
                     supportedFeatures = listOf("book-daily-navigation")
                 )
             ),
