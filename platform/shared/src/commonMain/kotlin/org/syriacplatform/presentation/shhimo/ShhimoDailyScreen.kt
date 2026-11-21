@@ -18,6 +18,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
+import org.jetbrains.compose.resources.Font
+import syriacplatform.shared.generated.resources.Res
+import syriacplatform.shared.generated.resources.serto_jerusalem
 import androidx.compose.ui.unit.dp
 import org.syriacplatform.packageformat.loading.ApplicationPackageLoader
 import org.syriacplatform.packageformat.loading.PackageLoadResult
@@ -64,6 +69,7 @@ fun ShhimoDailyScreen(
                     it.prayerId in prayers && sequence.liturgicalItemIds.all { id -> id.value in items }
             }) { "Shhimo navigation references missing or mismatched content" }
             val texts = content.texts.associateBy { it.id.value }
+            val petgomos = content.petgomos.associateBy { it.id.value }
             ShhimoScreenState.Ready(
                 navigation.days.map { day ->
                     ShhimoDayUi(day.dayId, day.prayers.map { prayer ->
@@ -81,12 +87,16 @@ fun ShhimoDailyScreen(
                 },
                 items.mapValues { (_, item) ->
                     val occurrences = when (val target = item.target) {
-                        is LiturgicalItemTarget.Text -> listOf(target.textId.value)
-                        is LiturgicalItemTarget.NonMelodicText -> target.verses.map { it.textId.value }
-                        is LiturgicalItemTarget.Qolo -> target.verses.map { it.textId.value }
-                        is LiturgicalItemTarget.UnresolvedQolo -> target.verses.map { it.textId.value }
+                        is LiturgicalItemTarget.Text -> listOf(target.textId.value to target.petgomoId?.value)
+                        is LiturgicalItemTarget.NonMelodicText -> target.verses.map { it.textId.value to it.petgomoId?.value }
+                        is LiturgicalItemTarget.Qolo -> target.verses.map { it.textId.value to it.petgomoId?.value }
+                        is LiturgicalItemTarget.UnresolvedQolo -> target.verses.map { it.textId.value to it.petgomoId?.value }
                     }
-                    occurrences.mapNotNull { texts[it]?.syriac }
+                    occurrences.mapNotNull { (textId, petgomoId) ->
+                        texts[textId]?.let { verse ->
+                            ShhimoVerseUi(verse.syriac, petgomoId?.let { petgomos[it]?.syriac })
+                        }
+                    }
                 }
             )
         } catch (e: Exception) {
@@ -94,8 +104,9 @@ fun ShhimoDailyScreen(
         }
     }
 
+    val syriacFont = FontFamily(Font(Res.font.serto_jerusalem))
     Column(modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("ܫܚܺܝܡܳܐ", style = MaterialTheme.typography.headlineMedium)
+        Text("ܫܚܺܝܡܳܐ", style = MaterialTheme.typography.headlineMedium, fontFamily = syriacFont, textAlign = TextAlign.Right, modifier = Modifier.fillMaxWidth())
         when (val current = state) {
             ShhimoScreenState.Loading -> Text("جارٍ تحميل الصلوات…")
             is ShhimoScreenState.Error -> Text(current.message, color = MaterialTheme.colorScheme.error)
@@ -112,7 +123,16 @@ fun ShhimoDailyScreen(
                         Text(current.itemTitles[selectedItem] ?: "ܩܳܠܳܐ", style = MaterialTheme.typography.titleLarge)
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             items(current.itemVerses[selectedItem].orEmpty()) { verse ->
-                                Text(verse, modifier = Modifier.fillMaxWidth().padding(8.dp), style = MaterialTheme.typography.bodyLarge)
+                                Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                                    Text(verse.syriac, modifier = Modifier.fillMaxWidth(), fontFamily = syriacFont,
+                                        textAlign = TextAlign.Right, style = MaterialTheme.typography.bodyLarge)
+                                    verse.petgomo?.let { petgomo ->
+                                        Text(petgomo, modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                                            fontFamily = syriacFont, textAlign = TextAlign.Right,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.primary)
+                                    }
+                                }
                             }
                         }
                     }
@@ -166,7 +186,7 @@ private fun dayLabel(id: Long): String = when (id) {
 private sealed interface ShhimoScreenState {
     data object Loading : ShhimoScreenState
     data class Error(val message: String) : ShhimoScreenState
-    data class Ready(val days: List<ShhimoDayUi>, val itemTitles: Map<Long, String>, val itemVerses: Map<Long, List<String>>) : ShhimoScreenState
+    data class Ready(val days: List<ShhimoDayUi>, val itemTitles: Map<Long, String>, val itemVerses: Map<Long, List<ShhimoVerseUi>>) : ShhimoScreenState
 }
 private data class ShhimoDayUi(val id: Long, val prayers: List<ShhimoPrayerUi>)
 private data class ShhimoPrayerUi(
@@ -175,3 +195,5 @@ private data class ShhimoPrayerUi(
     val name: String,
     val itemIds: List<Long>
 )
+
+private data class ShhimoVerseUi(val syriac: String, val petgomo: String?)
