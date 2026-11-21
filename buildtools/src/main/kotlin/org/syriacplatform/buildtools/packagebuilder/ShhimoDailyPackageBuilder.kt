@@ -2,6 +2,7 @@ package org.syriacplatform.buildtools.packagebuilder
 
 import org.syriacplatform.buildtools.schema.BookPrayerPackageSliceBuilder
 import org.syriacplatform.buildtools.schema.SchemaV1CanonicalMapper
+import org.syriacplatform.buildtools.schema.SchemaV1CanonicalMedia
 import org.syriacplatform.buildtools.schema.SchemaV1CompositionDraft
 import org.syriacplatform.buildtools.schema.SchemaV1NavigationContent
 import org.syriacplatform.buildtools.schema.SchemaV1PrayerCompositionDraft
@@ -43,7 +44,13 @@ class ShhimoDailyPackageBuilder(
             contentVersion = "shhimo-book-$bookId-daily-preview"
         )
         val assembled = assembler.assemble(
-            canonical = canonicalMapper.map(source),
+            canonical = canonicalMapper.map(
+                source,
+                SchemaV1CanonicalMedia(
+                    mediaAssets = emptyList(),
+                    melodyMedia = emptyList()
+                )
+            ),
             composition = SchemaV1CompositionDraft(
                 occasionId = internalOccasionId,
                 prayers = slicesByPrayer.map { (entry, slice) ->
