@@ -66,24 +66,11 @@ class SchemaV1PackageMediaSelector {
 
         val selectedTextOccurrenceMediaSegments =
             canonicalMedia.textOccurrenceMediaSegments
-                .filter { it.mediaSegmentId in selectedMediaSegmentIds }
+                .filter { it.mediaSegmentId in selectedMediaSegmentIds && it.textOccurrenceId in textOccurrenceIds }
                 .sortedWith(
                     compareBy<SchemaV1TextOccurrenceMediaSegment> { it.mediaSegmentId }
                         .thenBy { it.id }
                 )
-
-        val missingTextOccurrenceIds =
-            selectedTextOccurrenceMediaSegments
-                .map { it.textOccurrenceId }
-                .filterNot { it in textOccurrenceIds }
-                .distinct()
-                .sorted()
-
-        require(missingTextOccurrenceIds.isEmpty()) {
-            "Selected PERFORMANCE timing references TextOccurrence ids " +
-                    "not present in the package: " +
-                    missingTextOccurrenceIds.joinToString()
-        }
 
         val selectedMediaAssetIds =
             buildSet {
