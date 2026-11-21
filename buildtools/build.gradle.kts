@@ -162,3 +162,13 @@ tasks.register<JavaExec>("buildBookPrayerPreview") {
         )
     }
 }
+
+tasks.register<JavaExec>("inspectShhimoDailyNavigation") {
+    group = "syriacplatform"
+    description = "Lists Shhimo daily prayers from exported ExistsIn.csv (excludes DayN=0)."
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("org.syriacplatform.buildtools.schema.ShhimoDailyNavigationMainKt")
+    val bookId = providers.gradleProperty("bookId")
+    val sourceDir = providers.gradleProperty("sourceDir")
+    doFirst { args(bookId.get(), sourceDir.get()) }
+}
