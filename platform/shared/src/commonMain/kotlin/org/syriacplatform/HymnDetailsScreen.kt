@@ -185,7 +185,7 @@ internal fun HymnDetailsScreen(
 ) {
     val itemResult by produceState<Result<ResolvedLiturgicalItem>?>(
         initialValue = null,
-        key1 = platform,
+        key1 = services.content,
         key2 = liturgicalItemId
     ) {
         value = services.content.loadLiturgicalItem(liturgicalItemId)
@@ -196,7 +196,7 @@ internal fun HymnDetailsScreen(
 
     val occurrenceNoteResult by produceState<Result<org.syriacservices.content.models.Note>?>(
         initialValue = null,
-        key1 = platform,
+        key1 = services.content,
         key2 = occurrenceNoteId
     ) {
         value = occurrenceNoteId?.let { services.content.loadNote(it) }
@@ -256,7 +256,7 @@ internal fun HymnDetailsScreen(
     val performanceMediaResult by
         produceState<Result<List<ResolvedPerformanceMedia>>?>(
             initialValue = null,
-            key1 = platform,
+            key1 = services.content,
             key2 = liturgicalItemId
         ) {
             value =
@@ -314,7 +314,7 @@ internal fun HymnDetailsScreen(
         }
     val toolbarNotations by produceState<Result<List<MediaAsset>>?>(
         initialValue = null,
-        key1 = platform,
+        key1 = services.content,
         key2 = toolbarMelodyId
     ) {
         value = toolbarMelodyId?.let { services.content.loadMelodyNotations(it) }
@@ -682,7 +682,7 @@ internal fun HymnDetailsScreen(
 
                     val recordingsResult by produceState<Result<List<MediaAsset>>?>(
                         initialValue = null,
-                        key1 = platform,
+                        key1 = services.content,
                         key2 = selectedMelody?.id
                     ) {
                         value =
