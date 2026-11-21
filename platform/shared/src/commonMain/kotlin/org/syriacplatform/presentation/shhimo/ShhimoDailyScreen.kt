@@ -40,6 +40,7 @@ fun ShhimoDailyScreen(
     source: PackageSource,
     onOpenLiturgicalItem: (Long) -> Unit,
     onPlayRecording: (MediaAsset) -> Unit = {},
+    externalItemDetails: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     var state by remember(source) { mutableStateOf<ShhimoScreenState>(ShhimoScreenState.Loading) }
@@ -161,7 +162,7 @@ fun ShhimoDailyScreen(
                                 Text(
                                     current.itemTitles[id] ?: "ܩܳܠܳܐ",
                                     modifier = Modifier.fillMaxWidth()
-                                        .clickable { selectedItem = id; onOpenLiturgicalItem(id) }
+                                        .clickable { if (!externalItemDetails) selectedItem = id; onOpenLiturgicalItem(id) }
                                         .padding(12.dp)
                                 )
                             }
