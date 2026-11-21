@@ -18,11 +18,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
-import org.jetbrains.compose.resources.Font
-import syriacplatform.shared.generated.resources.Res
-import syriacplatform.shared.generated.resources.serto_jerusalem
+import org.syriacplatform.presentation.theme.LiturgicalFontFamilies
+import org.syriacplatform.presentation.theme.LiturgicalTextStyles
+import org.syriacplatform.presentation.theme.LiturgicalTitleLevel
 import androidx.compose.ui.unit.dp
 import org.syriacplatform.packageformat.loading.ApplicationPackageLoader
 import org.syriacplatform.packageformat.loading.PackageLoadResult
@@ -104,9 +103,9 @@ fun ShhimoDailyScreen(
         }
     }
 
-    val syriacFont = FontFamily(Font(Res.font.serto_jerusalem))
+    val syriacFont = LiturgicalFontFamilies.syriac()
     Column(modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("ܫܚܺܝܡܳܐ", style = MaterialTheme.typography.headlineMedium, fontFamily = syriacFont, textAlign = TextAlign.Right, modifier = Modifier.fillMaxWidth())
+        Text("ܫܚܺܝܡܳܐ", style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Occasion), modifier = Modifier.fillMaxWidth())
         when (val current = state) {
             ShhimoScreenState.Loading -> Text("جارٍ تحميل الصلوات…")
             is ShhimoScreenState.Error -> Text(current.message, color = MaterialTheme.colorScheme.error)
@@ -124,14 +123,14 @@ fun ShhimoDailyScreen(
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             items(current.itemVerses[selectedItem].orEmpty()) { verse ->
                                 Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                                    Text(verse.syriac, modifier = Modifier.fillMaxWidth(), fontFamily = syriacFont,
-                                        textAlign = TextAlign.Right, style = MaterialTheme.typography.bodyLarge)
                                     verse.petgomo?.let { petgomo ->
-                                        Text(petgomo, modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                                        Text(petgomo, modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
                                             fontFamily = syriacFont, textAlign = TextAlign.Right,
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.primary)
                                     }
+                                    Text(verse.syriac, modifier = Modifier.fillMaxWidth(), fontFamily = syriacFont,
+                                        textAlign = TextAlign.Right, style = MaterialTheme.typography.bodyLarge)
                                 }
                             }
                         }
