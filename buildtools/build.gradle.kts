@@ -182,3 +182,14 @@ tasks.register<JavaExec>("validateShhimoDailySequences") {
     val sourceDir = providers.gradleProperty("sourceDir")
     doFirst { args(bookId.get(), sourceDir.get()) }
 }
+
+tasks.register<JavaExec>("buildShhimoDailyPackage") {
+    group = "syriacplatform"
+    description = "Builds the complete seven-day Shhimo Book-profile package."
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("org.syriacplatform.buildtools.packagebuilder.ShhimoDailyPackageBuildMainKt")
+    val bookId = providers.gradleProperty("bookId")
+    val sourceDir = providers.gradleProperty("sourceDir")
+    val outputDir = providers.gradleProperty("outputDir")
+    doFirst { args(bookId.get(), sourceDir.get(), outputDir.get()) }
+}
