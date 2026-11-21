@@ -15,6 +15,9 @@ object PackagePaths {
     const val OCCASIONS =
         "content/occasions.json"
 
+    const val BOOK_DAILY_NAVIGATION =
+        "content/book-daily-navigation.json"
+
     const val PRAYERS =
         "content/prayers.json"
 
