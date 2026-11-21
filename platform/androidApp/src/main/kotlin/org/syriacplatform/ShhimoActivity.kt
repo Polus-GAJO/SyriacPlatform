@@ -25,6 +25,7 @@ class ShhimoActivity : ComponentActivity() {
     private lateinit var audio: DefaultAudioService
     private var pendingAutoplay by mutableStateOf(false)
     private var playingTitle by mutableStateOf("تسجيل الأداء")
+    private var selectedHymnId by mutableStateOf<Long?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,9 +57,22 @@ class ShhimoActivity : ComponentActivity() {
                 if (playback.status == PlaybackStatus.Error) pendingAutoplay = false
             }
             Column {
+                if (selectedHymnId != null) {
+                    ShhimoHymnDetails(
+                        source = source,
+                        audioService = audio,
+                        itemId = requireNotNull(selectedHymnId),
+                        onBack = { selectedHymnId = null }
+                    )
+                } else {
                 ShhimoDailyScreen(
                     source = source,
-                    onOpenLiturgicalItem = {},
+                    onOpenLiturgicalItem = { id ->
+                        pendingAutoplay = false
+                        audio.stop()
+                        selectedHymnId = id
+                    },
+                    externalItemDetails = true,
                     onPlayRecording = { asset ->
                         pendingAutoplay = false
                         audio.stop()
@@ -68,7 +82,8 @@ class ShhimoActivity : ComponentActivity() {
                     },
                     modifier = androidx.compose.ui.Modifier.weight(1f)
                 )
-                if (playback.status != PlaybackStatus.Idle) {
+                }
+                if (selectedHymnId == null && playback.status != PlaybackStatus.Idle) {
                     CompactAudioPlayer(
                         title = playingTitle,
                         status = playback.status,
