@@ -191,5 +191,13 @@ tasks.register<JavaExec>("buildShhimoDailyPackage") {
     val bookId = providers.gradleProperty("bookId")
     val sourceDir = providers.gradleProperty("sourceDir")
     val outputDir = providers.gradleProperty("outputDir")
-    doFirst { args(bookId.get(), sourceDir.get(), outputDir.get()) }
+    val includeMedia = providers.gradleProperty("includeMedia").map { it.toBoolean() }.orElse(false)
+    doFirst {
+        if (includeMedia.get()) {
+            args(bookId.get(), sourceDir.get(), mediaSourceDirectory.asFile.absolutePath,
+                file(mediaLibraryRoot).absolutePath, outputDir.get())
+        } else {
+            args(bookId.get(), sourceDir.get(), outputDir.get())
+        }
+    }
 }
