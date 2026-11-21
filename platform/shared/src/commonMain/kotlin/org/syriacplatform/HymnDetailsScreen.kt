@@ -137,13 +137,13 @@ import org.syriacplatform.common.types.MelodyId
 import org.syriacplatform.common.types.OccasionId
 import org.syriacplatform.common.types.PerformanceMediaId
 import org.syriacplatform.common.types.QoloId
-import org.syriacservices.content.models.MediaAsset
-import org.syriacservices.content.models.Occasion
-import org.syriacservices.content.models.Qolo
-import org.syriacservices.content.runtime.ResolvedLiturgicalItem
-import org.syriacservices.content.runtime.ResolvedLiturgicalItemTarget
-import org.syriacservices.content.runtime.ResolvedPerformanceMedia
-import org.syriacservices.content.runtime.RuntimeOccasion
+import org.syriacplatform.content.models.MediaAsset
+import org.syriacplatform.content.models.Occasion
+import org.syriacplatform.content.models.Qolo
+import org.syriacplatform.content.runtime.ResolvedLiturgicalItem
+import org.syriacplatform.content.runtime.ResolvedLiturgicalItemTarget
+import org.syriacplatform.content.runtime.ResolvedPerformanceMedia
+import org.syriacplatform.content.runtime.RuntimeOccasion
 import org.syriacplatform.context.PlatformContext
 import org.syriacplatform.navigation.AppDestination
 import org.syriacplatform.navigation.AppSessionState
@@ -162,7 +162,7 @@ import kotlinx.coroutines.launch
 
 /** Services required by the hymn screen, independent of app navigation and kernel. */
 internal interface HymnDetailsServices {
-    val content: org.syriacservices.content.contracts.ContentService
+    val content: org.syriacplatform.content.contracts.ContentService
     val preferences: org.syriacplatform.user.contracts.PreferencesService
     val performanceTextPlayback: org.syriacplatform.audio.PerformanceTextOccurrencePlaybackController?
 }
@@ -194,7 +194,7 @@ internal fun HymnDetailsScreen(
     val occurrenceNoteId =
         (itemResult as? Result.Success)?.data?.item?.noteId
 
-    val occurrenceNoteResult by produceState<Result<org.syriacservices.content.models.Note>?>(
+    val occurrenceNoteResult by produceState<Result<org.syriacplatform.content.models.Note>?>(
         initialValue = null,
         key1 = services.content,
         key2 = occurrenceNoteId
