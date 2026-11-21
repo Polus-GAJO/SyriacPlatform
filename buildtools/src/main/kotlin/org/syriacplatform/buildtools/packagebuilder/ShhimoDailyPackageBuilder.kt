@@ -3,6 +3,8 @@ package org.syriacplatform.buildtools.packagebuilder
 import org.syriacplatform.buildtools.schema.BookPrayerPackageSliceBuilder
 import org.syriacplatform.buildtools.schema.SchemaV1CanonicalMapper
 import org.syriacplatform.buildtools.schema.SchemaV1CanonicalMedia
+import org.syriacplatform.buildtools.schema.SchemaV1PackageMediaSelector
+import org.syriacplatform.buildtools.schema.SchemaV1QoloLiturgicalItem
 import org.syriacplatform.buildtools.schema.SchemaV1CompositionDraft
 import org.syriacplatform.buildtools.schema.SchemaV1NavigationContent
 import org.syriacplatform.buildtools.schema.SchemaV1PrayerCompositionDraft
@@ -18,9 +20,10 @@ class ShhimoDailyPackageBuilder(
     private val planner: ShhimoDailySequencePlanner = ShhimoDailySequencePlanner(),
     private val slices: BookPrayerPackageSliceBuilder = BookPrayerPackageSliceBuilder(),
     private val canonicalMapper: SchemaV1CanonicalMapper = SchemaV1CanonicalMapper(),
-    private val assembler: SchemaV1PreviewPackageAssembler = SchemaV1PreviewPackageAssembler()
+    private val assembler: SchemaV1PreviewPackageAssembler = SchemaV1PreviewPackageAssembler(),
+    private val mediaSelector: SchemaV1PackageMediaSelector = SchemaV1PackageMediaSelector()
 ) {
-    fun build(source: AuthorSourceData, bookId: Long): ShhimoDailyPackage {
+    fun build(source: AuthorSourceData, bookId: Long, media: SchemaV1CanonicalMedia = SchemaV1CanonicalMedia(emptyList(), emptyList())): ShhimoDailyPackage {
         require(bookId > 0L)
         val plan = planner.plan(source.existsIn, bookId)
         require(plan.isNotEmpty()) { "No daily prayers in book $bookId." }
@@ -37,6 +40,10 @@ class ShhimoDailyPackageBuilder(
         require(items.map { it.id }.distinct().size == items.size) {
             "Duplicate liturgical item across daily prayers."
         }
+        val melodyIds = items.filterIsInstance<SchemaV1QoloLiturgicalItem>()
+            .flatMap { item -> listOfNotNull(item.effectiveMelodyId) + item.melodyCandidateIds }
+            .toSet()
+        val selectedMedia = mediaSelector.select(media, melodyIds, items)
         val internalOccasionId = 1L
         val config = OccasionPackageBuildConfig.developmentPreview(internalOccasionId).copy(
             packageId = "org.syriacplatform.shhimo.book$bookId",
@@ -46,10 +53,7 @@ class ShhimoDailyPackageBuilder(
         val assembled = assembler.assemble(
             canonical = canonicalMapper.map(
                 source,
-                SchemaV1CanonicalMedia(
-                    mediaAssets = emptyList(),
-                    melodyMedia = emptyList()
-                )
+                selectedMedia
             ),
             composition = SchemaV1CompositionDraft(
                 occasionId = internalOccasionId,
@@ -68,7 +72,8 @@ class ShhimoDailyPackageBuilder(
                 occasions = emptyList(),
                 prayerSequences = sequences
             ),
-            config = config
+            config = config,
+            media = selectedMedia
         )
         return ShhimoDailyPackage(
             content = assembled.copy(
