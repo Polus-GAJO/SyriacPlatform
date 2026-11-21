@@ -172,3 +172,13 @@ tasks.register<JavaExec>("inspectShhimoDailyNavigation") {
     val sourceDir = providers.gradleProperty("sourceDir")
     doFirst { args(bookId.get(), sourceDir.get()) }
 }
+
+tasks.register<JavaExec>("validateShhimoDailySequences") {
+    group = "syriacplatform"
+    description = "Checks all daily Shhimo prayer sequence IDs, items and verse ordering."
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("org.syriacplatform.buildtools.schema.ShhimoDailySequenceValidationMainKt")
+    val bookId = providers.gradleProperty("bookId")
+    val sourceDir = providers.gradleProperty("sourceDir")
+    doFirst { args(bookId.get(), sourceDir.get()) }
+}
