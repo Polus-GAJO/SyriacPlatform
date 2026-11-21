@@ -30,6 +30,7 @@ import org.syriacplatform.packageformat.loading.ShhimoDailyNavigationLoader
 import org.syriacplatform.packageformat.models.PackageProfile
 import org.syriacplatform.packagevalidation.compatibility.CoreCompatibilityDefaults
 import org.syriacplatform.content.runtime.RuntimeContentStore
+import org.syriacplatform.content.runtime.LiturgicalPerformanceResolver
 import org.syriacplatform.content.models.LiturgicalItemTarget
 
 /** A Shhima-specific entry screen; the existing Occasion App remains untouched. */
@@ -58,7 +59,9 @@ fun ShhimoDailyScreen(
                 "Expected a Shhima package"
             }
             val navigation = ShhimoDailyNavigationLoader(source).load()
-            val content = RuntimeContentStore.from(success.packageData).content
+            val store = RuntimeContentStore.from(success.packageData)
+            val content = store.content
+            val performanceResolver = LiturgicalPerformanceResolver(store)
             val sequences = content.prayerSequences.associateBy { it.id.value }
             val prayers = content.prayers.associateBy { it.id.value }
             val items = content.liturgicalItems.associateBy { it.id.value }
@@ -96,6 +99,11 @@ fun ShhimoDailyScreen(
                             ShhimoVerseUi(verse.syriac, petgomoId?.let { petgomos[it]?.syriac })
                         }
                     }
+                },
+                items.mapValues { (_, item) ->
+                    performanceResolver.recordingsFor(item.id).map { recording ->
+                        recording.asset.performer ?: recording.asset.path
+                    }
                 }
             )
         } catch (e: Exception) {
@@ -120,6 +128,13 @@ fun ShhimoDailyScreen(
                 when {
                     prayer != null && selectedItem != null -> {
                         Text(current.itemTitles[selectedItem] ?: "ܩܳܠܳܐ", style = MaterialTheme.typography.titleLarge)
+                        val performances = current.itemPerformances[selectedItem].orEmpty()
+                        Text(
+                            if (performances.isEmpty()) "لا يوجد تسجيل أداء مرفق في الحزمة الحالية"
+                            else "تسجيلات الأداء: " + performances.joinToString("، "),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             items(current.itemVerses[selectedItem].orEmpty()) { verse ->
                                 Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
@@ -185,7 +200,7 @@ private fun dayLabel(id: Long): String = when (id) {
 private sealed interface ShhimoScreenState {
     data object Loading : ShhimoScreenState
     data class Error(val message: String) : ShhimoScreenState
-    data class Ready(val days: List<ShhimoDayUi>, val itemTitles: Map<Long, String>, val itemVerses: Map<Long, List<ShhimoVerseUi>>) : ShhimoScreenState
+    data class Ready(val days: List<ShhimoDayUi>, val itemTitles: Map<Long, String>, val itemVerses: Map<Long, List<ShhimoVerseUi>>, val itemPerformances: Map<Long, List<String>>) : ShhimoScreenState
 }
 private data class ShhimoDayUi(val id: Long, val prayers: List<ShhimoPrayerUi>)
 private data class ShhimoPrayerUi(
