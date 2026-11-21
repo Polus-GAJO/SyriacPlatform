@@ -137,13 +137,13 @@ import org.syriacplatform.common.types.MelodyId
 import org.syriacplatform.common.types.OccasionId
 import org.syriacplatform.common.types.PerformanceMediaId
 import org.syriacplatform.common.types.QoloId
-import org.syriacplatform.content.models.MediaAsset
-import org.syriacplatform.content.models.Occasion
-import org.syriacplatform.content.models.Qolo
-import org.syriacplatform.content.runtime.ResolvedLiturgicalItem
-import org.syriacplatform.content.runtime.ResolvedLiturgicalItemTarget
-import org.syriacplatform.content.runtime.ResolvedPerformanceMedia
-import org.syriacplatform.content.runtime.RuntimeOccasion
+import org.syriacservices.content.models.MediaAsset
+import org.syriacservices.content.models.Occasion
+import org.syriacservices.content.models.Qolo
+import org.syriacservices.content.runtime.ResolvedLiturgicalItem
+import org.syriacservices.content.runtime.ResolvedLiturgicalItemTarget
+import org.syriacservices.content.runtime.ResolvedPerformanceMedia
+import org.syriacservices.content.runtime.RuntimeOccasion
 import org.syriacplatform.context.PlatformContext
 import org.syriacplatform.navigation.AppDestination
 import org.syriacplatform.navigation.AppSessionState
@@ -160,9 +160,16 @@ import org.syriacplatform.presentation.theme.LiturgicalNoteText
 import kotlinx.coroutines.launch
 
 
+/** Services required by the hymn screen, independent of app navigation and kernel. */
+internal interface HymnDetailsServices {
+    val content: org.syriacservices.content.contracts.ContentService
+    val preferences: org.syriacplatform.user.contracts.PreferencesService
+    val performanceTextPlayback: org.syriacplatform.audio.PerformanceTextOccurrencePlaybackController?
+}
+
 @Composable
 internal fun HymnDetailsScreen(
-    platform: PlatformContext,
+    services: HymnDetailsServices,
     audioService: AudioService?,
     liturgicalItemId: LiturgicalItemId,
     initialMelodyId: MelodyId?,
@@ -181,25 +188,25 @@ internal fun HymnDetailsScreen(
         key1 = platform,
         key2 = liturgicalItemId
     ) {
-        value = platform.content.loadLiturgicalItem(liturgicalItemId)
+        value = services.content.loadLiturgicalItem(liturgicalItemId)
     }
 
     val occurrenceNoteId =
         (itemResult as? Result.Success)?.data?.item?.noteId
 
-    val occurrenceNoteResult by produceState<Result<org.syriacplatform.content.models.Note>?>(
+    val occurrenceNoteResult by produceState<Result<org.syriacservices.content.models.Note>?>(
         initialValue = null,
         key1 = platform,
         key2 = occurrenceNoteId
     ) {
-        value = occurrenceNoteId?.let { platform.content.loadNote(it) }
+        value = occurrenceNoteId?.let { services.content.loadNote(it) }
     }
 
     val playbackState = rememberPlaybackState(audioService)
     // Resolve the localized fallback during composition, not inside playback callbacks.
     val performancePlaybackFailedLabel = stringResource(Res.string.performance_playback_failed)
     val activeTextInterval by (
-        platform.performanceTextPlayback?.activeInterval
+        services.performanceTextPlayback?.activeInterval
             ?: remember { kotlinx.coroutines.flow.MutableStateFlow<org.syriacplatform.audio.ActiveTextInterval?>(null) }
     ).collectAsState()
 
@@ -208,7 +215,7 @@ internal fun HymnDetailsScreen(
 
     // Remember the user's last explicitly chosen translation language.
     // A preference alone never opens translations automatically.
-    val userPreferences by platform.preferences.preferences.collectAsState()
+    val userPreferences by services.preferences.preferences.collectAsState()
 
     var pendingAutoPlayId by remember(liturgicalItemId) {
         mutableStateOf<MediaAssetId?>(null)
@@ -253,7 +260,7 @@ internal fun HymnDetailsScreen(
             key2 = liturgicalItemId
         ) {
             value =
-                platform.content.loadPerformanceMedia(
+                services.content.loadPerformanceMedia(
                     liturgicalItemId
                 )
         }
@@ -310,7 +317,7 @@ internal fun HymnDetailsScreen(
         key1 = platform,
         key2 = toolbarMelodyId
     ) {
-        value = toolbarMelodyId?.let { platform.content.loadMelodyNotations(it) }
+        value = toolbarMelodyId?.let { services.content.loadMelodyNotations(it) }
     }
     val notationCount = (toolbarNotations as? Result.Success)?.data?.size ?: 0
     val toolbarLanguages = toolbarVerses.flatMap { verse ->
@@ -392,7 +399,7 @@ internal fun HymnDetailsScreen(
                                                     playbackState.status == PlaybackStatus.Ready) ->
                                                 audioService?.play()
                                             else -> {
-                                                platform.performanceTextPlayback?.clearActiveInterval()
+                                                services.performanceTextPlayback?.clearActiveInterval()
                                                 pendingAutoPlayId = recording.id
                                                 if (audioService?.load(recording) is Result.Failure) {
                                                     pendingAutoPlayId = null
@@ -433,7 +440,7 @@ internal fun HymnDetailsScreen(
                                         if (selectedPerformanceId != resolved.performance.id) {
                                             pendingAutoPlayId = null
                                             audioService?.stop()
-                                            platform.performanceTextPlayback?.clearActiveInterval()
+                                            services.performanceTextPlayback?.clearActiveInterval()
                                             selectedPerformanceId = resolved.performance.id
                                             performancePlaybackMessage = null
                                         }
@@ -472,10 +479,10 @@ internal fun HymnDetailsScreen(
                                 color = MaterialTheme.colorScheme.surfaceVariant,
                                 modifier = Modifier.fillMaxWidth().clickable(
                                     enabled = selectedPerformance != null &&
-                                        platform.performanceTextPlayback != null,
+                                        services.performanceTextPlayback != null,
                                     onClick = {
                                         val performance = selectedPerformance
-                                        val playback = platform.performanceTextPlayback
+                                        val playback = services.performanceTextPlayback
                                         if (performance != null && playback != null) {
                                             performancePlaybackMessage = null
                                             coroutineScope.launch {
@@ -569,7 +576,7 @@ internal fun HymnDetailsScreen(
                                                 playbackState.status == PlaybackStatus.Ready) ->
                                             audioService?.play()
                                         else -> {
-                                            platform.performanceTextPlayback?.clearActiveInterval()
+                                            services.performanceTextPlayback?.clearActiveInterval()
                                             pendingAutoPlayId = recording.id
                                             if (audioService?.load(recording) is Result.Failure) {
                                                 pendingAutoPlayId = null
@@ -663,7 +670,7 @@ internal fun HymnDetailsScreen(
                     }
 
                     MelodyNotationSection(
-                        platform = platform,
+                        content = services.content,
                         melodyId = selectedMelody?.id,
                         initialOpen = notationOpen,
                         initialPage = notationPage,
@@ -680,7 +687,7 @@ internal fun HymnDetailsScreen(
                     ) {
                         value =
                             if (selectedMelody != null) {
-                                platform.content.loadMelodyRecordings(
+                                services.content.loadMelodyRecordings(
                                     selectedMelody.id
                                 )
                             } else {
@@ -761,7 +768,7 @@ internal fun HymnDetailsScreen(
                                                             enabled = audioService != null,
                                                             onClick = {
                                                                 if (activeTextInterval?.mediaAssetId == playbackState.mediaAssetId) {
-                                                                    platform.performanceTextPlayback?.clearActiveInterval()
+                                                                    services.performanceTextPlayback?.clearActiveInterval()
                                                                     pendingAutoPlayId = selectedRecording.id
                                                                     if (audioService?.load(selectedRecording) is Result.Failure) {
                                                                         pendingAutoPlayId = null
@@ -779,7 +786,7 @@ internal fun HymnDetailsScreen(
                                                                     }
                                                                     audioService?.play()
                                                                 } else {
-                                                                    platform.performanceTextPlayback?.clearActiveInterval()
+                                                                    services.performanceTextPlayback?.clearActiveInterval()
                                                                     pendingAutoPlayId = selectedRecording.id
                                                                     if (audioService?.load(selectedRecording) is Result.Failure) {
                                                                         pendingAutoPlayId = null
@@ -826,7 +833,7 @@ internal fun HymnDetailsScreen(
                                                     null
 
                                                 audioService?.stop()
-                                                platform.performanceTextPlayback?.clearActiveInterval()
+                                                services.performanceTextPlayback?.clearActiveInterval()
 
                                                 selectedRecordingId =
                                                     recording.id
@@ -923,7 +930,7 @@ internal fun HymnDetailsScreen(
 
                                         Button(
                                             enabled =
-                                                platform.performanceTextPlayback !=
+                                                services.performanceTextPlayback !=
                                                     null,
                                             onClick = {
                                                 if (
@@ -1016,12 +1023,12 @@ internal fun HymnDetailsScreen(
                                     color = MaterialTheme.colorScheme.surfaceVariant,
                                     modifier = Modifier.fillMaxWidth().clickable(
                                         enabled = selectedPerformance != null &&
-                                            platform.performanceTextPlayback != null,
+                                            services.performanceTextPlayback != null,
                                         onClick = {
                                         val performance =
                                             selectedPerformance
                                         val playback =
-                                            platform.performanceTextPlayback
+                                            services.performanceTextPlayback
 
                                         if (
                                             performance != null &&
@@ -1110,7 +1117,7 @@ internal fun HymnDetailsScreen(
                                 userPreferences.translationLanguage != newSelection
                             ) {
                                 coroutineScope.launch {
-                                    platform.preferences.update(
+                                    services.preferences.update(
                                         userPreferences.copy(translationLanguage = newSelection)
                                     )
                                 }
@@ -1217,7 +1224,7 @@ internal fun HymnDetailsScreen(
             onClose = {
                 pendingAutoPlayId = null
                 audioService.stop()
-                platform.performanceTextPlayback?.clearActiveInterval()
+                services.performanceTextPlayback?.clearActiveInterval()
             },
             modifier = Modifier.align(Alignment.BottomCenter)
         )
