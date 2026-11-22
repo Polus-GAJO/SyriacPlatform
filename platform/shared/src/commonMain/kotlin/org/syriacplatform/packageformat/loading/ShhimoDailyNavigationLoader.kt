@@ -20,8 +20,8 @@ class ShhimoDailyNavigationLoader(
             bytes.decodeToString()
         )
         require(navigation.bookId > 0L) { "Invalid book ID." }
-        require(navigation.days.map { it.dayId } == (1L..7L).toList()) {
-            "Shhimo daily navigation must contain days 1 through 7 in order."
+        require(navigation.days.isNotEmpty() && navigation.days.map { it.dayId } == navigation.days.map { it.dayId }.distinct().sorted() && navigation.days.all { it.dayId in 1L..7L }) {
+            "Shhimo daily navigation must contain unique ordered days from 1 through 7."
         }
         val sequences = navigation.days.flatMap { day ->
             require(day.prayers.isNotEmpty()) { "Day ${day.dayId} has no prayers." }
@@ -46,6 +46,7 @@ data class ShhimoDailyNavigation(
 @Serializable
 data class ShhimoDailyNavigationDay(
     val dayId: Long,
+    val dayName: String? = null,
     val prayers: List<ShhimoDailyNavigationPrayer>
 )
 
