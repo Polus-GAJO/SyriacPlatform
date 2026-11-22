@@ -9,9 +9,6 @@
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <activity
-            android:name=".ShhimoActivity"
-            android:exported="true" />
-        <activity
             android:exported="true"
             android:name=".MainActivity">
             <intent-filter>
