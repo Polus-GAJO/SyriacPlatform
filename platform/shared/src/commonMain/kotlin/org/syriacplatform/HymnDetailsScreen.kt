@@ -100,6 +100,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -160,6 +161,9 @@ import org.syriacplatform.presentation.theme.LiturgicalNoteText
 import kotlinx.coroutines.launch
 
 
+/** Shhimo-only parchment preview; the Occasion app keeps its original styling. */
+internal val LocalParchmentHymnBackground = compositionLocalOf { false }
+
 /** Services required by the hymn screen, independent of app navigation and kernel. */
 internal interface HymnDetailsServices {
     val content: org.syriacplatform.content.contracts.ContentService
@@ -184,6 +188,7 @@ internal fun HymnDetailsScreen(
         (MelodyId, MediaAssetId) -> Unit,
     onBack: () -> Unit
 ) {
+    val parchmentBackground = LocalParchmentHymnBackground.current
     val itemResult by produceState<Result<ResolvedLiturgicalItem>?>(
         initialValue = null,
         key1 = services.content,
@@ -336,7 +341,7 @@ internal fun HymnDetailsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primaryContainer)
+            .background(if (parchmentBackground) androidx.compose.ui.graphics.Color.Transparent else MaterialTheme.colorScheme.primaryContainer)
             .padding(start = 24.dp, end = 24.dp, top = 50.dp, bottom = 8.dp)
     ) {
         when (val result = itemResult) {
@@ -478,7 +483,7 @@ internal fun HymnDetailsScreen(
                         itemsIndexed(target.verses) { index, verse ->
                             Surface(
                                 shape = RoundedCornerShape(4.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                color = if (parchmentBackground) androidx.compose.ui.graphics.Color.Transparent else MaterialTheme.colorScheme.surfaceVariant,
                                 modifier = Modifier.fillMaxWidth().clickable(
                                     enabled = selectedPerformance != null &&
                                         services.performanceTextPlayback != null,
