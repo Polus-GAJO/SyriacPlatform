@@ -29,6 +29,7 @@ dependencyResolutionManagement {
 }
 
 include(":androidApp")
+include(":shhimoApp")
 include(":shared")
 
 include(":buildtools")
