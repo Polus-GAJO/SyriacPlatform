@@ -1,6 +1,9 @@
 package org.syriacplatform
 
 import android.os.Bundle
+import org.jetbrains.compose.resources.stringResource
+import org.syriacplatform.resources.Res
+import org.syriacplatform.resources.shhimo_performance_recording
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
@@ -102,7 +105,7 @@ class ShhimoActivity : ComponentActivity() {
                     )
                     if (playback.status != PlaybackStatus.Idle) {
                         CompactAudioPlayer(
-                            title = "تسجيل الأداء",
+                            title = stringResource(Res.string.shhimo_performance_recording),
                             status = playback.status,
                             positionMs = playback.positionMs,
                             durationMs = playback.durationMs,
