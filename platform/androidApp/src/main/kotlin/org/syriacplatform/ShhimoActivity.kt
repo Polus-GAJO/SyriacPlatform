@@ -19,6 +19,7 @@ import org.syriacplatform.content.models.MediaAsset
 import org.syriacplatform.packageformat.loading.PackageSource
 import org.syriacplatform.presentation.audio.CompactAudioPlayer
 import org.syriacplatform.presentation.shhimo.ShhimoDailyScreen
+import org.syriacplatform.presentation.shhimo.ShhimoNavigationState
 
 /** Independent Shhimo preview; Occasion MainActivity is not modified. */
 class ShhimoActivity : ComponentActivity() {
@@ -26,9 +27,15 @@ class ShhimoActivity : ComponentActivity() {
     private var pendingAutoplay by mutableStateOf(false)
     private var playingTitle by mutableStateOf("تسجيل الأداء")
     private var selectedHymnId by mutableStateOf<Long?>(null)
+    private val navigationState = ShhimoNavigationState()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        savedInstanceState?.let { saved ->
+            navigationState.selectedDay = saved.getLong("shhimo.day").takeIf { it != 0L }
+            navigationState.selectedSequence = saved.getLong("shhimo.sequence").takeIf { it != 0L }
+            selectedHymnId = saved.getLong("shhimo.item").takeIf { it != 0L }
+        }
         val resolver = object : MediaResourceResolver {
             override fun resolve(mediaAsset: MediaAsset): Result<MediaResource> {
                 // Paths in the package are relative to its root (media/...).
@@ -73,6 +80,7 @@ class ShhimoActivity : ComponentActivity() {
                         selectedHymnId = id
                     },
                     externalItemDetails = true,
+                    navigationState = navigationState,
                     onPlayRecording = { asset ->
                         pendingAutoplay = false
                         audio.stop()
@@ -106,6 +114,13 @@ class ShhimoActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putLong("shhimo.day", navigationState.selectedDay ?: 0L)
+        outState.putLong("shhimo.sequence", navigationState.selectedSequence ?: 0L)
+        outState.putLong("shhimo.item", selectedHymnId ?: 0L)
+        super.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
