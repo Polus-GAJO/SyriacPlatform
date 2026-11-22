@@ -621,6 +621,8 @@ internal fun HymnDetailsScreen(
                             )
                         )
 
+                        }
+
                         if (melodyCandidatesExpanded) target.melodyCandidates.forEach { melody ->
                             Button(
                                 onClick = {
