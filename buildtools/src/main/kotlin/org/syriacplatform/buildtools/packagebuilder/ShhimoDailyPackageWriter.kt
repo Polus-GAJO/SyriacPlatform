@@ -17,8 +17,8 @@ class ShhimoDailyPackageWriter(
         require(data.content.entryPoints.isEmpty() && data.content.occasions.isEmpty()) {
             "Book packages must not contain Occasion navigation."
         }
-        require(data.days.map { it.dayId } == (1L..7L).toList()) {
-            "Shhimo daily package requires seven ordered days."
+        require(data.days.isNotEmpty() && data.days.map { it.dayId } == data.days.map { it.dayId }.distinct().sorted() && data.days.all { it.dayId in 1L..7L && it.prayers.isNotEmpty() }) {
+            "Shhimo daily package requires unique ordered non-empty days 1 through 7."
         }
         require(data.days.flatMap { it.prayers }.map { it.sequenceId }.toSet() ==
             data.content.prayerSequences.map { it.id }.toSet()) {
@@ -31,6 +31,7 @@ class ShhimoDailyPackageWriter(
                 data.days.forEach { day ->
                     add(buildJsonObject {
                         put("dayId", day.dayId)
+                        day.dayName?.let { put("dayName", it) }
                         put("prayers", buildJsonArray {
                             day.prayers.forEach { prayer ->
                                 add(buildJsonObject {
