@@ -14,9 +14,10 @@ import androidx.compose.ui.platform.LocalContext
 
 /** Shared parchment layer for the hymn details screen in both Android apps. */
 @Composable
-fun ParchmentHymnBackground(content: @Composable () -> Unit) {
+fun ParchmentHymnBackground(enabled: Boolean = true, content: @Composable () -> Unit) {
     val context = LocalContext.current
-    val parchment = remember(context) {
+    val parchment = remember(context, enabled) {
+        if (!enabled) return@remember null
         try {
             context.assets.open("shhimo-parchment.jpg").use { stream ->
                 BitmapFactory.decodeStream(stream)?.asImageBitmap()
@@ -35,7 +36,7 @@ fun ParchmentHymnBackground(content: @Composable () -> Unit) {
             )
         }
         CompositionLocalProvider(
-            LocalParchmentHymnBackground provides (parchment != null)
+            LocalParchmentHymnBackground provides (enabled && parchment != null)
         ) {
             content()
         }
