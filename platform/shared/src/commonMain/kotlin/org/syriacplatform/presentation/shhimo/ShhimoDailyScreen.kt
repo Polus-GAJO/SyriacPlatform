@@ -6,11 +6,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -91,7 +95,7 @@ fun ShhimoDailyScreen(
         }
     }
 
-    Column(modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(modifier.fillMaxSize().safeDrawingPadding().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("ܫܚܺܝܡܳܐ", style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Occasion), modifier = Modifier.fillMaxWidth())
         when (val current = state) {
             ShhimoScreenState.Loading -> Text("جارٍ تحميل الصلوات…")
@@ -106,15 +110,23 @@ fun ShhimoDailyScreen(
                 }
                 when {
                     prayer != null -> {
-                        Text(prayer.name, style = MaterialTheme.typography.titleLarge)
+                        Text(prayer.name, style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Prayer), modifier = Modifier.fillMaxWidth())
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             items(prayer.itemIds) { id ->
-                                Text(
-                                    current.itemTitles[id] ?: "ܩܳܠܳܐ",
-                                    modifier = Modifier.fillMaxWidth()
-                                        .clickable { onOpenLiturgicalItem(id) }
-                                        .padding(12.dp)
-                                )
+                                Button(
+                                    onClick = { onOpenLiturgicalItem(id) },
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                ) {
+                                    Text(
+                                        current.itemTitles[id] ?: "ܩܳܠܳܐ",
+                                        style = LiturgicalTextStyles.section(),
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
                             }
                         }
                     }
@@ -122,7 +134,7 @@ fun ShhimoDailyScreen(
                         Text(dayLabel(day.id), style = MaterialTheme.typography.titleLarge)
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             items(day.prayers) { entry ->
-                                Text(entry.name, modifier = Modifier.fillMaxWidth()
+                                Text(entry.name, style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Prayer), modifier = Modifier.fillMaxWidth()
                                     .clickable { navigationState.selectedSequence = entry.sequenceId }
                                     .padding(12.dp))
                             }
