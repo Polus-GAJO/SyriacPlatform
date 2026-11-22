@@ -85,8 +85,8 @@ class ShhimoDailyPackageBuilder(
             days = plan.groupBy { it.dayId }.toSortedMap().map { (dayId, prayers) ->
                 ShhimoDailyPackageDay(
                     dayId,
-                    dayNames[dayId],
-                    prayers.map { ShhimoDailyPackagePrayer(it.prayerId, it.sequenceId) }
+                    prayers.map { ShhimoDailyPackagePrayer(it.prayerId, it.sequenceId) },
+                    dayNames[dayId]
                 )
             }
         )
@@ -99,8 +99,8 @@ data class ShhimoDailyPackage(
 )
 data class ShhimoDailyPackageDay(
     val dayId: Long,
-    val dayName: String?,
-    val prayers: List<ShhimoDailyPackagePrayer>
+    val prayers: List<ShhimoDailyPackagePrayer>,
+    val dayName: String? = null
 )
 data class ShhimoDailyPackagePrayer(
     val prayerId: Long,
