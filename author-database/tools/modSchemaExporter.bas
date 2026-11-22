@@ -38,6 +38,24 @@ Private Const MEDIA_EXPORT_ROOT As String = _
 
 
 ' ============================================================
+' ONE-CLICK SHHIMO EXPORT
+' Export the current book data and media metadata together.
+' Media binaries are packaged separately by the Gradle build.
+' ============================================================
+Public Sub ExportShhimoPackageData()
+    On Error GoTo ErrorHandler
+
+    ExportBookData 1
+    ExportMediaData
+    Exit Sub
+
+ErrorHandler:
+    MsgBox "Shhimo export interrupted: " & Err.Description, _
+        vbCritical, "SyriacPlatform Export"
+End Sub
+
+
+' ============================================================
 ' PUBLIC ENTRY POINT
 ' ============================================================
 
