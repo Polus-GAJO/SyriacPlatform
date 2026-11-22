@@ -8,6 +8,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
 import org.syriacplatform.audio.android.AndroidAudioPlayerBackend
 import org.syriacplatform.bootstrap.DefaultPlatformDependencies
@@ -57,13 +59,22 @@ class MainActivity : ComponentActivity() {
         platform.navigation.navigateTo(sessionSnapshot.destination)
 
         setContent {
-            App(
-                platform = platform,
-                initialSession = sessionSnapshot,
-                onSessionChanged = { updated ->
-                    sessionSnapshot = updated
+            val navigation by platform.navigation.state.collectAsState()
+            if (navigation.currentDestination == AppDestination.HYMN_DETAILS) {
+                ParchmentHymnBackground {
+                    App(
+                        platform = platform,
+                        initialSession = sessionSnapshot,
+                        onSessionChanged = { updated -> sessionSnapshot = updated }
+                    )
                 }
-            )
+            } else {
+                App(
+                    platform = platform,
+                    initialSession = sessionSnapshot,
+                    onSessionChanged = { updated -> sessionSnapshot = updated }
+                )
+            }
         }
     }
 
