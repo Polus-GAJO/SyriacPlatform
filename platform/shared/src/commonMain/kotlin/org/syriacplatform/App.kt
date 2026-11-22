@@ -1675,6 +1675,7 @@ private sealed interface NotationImageState {
 @Composable
 internal fun MelodyNotationSection(
     content: org.syriacplatform.content.contracts.ContentService,
+    loadNotationBytes: (suspend (String) -> ByteArray?)? = null,
     melodyId: MelodyId?,
     initialOpen: Boolean,
     initialPage: Int,
@@ -1718,12 +1719,13 @@ internal fun MelodyNotationSection(
                     val asset = assets[page.coerceIn(0, assets.lastIndex)]
                     val imageState by produceState<NotationImageState>(
                         initialValue = NotationImageState.Loading,
-                        key1 = asset.path
+                        key1 = asset.path,
+                        key2 = loadNotationBytes
                     ) {
                         value = try {
-                            NotationImageState.Loaded(
-                                Res.readBytes("files/${asset.path}").decodeToImageBitmap()
-                            )
+                            val bytes = loadNotationBytes?.invoke(asset.path)
+                                ?: if (loadNotationBytes == null) Res.readBytes("files/${asset.path}") else error("Notation media not found")
+                            NotationImageState.Loaded(bytes.decodeToImageBitmap())
                         } catch (_: Exception) {
                             NotationImageState.Failed
                         }
