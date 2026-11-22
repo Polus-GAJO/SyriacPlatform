@@ -65,8 +65,8 @@ fun main(args: Array<String>) {
         translationLinks = rows("TranslationLinks.csv").map(mapper::toTranslationLink)
     )
     val dayNames = rows("Days.csv").associate { row ->
-        val id = requireNotNull(row.values["DayN"]).toLong()
-        id to requireNotNull(row.values["DayName"]) { "Missing DayName for day $id" }
+        val id = requireNotNull(row["DayN"]).toLong()
+        id to requireNotNull(row["DayName"]) { "Missing DayName for day $id" }
     }
     val media = if (mediaSourceDirectory != null)
         SchemaV1MediaMapper().map(MediaSourceDataLoader().load(mediaSourceDirectory))
