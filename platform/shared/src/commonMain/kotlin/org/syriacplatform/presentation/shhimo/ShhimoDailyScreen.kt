@@ -18,8 +18,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
-import org.syriacplatform.presentation.theme.LiturgicalFontFamilies
 import org.syriacplatform.presentation.theme.LiturgicalTextStyles
 import org.syriacplatform.presentation.theme.LiturgicalTitleLevel
 import androidx.compose.ui.unit.dp
@@ -30,14 +28,10 @@ import org.syriacplatform.packageformat.loading.ShhimoDailyNavigationLoader
 import org.syriacplatform.packageformat.models.PackageProfile
 import org.syriacplatform.packagevalidation.compatibility.CoreCompatibilityDefaults
 import org.syriacplatform.content.runtime.RuntimeContentStore
-import org.syriacplatform.content.runtime.LiturgicalPerformanceResolver
-import org.syriacplatform.content.models.LiturgicalItemTarget
-import org.syriacplatform.content.models.MediaAsset
 
 class ShhimoNavigationState {
     var selectedDay by mutableStateOf<Long?>(null)
     var selectedSequence by mutableStateOf<Long?>(null)
-    var selectedItem by mutableStateOf<Long?>(null)
 }
 
 /** A Shhima-specific entry screen; the existing Occasion App remains untouched. */
@@ -45,8 +39,6 @@ class ShhimoNavigationState {
 fun ShhimoDailyScreen(
     source: PackageSource,
     onOpenLiturgicalItem: (Long) -> Unit,
-    onPlayRecording: (MediaAsset) -> Unit = {},
-    externalItemDetails: Boolean = false,
     navigationState: ShhimoNavigationState = remember { ShhimoNavigationState() },
     modifier: Modifier = Modifier
 ) {
@@ -69,7 +61,6 @@ fun ShhimoDailyScreen(
             val navigation = ShhimoDailyNavigationLoader(source).load()
             val store = RuntimeContentStore.from(success.packageData)
             val content = store.content
-            val performanceResolver = LiturgicalPerformanceResolver(store)
             val sequences = content.prayerSequences.associateBy { it.id.value }
             val prayers = content.prayers.associateBy { it.id.value }
             val items = content.liturgicalItems.associateBy { it.id.value }
@@ -78,8 +69,6 @@ fun ShhimoDailyScreen(
                 sequence != null && sequence.prayerId.value == it.prayerId &&
                     it.prayerId in prayers && sequence.liturgicalItemIds.all { id -> id.value in items }
             }) { "Shhimo navigation references missing or mismatched content" }
-            val texts = content.texts.associateBy { it.id.value }
-            val petgomos = content.petgomos.associateBy { it.id.value }
             ShhimoScreenState.Ready(
                 navigation.days.map { day ->
                     ShhimoDayUi(day.dayId, day.prayers.map { prayer ->
@@ -95,29 +84,13 @@ fun ShhimoDailyScreen(
                 items.mapValues { (_, item) ->
                     item.locationTitle ?: item.qintoTitle ?: "ܩܳܠܳܐ"
                 },
-                items.mapValues { (_, item) ->
-                    val occurrences = when (val target = item.target) {
-                        is LiturgicalItemTarget.Text -> listOf(target.textId.value to target.petgomoId?.value)
-                        is LiturgicalItemTarget.NonMelodicText -> target.verses.map { it.textId.value to it.petgomoId?.value }
-                        is LiturgicalItemTarget.Qolo -> target.verses.map { it.textId.value to it.petgomoId?.value }
-                        is LiturgicalItemTarget.UnresolvedQolo -> target.verses.map { it.textId.value to it.petgomoId?.value }
-                    }
-                    occurrences.mapNotNull { (textId, petgomoId) ->
-                        texts[textId]?.let { verse ->
-                            ShhimoVerseUi(verse.syriac, petgomoId?.let { petgomos[it]?.syriac })
-                        }
-                    }
-                },
-                items.mapValues { (_, item) ->
-                    performanceResolver.recordingsFor(item.id).map { recording -> recording.asset }
-                }
+
             )
         } catch (e: Exception) {
             ShhimoScreenState.Error(e.message ?: "Unable to load Shhima")
         }
     }
 
-    val syriacFont = LiturgicalFontFamilies.syriac()
     Column(modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("ܫܚܺܝܡܳܐ", style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Occasion), modifier = Modifier.fillMaxWidth())
         when (val current = state) {
@@ -127,39 +100,11 @@ fun ShhimoDailyScreen(
                 val day = current.days.firstOrNull { it.id == navigationState.selectedDay }
                 val prayer = day?.prayers?.firstOrNull { it.sequenceId == navigationState.selectedSequence }
                 if (day != null) {
-                    TextButton(onClick = { if (navigationState.selectedItem != null) navigationState.selectedItem = null else if (prayer != null) navigationState.selectedSequence = null else navigationState.selectedDay = null }) {
+                    TextButton(onClick = { if (prayer != null) navigationState.selectedSequence = null else navigationState.selectedDay = null }) {
                         Text("رجوع")
                     }
                 }
                 when {
-                    prayer != null && navigationState.selectedItem != null -> {
-                        Text(current.itemTitles[navigationState.selectedItem] ?: "ܩܳܠܳܐ", style = MaterialTheme.typography.titleLarge)
-                        val performances = current.itemPerformances[navigationState.selectedItem].orEmpty()
-                        if (performances.isEmpty()) {
-                            Text("لا يوجد تسجيل أداء مرفق في الحزمة الحالية",
-                                style = MaterialTheme.typography.bodySmall)
-                        } else {
-                            performances.forEachIndexed { index, asset ->
-                                TextButton(onClick = { onPlayRecording(asset) }) {
-                                    Text("▶ " + (asset.performer ?: "تسجيل الأداء ${index + 1}"))
-                                }
-                            }
-                        }
-                        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            items(current.itemVerses[navigationState.selectedItem].orEmpty()) { verse ->
-                                Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                                    verse.petgomo?.let { petgomo ->
-                                        Text(petgomo, modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-                                            fontFamily = syriacFont, textAlign = TextAlign.Right,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.primary)
-                                    }
-                                    Text(verse.syriac, modifier = Modifier.fillMaxWidth(), fontFamily = syriacFont,
-                                        textAlign = TextAlign.Right, style = MaterialTheme.typography.bodyLarge)
-                                }
-                            }
-                        }
-                    }
                     prayer != null -> {
                         Text(prayer.name, style = MaterialTheme.typography.titleLarge)
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -167,7 +112,7 @@ fun ShhimoDailyScreen(
                                 Text(
                                     current.itemTitles[id] ?: "ܩܳܠܳܐ",
                                     modifier = Modifier.fillMaxWidth()
-                                        .clickable { if (!externalItemDetails) navigationState.selectedItem = id; onOpenLiturgicalItem(id) }
+                                        .clickable { onOpenLiturgicalItem(id) }
                                         .padding(12.dp)
                                 )
                             }
@@ -210,7 +155,7 @@ private fun dayLabel(id: Long): String = when (id) {
 private sealed interface ShhimoScreenState {
     data object Loading : ShhimoScreenState
     data class Error(val message: String) : ShhimoScreenState
-    data class Ready(val days: List<ShhimoDayUi>, val itemTitles: Map<Long, String>, val itemVerses: Map<Long, List<ShhimoVerseUi>>, val itemPerformances: Map<Long, List<MediaAsset>>) : ShhimoScreenState
+    data class Ready(val days: List<ShhimoDayUi>, val itemTitles: Map<Long, String>) : ShhimoScreenState
 }
 private data class ShhimoDayUi(val id: Long, val prayers: List<ShhimoPrayerUi>)
 private data class ShhimoPrayerUi(
@@ -220,4 +165,3 @@ private data class ShhimoPrayerUi(
     val itemIds: List<Long>
 )
 
-private data class ShhimoVerseUi(val syriac: String, val petgomo: String?)
