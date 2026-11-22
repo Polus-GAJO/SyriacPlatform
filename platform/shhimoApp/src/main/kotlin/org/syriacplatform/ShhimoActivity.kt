@@ -1,6 +1,14 @@
 package org.syriacplatform
 
 import android.os.Bundle
+import android.graphics.BitmapFactory
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import org.syriacplatform.LocalParchmentHymnBackground
 import org.syriacplatform.presentation.shhimo.shhimoRecordingLabel
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -61,6 +69,27 @@ class ShhimoActivity : ComponentActivity() {
             Column {
                 val hymnId = session.selectedHymnId
                 if (hymnId != null) {
+                    val parchment = remember {
+                        try {
+                            assets.open("shhimo-parchment.jpg").use { stream ->
+                                BitmapFactory.decodeStream(stream)?.asImageBitmap()
+                            }
+                        } catch (_: java.io.IOException) {
+                            null
+                        }
+                    }
+                    Box(Modifier.fillMaxSize()) {
+                        if (parchment != null) {
+                            Image(
+                                bitmap = parchment,
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                        CompositionLocalProvider(
+                            LocalParchmentHymnBackground provides (parchment != null)
+                        ) {
                     ShhimoHymnDetails(
                         source = source,
                         audioService = audio,
@@ -83,6 +112,8 @@ class ShhimoActivity : ComponentActivity() {
                             session.selectedHymnId = null
                         }
                     )
+                        }
+                    }
                 } else {
                     ShhimoDailyScreen(
                         source = source,
