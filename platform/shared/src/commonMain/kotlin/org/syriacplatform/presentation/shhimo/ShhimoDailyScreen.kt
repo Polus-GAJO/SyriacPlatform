@@ -3,6 +3,8 @@ package org.syriacplatform.presentation.shhimo
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,8 +14,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.ui.text.style.TextAlign
 import org.jetbrains.compose.resources.stringResource
 import org.syriacplatform.resources.Res
@@ -102,57 +102,84 @@ fun ShhimoDailyScreen(
         }
     }
 
-    Column(modifier.fillMaxSize().safeDrawingPadding().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("ܫܚܺܝܡܳܐ", style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Occasion), modifier = Modifier.fillMaxWidth())
-        if (navigationState.selectedDay == null) settings()
+    Column(
+        modifier.fillMaxSize().safeDrawingPadding().padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        val ready = state as? ShhimoScreenState.Ready
+        val day = ready?.days?.firstOrNull { it.id == navigationState.selectedDay }
+        val prayer = day?.prayers?.firstOrNull { it.sequenceId == navigationState.selectedSequence }
+
+        if (day == null) {
+            Text(
+                "ܫܚܺܝܡܳܐ",
+                style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Occasion),
+                modifier = Modifier.fillMaxWidth()
+            )
+            settings()
+        } else {
+            // The title is centered independently of the back button's width.
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = if (prayer != null) prayer.name else day.dayName ?: dayLabel(day.id),
+                    style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Prayer),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().align(Alignment.Center)
+                )
+                TextButton(
+                    onClick = {
+                        if (prayer != null) navigationState.selectedSequence = null
+                        else navigationState.selectedDay = null
+                    },
+                    modifier = Modifier.align(Alignment.CenterStart)
+                ) {
+                    Text(stringResource(Res.string.back))
+                }
+            }
+        }
+
         when (val current = state) {
             ShhimoScreenState.Loading -> Text(stringResource(Res.string.loading))
             is ShhimoScreenState.Error -> Text(current.message, color = MaterialTheme.colorScheme.error)
-            is ShhimoScreenState.Ready -> {
-                val day = current.days.firstOrNull { it.id == navigationState.selectedDay }
-                val prayer = day?.prayers?.firstOrNull { it.sequenceId == navigationState.selectedSequence }
-                if (day != null) {
-                    TextButton(onClick = { if (prayer != null) navigationState.selectedSequence = null else navigationState.selectedDay = null }) {
-                        Text(stringResource(Res.string.back))
+            is ShhimoScreenState.Ready -> when {
+                prayer != null -> {
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        items(prayer.itemIds) { id ->
+                            Text(
+                                text = current.itemTitles[id] ?: "ܩܳܠܳܐ",
+                                style = LiturgicalTextStyles.section(),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                                    .clickable { onOpenLiturgicalItem(id) }
+                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                            )
+                        }
                     }
                 }
-                when {
-                    prayer != null -> {
-                        Text(prayer.name, style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Prayer), modifier = Modifier.fillMaxWidth())
-                        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            items(prayer.itemIds) { id ->
-                                Button(
-                                    onClick = { onOpenLiturgicalItem(id) },
-                                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                ) {
-                                    Text(
-                                        current.itemTitles[id] ?: "ܩܳܠܳܐ",
-                                        style = LiturgicalTextStyles.section(),
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
-                            }
-                        }
-                    }
-                    day != null -> {
-                        Text(day.dayName ?: dayLabel(day.id), style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Prayer), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
-                        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            items(day.prayers) { entry ->
-                                Text(entry.name, style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Prayer), modifier = Modifier.fillMaxWidth()
+                day != null -> {
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(day.prayers) { entry ->
+                            Text(
+                                entry.name,
+                                style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Prayer),
+                                modifier = Modifier.fillMaxWidth()
                                     .clickable { navigationState.selectedSequence = entry.sequenceId }
-                                    .padding(12.dp))
-                            }
+                                    .padding(12.dp)
+                            )
                         }
                     }
-                    else -> LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                }
+                else -> {
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         items(current.days) { entry ->
-                            Text(entry.dayName ?: dayLabel(entry.id), style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Prayer), textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()
-                                .clickable { navigationState.selectedDay = entry.id }
-                                .padding(12.dp))
+                            Text(
+                                entry.dayName ?: dayLabel(entry.id),
+                                style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Prayer),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                                    .clickable { navigationState.selectedDay = entry.id }
+                                    .padding(12.dp)
+                            )
                         }
                     }
                 }
