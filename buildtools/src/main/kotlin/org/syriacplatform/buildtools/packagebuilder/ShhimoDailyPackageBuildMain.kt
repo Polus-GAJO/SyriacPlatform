@@ -64,10 +64,14 @@ fun main(args: Array<String>) {
         translations = rows("Translations.csv").map(mapper::toTranslation),
         translationLinks = rows("TranslationLinks.csv").map(mapper::toTranslationLink)
     )
+    val dayNames = rows("Days.csv").associate { row ->
+        val id = requireNotNull(row.values["DayN"]).toLong()
+        id to requireNotNull(row.values["DayName"]) { "Missing DayName for day $id" }
+    }
     val media = if (mediaSourceDirectory != null)
         SchemaV1MediaMapper().map(MediaSourceDataLoader().load(mediaSourceDirectory))
     else SchemaV1CanonicalMedia(emptyList(), emptyList())
-    val packageData = ShhimoDailyPackageBuilder().build(source, bookId, media)
+    val packageData = ShhimoDailyPackageBuilder().build(source, bookId, media, dayNames)
     val selectedSourceMedia = packageData.content.mediaAssets.map { packaged ->
         media.mediaAssets.single { it.id == packaged.id }
     }
