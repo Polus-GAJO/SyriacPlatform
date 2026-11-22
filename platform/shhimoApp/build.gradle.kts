@@ -32,13 +32,8 @@ android {
         versionName = "0.1.0-dev"
     }
 
-    // The local debug package remains in androidApp/src/debug/assets/shhimo.
-    // Include it without copying or tracking the user's media files.
-    sourceSets {
-        getByName("debug") {
-            assets.srcDirs("../androidApp/src/debug/assets")
-        }
-    }
+    // Debug assets are loaded from shhimoApp/src/debug/assets by Android Gradle Plugin.
+    // Keep the local Shhimo media package independent of androidApp.
 
     buildTypes {
         getByName("release") { isMinifyEnabled = false }
