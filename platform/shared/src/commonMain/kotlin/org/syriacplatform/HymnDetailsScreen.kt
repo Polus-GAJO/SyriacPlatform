@@ -1033,7 +1033,7 @@ internal fun HymnDetailsScreen(
                             itemsIndexed(target.verses) { verseIndex, verse ->
                                 Surface(
                                     shape = RoundedCornerShape(4.dp),
-                                    color = MaterialTheme.colorScheme.surfaceVariant,
+                                    color = if (parchmentBackground) androidx.compose.ui.graphics.Color.Transparent else MaterialTheme.colorScheme.surfaceVariant,
                                     modifier = Modifier.fillMaxWidth().clickable(
                                         enabled = selectedPerformance != null &&
                                             services.performanceTextPlayback != null,
