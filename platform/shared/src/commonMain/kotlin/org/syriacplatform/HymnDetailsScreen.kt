@@ -1102,7 +1102,7 @@ internal fun HymnDetailsScreen(
     }
     androidx.compose.material3.Surface(
         modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.50f),
         shadowElevation = 3.dp
     ) {
         androidx.compose.foundation.layout.Box(
