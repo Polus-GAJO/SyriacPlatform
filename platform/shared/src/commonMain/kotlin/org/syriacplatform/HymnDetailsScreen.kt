@@ -165,6 +165,7 @@ internal interface HymnDetailsServices {
     val content: org.syriacplatform.content.contracts.ContentService
     val preferences: org.syriacplatform.user.contracts.PreferencesService
     val performanceTextPlayback: org.syriacplatform.audio.PerformanceTextOccurrencePlaybackController?
+    val loadNotationBytes: (suspend (String) -> ByteArray?)? get() = null
 }
 
 @Composable
@@ -298,6 +299,7 @@ internal fun HymnDetailsScreen(
     var notationRequestedPage by remember { mutableStateOf(0) }
     var notationChoiceOpen by remember { mutableStateOf(false) }
     var melodyRecordingsExpanded by remember(liturgicalItemId) { mutableStateOf(false) }
+    var melodyCandidatesExpanded by remember(liturgicalItemId) { mutableStateOf(false) }
     var performanceRecordingsExpanded by remember(liturgicalItemId) { mutableStateOf(false) }
     val toolbarTarget = (itemResult as? Result.Success)?.data?.target
     val toolbarVerses = when (toolbarTarget) {
@@ -603,7 +605,10 @@ internal fun HymnDetailsScreen(
                         effectiveMelody == null &&
                         target.melodyCandidates.size > 1
                     ) {
-                        Text(
+                        androidx.compose.material3.TextButton(
+                            onClick = { melodyCandidatesExpanded = !melodyCandidatesExpanded }
+                        ) {
+                            Text(
                             text = stringResource(Res.string.melodies_available),
                             modifier =
                                 Modifier.padding(
@@ -616,7 +621,7 @@ internal fun HymnDetailsScreen(
                             )
                         )
 
-                        target.melodyCandidates.forEach { melody ->
+                        if (melodyCandidatesExpanded) target.melodyCandidates.forEach { melody ->
                             Button(
                                 onClick = {
                                     if (selectedMelodyId != melody.id) {
@@ -671,6 +676,7 @@ internal fun HymnDetailsScreen(
 
                     MelodyNotationSection(
                         content = services.content,
+                        loadNotationBytes = services.loadNotationBytes,
                         melodyId = selectedMelody?.id,
                         initialOpen = notationOpen,
                         initialPage = notationPage,
