@@ -60,15 +60,9 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val navigation by platform.navigation.state.collectAsState()
-            if (navigation.currentDestination == AppDestination.HYMN_DETAILS) {
-                ParchmentHymnBackground {
-                    App(
-                        platform = platform,
-                        initialSession = sessionSnapshot,
-                        onSessionChanged = { updated -> sessionSnapshot = updated }
-                    )
-                }
-            } else {
+            ParchmentHymnBackground(
+                enabled = navigation.currentDestination == AppDestination.HYMN_DETAILS
+            ) {
                 App(
                     platform = platform,
                     initialSession = sessionSnapshot,
