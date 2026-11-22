@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -136,6 +137,10 @@ fun ShhimoDailyScreen(
                     Text(stringResource(Res.string.back))
                 }
             }
+            HorizontalDivider(
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 4.dp),
+                color = MaterialTheme.colorScheme.outlineVariant
+            )
         }
 
         when (val current = state) {
@@ -143,7 +148,7 @@ fun ShhimoDailyScreen(
             is ShhimoScreenState.Error -> Text(current.message, color = MaterialTheme.colorScheme.error)
             is ShhimoScreenState.Ready -> when {
                 prayer != null -> {
-                    LazyColumn(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         items(prayer.itemIds) { id ->
                             Text(
                                 text = current.itemTitles[id] ?: "ܩܳܠܳܐ",
@@ -151,20 +156,20 @@ fun ShhimoDailyScreen(
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth()
                                     .clickable { onOpenLiturgicalItem(id) }
-                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                                    .padding(horizontal = 12.dp, vertical = 10.dp)
                             )
                         }
                     }
                 }
                 day != null -> {
-                    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         items(day.prayers) { entry ->
                             Text(
                                 entry.name,
                                 style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Prayer),
                                 modifier = Modifier.fillMaxWidth()
                                     .clickable { navigationState.selectedSequence = entry.sequenceId }
-                                    .padding(12.dp)
+                                    .padding(horizontal = 12.dp, vertical = 10.dp)
                             )
                         }
                     }
