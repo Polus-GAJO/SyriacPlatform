@@ -24,6 +24,13 @@ fun ShhimoHymnDetails(
     source: PackageSource,
     audioService: AudioService,
     itemId: Long,
+    selectedMelodyId: Long?,
+    notationOpen: Boolean,
+    notationPage: Int,
+    recordingIds: Map<Long, Long>,
+    onMelodyChanged: (Long?) -> Unit,
+    onNotationChanged: (Boolean, Int) -> Unit,
+    onRecordingSelected: (Long, Long) -> Unit,
     onBack: () -> Unit
 ) {
     val services = remember(source, audioService) {
@@ -47,13 +54,13 @@ fun ShhimoHymnDetails(
         services = services,
         audioService = audioService,
         liturgicalItemId = LiturgicalItemId(itemId),
-        initialMelodyId = null,
-        notationOpen = false,
-        notationPage = 0,
-        onMelodyChanged = {},
-        onNotationChanged = { _, _ -> },
-        preferredRecordingIds = emptyMap<MelodyId, MediaAssetId>(),
-        onRecordingSelected = { _, _ -> },
+        initialMelodyId = selectedMelodyId?.let(::MelodyId),
+        notationOpen = notationOpen,
+        notationPage = notationPage,
+        onMelodyChanged = { onMelodyChanged(it?.value) },
+        onNotationChanged = onNotationChanged,
+        preferredRecordingIds = recordingIds.mapKeys { MelodyId(it.key) }.mapValues { MediaAssetId(it.value) },
+        onRecordingSelected = { melody, recording -> onRecordingSelected(melody.value, recording.value) },
         onBack = onBack
     )
 }
