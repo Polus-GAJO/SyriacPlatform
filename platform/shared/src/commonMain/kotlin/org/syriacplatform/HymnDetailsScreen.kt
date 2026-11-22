@@ -162,7 +162,7 @@ import kotlinx.coroutines.launch
 
 
 /** Shhimo-only parchment preview; the Occasion app keeps its original styling. */
-internal val LocalParchmentHymnBackground = compositionLocalOf { false }
+val LocalParchmentHymnBackground = compositionLocalOf { false }
 
 /** Services required by the hymn screen, independent of app navigation and kernel. */
 internal interface HymnDetailsServices {
