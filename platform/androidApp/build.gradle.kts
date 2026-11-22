@@ -15,6 +15,7 @@ dependencies {
     implementation(projects.shared)
 
     implementation(libs.androidx.activity.compose)
+    implementation("androidx.lifecycle:lifecycle-viewmodel:2.11.0-beta01")
     implementation(libs.compose.foundation)
     implementation(libs.media3.exoplayer)
 
