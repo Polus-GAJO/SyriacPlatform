@@ -23,7 +23,7 @@ class ShhimoDailyPackageBuilder(
     private val assembler: SchemaV1PreviewPackageAssembler = SchemaV1PreviewPackageAssembler(),
     private val mediaSelector: SchemaV1PackageMediaSelector = SchemaV1PackageMediaSelector()
 ) {
-    fun build(source: AuthorSourceData, bookId: Long, media: SchemaV1CanonicalMedia = SchemaV1CanonicalMedia(emptyList(), emptyList())): ShhimoDailyPackage {
+    fun build(source: AuthorSourceData, bookId: Long, media: SchemaV1CanonicalMedia = SchemaV1CanonicalMedia(emptyList(), emptyList()), dayNames: Map<Long, String> = emptyMap()): ShhimoDailyPackage {
         require(bookId > 0L)
         val plan = planner.plan(source.existsIn, bookId)
         require(plan.isNotEmpty()) { "No daily prayers in book $bookId." }
@@ -85,6 +85,7 @@ class ShhimoDailyPackageBuilder(
             days = plan.groupBy { it.dayId }.toSortedMap().map { (dayId, prayers) ->
                 ShhimoDailyPackageDay(
                     dayId,
+                    dayNames[dayId],
                     prayers.map { ShhimoDailyPackagePrayer(it.prayerId, it.sequenceId) }
                 )
             }
@@ -98,6 +99,7 @@ data class ShhimoDailyPackage(
 )
 data class ShhimoDailyPackageDay(
     val dayId: Long,
+    val dayName: String?,
     val prayers: List<ShhimoDailyPackagePrayer>
 )
 data class ShhimoDailyPackagePrayer(
