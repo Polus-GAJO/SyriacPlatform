@@ -2177,6 +2177,12 @@ Public Sub ExportBookData(ByVal bookId As Long)
         "WHERE PE.PetN Is Not Null AND PE.ExistInTextID IN (" & verseIds & ")"
 
     ExportQueryToCsv _
+        "SELECT D.DayN, D.DayName FROM Days AS D WHERE D.DayN IN (" & _
+        "SELECT DISTINCT E.DayN FROM ExistsIn AS E WHERE E.BookN=" & _
+        CStr(bookId) & " AND E.DayN Between 1 And 7) ORDER BY D.DayN;", _
+        outputRoot & "\\Days.csv"
+
+    ExportQueryToCsv _
         "SELECT E.* FROM ExistsIn AS E WHERE E.BookN=" & CStr(bookId) & _
         " ORDER BY E.DayN, E.PrayerN, E.Sort, E.ID;", _
         outputRoot & "\ExistsIn.csv"
