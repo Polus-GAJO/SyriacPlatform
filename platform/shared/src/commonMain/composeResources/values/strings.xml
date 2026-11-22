@@ -64,4 +64,5 @@
     <string name="hymn_not_selected">No hymn selected</string>
     <string name="performance_playback_failed">Unable to play text recording</string>
     <string name="generic_text">Text</string>
+    <string name="shhimo_performance_recording">Performance recording</string>
 </resources>
