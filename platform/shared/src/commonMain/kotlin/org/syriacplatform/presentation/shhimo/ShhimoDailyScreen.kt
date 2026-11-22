@@ -15,6 +15,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.Alignment
+import org.syriacplatform.presentation.theme.LiturgicalColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,7 +46,8 @@ fun ShhimoDailyScreen(
     source: PackageSource,
     onOpenLiturgicalItem: (Long) -> Unit,
     navigationState: ShhimoNavigationState = remember { ShhimoNavigationState() },
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    settings: @Composable () -> Unit = {}
 ) {
     var state by remember(source) { mutableStateOf<ShhimoScreenState>(ShhimoScreenState.Loading) }
 
@@ -74,16 +77,18 @@ fun ShhimoDailyScreen(
                     it.prayerId in prayers && sequence.liturgicalItemIds.all { id -> id.value in items }
             }) { "Shhimo navigation references missing or mismatched content" }
             ShhimoScreenState.Ready(
-                navigation.days.map { day ->
-                    ShhimoDayUi(day.dayId, day.prayers.map { prayer ->
+                navigation.days.mapNotNull { day ->
+                    val available = day.prayers.mapNotNull { prayer ->
                         val sequence = requireNotNull(sequences[prayer.sequenceId])
+                        if (sequence.liturgicalItemIds.isEmpty()) return@mapNotNull null
                         ShhimoPrayerUi(
                             prayer.prayerId,
                             prayer.sequenceId,
                             requireNotNull(prayers[prayer.prayerId]).name,
                             sequence.liturgicalItemIds.map { it.value }
                         )
-                    })
+                    }
+                    if (available.isEmpty()) null else ShhimoDayUi(day.dayId, day.dayName, available)
                 },
                 items.mapValues { (_, item) ->
                     item.locationTitle ?: item.qintoTitle ?: "ܩܳܠܳܐ"
@@ -97,6 +102,7 @@ fun ShhimoDailyScreen(
 
     Column(modifier.fillMaxSize().safeDrawingPadding().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("ܫܚܺܝܡܳܐ", style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Occasion), modifier = Modifier.fillMaxWidth())
+        if (navigationState.selectedDay == null) settings()
         when (val current = state) {
             ShhimoScreenState.Loading -> Text("جارٍ تحميل الصلوات…")
             is ShhimoScreenState.Error -> Text(current.message, color = MaterialTheme.colorScheme.error)
@@ -131,7 +137,7 @@ fun ShhimoDailyScreen(
                         }
                     }
                     day != null -> {
-                        Text(dayLabel(day.id), style = MaterialTheme.typography.titleLarge)
+                        Text(day.dayName ?: dayLabel(day.id), style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Prayer), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             items(day.prayers) { entry ->
                                 Text(entry.name, style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Prayer), modifier = Modifier.fillMaxWidth()
@@ -142,7 +148,7 @@ fun ShhimoDailyScreen(
                     }
                     else -> LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         items(current.days) { entry ->
-                            Text(dayLabel(entry.id), modifier = Modifier.fillMaxWidth()
+                            Text(entry.dayName ?: dayLabel(entry.id), style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Prayer), textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()
                                 .clickable { navigationState.selectedDay = entry.id }
                                 .padding(12.dp))
                         }
@@ -169,7 +175,7 @@ private sealed interface ShhimoScreenState {
     data class Error(val message: String) : ShhimoScreenState
     data class Ready(val days: List<ShhimoDayUi>, val itemTitles: Map<Long, String>) : ShhimoScreenState
 }
-private data class ShhimoDayUi(val id: Long, val prayers: List<ShhimoPrayerUi>)
+private data class ShhimoDayUi(val id: Long, val dayName: String?, val prayers: List<ShhimoPrayerUi>)
 private data class ShhimoPrayerUi(
     val prayerId: Long,
     val sequenceId: Long,
