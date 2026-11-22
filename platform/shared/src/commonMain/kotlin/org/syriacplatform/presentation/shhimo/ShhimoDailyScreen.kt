@@ -15,8 +15,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.Alignment
-import org.syriacplatform.presentation.theme.LiturgicalColors
+import org.jetbrains.compose.resources.stringResource
+import org.syriacplatform.resources.Res
+import org.syriacplatform.resources.loading
+import org.syriacplatform.resources.back
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -104,14 +106,14 @@ fun ShhimoDailyScreen(
         Text("ܫܚܺܝܡܳܐ", style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Occasion), modifier = Modifier.fillMaxWidth())
         if (navigationState.selectedDay == null) settings()
         when (val current = state) {
-            ShhimoScreenState.Loading -> Text("جارٍ تحميل الصلوات…")
+            ShhimoScreenState.Loading -> Text(stringResource(Res.string.loading))
             is ShhimoScreenState.Error -> Text(current.message, color = MaterialTheme.colorScheme.error)
             is ShhimoScreenState.Ready -> {
                 val day = current.days.firstOrNull { it.id == navigationState.selectedDay }
                 val prayer = day?.prayers?.firstOrNull { it.sequenceId == navigationState.selectedSequence }
                 if (day != null) {
                     TextButton(onClick = { if (prayer != null) navigationState.selectedSequence = null else navigationState.selectedDay = null }) {
-                        Text("رجوع")
+                        Text(stringResource(Res.string.back))
                     }
                 }
                 when {
