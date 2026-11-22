@@ -34,6 +34,12 @@ import org.syriacplatform.content.runtime.LiturgicalPerformanceResolver
 import org.syriacplatform.content.models.LiturgicalItemTarget
 import org.syriacplatform.content.models.MediaAsset
 
+class ShhimoNavigationState {
+    var selectedDay by mutableStateOf<Long?>(null)
+    var selectedSequence by mutableStateOf<Long?>(null)
+    var selectedItem by mutableStateOf<Long?>(null)
+}
+
 /** A Shhima-specific entry screen; the existing Occasion App remains untouched. */
 @Composable
 fun ShhimoDailyScreen(
@@ -41,12 +47,11 @@ fun ShhimoDailyScreen(
     onOpenLiturgicalItem: (Long) -> Unit,
     onPlayRecording: (MediaAsset) -> Unit = {},
     externalItemDetails: Boolean = false,
+    navigationState: ShhimoNavigationState = remember { ShhimoNavigationState() },
     modifier: Modifier = Modifier
 ) {
     var state by remember(source) { mutableStateOf<ShhimoScreenState>(ShhimoScreenState.Loading) }
-    var selectedDay by remember(source) { mutableStateOf<Long?>(null) }
-    var selectedSequence by remember(source) { mutableStateOf<Long?>(null) }
-    var selectedItem by remember(source) { mutableStateOf<Long?>(null) }
+
 
     LaunchedEffect(source) {
         state = try {
@@ -119,17 +124,17 @@ fun ShhimoDailyScreen(
             ShhimoScreenState.Loading -> Text("جارٍ تحميل الصلوات…")
             is ShhimoScreenState.Error -> Text(current.message, color = MaterialTheme.colorScheme.error)
             is ShhimoScreenState.Ready -> {
-                val day = current.days.firstOrNull { it.id == selectedDay }
-                val prayer = day?.prayers?.firstOrNull { it.sequenceId == selectedSequence }
+                val day = current.days.firstOrNull { it.id == navigationState.selectedDay }
+                val prayer = day?.prayers?.firstOrNull { it.sequenceId == navigationState.selectedSequence }
                 if (day != null) {
-                    TextButton(onClick = { if (selectedItem != null) selectedItem = null else if (prayer != null) selectedSequence = null else selectedDay = null }) {
+                    TextButton(onClick = { if (navigationState.selectedItem != null) navigationState.selectedItem = null else if (prayer != null) navigationState.selectedSequence = null else navigationState.selectedDay = null }) {
                         Text("رجوع")
                     }
                 }
                 when {
-                    prayer != null && selectedItem != null -> {
-                        Text(current.itemTitles[selectedItem] ?: "ܩܳܠܳܐ", style = MaterialTheme.typography.titleLarge)
-                        val performances = current.itemPerformances[selectedItem].orEmpty()
+                    prayer != null && navigationState.selectedItem != null -> {
+                        Text(current.itemTitles[navigationState.selectedItem] ?: "ܩܳܠܳܐ", style = MaterialTheme.typography.titleLarge)
+                        val performances = current.itemPerformances[navigationState.selectedItem].orEmpty()
                         if (performances.isEmpty()) {
                             Text("لا يوجد تسجيل أداء مرفق في الحزمة الحالية",
                                 style = MaterialTheme.typography.bodySmall)
@@ -141,7 +146,7 @@ fun ShhimoDailyScreen(
                             }
                         }
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            items(current.itemVerses[selectedItem].orEmpty()) { verse ->
+                            items(current.itemVerses[navigationState.selectedItem].orEmpty()) { verse ->
                                 Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                                     verse.petgomo?.let { petgomo ->
                                         Text(petgomo, modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
@@ -162,7 +167,7 @@ fun ShhimoDailyScreen(
                                 Text(
                                     current.itemTitles[id] ?: "ܩܳܠܳܐ",
                                     modifier = Modifier.fillMaxWidth()
-                                        .clickable { if (!externalItemDetails) selectedItem = id; onOpenLiturgicalItem(id) }
+                                        .clickable { if (!externalItemDetails) navigationState.selectedItem = id; onOpenLiturgicalItem(id) }
                                         .padding(12.dp)
                                 )
                             }
@@ -173,7 +178,7 @@ fun ShhimoDailyScreen(
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             items(day.prayers) { entry ->
                                 Text(entry.name, modifier = Modifier.fillMaxWidth()
-                                    .clickable { selectedSequence = entry.sequenceId }
+                                    .clickable { navigationState.selectedSequence = entry.sequenceId }
                                     .padding(12.dp))
                             }
                         }
@@ -181,7 +186,7 @@ fun ShhimoDailyScreen(
                     else -> LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         items(current.days) { entry ->
                             Text(dayLabel(entry.id), modifier = Modifier.fillMaxWidth()
-                                .clickable { selectedDay = entry.id }
+                                .clickable { navigationState.selectedDay = entry.id }
                                 .padding(12.dp))
                         }
                     }
