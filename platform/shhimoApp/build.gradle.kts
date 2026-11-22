@@ -32,14 +32,11 @@ android {
         versionName = "0.1.0-dev"
     }
 
-    // Reuse the already tested Shhimo entry point while migrating its source.
+    // The local debug package remains in androidApp/src/debug/assets/shhimo.
+    // Include it without copying or tracking the user's media files.
     sourceSets {
-        getByName("main") {
-            java.srcDir("../androidApp/src/main/kotlin")
-            java.exclude("**/MainActivity.kt")
-        }
         getByName("debug") {
-            assets.srcDir("../androidApp/src/debug/assets")
+            assets.srcDirs("../androidApp/src/debug/assets")
         }
     }
 
