@@ -193,7 +193,8 @@ internal fun HymnDetailsScreen(
         Map<MelodyId, MediaAssetId>,
     onRecordingSelected:
         (MelodyId, MediaAssetId) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onNextItem: (() -> Unit)? = null
 ) {
     val parchmentBackground = LocalParchmentHymnBackground.current
     val itemResult by produceState<Result<ResolvedLiturgicalItem>?>(
@@ -1103,6 +1104,17 @@ internal fun HymnDetailsScreen(
                     }
                 } else {
                     Text(stringResource(Res.string.hymn_unavailable))
+                }
+                if (onNextItem != null) {
+                    androidx.compose.material3.TextButton(
+                        onClick = onNextItem,
+                        modifier = Modifier.fillMaxWidth().padding(top = 22.dp, bottom = 18.dp),
+                        colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f)
+                        )
+                    ) {
+                        Text("↓", style = MaterialTheme.typography.headlineMedium)
+                    }
                 }
             }
         }
