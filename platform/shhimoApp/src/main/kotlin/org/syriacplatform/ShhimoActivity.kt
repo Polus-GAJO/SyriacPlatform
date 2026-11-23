@@ -3,6 +3,7 @@ package org.syriacplatform
 import android.os.Bundle
 import org.syriacplatform.presentation.shhimo.shhimoRecordingLabel
 import androidx.activity.ComponentActivity
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.collectAsState
@@ -27,7 +28,10 @@ import org.syriacplatform.presentation.shhimo.ShhimoDailyScreen
 /** Shhimo uses the same hymn detail UI as the Occasion app. */
 class ShhimoActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        window.navigationBarColor = android.graphics.Color.TRANSPARENT
+        if (android.os.Build.VERSION.SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
         val session = ViewModelProvider(this)[ShhimoSessionViewModel::class.java]
         val audio = session.audio(applicationContext)
         val source = object : PackageSource {
