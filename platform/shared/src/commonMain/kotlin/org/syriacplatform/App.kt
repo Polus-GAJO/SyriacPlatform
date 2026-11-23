@@ -676,7 +676,6 @@ private fun OccasionListItem(
 }
 
 @Composable
-@Composable
 private fun LiturgicalBackNavigation(onClick: () -> Unit, title: String? = null) {
     androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxWidth()) {
         if (title != null) {
@@ -697,7 +696,6 @@ private fun LiturgicalBackNavigation(onClick: () -> Unit, title: String? = null)
     )
 }
 
-@Composable
 @Composable
 private fun OccasionDetailsScreen(
     platform: PlatformContext,
@@ -734,9 +732,9 @@ private fun OccasionDetailsScreen(
             .background(
                 MaterialTheme.colorScheme.primaryContainer
             )
-            .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 8.dp)
+            .padding(16.dp)
     ) {
-        LiturgicalBackNavigation(onClick = onBack)
+        LiturgicalBackNavigation(onClick = onBack, title = (occasionResult as? Result.Success)?.data?.occasion?.name)
 
         when (
             val result =
@@ -761,13 +759,6 @@ private fun OccasionDetailsScreen(
             is Result.Success -> {
                 val runtimeOccasion =
                     result.data
-
-                Text(
-                    text = runtimeOccasion.occasion.name,
-                    modifier = Modifier.fillMaxWidth(),
-                    style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Occasion),
-                    textAlign = TextAlign.Center
-                )
 
                 runtimeOccasion
                     .occasion
@@ -803,7 +794,7 @@ private fun OccasionDetailsScreen(
                             .fillMaxWidth()
                             .weight(1f),
                         verticalArrangement =
-                            Arrangement.spacedBy(20.dp, Alignment.CenterVertically)
+                            Arrangement.spacedBy(6.dp)
                     ) {
                         val noteText = (noteResult as? Result.Success)?.data?.text
                         if (!noteText.isNullOrBlank()) {
@@ -826,18 +817,10 @@ private fun OccasionDetailsScreen(
                                 .prayerSequences
                         ) { sequence ->
                             Column(modifier = Modifier.fillMaxWidth()) {
-                            Button(
-                                onClick = {
-                                    onOpenPrayer(
-                                        sequence.sequence.id
-                                    )
-                                },
-                                modifier =
-                                    Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                            Column(
+                                modifier = Modifier.fillMaxWidth()
+                                    .clickable { onOpenPrayer(sequence.sequence.id) }
+                                    .padding(horizontal = 12.dp, vertical = 10.dp)
                             ) {
                                 Column(
                                     modifier =
