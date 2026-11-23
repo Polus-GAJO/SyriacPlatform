@@ -263,6 +263,26 @@ fun App(
                     selectedLiturgicalItemId
 
                 if (liturgicalItemId != null) {
+                    val nextLiturgicalItemId by produceState<LiturgicalItemId?>(
+                        initialValue = null,
+                        key1 = selectedOccasionId,
+                        key2 = selectedPrayerSequenceId,
+                        key3 = liturgicalItemId
+                    ) {
+                        value = selectedOccasionId?.let { occasionId ->
+                            val loaded = platform.content.loadOccasion(occasionId)
+                            val occasion = (loaded as? Result.Success)?.data
+                            val sequence = occasion?.prayerSequences?.firstOrNull {
+                                it.sequence.id == selectedPrayerSequenceId
+                            }
+                            val navigableIds = sequence?.items
+                                ?.filter { it.target is ResolvedLiturgicalItemTarget.Qolo }
+                                ?.map { it.item.id }
+                                .orEmpty()
+                            val index = navigableIds.indexOf(liturgicalItemId)
+                            if (index >= 0) navigableIds.getOrNull(index + 1) else null
+                        }
+                    }
                     HymnDetailsScreen(
                         services = object : HymnDetailsServices {
                             override val content = platform.content
@@ -308,6 +328,16 @@ fun App(
                                 melodyId
                             ] =
                                 recordingId
+                        },
+                        onNextItem = nextLiturgicalItemId?.let { nextId ->
+                            {
+                                platform.audio?.stop()
+                                selectedLiturgicalItemId = nextId
+                                melodySession = null
+                                notationOpenSession = false
+                                notationPageSession = 0
+                                publishSession(AppDestination.HYMN_DETAILS)
+                            }
                         },
                         onBack = {
                             selectedLiturgicalItemId = null
