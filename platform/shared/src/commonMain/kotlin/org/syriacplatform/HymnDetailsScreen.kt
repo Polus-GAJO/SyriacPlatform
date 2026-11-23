@@ -343,6 +343,9 @@ internal fun HymnDetailsScreen(
         compareBy<String> { it != preferredTranslationLanguage }.thenBy { it }
     )
 
+    val hymnScrollState = rememberScrollState()
+    LaunchedEffect(liturgicalItemId) { hymnScrollState.scrollTo(0) }
+
     androidx.compose.foundation.layout.Box(
         modifier = if (parchmentBackground) Modifier.fillMaxSize() else Modifier.fillMaxSize().safeDrawingPadding()
     ) {
@@ -350,7 +353,7 @@ internal fun HymnDetailsScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(if (parchmentBackground) androidx.compose.ui.graphics.Color.Transparent else MaterialTheme.colorScheme.primaryContainer)
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(hymnScrollState)
             .padding(
                 start = 24.dp,
                 end = 24.dp,
