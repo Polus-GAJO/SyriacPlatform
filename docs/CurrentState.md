@@ -4070,3 +4070,18 @@ No unpublished translation or unrelated occasion links are exported. Shared tran
 ### Next engineering focus — database and content services
 
 The user explicitly requests a return to improving **database services** rather than more UI polishing. Before implementing anything, inspect the current `ContentService`, `ContentRepository`, runtime index/resolver, package-loading boundaries, and relevant tests; distinguish platform database/content-service improvements from Access Author Database editorial changes. Agree on a narrow requirement, preserve canonical content vs. liturgical occurrence identity and authored ordering, add focused tests, and use small commits. Do not assume the next task is translation UI or notation styling.
+
+---
+
+## 2026-11-23 — Shared hymn navigation and Occasion/Shhimo UI parity
+
+**Branch:** `feature/notation-media-selection`. **Latest implementation commit:** `73b9281`.
+
+- Both applications use the shared `HymnDetailsScreen` and its optional `onNextItem` callback. A subtle downward arrow at the bottom of the scrollable reading content navigates directly to the next liturgical occurrence within the current prayer, if one exists. The arrow is absent on the last navigable occurrence. Navigation stops active audio, clears selected melody and notation state, and resets the reading scroll to the top on item change.
+- Occasion navigation resolves the ordered current prayer from `ContentService.loadOccasion`; its navigable list now includes both `ResolvedLiturgicalItemTarget.Qolo` and `ResolvedLiturgicalItemTarget.NonMelodicText`. Commit `73b9281` fixed missing arrows for non-melodic texts and transitions between those types. It does **not** currently include `Text` or `UnresolvedQolo` targets in this next-item list; revisit if those are intended to be openable reading pages.
+- Shhimo passes the current prayer's ordered `itemIds` through `ShhimoDailyScreen` into `ShhimoSessionViewModel`; both the standalone `shhimoApp` and Shhimo entry point in `androidApp` support sequential navigation, including non-melodic items. The Android entry point's callback-signature compilation error was corrected in commit `73462f8`.
+- Occasion's first three screens (occasion list, occasion prayer list, prayer liturgical-item list) now follow the accepted Shhimo reading style: centered headings, quiet back navigation and divider, text rows rather than filled buttons, `6.dp` list spacing and `10.dp` row vertical padding. Their backgrounds now use `MaterialTheme.colorScheme.surface`, matching the Shhimo navigation screens (commit `587b0f2`). The Occasion landing heading is localized in Arabic, English, French and German.
+- Shared rendering is established for the hymn page, but the first three navigation screens remain separate composables with aligned styling. Do not claim they are already extracted into a single cross-app component. Preserve each application's distinct navigation and content loading.
+- The user tested and approved the Occasion navigation restyling/background and subsequently confirmed the non-melodic next-item fix as satisfactory. These approvals are not a substitute for a fresh full Gradle test run; the assistant did not execute a local build.
+
+**Next agreed focus:** investigate the eight-qine / eight-melody association and import from the Access authoring data through exports, Build Tools, package, runtime and selection UI. Preserve one liturgical occurrence and its text while resolving alternative melodies by qinto; first inspect actual data and existing mapping before choosing a fix.
