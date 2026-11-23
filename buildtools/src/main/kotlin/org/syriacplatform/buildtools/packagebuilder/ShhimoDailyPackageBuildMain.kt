@@ -57,6 +57,8 @@ fun main(args: Array<String>) {
         texts = rows("Texts.csv").map(mapper::toText),
         petgomos = rows("Petgomo.csv").map(mapper::toPetgomo),
         melodies = rows("Melody.csv").map(mapper::toMelody),
+        melodyGroups = rows("MelodyGroup.csv").map(mapper::toMelodyGroup),
+        melodyGroupMembers = rows("MelodyGroupMember.csv").map(mapper::toMelodyGroupMember),
         qintos = rows("Qinto.csv").map(mapper::toQinto),
         locations = rows("Location.csv").map(mapper::toLocation),
         notes = rows("Notes.csv").map(mapper::toNote),
