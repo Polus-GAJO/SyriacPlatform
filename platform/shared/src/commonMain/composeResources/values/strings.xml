@@ -65,4 +65,5 @@
     <string name="performance_playback_failed">Unable to play text recording</string>
     <string name="generic_text">Text</string>
     <string name="shhimo_performance_recording">Performance recording</string>
+    <string name="occasions_title">Occasions</string>
 </resources>
