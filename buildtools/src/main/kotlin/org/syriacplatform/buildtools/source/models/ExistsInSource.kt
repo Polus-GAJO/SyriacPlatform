@@ -10,5 +10,6 @@ data class ExistsInSource(
     val qintoId: Long?,
     val noteId: Long?,
     val dayId: Long?,
+    val melodyGroupId: Long? = null,
     val itemType: String? = null
 )
