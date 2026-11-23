@@ -37,6 +37,7 @@ import org.syriacplatform.packageformat.loading.ShhimoDailyNavigationLoader
 import org.syriacplatform.packageformat.models.PackageProfile
 import org.syriacplatform.packagevalidation.compatibility.CoreCompatibilityDefaults
 import org.syriacplatform.content.runtime.RuntimeContentStore
+import org.syriacplatform.content.models.LiturgicalItemTarget
 
 class ShhimoNavigationState {
     var selectedDay by mutableStateOf<Long?>(null)
@@ -74,6 +75,7 @@ fun ShhimoDailyScreen(
             val sequences = content.prayerSequences.associateBy { it.id.value }
             val prayers = content.prayers.associateBy { it.id.value }
             val items = content.liturgicalItems.associateBy { it.id.value }
+            val qoloNames = content.qolos.associate { it.id to it.name }
             require(navigation.days.flatMap { it.prayers }.all {
                 val sequence = sequences[it.sequenceId]
                 sequence != null && sequence.prayerId.value == it.prayerId &&
@@ -94,7 +96,12 @@ fun ShhimoDailyScreen(
                     if (available.isEmpty()) null else ShhimoDayUi(day.dayId, day.dayName, available)
                 },
                 items.mapValues { (_, item) ->
-                    item.locationTitle ?: item.qintoTitle ?: "ܩܳܠܳܐ"
+                    val locationTitle = item.locationTitle?.takeIf { it.isNotBlank() }
+                    val qoloTitle = (item.target as? LiturgicalItemTarget.Qolo)
+                        ?.qoloId?.let(qoloNames::get)?.takeIf { it.isNotBlank() }
+                    listOfNotNull(locationTitle, qoloTitle)
+                        .joinToString(": ")
+                        .ifBlank { "ܩܳܠܳܐ" }
                 },
 
             )
