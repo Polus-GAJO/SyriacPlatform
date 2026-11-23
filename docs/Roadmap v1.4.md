@@ -1843,3 +1843,18 @@ Non-melodic liturgical texts (prayers/readings/sedros) already exist in Author D
 4. Defer further Android UI refinements unless a functional regression is discovered.
 
 This newer priority supersedes the 2026-11-13 immediate recommendation to implement saved navigation/viewer state first. It does not erase that deferred requirement.
+
+---
+
+## 2026-11-23 — Navigation/UI acceptance and next milestone: eight qine
+
+**Accepted on device by the user:** The first three Occasion screens now visually match Shhimo's quiet navigation layout and surface background. The shared hymn page supports a subtle bottom-of-page arrow to the next liturgical occurrence, in both apps, including occurrences without a melody. The last item has no next arrow. Changes through commit `73b9281`; the Android Shhimo callback compilation regression was corrected in `73462f8`. The shared hymn reader is reused, while the three navigation screens are still separate implementations with matching style.
+
+**Next milestone — eight-qine melodic alternatives:**
+1. Inspect the Access authoring schema and actual exported data for `qinto`, melody groups, and liturgical item references.
+2. Trace Build Tools ingestion, validation and package writing, then runtime decoding/resolution and UI selection for all eight melodic variants.
+3. Identify whether alternatives are missing in export, packaging, runtime association or presentation; document the actual root cause.
+4. Implement a focused fix without duplicating canonical text or changing authored occurrence order; preserve existing single-melody and recording/notation flows.
+5. Add focused tests and verify both Android applications with representative real data, including a single-melody control and an eight-qine occurrence.
+
+**Verification boundary:** User approval reflects device observation, not a recorded independent full-suite Gradle result. Avoid treating the eight-qine problem as solved before investigation.
