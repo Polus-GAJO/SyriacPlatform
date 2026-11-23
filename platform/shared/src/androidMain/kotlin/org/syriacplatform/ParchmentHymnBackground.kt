@@ -2,6 +2,12 @@ package org.syriacplatform
 
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -33,6 +39,19 @@ fun ParchmentHymnBackground(enabled: Boolean = true, content: @Composable () -> 
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
+            )
+        }
+        if (enabled && parchment != null) {
+            Box(
+                Modifier.align(Alignment.BottomCenter)
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            0.0f to Color.Transparent,
+                            0.78f to Color.Transparent,
+                            1.0f to Color.Black.copy(alpha = 0.35f)
+                        )
+                    )
             )
         }
         CompositionLocalProvider(
