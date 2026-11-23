@@ -2233,6 +2233,21 @@ Public Sub ExportBookData(ByVal bookId As Long)
         CStr(bookId) & " AND E.QintoN Is Not Null) ORDER BY Q.QintoN;", _
         outputRoot & "\Qinto.csv"
 
+    ' Export only groups attached to this book's liturgical occurrences.
+    ExportQueryToCsv _
+        "SELECT MG.* FROM MelodyGroup AS MG WHERE MG.MelodyGroupID IN (" & _
+        "SELECT DISTINCT E.MelodyGroupID FROM ExistsIn AS E WHERE E.BookN=" & _
+        CStr(bookId) & " AND E.MelodyGroupID Is Not Null) " & _
+        "ORDER BY MG.MelodyGroupID;", _
+        outputRoot & "\MelodyGroup.csv"
+
+    ExportQueryToCsv _
+        "SELECT MM.* FROM MelodyGroupMember AS MM WHERE MM.MelodyGroupID IN (" & _
+        "SELECT DISTINCT E.MelodyGroupID FROM ExistsIn AS E WHERE E.BookN=" & _
+        CStr(bookId) & " AND E.MelodyGroupID Is Not Null) " & _
+        "ORDER BY MM.MelodyGroupID, MM.Sort, MM.MelodyGroupMemberID;", _
+        outputRoot & "\MelodyGroupMember.csv"
+
     ExportQueryToCsv _
         "SELECT M.* FROM Melody AS M WHERE M.QoloN IN (" & _
         "SELECT DISTINCT E.QoloN FROM ExistsIn AS E WHERE E.BookN=" & _
