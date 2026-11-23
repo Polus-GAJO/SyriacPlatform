@@ -572,7 +572,7 @@ private fun HomeScreen(
             .fillMaxSize()
             .safeDrawingPadding()
             .background(
-                MaterialTheme.colorScheme.primaryContainer
+                MaterialTheme.colorScheme.surface
             )
             .padding(16.dp),
         horizontalAlignment =
@@ -731,7 +731,7 @@ private fun OccasionDetailsScreen(
             .fillMaxSize()
             .safeDrawingPadding()
             .background(
-                MaterialTheme.colorScheme.primaryContainer
+                MaterialTheme.colorScheme.surface
             )
             .padding(16.dp)
     ) {
@@ -962,7 +962,7 @@ private fun PrayerDetailsScreen(
             .fillMaxSize()
             .safeDrawingPadding()
             .background(
-                MaterialTheme.colorScheme.primaryContainer
+                MaterialTheme.colorScheme.surface
             )
             .padding(16.dp)
     ) {
