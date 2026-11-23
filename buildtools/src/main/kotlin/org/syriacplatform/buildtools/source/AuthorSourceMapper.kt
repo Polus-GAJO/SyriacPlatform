@@ -93,6 +93,7 @@ fun toNote(row: CsvRow): NoteSource {
         qintoId = row.optionalLong("QintoN"),
         noteId = row.optionalLong("NoteN"),
         dayId = row.optionalLong("DayN"),
+        melodyGroupId = row.optionalLong("MelodyGroupID"),
         itemType = row["ItemType"]?.takeIf { it.isNotBlank() }
     )
 }
