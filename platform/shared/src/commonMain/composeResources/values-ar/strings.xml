@@ -65,4 +65,5 @@
     <string name="performance_playback_failed">تعذّر تشغيل تسجيل النص</string>
     <string name="generic_text">نص</string>
     <string name="shhimo_performance_recording">تسجيل الأداء</string>
+    <string name="occasions_title">المناسبات</string>
 </resources>
