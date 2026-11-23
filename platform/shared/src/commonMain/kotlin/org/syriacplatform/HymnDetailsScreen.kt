@@ -89,6 +89,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -338,14 +343,19 @@ internal fun HymnDetailsScreen(
     )
 
     androidx.compose.foundation.layout.Box(
-        modifier = Modifier.fillMaxSize().safeDrawingPadding()
+        modifier = if (parchmentBackground) Modifier.fillMaxSize() else Modifier.fillMaxSize().safeDrawingPadding()
     ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(if (parchmentBackground) androidx.compose.ui.graphics.Color.Transparent else MaterialTheme.colorScheme.primaryContainer)
             .verticalScroll(rememberScrollState())
-            .padding(start = 24.dp, end = 24.dp, top = 50.dp, bottom = 92.dp)
+            .padding(
+                start = 24.dp,
+                end = 24.dp,
+                top = 50.dp + if (parchmentBackground) WindowInsets.statusBars.asPaddingValues().calculateTopPadding() else 0.dp,
+                bottom = 92.dp
+            )
     ) {
         when (val result = itemResult) {
             null -> Text(stringResource(Res.string.hymn_loading))
@@ -1099,8 +1109,9 @@ internal fun HymnDetailsScreen(
 
     }
     androidx.compose.material3.Surface(
-        modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.50f),
+        modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth()
+            .then(if (parchmentBackground) Modifier.statusBarsPadding() else Modifier),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.60f),
         border = null,
         tonalElevation = 0.dp,
         shadowElevation = 1.dp
@@ -1240,6 +1251,7 @@ internal fun HymnDetailsScreen(
                 services.performanceTextPlayback?.clearActiveInterval()
             },
             modifier = Modifier.align(Alignment.BottomCenter)
+                .then(if (parchmentBackground) Modifier.navigationBarsPadding() else Modifier)
         )
     }
     shownTranslation?.let { translation ->
@@ -1247,6 +1259,7 @@ internal fun HymnDetailsScreen(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
+                .then(if (parchmentBackground) Modifier.navigationBarsPadding() else Modifier)
                 .padding(horizontal = 12.dp)
                 .padding(bottom = if (audioPlayerVisible) 64.dp else 0.dp),
             shape = RoundedCornerShape(12.dp),
