@@ -155,6 +155,22 @@ fun toNote(row: CsvRow): NoteSource {
         )
     }
 
+    fun toMelodyGroup(row: CsvRow) =
+        org.syriacplatform.buildtools.source.models.MelodyGroupSource(
+            id = row.requiredLong("MelodyGroupID"),
+            qoloId = row.requiredLong("QoloN"),
+            qintoId = row.optionalLong("QintoN"),
+            name = row["GroupName"]
+        )
+
+    fun toMelodyGroupMember(row: CsvRow) =
+        org.syriacplatform.buildtools.source.models.MelodyGroupMemberSource(
+            id = row.requiredLong("MelodyGroupMemberID"),
+            melodyGroupId = row.requiredLong("MelodyGroupID"),
+            melodyId = row.requiredLong("MelodyN"),
+            sort = row.requiredLong("Sort")
+        )
+
     fun toMelody(row: CsvRow): MelodySource {
         return MelodySource(
             id = row.requiredLong("MelodyN"),
