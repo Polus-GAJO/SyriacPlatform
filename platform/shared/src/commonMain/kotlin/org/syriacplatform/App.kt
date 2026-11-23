@@ -84,6 +84,7 @@ import org.syriacplatform.resources.whole_hymn
 import org.jetbrains.compose.resources.stringResource
 import org.syriacplatform.presentation.locale.LocalAppLocale
 import androidx.compose.foundation.clickable
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.safeDrawingPadding
@@ -572,10 +573,16 @@ private fun HomeScreen(
             .background(
                 MaterialTheme.colorScheme.primaryContainer
             )
-            .padding(24.dp),
+            .padding(16.dp),
         horizontalAlignment =
             Alignment.CenterHorizontally
     ) {
+        Text(
+            text = "المناسبات",
+            style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Occasion),
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             TextButton(onClick = onOpenFontSize) {
                 Text(stringResource(Res.string.settings_font_size))
@@ -584,6 +591,7 @@ private fun HomeScreen(
                 Text(stringResource(Res.string.settings_interface_language))
             }
         }
+        HorizontalDivider(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), color = MaterialTheme.colorScheme.outlineVariant)
         when (
             val result =
                 occasionsResult
@@ -619,7 +627,7 @@ private fun HomeScreen(
                             .fillMaxWidth()
                             .weight(1f),
                         verticalArrangement =
-                            Arrangement.spacedBy(12.dp, Alignment.CenterVertically)
+                            Arrangement.spacedBy(6.dp)
                     ) {
                         items(occasions) {
                                 occasion ->
@@ -645,64 +653,51 @@ private fun OccasionListItem(
     occasion: Occasion,
     onClick: () -> Unit
 ) {
-    Button(
-        onClick = onClick,
-        modifier =
-            Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+    Column(
+        modifier = Modifier.fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    vertical = 8.dp
-                ),
-            horizontalAlignment =
-                Alignment.CenterHorizontally
-        ) {
+        Text(
+            text = occasion.name,
+            style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Prayer),
+            textAlign = TextAlign.Center
+        )
+        occasion.description?.let { description ->
             Text(
-                text = occasion.name,
-                style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Occasion),
+                text = description,
+                modifier = Modifier.padding(top = 4.dp),
+                style = LiturgicalTextStyles.secondary(MaterialTheme.typography.bodyMedium),
                 textAlign = TextAlign.Center
             )
-
-            occasion.description?.let {
-                    description ->
-
-                Text(
-                    text = description,
-                    modifier =
-                        Modifier.padding(
-                            top = 4.dp
-                        ),
-                    style =
-                        LiturgicalTextStyles.secondary(MaterialTheme.typography.bodyMedium),
-                    textAlign =
-                        TextAlign.Center
-                )
-            }
         }
     }
 }
 
 @Composable
-private fun LiturgicalBackNavigation(onClick: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Start
-    ) {
-        TextButton(onClick = onClick) {
+@Composable
+private fun LiturgicalBackNavigation(onClick: () -> Unit, title: String? = null) {
+    androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxWidth()) {
+        if (title != null) {
             Text(
-                text = stringResource(Res.string.back),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = title,
+                style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Prayer),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().align(Alignment.Center)
             )
         }
+        TextButton(onClick = onClick, modifier = Modifier.align(Alignment.CenterStart)) {
+            Text(stringResource(Res.string.back))
+        }
     }
+    HorizontalDivider(
+        modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 4.dp),
+        color = MaterialTheme.colorScheme.outlineVariant
+    )
 }
 
+@Composable
 @Composable
 private fun OccasionDetailsScreen(
     platform: PlatformContext,
