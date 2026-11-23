@@ -659,7 +659,7 @@ internal fun HymnDetailsScreen(
                                         .fillMaxWidth()
                                         .padding(bottom = 6.dp),
                                         colors = ButtonDefaults.buttonColors(
-                                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.50f),
                                             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                             ) {
