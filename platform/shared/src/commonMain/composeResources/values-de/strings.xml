@@ -65,4 +65,5 @@
     <string name="performance_playback_failed">Textaufnahme konnte nicht abgespielt werden</string>
     <string name="generic_text">Text</string>
     <string name="shhimo_performance_recording">Aufnahme</string>
+    <string name="occasions_title">Anlässe</string>
 </resources>
