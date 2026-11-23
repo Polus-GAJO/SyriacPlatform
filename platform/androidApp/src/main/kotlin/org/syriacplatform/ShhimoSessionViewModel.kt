@@ -21,6 +21,7 @@ import org.syriacplatform.presentation.shhimo.ShhimoNavigationState
 class ShhimoSessionViewModel : ViewModel() {
     val navigation = ShhimoNavigationState()
     var selectedHymnId by mutableStateOf<Long?>(null)
+    var prayerItemIds by mutableStateOf<List<Long>>(emptyList())
     var selectedMelodyId by mutableStateOf<Long?>(null)
     var notationOpen by mutableStateOf(false)
     var notationPage by mutableStateOf(0)
