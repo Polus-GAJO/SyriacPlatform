@@ -47,7 +47,7 @@ class ShhimoNavigationState {
 @Composable
 fun ShhimoDailyScreen(
     source: PackageSource,
-    onOpenLiturgicalItem: (Long) -> Unit,
+    onOpenLiturgicalItem: (Long, Long?) -> Unit,
     navigationState: ShhimoNavigationState = remember { ShhimoNavigationState() },
     modifier: Modifier = Modifier,
     settings: @Composable () -> Unit = {}
@@ -155,7 +155,10 @@ fun ShhimoDailyScreen(
                                 style = LiturgicalTextStyles.section(),
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth()
-                                    .clickable { onOpenLiturgicalItem(id) }
+                                    .clickable {
+                                        val index = prayer.itemIds.indexOf(id)
+                                        onOpenLiturgicalItem(id, prayer.itemIds.getOrNull(index + 1))
+                                    }
                                     .padding(horizontal = 12.dp, vertical = 10.dp)
                             )
                         }
