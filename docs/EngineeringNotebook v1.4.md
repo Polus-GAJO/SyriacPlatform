@@ -3601,3 +3601,23 @@ architecture.
 
 Verse synchronization and interval playback remain future runtime work
 until deliberately selected in the Roadmap.
+
+---
+
+# Decision 078 — Shared Reading Navigation and Authored Occurrence Order (2026-11-23)
+
+The next-occurrence arrow belongs at the bottom of the shared `HymnDetailsScreen` and is driven by an optional callback provided by each application's navigation layer. The shared reading component does not own prayer ordering or app destinations. Both melody-linked Qolo and non-melodic text occurrences are valid navigation targets; a missing melody must not suppress the arrow. The arrow is hidden when there is no next navigable occurrence. Switching occurrences stops audio, clears occurrence-specific melody/notation selection, and resets scroll to the beginning.
+
+The Occasion application currently obtains the ordered prayer items via `loadOccasion` and filters to `Qolo` and `NonMelodicText`. Shhimo retains the current prayer's item IDs in its session ViewModel. Both Android entry points must be updated when the shared Shhimo callback contract changes; omission caused and then fixed a Kotlin compile error.
+
+The first three Occasion navigation screens were aligned visually with Shhimo (centered headers, thin divider, unobtrusive text rows, surface background). They are **not yet one shared composable**: only the hymn reader is shared. Keep the distinct Occasion and Shhimo content/navigation logic separate from reusable presentation components.
+
+Implementation through `73b9281`; user approved the current UI and reported satisfactory behavior. A fresh automated build/test result is not independently recorded.
+
+------------------------------------------------------------------------
+
+# Decision 079 — Eight Qine Must Resolve Melody Alternatives Without Duplicating Text (Pending Investigation)
+
+The next requested task is to inspect how the Author Database indicates that a liturgical item can use any of eight melodies according to `qinto` (ܩܝܢܬܐ). Follow Access tables/relationships and exported CSVs through Build Tools, package DTOs, runtime content resolution and melody/recording/notation selection. Do not assume all eight alternatives are exported or that the current mapping is correct. Preserve the identity and order of the liturgical occurrence and its canonical text; do not manufacture eight copies of the text. Record the observed source representation and root cause before implementing or changing schema.
+
+------------------------------------------------------------------------
