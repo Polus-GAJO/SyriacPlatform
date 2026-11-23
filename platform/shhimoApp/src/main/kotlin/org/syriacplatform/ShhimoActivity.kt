@@ -82,6 +82,15 @@ class ShhimoActivity : ComponentActivity() {
                         onRecordingSelected = { melody, recording ->
                             session.recordingIds[melody] = recording
                         },
+                        onNextItem = session.prayerItemIds.getOrNull(session.prayerItemIds.indexOf(hymnId) + 1)?.let { nextId ->
+                            {
+                                audio.stop()
+                                session.selectedMelodyId = null
+                                session.notationOpen = false
+                                session.notationPage = 0
+                                session.selectedHymnId = nextId
+                            }
+                        },
                         onBack = {
                             session.notationOpen = false
                             session.notationPage = 0
@@ -93,7 +102,8 @@ class ShhimoActivity : ComponentActivity() {
                     ShhimoDailyScreen(
                         source = source,
                         navigationState = session.navigation,
-                        onOpenLiturgicalItem = { id ->
+                        onOpenLiturgicalItem = { id, prayerItems ->
+                            session.prayerItemIds = prayerItems
                             audio.stop()
                             session.selectedMelodyId = null
                             session.notationOpen = false
