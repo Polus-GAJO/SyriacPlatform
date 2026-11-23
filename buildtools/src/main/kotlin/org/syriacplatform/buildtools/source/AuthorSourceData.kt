@@ -34,5 +34,7 @@ data class AuthorSourceData(
     val notes: List<NoteSource> = emptyList(),
     val languages: List<LanguageSource> = emptyList(),
     val translations: List<TranslationSource> = emptyList(),
+    val melodyGroups: List<MelodyGroupSource> = emptyList(),
+    val melodyGroupMembers: List<MelodyGroupMemberSource> = emptyList(),
     val translationLinks: List<TranslationLinkSource> = emptyList()
 )
