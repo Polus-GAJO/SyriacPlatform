@@ -23,6 +23,7 @@ import org.syriacplatform.resources.settings_font_size_value
 import org.syriacplatform.resources.settings_save
 import org.syriacplatform.resources.settings_interface_language
 import org.syriacplatform.resources.loading
+import org.syriacplatform.resources.occasions_title
 import org.syriacplatform.resources.occasions_failed
 import org.syriacplatform.resources.occasions_empty
 import org.syriacplatform.resources.occasion_failed
@@ -578,7 +579,7 @@ private fun HomeScreen(
             Alignment.CenterHorizontally
     ) {
         Text(
-            text = "المناسبات",
+            text = stringResource(Res.string.occasions_title),
             style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Occasion),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center
