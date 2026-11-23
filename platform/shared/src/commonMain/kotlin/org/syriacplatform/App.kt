@@ -1227,15 +1227,11 @@ private fun ResolvedLiturgicalItemView(
         }
 
         is ResolvedLiturgicalItemTarget.Qolo -> {
-            Button(
-                onClick = { onOpenHymn(item.item.id) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            Column(
+                modifier = Modifier.fillMaxWidth()
+                    .clickable { onOpenHymn(item.item.id) }
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 val locationTitle = item.item.locationTitle
                     ?.takeIf { it.isNotBlank() }
@@ -1252,15 +1248,11 @@ private fun ResolvedLiturgicalItemView(
         }
 
         is ResolvedLiturgicalItemTarget.NonMelodicText -> {
-            Button(
-                onClick = { onOpenHymn(item.item.id) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            Column(
+                modifier = Modifier.fillMaxWidth()
+                    .clickable { onOpenHymn(item.item.id) }
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text = item.item.locationTitle
