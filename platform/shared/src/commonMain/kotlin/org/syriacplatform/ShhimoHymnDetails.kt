@@ -31,7 +31,8 @@ fun ShhimoHymnDetails(
     onMelodyChanged: (Long?) -> Unit,
     onNotationChanged: (Boolean, Int) -> Unit,
     onRecordingSelected: (Long, Long) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onNextItem: (() -> Unit)? = null
 ) {
     val services = remember(source, audioService) {
         val contentService = DefaultContentService(
@@ -61,6 +62,7 @@ fun ShhimoHymnDetails(
         onNotationChanged = onNotationChanged,
         preferredRecordingIds = recordingIds.mapKeys { MelodyId(it.key) }.mapValues { MediaAssetId(it.value) },
         onRecordingSelected = { melody, recording -> onRecordingSelected(melody.value, recording.value) },
-        onBack = onBack
+        onBack = onBack,
+        onNextItem = onNextItem
     )
 }
