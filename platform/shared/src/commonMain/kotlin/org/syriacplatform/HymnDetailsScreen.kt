@@ -1,6 +1,8 @@
 package org.syriacplatform
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
@@ -342,7 +344,8 @@ internal fun HymnDetailsScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(if (parchmentBackground) androidx.compose.ui.graphics.Color.Transparent else MaterialTheme.colorScheme.primaryContainer)
-            .padding(start = 24.dp, end = 24.dp, top = 50.dp, bottom = 8.dp)
+            .verticalScroll(rememberScrollState())
+            .padding(start = 24.dp, end = 24.dp, top = 50.dp, bottom = 92.dp)
     ) {
         when (val result = itemResult) {
             null -> Text(stringResource(Res.string.hymn_loading))
@@ -475,12 +478,11 @@ internal fun HymnDetailsScreen(
                     performancePlaybackMessage?.let { message ->
                         Text(text = message, modifier = Modifier.padding(bottom = 8.dp))
                     }
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth().weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        contentPadding = PaddingValues(bottom = 92.dp)
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        itemsIndexed(target.verses) { index, verse ->
+                        target.verses.forEachIndexed { index, verse ->
                             Surface(
                                 shape = RoundedCornerShape(4.dp),
                                 color = if (parchmentBackground) androidx.compose.ui.graphics.Color.Transparent else MaterialTheme.colorScheme.surfaceVariant,
@@ -1008,15 +1010,11 @@ internal fun HymnDetailsScreen(
                     if (target.verses.isEmpty()) {
                         Text(stringResource(Res.string.hymn_text_unavailable))
                     } else {
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f),
-                            verticalArrangement =
-                                Arrangement.spacedBy(12.dp),
-                            contentPadding = PaddingValues(bottom = 92.dp)
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            item {
+                            run {
                                 val note = (occurrenceNoteResult as? Result.Success)?.data?.text
                                 if (!note.isNullOrBlank()) {
                                     Text(
@@ -1030,7 +1028,7 @@ internal fun HymnDetailsScreen(
                                     )
                                 }
                             }
-                            itemsIndexed(target.verses) { verseIndex, verse ->
+                            target.verses.forEachIndexed { verseIndex, verse ->
                                 Surface(
                                     shape = RoundedCornerShape(4.dp),
                                     color = if (parchmentBackground) androidx.compose.ui.graphics.Color.Transparent else MaterialTheme.colorScheme.surfaceVariant,
