@@ -963,12 +963,13 @@ private fun PrayerDetailsScreen(
             .background(
                 MaterialTheme.colorScheme.primaryContainer
             )
-            .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 8.dp)
+            .padding(16.dp)
     ) {
         LiturgicalBackNavigation(onClick = {
             queueController?.stop()
             onBack()
-        })
+        }, title = (occasionResult as? Result.Success)?.data?.prayerSequences
+            ?.firstOrNull { it.sequence.id == prayerSequenceId }?.prayer?.name)
 
         when (
             val result =
@@ -1003,13 +1004,6 @@ private fun PrayerDetailsScreen(
                             stringResource(Res.string.prayer_not_found)
                     )
                 } else {
-                    Text(
-                        text = sequence.prayer.name,
-                        modifier = Modifier.fillMaxWidth(),
-                        style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Prayer),
-                        textAlign = TextAlign.Center
-                    )
-
                     sequence.prayer.description?.let {
                             description ->
                         Text(
@@ -1133,7 +1127,7 @@ private fun PrayerDetailsScreen(
                                 .fillMaxWidth()
                                 .weight(1f),
                             verticalArrangement =
-                                Arrangement.spacedBy(12.dp, Alignment.CenterVertically)
+                                Arrangement.spacedBy(6.dp)
                         ) {
                             items(sequence.items) {
                                     item ->
