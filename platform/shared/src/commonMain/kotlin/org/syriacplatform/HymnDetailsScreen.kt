@@ -467,7 +467,7 @@ internal fun HymnDetailsScreen(
                                     },
                                     modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
                                         colors = ButtonDefaults.buttonColors(
-                                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.50f),
+                                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.40f),
                                             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                 ) {
@@ -659,7 +659,7 @@ internal fun HymnDetailsScreen(
                                         .fillMaxWidth()
                                         .padding(bottom = 6.dp),
                                         colors = ButtonDefaults.buttonColors(
-                                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.50f),
+                                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.40f),
                                             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                             ) {
@@ -882,7 +882,7 @@ internal fun HymnDetailsScreen(
                                                     bottom = 6.dp
                                                 ),
                                         colors = ButtonDefaults.buttonColors(
-                                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.40f),
                                             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     ) {
@@ -976,7 +976,7 @@ internal fun HymnDetailsScreen(
                                                         bottom = 6.dp
                                                     ),
                                         colors = ButtonDefaults.buttonColors(
-                                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.40f),
                                             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                         ) {
