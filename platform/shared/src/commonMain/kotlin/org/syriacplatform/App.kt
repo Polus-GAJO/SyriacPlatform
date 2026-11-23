@@ -278,7 +278,10 @@ fun App(
                                 it.sequence.id == selectedPrayerSequenceId
                             }
                             val navigableIds = sequence?.items
-                                ?.filter { it.target is ResolvedLiturgicalItemTarget.Qolo }
+                                ?.filter {
+                                    it.target is ResolvedLiturgicalItemTarget.Qolo ||
+                                        it.target is ResolvedLiturgicalItemTarget.NonMelodicText
+                                }
                                 ?.map { it.item.id }
                                 .orEmpty()
                             val index = navigableIds.indexOf(liturgicalItemId)
