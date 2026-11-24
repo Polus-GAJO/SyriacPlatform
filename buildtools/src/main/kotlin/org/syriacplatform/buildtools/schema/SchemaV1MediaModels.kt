@@ -21,7 +21,8 @@ data class SchemaV1PerformanceMedia(
     val mediaAssetId: Long,
     val role: String,
     val sort: Long,
-    val mediaTimingSetId: Long? = null
+    val mediaTimingSetId: Long? = null,
+    val qintoId: Long? = null
 )
 
 data class SchemaV1MediaTimingSet(
