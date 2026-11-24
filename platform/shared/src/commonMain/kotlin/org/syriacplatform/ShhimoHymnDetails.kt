@@ -7,6 +7,8 @@ import org.syriacplatform.audio.PerformanceTextOccurrencePlaybackController
 import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.common.types.MediaAssetId
 import org.syriacplatform.common.types.MelodyId
+import org.syriacplatform.common.types.QintoId
+import org.syriacplatform.content.repository.ContentRepository
 import org.syriacplatform.content.repository.ApplicationPackageContentRepository
 import org.syriacplatform.content.services.DefaultContentService
 import org.syriacplatform.packageformat.loading.ApplicationPackageLoader
@@ -32,15 +34,21 @@ fun ShhimoHymnDetails(
     onNotationChanged: (Boolean, Int) -> Unit,
     onRecordingSelected: (Long, Long) -> Unit,
     onBack: () -> Unit,
-    onNextItem: (() -> Unit)? = null
+    onNextItem: (() -> Unit)? = null,
+    weeklyQintoId: Long = 1L
 ) {
-    val services = remember(source, audioService) {
-        val contentService = DefaultContentService(
-            ApplicationPackageContentRepository(
-                ApplicationPackageLoader(source),
-                CoreCompatibilityDefaults.CURRENT
-            )
-        ).also { it.initialize() }
+    val repository = remember(source) {
+        ApplicationPackageContentRepository(ApplicationPackageLoader(source), CoreCompatibilityDefaults.CURRENT)
+    }
+    val services = remember(repository, audioService, weeklyQintoId) {
+        val selectedQinto = QintoId(weeklyQintoId)
+        val scopedRepository = object : ContentRepository by repository {
+            override suspend fun loadLiturgicalItem(id: LiturgicalItemId) =
+                repository.loadLiturgicalItemForQinto(id, selectedQinto)
+            override suspend fun loadPerformanceMedia(liturgicalItemId: LiturgicalItemId) =
+                repository.loadPerformanceMediaForQinto(liturgicalItemId, selectedQinto)
+        }
+        val contentService = DefaultContentService(scopedRepository).also { it.initialize() }
         val preferencesService = DefaultPreferencesService(
             InMemoryUserPreferencesStore()
         ).also { it.initialize() }
