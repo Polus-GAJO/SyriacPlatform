@@ -84,7 +84,8 @@ class MediaSourceMapper {
             mediaAssetId = row.requiredLong("MediaAssetID"),
             role = role,
             sort = sort,
-            mediaTimingSetId = row.optionalLong("MediaTimingSetID")
+            mediaTimingSetId = row.optionalLong("MediaTimingSetID"),
+            qintoId = row.optionalLong("QintoN")
         )
     }
 
