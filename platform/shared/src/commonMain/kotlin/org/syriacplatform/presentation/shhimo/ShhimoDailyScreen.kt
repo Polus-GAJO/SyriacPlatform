@@ -5,10 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.ui.AbsoluteAlignment
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -124,33 +120,31 @@ fun ShhimoDailyScreen(
         val day = ready?.days?.firstOrNull { it.id == navigationState.selectedDay }
         val prayer = day?.prayers?.firstOrNull { it.sequenceId == navigationState.selectedSequence }
 
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(Modifier.weight(1f), contentAlignment = AbsoluteAlignment.CenterLeft) {
-                    if (day != null) {
-                        TextButton(onClick = {
-                            if (prayer != null) navigationState.selectedSequence = null
-                            else navigationState.selectedDay = null
-                        }) {
-                            Text(stringResource(Res.string.back))
-                        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                if (day != null) {
+                    TextButton(onClick = {
+                        if (prayer != null) navigationState.selectedSequence = null
+                        else navigationState.selectedDay = null
+                    }) {
+                        Text(stringResource(Res.string.back))
                     }
                 }
-                Text(
-                    text = if (day == null) "ܫܚܺܝܡܳܐ"
-                        else if (prayer != null) prayer.name else day.dayName ?: dayLabel(day.id),
-                    style = LiturgicalTextStyles.title(
-                        if (day == null) LiturgicalTitleLevel.Occasion else LiturgicalTitleLevel.Prayer
-                    ),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(1f)
-                )
-                Box(Modifier.weight(1f), contentAlignment = AbsoluteAlignment.CenterRight) {
-                    qintoSelector()
-                }
+            }
+            Text(
+                text = if (day == null) "ܫܚܺܝܡܳܐ"
+                    else if (prayer != null) prayer.name else day.dayName ?: dayLabel(day.id),
+                style = LiturgicalTextStyles.title(
+                    if (day == null) LiturgicalTitleLevel.Occasion else LiturgicalTitleLevel.Prayer
+                ),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(1f)
+            )
+            Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
+                qintoSelector()
             }
         }
         if (day == null) settings()
