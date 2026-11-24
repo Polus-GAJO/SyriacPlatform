@@ -53,7 +53,10 @@ class BookPrayerLiturgicalItemMapper(
                     noteId = noteId
                 )
                 else -> {
-                    val resolution = melodyResolver.resolve(item, source.melodies)
+                    val resolution = melodyResolver.resolve(
+                        item, source.melodies, source.melodyGroups,
+                        source.melodyGroupMembers, enableWeeklyQinto = true
+                    )
                     SchemaV1QoloLiturgicalItem(
                         id = item.id,
                         qoloId = qoloId,
