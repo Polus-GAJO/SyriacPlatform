@@ -51,7 +51,8 @@ fun ShhimoDailyScreen(
     onOpenLiturgicalItem: (Long, List<Long>) -> Unit,
     navigationState: ShhimoNavigationState = remember { ShhimoNavigationState() },
     modifier: Modifier = Modifier,
-    settings: @Composable () -> Unit = {}
+    settings: @Composable () -> Unit = {},
+    qintoSelector: @Composable () -> Unit = {}
 ) {
     var state by remember(source) { mutableStateOf<ShhimoScreenState>(ShhimoScreenState.Loading) }
 
@@ -149,6 +150,8 @@ fun ShhimoDailyScreen(
                 color = MaterialTheme.colorScheme.outlineVariant
             )
         }
+
+        qintoSelector()
 
         when (val current = state) {
             ShhimoScreenState.Loading -> Text(stringResource(Res.string.loading))
