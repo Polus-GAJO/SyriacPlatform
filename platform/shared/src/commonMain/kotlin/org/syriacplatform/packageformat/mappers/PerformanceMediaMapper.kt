@@ -17,6 +17,7 @@ internal fun PerformanceMediaJsonDto.toDomain(): Result<PerformanceMedia> =
             role = role,
             sort = sort,
             mediaTimingSetId =
-                mediaTimingSetId?.let(::MediaTimingSetId)
+                mediaTimingSetId?.let(::MediaTimingSetId),
+            qintoId = qintoId?.let { org.syriacplatform.common.types.QintoId(it) }
         )
     )
