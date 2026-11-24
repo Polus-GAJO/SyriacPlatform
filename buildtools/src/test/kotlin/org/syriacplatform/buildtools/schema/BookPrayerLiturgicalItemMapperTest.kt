@@ -49,13 +49,46 @@ class BookPrayerLiturgicalItemMapperTest {
     @Test
     fun resolvesOnlyUnambiguousMelody() {
         val data = source(
-            listOf(item(2, 325, 22)),
-            listOf(MelodySource(88, 325, null, null, 22, null, null, null))
+            listOf(item(2, 325, 9)),
+            listOf(MelodySource(88, 325, null, null, 9, null, null, null))
         )
         val mapped = BookPrayerLiturgicalItemMapper().map(
             data, BookPrayerComposition(5, 1, 1, listOf(occurrence(2, 325, emptyList())))
         )
         assertEquals(88L, assertIs<SchemaV1QoloLiturgicalItem>(mapped.single()).effectiveMelodyId)
+    }
+
+    @Test
+    fun weeklyQintoIncludesOnlyEightOrdinaryTones() {
+        val data = source(
+            listOf(item(2, 325, 22)),
+            (1L..8L).map { MelodySource(100 + it, 325, null, null, it, null, null, null) } +
+                listOf(9L, 10L, 22L).map { MelodySource(100 + it, 325, null, null, it, null, null, null) }
+        )
+        val mapped = assertIs<SchemaV1QoloLiturgicalItem>(
+            BookPrayerLiturgicalItemMapper().map(
+                data, BookPrayerComposition(5, 1, 1, listOf(occurrence(2, 325, emptyList())))
+            ).single()
+        )
+        assertEquals(true, mapped.usesWeeklyQinto)
+        assertEquals(null, mapped.effectiveMelodyId)
+        assertEquals((101L..108L).toList(), mapped.melodyCandidateIds)
+    }
+
+    @Test
+    fun weeklyQintoDoesNotFixEvenASingleCandidate() {
+        val data = source(
+            listOf(item(2, 325, 22)),
+            listOf(MelodySource(88, 325, null, null, 3, null, null, null))
+        )
+        val mapped = assertIs<SchemaV1QoloLiturgicalItem>(
+            BookPrayerLiturgicalItemMapper().map(
+                data, BookPrayerComposition(5, 1, 1, listOf(occurrence(2, 325, emptyList())))
+            ).single()
+        )
+        assertEquals(true, mapped.usesWeeklyQinto)
+        assertEquals(null, mapped.effectiveMelodyId)
+        assertEquals(listOf(88L), mapped.melodyCandidateIds)
     }
 
     @Test
