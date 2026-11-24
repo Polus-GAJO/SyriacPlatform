@@ -13,5 +13,6 @@ data class LiturgicalItem(
     val target: LiturgicalItemTarget,
     val noteId: Long? = null,
     val locationTitle: String? = null,
-    val qintoTitle: String? = null
+    val qintoTitle: String? = null,
+    val usesWeeklyQinto: Boolean = false
 )
