@@ -145,13 +145,13 @@ fun ShhimoDailyScreen(
                     Text(stringResource(Res.string.back))
                 }
             }
-            HorizontalDivider(
-                modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 4.dp),
-                color = MaterialTheme.colorScheme.outlineVariant
-            )
         }
 
         qintoSelector()
+        HorizontalDivider(
+            modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 4.dp),
+            color = MaterialTheme.colorScheme.outlineVariant
+        )
 
         when (val current = state) {
             ShhimoScreenState.Loading -> Text(stringResource(Res.string.loading))
