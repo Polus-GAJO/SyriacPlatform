@@ -6,7 +6,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -18,7 +18,7 @@ fun ShhimoQintoSelector(selectedQintoId: Long, onSelect: (Long) -> Unit) {
     val names = listOf("ܩܰܕܡܳܝܬܳܐ", "ܬܪܰܝܳܢܺܝܬܳܐ", "ܬܠܺܝܬܳܝܬܳܐ", "ܪܒܺܝܥܳܝܬܳܐ",
         "ܚܡܺܝܫܳܝܬܳܐ", "ܫܬܺܝܬܳܝܬܳܐ", "ܫܒܺܝܥܳܝܬܳܐ", "ܬܡܺܝܢܳܝܬܳܐ")
     var open by rememberSaveable { mutableStateOf(false) }
-    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterRight) {
+    Box(Modifier.fillMaxWidth(), contentAlignment = AbsoluteAlignment.CenterRight) {
         OutlinedButton(
             onClick = { open = true },
             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
