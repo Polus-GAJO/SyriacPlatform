@@ -9,5 +9,6 @@ internal data class PerformanceMediaJsonDto(
     val mediaAssetId: Long,
     val role: String,
     val sort: Long,
-    val mediaTimingSetId: Long? = null
+    val mediaTimingSetId: Long? = null,
+    val qintoId: Long? = null
 )
