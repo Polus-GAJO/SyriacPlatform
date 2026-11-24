@@ -34,8 +34,11 @@ data class SchemaV1PreviewPackage(
     val mediaTimingSets: List<SchemaV1MediaTimingSet> = emptyList(),
     val mediaSegments: List<SchemaV1MediaSegment> = emptyList(),
     val textOccurrenceMediaSegments: List<SchemaV1TextOccurrenceMediaSegment> = emptyList(),
-val notes: List<SchemaV1PackageNote> = emptyList()
+val notes: List<SchemaV1PackageNote> = emptyList(),
+    val melodyQintoAssignments: List<SchemaV1PackageMelodyQintoAssignment> = emptyList()
 )
+
+data class SchemaV1PackageMelodyQintoAssignment(val melodyId: Long, val qintoId: Long)
 
 data class SchemaV1PackageNote(
     val id: Long,
