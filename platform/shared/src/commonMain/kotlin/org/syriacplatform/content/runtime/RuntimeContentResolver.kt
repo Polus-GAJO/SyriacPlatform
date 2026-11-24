@@ -6,6 +6,7 @@ import org.syriacplatform.common.types.ErrorCode
 import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.common.types.MediaAssetId
 import org.syriacplatform.common.types.MelodyId
+import org.syriacplatform.common.types.QintoId
 import org.syriacplatform.common.types.OccasionId
 import org.syriacplatform.common.types.PerformanceMediaId
 import org.syriacplatform.common.types.PlatformError
@@ -245,8 +246,38 @@ class RuntimeContentResolver(
     }
 
 
+    /** Select weekly content without mutating the authored item or its verses. */
+    fun resolveLiturgicalItemForQinto(
+        id: LiturgicalItemId,
+        qintoId: QintoId
+    ): Result<ResolvedLiturgicalItem> {
+        require(qintoId.value in 1L..8L)
+        return when (val result = resolveLiturgicalItem(id)) {
+            is Result.Failure -> result
+            is Result.Success -> {
+                val resolved = result.data
+                val target = resolved.target
+                if (!resolved.item.usesWeeklyQinto || target !is ResolvedLiturgicalItemTarget.Qolo) {
+                    result
+                } else {
+                    val candidates = (listOfNotNull(target.effectiveMelody) + target.melodyCandidates)
+                        .distinctBy { it.id }
+                        .filter { melody ->
+                            store.index.melodyQintoAssignmentsByMelodyId[melody.id]
+                                .orEmpty().any { it.qintoId == qintoId }
+                        }
+                    Result.Success(resolved.copy(target = target.copy(
+                        effectiveMelody = candidates.singleOrNull(),
+                        melodyCandidates = if (candidates.size > 1) candidates else emptyList()
+                    )))
+                }
+            }
+        }
+    }
+
     fun resolvePerformanceMedia(
-        id: LiturgicalItemId
+        id: LiturgicalItemId,
+        weeklyQintoId: QintoId? = null
     ): Result<List<ResolvedPerformanceMedia>> {
         if (store.index.liturgicalItemsById[id] == null) {
             return notFound(
@@ -259,6 +290,11 @@ class RuntimeContentResolver(
             store.index
                 .performanceMediaByLiturgicalItemId[id]
                 .orEmpty()
+                .filter { performance ->
+                    weeklyQintoId == null ||
+                        store.index.liturgicalItemsById[id]?.usesWeeklyQinto != true ||
+                        performance.qintoId == weeklyQintoId
+                }
 
         val resolved =
             mutableListOf<ResolvedPerformanceMedia>()
