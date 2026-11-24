@@ -2206,6 +2206,11 @@ Public Sub ExportBookData(ByVal bookId As Long)
         outputRoot & "\ExistsIn.csv"
 
     ExportQueryToCsv _
+        "SELECT O.* FROM OccaExis AS O WHERE O.ExistInID IN (" & ids & _
+        ") ORDER BY O.ExistInID, O.OccaExisID;", _
+        outputRoot & "\OccaExis.csv"
+
+    ExportQueryToCsv _
         "SELECT ET.* FROM ExistsInText AS ET WHERE ET.ExistsInID IN (" & ids & _
         ") ORDER BY ET.ExistsInID, ET.SortInPra, ET.ID;", _
         outputRoot & "\ExistsInText.csv"
