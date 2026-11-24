@@ -266,10 +266,15 @@ class RuntimeContentResolver(
                             store.index.melodyQintoAssignmentsByMelodyId[melody.id]
                                 .orEmpty().any { it.qintoId == qintoId }
                         }
-                    Result.Success(resolved.copy(target = target.copy(
-                        effectiveMelody = candidates.singleOrNull(),
-                        melodyCandidates = if (candidates.size > 1) candidates else emptyList()
-                    )))
+                    Result.Success(resolved.copy(
+                        item = resolved.item.copy(
+                            qintoTitle = store.index.qintosById[qintoId]?.name
+                        ),
+                        target = target.copy(
+                            effectiveMelody = candidates.singleOrNull(),
+                            melodyCandidates = if (candidates.size > 1) candidates else emptyList()
+                        )
+                    ))
                 }
             }
         }
