@@ -4,6 +4,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.AbsoluteAlignment
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -119,35 +124,37 @@ fun ShhimoDailyScreen(
         val day = ready?.days?.firstOrNull { it.id == navigationState.selectedDay }
         val prayer = day?.prayers?.firstOrNull { it.sequenceId == navigationState.selectedSequence }
 
-        if (day == null) {
-            Text(
-                "ܫܚܺܝܡܳܐ",
-                style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Occasion),
-                modifier = Modifier.fillMaxWidth()
-            )
-            settings()
-        } else {
-            // The title is centered independently of the back button's width.
-            Box(modifier = Modifier.fillMaxWidth()) {
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(Modifier.weight(1f), contentAlignment = AbsoluteAlignment.CenterLeft) {
+                    if (day != null) {
+                        TextButton(onClick = {
+                            if (prayer != null) navigationState.selectedSequence = null
+                            else navigationState.selectedDay = null
+                        }) {
+                            Text(stringResource(Res.string.back))
+                        }
+                    }
+                }
                 Text(
-                    text = if (prayer != null) prayer.name else day.dayName ?: dayLabel(day.id),
-                    style = LiturgicalTextStyles.title(LiturgicalTitleLevel.Prayer),
+                    text = if (day == null) "ܫܚܺܝܡܳܐ"
+                        else if (prayer != null) prayer.name else day.dayName ?: dayLabel(day.id),
+                    style = LiturgicalTextStyles.title(
+                        if (day == null) LiturgicalTitleLevel.Occasion else LiturgicalTitleLevel.Prayer
+                    ),
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth().align(Alignment.Center)
+                    modifier = Modifier.weight(1f)
                 )
-                TextButton(
-                    onClick = {
-                        if (prayer != null) navigationState.selectedSequence = null
-                        else navigationState.selectedDay = null
-                    },
-                    modifier = Modifier.align(Alignment.CenterStart)
-                ) {
-                    Text(stringResource(Res.string.back))
+                Box(Modifier.weight(1f), contentAlignment = AbsoluteAlignment.CenterRight) {
+                    qintoSelector()
                 }
             }
         }
+        if (day == null) settings()
 
-        qintoSelector()
         HorizontalDivider(
             modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 4.dp),
             color = MaterialTheme.colorScheme.outlineVariant
