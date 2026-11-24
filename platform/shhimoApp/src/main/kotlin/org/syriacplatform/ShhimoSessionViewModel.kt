@@ -20,6 +20,18 @@ import org.syriacplatform.presentation.shhimo.ShhimoNavigationState
  */
 class ShhimoSessionViewModel : ViewModel() {
     val navigation = ShhimoNavigationState()
+    var weeklyQintoId by mutableStateOf(1L)
+        private set
+
+    fun selectWeeklyQinto(id: Long) {
+        require(id in 1L..8L)
+        if (weeklyQintoId == id) return
+        weeklyQintoId = id
+        selectedMelodyId = null
+        notationOpen = false
+        notationPage = 0
+        recordingIds.clear()
+    }
     var selectedHymnId by mutableStateOf<Long?>(null)
     var prayerItemIds by mutableStateOf<List<Long>>(emptyList())
     var selectedMelodyId by mutableStateOf<Long?>(null)
