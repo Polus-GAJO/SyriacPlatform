@@ -9,6 +9,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.syriacplatform.presentation.theme.LiturgicalTextStyles
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -17,9 +18,16 @@ fun ShhimoQintoSelector(selectedQintoId: Long, onSelect: (Long) -> Unit) {
     val names = listOf("ܩܰܕܡܳܝܬܳܐ", "ܬܪܰܝܳܢܺܝܬܳܐ", "ܬܠܺܝܬܳܝܬܳܐ", "ܪܒܺܝܥܳܝܬܳܐ",
         "ܚܡܺܝܫܳܝܬܳܐ", "ܫܬܺܝܬܳܝܬܳܐ", "ܫܒܺܝܥܳܝܬܳܐ", "ܬܡܺܝܢܳܝܬܳܐ")
     var open by rememberSaveable { mutableStateOf(false) }
-    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-        OutlinedButton(onClick = { open = true }) {
-            Text("ܩܺܝܢܬܳܐ ${names[(selectedQintoId - 1).toInt()]}", style = LiturgicalTextStyles.section())
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterRight) {
+        OutlinedButton(
+            onClick = { open = true },
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+        ) {
+            Text("ܩܺܝܢܬܳܐ ${names[(selectedQintoId - 1).toInt()]}", style = LiturgicalTextStyles.section().copy(
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            ))
             Spacer(Modifier.width(8.dp))
             Text("▾")
         }
