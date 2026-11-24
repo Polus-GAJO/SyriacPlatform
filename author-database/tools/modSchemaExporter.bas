@@ -1330,7 +1330,7 @@ Private Sub ExportExistsInMedia(ByVal outputRoot As String)
 
     ExportQueryToCsv _
         "SELECT ExistsInMediaID, ExistsInID, MediaAssetID, Role, Sort, " & _
-        "MediaTimingSetID, publicationStatus FROM ExistsInMedia " & _
+        "MediaTimingSetID, publicationStatus, QintoN FROM ExistsInMedia " & _
         "ORDER BY ExistsInID, Sort, ExistsInMediaID;", _
         outputRoot & "\ExistsInMedia.csv"
 
@@ -2228,9 +2228,7 @@ Public Sub ExportBookData(ByVal bookId As Long)
         outputRoot & "\Qolos.csv"
 
     ExportQueryToCsv _
-        "SELECT Q.* FROM Qinto AS Q WHERE Q.QintoN IN (" & _
-        "SELECT DISTINCT E.QintoN FROM ExistsIn AS E WHERE E.BookN=" & _
-        CStr(bookId) & " AND E.QintoN Is Not Null) ORDER BY Q.QintoN;", _
+        "SELECT Q.* FROM Qinto AS Q ORDER BY Q.QintoN;", _
         outputRoot & "\Qinto.csv"
 
     ' Export only groups attached to this book's liturgical occurrences.
