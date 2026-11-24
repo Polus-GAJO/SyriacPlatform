@@ -6,6 +6,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.CompositionLocalProvider
@@ -70,6 +73,7 @@ class ShhimoActivity : ComponentActivity() {
                         source = source,
                         audioService = audio,
                         itemId = hymnId,
+                        weeklyQintoId = session.weeklyQintoId,
                         selectedMelodyId = session.selectedMelodyId,
                         notationOpen = session.notationOpen,
                         notationPage = session.notationPage,
@@ -99,6 +103,20 @@ class ShhimoActivity : ComponentActivity() {
                     )
                     }
                 } else {
+                    Row {
+                        listOf("ܐ", "ܒ", "ܓ", "ܕ", "ܗ", "ܘ", "ܙ", "ܚ").forEachIndexed { index, label ->
+                            val id = index.toLong() + 1L
+                            TextButton(
+                                modifier = androidx.compose.ui.Modifier.weight(1f),
+                                onClick = {
+                                    if (session.weeklyQintoId != id) {
+                                        audio.stop()
+                                        session.selectWeeklyQinto(id)
+                                    }
+                                }
+                            ) { Text(if (session.weeklyQintoId == id) "[$label]" else label) }
+                        }
+                    }
                     ShhimoDailyScreen(
                         source = source,
                         navigationState = session.navigation,
