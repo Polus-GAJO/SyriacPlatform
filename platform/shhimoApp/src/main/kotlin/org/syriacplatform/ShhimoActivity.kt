@@ -34,6 +34,8 @@ class ShhimoActivity : ComponentActivity() {
         window.navigationBarColor = android.graphics.Color.TRANSPARENT
         if (android.os.Build.VERSION.SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
         val session = ViewModelProvider(this)[ShhimoSessionViewModel::class.java]
+        val qintoPreferences = getSharedPreferences("syriacplatform.shhimo.user.preferences.v1", MODE_PRIVATE)
+        session.selectWeeklyQinto(qintoPreferences.getLong("weekly_qinto_id", 1L).coerceIn(1L, 8L))
         val audio = session.audio(applicationContext)
         val source = object : PackageSource {
             override suspend fun readBytesOrNull(path: String): ByteArray? =
@@ -101,12 +103,6 @@ class ShhimoActivity : ComponentActivity() {
                     )
                     }
                 } else {
-                    ShhimoQintoSelector(session.weeklyQintoId) { id ->
-                        if (session.weeklyQintoId != id) {
-                            audio.stop()
-                            session.selectWeeklyQinto(id)
-                        }
-                    }
                     ShhimoDailyScreen(
                         source = source,
                         navigationState = session.navigation,
@@ -117,6 +113,15 @@ class ShhimoActivity : ComponentActivity() {
                             session.notationOpen = false
                             session.notationPage = 0
                             session.selectedHymnId = id
+                        },
+                        qintoSelector = {
+                            ShhimoQintoSelector(session.weeklyQintoId) { id ->
+                                if (session.weeklyQintoId != id) {
+                                    qintoPreferences.edit().putLong("weekly_qinto_id", id).apply()
+                                    audio.stop()
+                                    session.selectWeeklyQinto(id)
+                                }
+                            }
                         },
                         settings = {
                             ShhimoReadingSettings(preferences) { updated ->
