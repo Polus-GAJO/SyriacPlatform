@@ -11,5 +11,6 @@ data class PerformanceMedia(
     val mediaAssetId: MediaAssetId,
     val role: String,
     val sort: Long,
-    val mediaTimingSetId: MediaTimingSetId? = null
+    val mediaTimingSetId: MediaTimingSetId? = null,
+    val qintoId: org.syriacplatform.common.types.QintoId? = null
 )
