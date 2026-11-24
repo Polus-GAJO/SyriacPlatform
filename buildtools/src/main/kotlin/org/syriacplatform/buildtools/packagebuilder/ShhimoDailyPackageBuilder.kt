@@ -75,8 +75,17 @@ class ShhimoDailyPackageBuilder(
             config = config,
             media = selectedMedia
         )
+        val qintos = source.qintos.filter { it.id > 0L && it.id != 22L }
+        val qintoIds = qintos.map { it.id }.toSet()
+        val assignments = source.melodies.filter { it.id in melodyIds }.mapNotNull { melody ->
+            val qintoId = melody.qintoId ?: return@mapNotNull null
+            if (qintoId !in qintoIds) return@mapNotNull null
+            SchemaV1PackageMelodyQintoAssignment(melody.id, qintoId)
+        }
         return ShhimoDailyPackage(
             content = assembled.copy(
+                qintos = qintos.map(canonicalMapper::mapQinto),
+                melodyQintoAssignments = assignments,
                 manifest = assembled.manifest.copy(
                     profile = "Shhima",
                     supportedFeatures = listOf("book-daily-navigation")
