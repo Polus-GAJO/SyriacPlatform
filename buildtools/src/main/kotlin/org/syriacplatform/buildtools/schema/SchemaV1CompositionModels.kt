@@ -40,7 +40,8 @@ data class SchemaV1QoloLiturgicalItem(
     override val verses: List<SchemaV1LiturgicalTextRef>,
     override val noteId: Long? = null,
     val locationTitle: String? = null,
-    val qintoTitle: String? = null
+    val qintoTitle: String? = null,
+    val usesWeeklyQinto: Boolean = false
 ) : SchemaV1LiturgicalItem
 
 data class SchemaV1UnresolvedQoloLiturgicalItem(
