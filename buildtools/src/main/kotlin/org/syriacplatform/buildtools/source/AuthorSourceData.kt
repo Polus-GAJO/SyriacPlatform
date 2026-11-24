@@ -3,6 +3,8 @@ package org.syriacplatform.buildtools.source
 import org.syriacplatform.buildtools.source.models.ExistsInSource
 import org.syriacplatform.buildtools.source.models.ExistsInTextSource
 import org.syriacplatform.buildtools.source.models.MelodySource
+import org.syriacplatform.buildtools.source.models.MelodyGroupSource
+import org.syriacplatform.buildtools.source.models.MelodyGroupMemberSource
 import org.syriacplatform.buildtools.source.models.OccaExisSource
 import org.syriacplatform.buildtools.source.models.OccasionSource
 import org.syriacplatform.buildtools.source.models.PetExisSource
