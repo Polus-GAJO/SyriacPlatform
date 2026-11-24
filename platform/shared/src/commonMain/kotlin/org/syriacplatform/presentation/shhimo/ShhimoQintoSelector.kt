@@ -6,7 +6,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.AbsoluteAlignment
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -18,20 +18,14 @@ fun ShhimoQintoSelector(selectedQintoId: Long, onSelect: (Long) -> Unit) {
     val names = listOf("ܩܰܕܡܳܝܬܳܐ", "ܬܪܰܝܳܢܺܝܬܳܐ", "ܬܠܺܝܬܳܝܬܳܐ", "ܪܒܺܝܥܳܝܬܳܐ",
         "ܚܡܺܝܫܳܝܬܳܐ", "ܫܬܺܝܬܳܝܬܳܐ", "ܫܒܺܝܥܳܝܬܳܐ", "ܬܡܺܝܢܳܝܬܳܐ")
     var open by rememberSaveable { mutableStateOf(false) }
-    Box(Modifier.fillMaxWidth(), contentAlignment = AbsoluteAlignment.CenterRight) {
-        OutlinedButton(
-            onClick = { open = true },
-            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
-        ) {
-            Text("ܩܺܝܢܬܳܐ ${names[(selectedQintoId - 1).toInt()]}", style = LiturgicalTextStyles.section().copy(
-                fontSize = 18.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            ))
-            Spacer(Modifier.width(8.dp))
-            Text("▾")
-        }
-    }
+    Text(
+        "ܩܺܝܢܬܳܐ ${names[(selectedQintoId - 1).toInt()]}",
+        style = LiturgicalTextStyles.section().copy(
+            fontSize = 18.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        ),
+        modifier = Modifier.clickable { open = true }.padding(vertical = 12.dp, horizontal = 4.dp)
+    )
     if (open) {
         ModalBottomSheet(
             onDismissRequest = { open = false },
