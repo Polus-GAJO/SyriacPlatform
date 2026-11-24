@@ -14,8 +14,8 @@ import org.syriacplatform.buildtools.source.models.OccasionSource
  * Development CLI for the complete seven-day Shhimo Book package.
  *
  * Expected CSVs: ExistsIn, ExistsInText, PetExis, Prayers, Qolos, Texts,
- * Petgomo, Melody, Qinto. Optional files may be absent. No Occasion or
- * OccaExis export is needed for this book-oriented workflow.
+ * Petgomo, Melody, Qinto, and required OccaExis membership.
+ * Optional files may be absent.
  *
  * Usage: <bookId> <sourceDirectory> <outputDirectory>
  */
@@ -46,10 +46,13 @@ fun main(args: Array<String>) {
     fun rows(file: String) = sourceDirectory.resolve(file).let { path ->
         if (Files.isRegularFile(path)) csv.read(path).rows else emptyList()
     }
+    require(Files.isRegularFile(sourceDirectory.resolve("OccaExis.csv"))) {
+        "OccaExis.csv is required; re-export book data from Access."
+    }
     val source = AuthorSourceData(
         occasion = OccasionSource(null, 1L, "Book preview", null, null),
         prayers = rows("Prayers.csv").map(mapper::toPrayer),
-        occasionLinks = emptyList(),
+        occasionLinks = rows("OccaExis.csv").map(mapper::toOccaExis),
         existsIn = rows("ExistsIn.csv").map(mapper::toExistsIn),
         existsInTexts = rows("ExistsInText.csv").map(mapper::toExistsInText),
         petExis = rows("PetExis.csv").map(mapper::toPetExis),
@@ -73,7 +76,10 @@ fun main(args: Array<String>) {
     val media = if (mediaSourceDirectory != null)
         SchemaV1MediaMapper().map(MediaSourceDataLoader().load(mediaSourceDirectory))
     else SchemaV1CanonicalMedia(emptyList(), emptyList())
-    val packageData = ShhimoDailyPackageBuilder().build(source, bookId, media, dayNames)
+    val weeklyIds = source.occasionLinks.filter { it.occasionId == 0L }
+        .mapNotNull { it.existsInId }.toSet()
+    val weeklySource = source.copy(existsIn = source.existsIn.filter { it.id in weeklyIds })
+    val packageData = ShhimoDailyPackageBuilder().build(weeklySource, bookId, media, dayNames)
     val selectedSourceMedia = packageData.content.mediaAssets.map { packaged ->
         media.mediaAssets.single { it.id == packaged.id }
     }
