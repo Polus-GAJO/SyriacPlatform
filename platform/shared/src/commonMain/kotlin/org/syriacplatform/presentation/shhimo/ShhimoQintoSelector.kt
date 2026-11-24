@@ -1,27 +1,45 @@
 package org.syriacplatform.presentation.shhimo
 
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.displayCutoutPadding
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.syriacplatform.presentation.theme.LiturgicalTextStyles
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShhimoQintoSelector(selectedQintoId: Long, onSelect: (Long) -> Unit) {
-    Row(Modifier.fillMaxWidth().statusBarsPadding().displayCutoutPadding()) {
-        listOf("ܐ", "ܒ", "ܓ", "ܕ", "ܗ", "ܘ", "ܙ", "ܚ").forEachIndexed { index, label ->
-            val id = index.toLong() + 1L
-            TextButton(
-                modifier = Modifier.weight(1f),
-                contentPadding = PaddingValues(0.dp),
-                onClick = { onSelect(id) }
-            ) {
-                Text(if (selectedQintoId == id) "[$label]" else label)
+    val names = listOf("ܩܰܕܡܳܝܬܳܐ", "ܬܪܰܝܳܢܺܝܬܳܐ", "ܬܠܺܝܬܳܝܬܳܐ", "ܪܒܺܝܥܳܝܬܳܐ",
+        "ܚܡܺܝܫܳܝܬܳܐ", "ܫܬܺܝܬܳܝܬܳܐ", "ܫܒܺܝܥܳܝܬܳܐ", "ܬܡܺܝܢܳܝܬܳܐ")
+    var open by rememberSaveable { mutableStateOf(false) }
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        OutlinedButton(onClick = { open = true }) {
+            Text("ܩܺܝܢܬܳܐ ${names[(selectedQintoId - 1).toInt()]}", style = LiturgicalTextStyles.section())
+            Spacer(Modifier.width(8.dp))
+            Text("▾")
+        }
+    }
+    if (open) {
+        ModalBottomSheet(
+            onDismissRequest = { open = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ) {
+            Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
+                Text("ܩܺܝ̈ܢܳܬܳܐ", style = LiturgicalTextStyles.section(), modifier = Modifier.fillMaxWidth())
+                HorizontalDivider()
+                names.forEachIndexed { index, name ->
+                    val id = index.toLong() + 1L
+                    TextButton(onClick = { onSelect(id); open = false }, modifier = Modifier.fillMaxWidth()) {
+                        Text(name, style = LiturgicalTextStyles.section(), modifier = Modifier.weight(1f))
+                        RadioButton(selected = selectedQintoId == id, onClick = null)
+                    }
+                }
+                Spacer(Modifier.height(12.dp))
             }
         }
     }
