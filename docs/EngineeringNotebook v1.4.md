@@ -3616,8 +3616,46 @@ Implementation through `73b9281`; user approved the current UI and reported sati
 
 ------------------------------------------------------------------------
 
-# Decision 079 — Eight Qine Must Resolve Melody Alternatives Without Duplicating Text (Pending Investigation)
+# Decision 079 — Eight Qine Must Resolve Melody Alternatives Without Duplicating Text (Verified 2026-11-24)
 
 The next requested task is to inspect how the Author Database indicates that a liturgical item can use any of eight melodies according to `qinto` (ܩܝܢܬܐ). Follow Access tables/relationships and exported CSVs through Build Tools, package DTOs, runtime content resolution and melody/recording/notation selection. Do not assume all eight alternatives are exported or that the current mapping is correct. Preserve the identity and order of the liturgical occurrence and its canonical text; do not manufacture eight copies of the text. Record the observed source representation and root cause before implementing or changing schema.
+
+------------------------------------------------------------------------
+
+## Resolution and verified implementation (2026-11-24)
+
+- `ExistsIn.QintoN = 22` (ܐ - ܚ) denotes a weekly choice among ordinary qine 1–8, not a ninth melody or a recording classification. QintoN 9 and other fixed qine remain distinct.
+- Preserve the authored occurrence ID, verse IDs and order. Build Tools export melody groups/members, qinto definitions and melody-to-qinto assignments; weekly candidates are resolved at runtime for the selected qinto.
+- `ExistsInMedia.QintoN` is an optional classification of a contextual PERFORMANCE relationship. Weekly performance selection matches the selected qinto; null is not implicitly all eight. Melody recordings and notation follow the selected melody.
+- The Shhimo session owns weekly selection. The eight-button selector is a temporary testing UI, not the final design.
+- Runtime resolves the display title from the selected qinto dictionary entry on a copy of the item, leaving authored data and fixed-qinto occurrences unchanged (3c8cf98).
+- The author confirmed correct weekly melody, recording, notation and qinto-title behavior on Android. Earlier package correction ec1dfa0 supplied the missing qinto dictionary and melody assignments. The final title correction was manually verified; no fresh automated regression result is recorded for it.
+
+------------------------------------------------------------------------
+
+# Decision 080 — Weekly Shhimo Membership Is an Explicit Occasion Relationship (2026-11-24)
+
+## Decision
+
+Book provenance and liturgical usage must remain separate. Do not move occurrences to another book or deduplicate by text merely to make weekly navigation work.
+
+For the current Shhimo book (BookN = 1), weekly content requires DayN 1–7 and an explicit OccaExis relationship with OccN = 0. The Access join is ExistsIn.ID = OccaExis.ExistInID (not ExistsInID). DayN = 0 represents non-weekday-specific usage, including date-based or general services.
+
+## Evidence
+
+The investigation found identical ordered text references in pairs 314/10215, 315/10216 and 7815/10217. Each pair shares book, day, prayer, sort and qolo; the first member has OccN = 0 and the second OccN = 39. These are distinct contextual occurrences, not duplicated melody alternatives.
+
+The Access grouped query for BookN = 1 and DayN 1–7 returned 406 membership rows for OccN = 0 and 25 for other occasions (34: 1; 36: 3; 37: 4; 39: 11; 40: 4; 380: 2), with no null group. These are relationship counts, not independently verified distinct occurrence counts.
+
+## Implementation and verification
+
+- e7dae0e: export OccaExis.csv with book data without narrowing the general book export.
+- 40011c3: require that CSV in the Shhimo daily package CLI and select occurrence IDs having OccN = 0 before invoking the package builder. A set prevents repeated membership rows from multiplying occurrences. Existing book/day planning remains in place.
+- The author confirmed that unintended liturgical repetitions disappeared and weekly media selection continued to work. No Access data migration was needed for this fix. The actual final package item count was not reported.
+- Scope: the membership filter currently lives in the Shhimo CLI, not every possible direct invocation of the package builder. Future entry points must preserve this policy.
+
+## Next work
+
+Design the final weekly qinto selector and Shhimo presentation. Add targeted automated regression coverage for membership filtering and selected qinto titles. Review authoring recording move/link workflows for preservation of optional QintoN before declaring that lifecycle fully verified.
 
 ------------------------------------------------------------------------
