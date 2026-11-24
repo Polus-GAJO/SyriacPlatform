@@ -2,7 +2,8 @@ package org.syriacplatform.presentation.shhimo
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,7 +13,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ShhimoQintoSelector(selectedQintoId: Long, onSelect: (Long) -> Unit) {
-    Row(Modifier.fillMaxWidth()) {
+    Row(Modifier.fillMaxWidth().statusBarsPadding().displayCutoutPadding()) {
         listOf("ܐ", "ܒ", "ܓ", "ܕ", "ܗ", "ܘ", "ܙ", "ܚ").forEachIndexed { index, label ->
             val id = index.toLong() + 1L
             TextButton(
