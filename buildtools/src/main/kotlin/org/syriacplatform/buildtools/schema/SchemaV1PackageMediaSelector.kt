@@ -64,6 +64,18 @@ class SchemaV1PackageMediaSelector {
         val selectedMediaSegmentIds =
             selectedMediaSegments.mapTo(mutableSetOf()) { it.id }
 
+        // Timing sets may be shared across occurrences in different packages.
+        // Ignore external links only when the segment also has a local link.
+        val reachableLinks = canonicalMedia.textOccurrenceMediaSegments
+            .filter { it.mediaSegmentId in selectedMediaSegmentIds }
+            .groupBy { it.mediaSegmentId }
+
+        require(reachableLinks.values.all { links ->
+            links.any { it.textOccurrenceId in textOccurrenceIds }
+        }) {
+            "Selected timing references only text occurrences outside the package."
+        }
+
         val selectedTextOccurrenceMediaSegments =
             canonicalMedia.textOccurrenceMediaSegments
                 .filter { it.mediaSegmentId in selectedMediaSegmentIds && it.textOccurrenceId in textOccurrenceIds }
