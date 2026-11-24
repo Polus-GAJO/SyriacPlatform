@@ -6,5 +6,6 @@ data class ExistsInMediaSource(
     val mediaAssetId: Long,
     val role: String,
     val sort: Long,
-    val mediaTimingSetId: Long?
+    val mediaTimingSetId: Long?,
+    val qintoId: Long? = null
 )
