@@ -27,5 +27,6 @@ internal data class LiturgicalItemJsonDto(
     val noteId: Long? = null,
     val locationTitle: String? = null,
     val qintoTitle: String? = null,
-    val verses: List<LiturgicalTextRefJsonDto> = emptyList()
+    val verses: List<LiturgicalTextRefJsonDto> = emptyList(),
+    val usesWeeklyQinto: Boolean = false
 )
