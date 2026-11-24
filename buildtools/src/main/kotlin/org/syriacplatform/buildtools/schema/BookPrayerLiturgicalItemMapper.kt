@@ -67,6 +67,7 @@ class BookPrayerLiturgicalItemMapper(
                         verses = occurrence.verses,
                         noteId = noteId,
                         locationTitle = item.locationId?.let(locations::get),
+                        usesWeeklyQinto = item.qintoId == 22L,
                         qintoTitle = item.qintoId
                             ?.takeIf { it > 0L }
                             ?.let(qintos::get)
