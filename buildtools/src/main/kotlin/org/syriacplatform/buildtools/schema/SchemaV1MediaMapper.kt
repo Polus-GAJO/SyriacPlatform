@@ -118,7 +118,8 @@ class SchemaV1MediaMapper {
             mediaAssetId = source.mediaAssetId,
             role = source.role,
             sort = source.sort,
-            mediaTimingSetId = source.mediaTimingSetId
+            mediaTimingSetId = source.mediaTimingSetId,
+            qintoId = source.qintoId
         )
     }
 
