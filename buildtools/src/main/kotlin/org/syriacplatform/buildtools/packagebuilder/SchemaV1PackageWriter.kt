@@ -431,6 +431,7 @@ class SchemaV1PackageWriter {
                     put("type", "qolo")
                     item.locationTitle?.let { put("locationTitle", it) }
                     item.qintoTitle?.let { put("qintoTitle", it) }
+                    if (item.usesWeeklyQinto) put("usesWeeklyQinto", true)
                     item.noteId?.let { put("noteId", it) }
                     put("targetId", item.qoloId)
 
