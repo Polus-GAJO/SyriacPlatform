@@ -4,6 +4,7 @@ import org.syriacplatform.common.result.Result
 import org.syriacplatform.common.types.ErrorCode
 import org.syriacplatform.common.types.PlatformError
 import org.syriacplatform.common.types.QoloId
+import org.syriacplatform.common.types.QintoId
 import org.syriacplatform.content.models.Qolo
 import org.syriacplatform.packageformat.loading.ApplicationPackageLoader
 import org.syriacplatform.packageformat.loading.PackageLoadResult
@@ -277,6 +278,24 @@ class ApplicationPackageContentRepository(
             is Result.Failure ->
                 storeResult
         }
+    }
+
+    suspend fun loadLiturgicalItemForQinto(
+        id: LiturgicalItemId,
+        qintoId: QintoId
+    ): Result<ResolvedLiturgicalItem> = when (val result = loadStore()) {
+        is Result.Success -> RuntimeContentResolver(result.data)
+            .resolveLiturgicalItemForQinto(id, qintoId)
+        is Result.Failure -> result
+    }
+
+    suspend fun loadPerformanceMediaForQinto(
+        id: LiturgicalItemId,
+        qintoId: QintoId
+    ): Result<List<ResolvedPerformanceMedia>> = when (val result = loadStore()) {
+        is Result.Success -> RuntimeContentResolver(result.data)
+            .resolvePerformanceMedia(id, qintoId)
+        is Result.Failure -> result
     }
 
     override suspend fun loadLiturgicalItem(
