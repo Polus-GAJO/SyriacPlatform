@@ -665,6 +665,7 @@ class SchemaV1PackageWriter {
         put("mediaAssetId", item.mediaAssetId)
         put("role", item.role)
         put("sort", item.sort)
+        item.qintoId?.let { put("qintoId", it) }
         if (item.mediaTimingSetId == null) {
             put("mediaTimingSetId", JsonNull)
         } else {
