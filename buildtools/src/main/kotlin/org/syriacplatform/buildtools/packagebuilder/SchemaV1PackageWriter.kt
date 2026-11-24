@@ -229,6 +229,19 @@ class SchemaV1PackageWriter {
             )
         }
 
+        if (packageData.melodyQintoAssignments.isNotEmpty()) {
+            writeCollection(
+                contentDirectory,
+                "melody-qinto-assignments.json",
+                packageData.melodyQintoAssignments.map { assignment ->
+                    buildJsonObject {
+                        put("melodyId", assignment.melodyId)
+                        put("qintoId", assignment.qintoId)
+                    }
+                }
+            )
+        }
+
         if (packageData.notes.isNotEmpty()) {
     writeCollection(
         contentDirectory,
