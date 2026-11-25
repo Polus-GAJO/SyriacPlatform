@@ -21,6 +21,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.syriacplatform.resources.Res
 import org.syriacplatform.resources.loading
 import org.syriacplatform.resources.back
+import org.syriacplatform.resources.play_all
+import org.syriacplatform.resources.stop_playback
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -53,7 +55,12 @@ fun ShhimoDailyScreen(
     navigationState: ShhimoNavigationState = remember { ShhimoNavigationState() },
     modifier: Modifier = Modifier,
     settings: @Composable () -> Unit = {},
-    qintoSelector: @Composable () -> Unit = {}
+    qintoSelector: @Composable () -> Unit = {},
+    queueActive: Boolean = false,
+    queuePreparing: Boolean = false,
+    onPlayPrayer: (List<Long>) -> Unit = {},
+    onStopPrayer: () -> Unit = {},
+    queueControls: @Composable () -> Unit = {}
 ) {
     var state by remember(source) { mutableStateOf<ShhimoScreenState>(ShhimoScreenState.Loading) }
 
@@ -127,7 +134,10 @@ fun ShhimoDailyScreen(
             Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                 if (day != null) {
                     TextButton(onClick = {
-                        if (prayer != null) navigationState.selectedSequence = null
+                        if (prayer != null) {
+                            onStopPrayer()
+                            navigationState.selectedSequence = null
+                        }
                         else navigationState.selectedDay = null
                     }) {
                         Text(stringResource(Res.string.back))
@@ -159,7 +169,14 @@ fun ShhimoDailyScreen(
             is ShhimoScreenState.Error -> Text(current.message, color = MaterialTheme.colorScheme.error)
             is ShhimoScreenState.Ready -> when {
                 prayer != null -> {
-                    LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    TextButton(
+                        onClick = { if (queueActive || queuePreparing) onStopPrayer() else onPlayPrayer(prayer.itemIds) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(stringResource(if (queueActive || queuePreparing) Res.string.stop_playback else Res.string.play_all))
+                    }
+                    queueControls()
+                    LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         items(prayer.itemIds) { id ->
                             Text(
                                 text = current.itemTitles[id] ?: "ܩܳܠܳܐ",
