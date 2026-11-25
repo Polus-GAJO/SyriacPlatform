@@ -39,7 +39,7 @@ try {
     $assetsParent = Split-Path -Parent $assets
     New-Item -ItemType Directory -Path $assetsParent -Force | Out-Null
     if (Test-Path -LiteralPath $assets) {
-        $backup = Join-Path $assetsParent ("shhimo-backup-" + [guid]::NewGuid().ToString("N"))
+        $backup = Join-Path $previewRoot ("shhimo-backup-" + [guid]::NewGuid().ToString("N"))
         Move-Item -LiteralPath $assets -Destination $backup
     }
     try {
