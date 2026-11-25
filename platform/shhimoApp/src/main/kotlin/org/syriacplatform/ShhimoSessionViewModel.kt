@@ -1,6 +1,21 @@
 package org.syriacplatform
 
 import android.content.Context
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collect
+import org.syriacplatform.audio.queue.PlaybackQueueController
+import org.syriacplatform.audio.queue.PlaybackQueueStatus
+import org.syriacplatform.audio.queue.PrayerPlaybackQueueBuilder
+import org.syriacplatform.common.types.LiturgicalItemId
+import org.syriacplatform.common.types.QintoId
+import org.syriacplatform.content.repository.ContentRepository
+import org.syriacplatform.content.repository.ApplicationPackageContentRepository
+import org.syriacplatform.content.services.DefaultContentService
+import org.syriacplatform.packageformat.loading.ApplicationPackageLoader
+import org.syriacplatform.packageformat.loading.PackageSource
+import org.syriacplatform.packagevalidation.compatibility.CoreCompatibilityDefaults
 import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -41,6 +56,49 @@ class ShhimoSessionViewModel : ViewModel() {
 
     private var retainedAudio: DefaultAudioService? = null
 
+    lateinit var queue: PlaybackQueueController
+        private set
+    private var preparation: Job? = null
+    var queuePreparing by mutableStateOf(false)
+        private set
+    var queueMessage by mutableStateOf<String?>(null)
+        private set
+
+    fun stopPrayer() {
+        preparation?.cancel()
+        preparation = null
+        queuePreparing = false
+        queueMessage = null
+        if (::queue.isInitialized) queue.stop()
+    }
+
+    fun playPrayer(source: PackageSource, ids: List<Long>) {
+        stopPrayer()
+        queuePreparing = true
+        val qinto = QintoId(weeklyQintoId)
+        preparation = viewModelScope.launch {
+            try {
+                val repository = ApplicationPackageContentRepository(
+                    ApplicationPackageLoader(source), CoreCompatibilityDefaults.CURRENT
+                )
+                val scoped = object : ContentRepository by repository {
+                    override suspend fun loadPerformanceMedia(liturgicalItemId: LiturgicalItemId) =
+                        repository.loadPerformanceMediaForQinto(liturgicalItemId, qinto)
+                }
+                val content = DefaultContentService(scoped).also { it.initialize() }
+                when (val result = PrayerPlaybackQueueBuilder(content).buildItems(ids.map(::LiturgicalItemId))) {
+                    is Result.Failure -> queueMessage = "prepare"
+                    is Result.Success -> {
+                        if (result.data.isEmpty()) queueMessage = "empty"
+                        else if (queue.start(result.data) is Result.Failure) queueMessage = "start"
+                    }
+                }
+            } finally {
+                queuePreparing = false
+            }
+        }
+    }
+
     fun audio(context: Context): DefaultAudioService {
         retainedAudio?.let { return it }
         val resolver = object : MediaResourceResolver {
@@ -48,7 +106,16 @@ class ShhimoSessionViewModel : ViewModel() {
                 Result.Success(MediaResource(mediaAsset.id, "asset:///shhimo/" + mediaAsset.path))
         }
         return DefaultAudioService(resolver, AndroidAudioPlayerBackend(context.applicationContext))
-            .also { it.initialize(); retainedAudio = it }
+            .also { service ->
+                service.initialize()
+                retainedAudio = service
+                queue = PlaybackQueueController(service)
+                viewModelScope.launch {
+                    service.state.collect { state ->
+                        queue.handlePlaybackState(state)
+                    }
+                }
+            }
     }
 
     override fun onCleared() {
