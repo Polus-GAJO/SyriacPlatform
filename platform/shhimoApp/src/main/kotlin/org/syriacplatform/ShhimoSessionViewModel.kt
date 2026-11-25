@@ -3,6 +3,9 @@ package org.syriacplatform
 import android.content.Context
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.ensureActive
+import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.collect
 import org.syriacplatform.audio.queue.PlaybackQueueController
@@ -86,13 +89,19 @@ class ShhimoSessionViewModel : ViewModel() {
                         repository.loadPerformanceMediaForQinto(liturgicalItemId, qinto)
                 }
                 val content = DefaultContentService(scoped).also { it.initialize() }
-                when (val result = PrayerPlaybackQueueBuilder(content).buildItems(ids.map(::LiturgicalItemId))) {
+                val result = PrayerPlaybackQueueBuilder(content).buildItems(ids.map(::LiturgicalItemId))
+                coroutineContext.ensureActive()
+                when (result) {
                     is Result.Failure -> queueMessage = "prepare"
                     is Result.Success -> {
                         if (result.data.isEmpty()) queueMessage = "empty"
                         else if (queue.start(result.data) is Result.Failure) queueMessage = "start"
                     }
                 }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                queueMessage = "prepare"
             } finally {
                 queuePreparing = false
             }
