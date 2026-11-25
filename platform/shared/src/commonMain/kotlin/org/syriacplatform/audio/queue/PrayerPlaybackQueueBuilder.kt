@@ -1,6 +1,7 @@
 package org.syriacplatform.audio.queue
 
 import org.syriacplatform.common.result.Result
+import org.syriacplatform.common.types.LiturgicalItemId
 import org.syriacplatform.content.contracts.ContentService
 import org.syriacplatform.content.runtime.RuntimePrayerSequence
 
@@ -10,13 +11,17 @@ import org.syriacplatform.content.runtime.RuntimePrayerSequence
  */
 class PrayerPlaybackQueueBuilder(private val contentService: ContentService) {
     suspend fun build(sequence: RuntimePrayerSequence): Result<List<PlaybackQueueEntry>> {
+        return buildItems(sequence.items.map { it.item.id })
+    }
+
+    suspend fun buildItems(itemIds: List<LiturgicalItemId>): Result<List<PlaybackQueueEntry>> {
         val entries = mutableListOf<PlaybackQueueEntry>()
-        for (item in sequence.items) {
-            when (val result = contentService.loadPerformanceMedia(item.item.id)) {
+        for (id in itemIds) {
+            when (val result = contentService.loadPerformanceMedia(id)) {
                 is Result.Failure -> return result
                 is Result.Success -> {
                     val recording = result.data.firstOrNull() ?: continue
-                    entries += PlaybackQueueEntry(item.item.id, recording.mediaAsset)
+                    entries += PlaybackQueueEntry(id, recording.mediaAsset)
                 }
             }
         }
