@@ -395,18 +395,21 @@ internal fun HymnDetailsScreen(
                         androidx.compose.ui.platform.LocalLayoutDirection provides
                             androidx.compose.ui.unit.LayoutDirection.Ltr
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
+                        Box(
+                            modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
                                 text = result.data.item.locationTitle
                                     ?.takeIf { it.isNotBlank() } ?: stringResource(Res.string.generic_text),
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 52.dp),
                                 style = LiturgicalTextStyles.section(),
                                 textAlign = TextAlign.Center
                             )
                             androidx.compose.material3.IconButton(
+                                modifier = Modifier.align(Alignment.CenterEnd),
                                 enabled = audioService != null && fullTextRecording != null,
                                 onClick = {
                                     val recording = fullTextRecording
