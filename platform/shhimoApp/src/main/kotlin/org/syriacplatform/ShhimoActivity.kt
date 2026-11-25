@@ -1,6 +1,9 @@
 package org.syriacplatform
 
 import android.os.Bundle
+import org.syriacplatform.audio.queue.PlaybackQueueStatus
+import org.syriacplatform.presentation.shhimo.ShhimoPrayerPlaybackControls
+import androidx.compose.foundation.layout.navigationBarsPadding
 import org.syriacplatform.presentation.shhimo.shhimoRecordingLabel
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
@@ -60,6 +63,10 @@ class ShhimoActivity : ComponentActivity() {
                 else -> deviceDirection
             }
             val playback by audio.state.collectAsState()
+            val queueState by session.queue.state.collectAsState()
+            val queueActive = queueState.status in listOf(
+                PlaybackQueueStatus.Loading, PlaybackQueueStatus.Playing, PlaybackQueueStatus.Paused
+            )
             CompositionLocalProvider(
                 LocalDensity provides scaledDensity,
                 LocalAppLocale provides preferences.interfaceLanguage,
@@ -108,6 +115,7 @@ class ShhimoActivity : ComponentActivity() {
                         navigationState = session.navigation,
                         onOpenLiturgicalItem = { id, prayerItems ->
                             session.prayerItemIds = prayerItems
+                            session.stopPrayer()
                             audio.stop()
                             session.selectedMelodyId = null
                             session.notationOpen = false
@@ -118,6 +126,7 @@ class ShhimoActivity : ComponentActivity() {
                             ShhimoQintoSelector(session.weeklyQintoId) { id ->
                                 if (session.weeklyQintoId != id) {
                                     qintoPreferences.edit().putLong("weekly_qinto_id", id).apply()
+                                    session.stopPrayer()
                                     audio.stop()
                                     session.selectWeeklyQinto(id)
                                 }
@@ -128,11 +137,24 @@ class ShhimoActivity : ComponentActivity() {
                                 scope.launch { preferenceStore.save(updated) }
                             }
                         },
+                        queueActive = queueActive,
+                        queuePreparing = session.queuePreparing,
+                        onPlayPrayer = { session.playPrayer(source, it) },
+                        onStopPrayer = { session.stopPrayer() },
+                        queueControls = {
+                            ShhimoPrayerPlaybackControls(
+                                state = queueState,
+                                preparing = session.queuePreparing,
+                                message = session.queueMessage,
+                                onPrevious = { session.queue.previous() },
+                                onNext = { session.queue.next() }
+                            )
+                        },
                         modifier = androidx.compose.ui.Modifier.weight(1f)
                     )
-                    if (playback.status != PlaybackStatus.Idle) {
+                    if (queueActive || (queueState.status == PlaybackQueueStatus.Idle && playback.status != PlaybackStatus.Idle)) {
                         CompactAudioPlayer(
-                            title = shhimoRecordingLabel(),
+                            title = if (queueActive) "${shhimoRecordingLabel()} ${(queueState.currentIndex ?: 0) + 1} / ${queueState.entries.size}" else shhimoRecordingLabel(),
                             status = playback.status,
                             positionMs = playback.positionMs,
                             durationMs = playback.durationMs,
@@ -145,7 +167,8 @@ class ShhimoActivity : ComponentActivity() {
                                 }
                             },
                             onSeek = { audio.seekTo(it) },
-                            onClose = { audio.stop() }
+                            onClose = { session.stopPrayer(); audio.stop() },
+                            modifier = androidx.compose.ui.Modifier.navigationBarsPadding()
                         )
                     }
                 }
