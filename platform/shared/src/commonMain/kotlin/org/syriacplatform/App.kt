@@ -99,6 +99,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Surface
+import org.syriacplatform.presentation.theme.PlatformTypographyTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -240,7 +241,7 @@ fun App(
         LocalAppLocale provides uiLanguage,
         LocalLayoutDirection provides interfaceLayoutDirection
     ) {
-    MaterialTheme {
+    PlatformTypographyTheme {
         when (navigationState.currentDestination) {
 
             AppDestination.HOME -> {
@@ -512,7 +513,7 @@ fun App(
                             }
                             languageDialogOpen = false
                         }) {
-                            Text((if (uiLanguage == code) "✓ " else "") + label)
+                            Text((if (uiLanguage == code) "✓ " else "") + label, fontFamily = if (code == "ar") LiturgicalFontFamilies.arabic() else LiturgicalFontFamilies.latin())
                         }
                     }
                 }
