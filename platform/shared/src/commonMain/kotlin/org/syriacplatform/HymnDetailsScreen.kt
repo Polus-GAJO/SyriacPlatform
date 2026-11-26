@@ -308,9 +308,9 @@ internal fun HymnDetailsScreen(
     }
 
     var translationMenuOpen by remember { mutableStateOf(false) }
-    var notationOpenRequest by remember { mutableStateOf(0) }
-    var notationRequestedPage by remember { mutableStateOf(0) }
-    var notationChoiceOpen by remember { mutableStateOf(false) }
+    var notationOpenRequest by remember(liturgicalItemId) { mutableStateOf(0) }
+    var notationRequestedPage by remember(liturgicalItemId) { mutableStateOf(0) }
+    var notationChoiceOpen by remember(liturgicalItemId) { mutableStateOf(false) }
     var melodyRecordingsExpanded by remember(liturgicalItemId) { mutableStateOf(false) }
     var melodyCandidatesExpanded by remember(liturgicalItemId) { mutableStateOf(false) }
     var performanceRecordingsExpanded by remember(liturgicalItemId) { mutableStateOf(false) }
