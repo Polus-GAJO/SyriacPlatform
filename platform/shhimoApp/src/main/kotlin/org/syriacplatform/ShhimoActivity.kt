@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import kotlinx.coroutines.launch
+import org.syriacplatform.presentation.locale.AppLocaleProvider
 import org.syriacplatform.presentation.locale.LocalAppLocale
 import org.syriacplatform.presentation.shhimo.ShhimoReadingSettings
 import org.syriacplatform.user.storage.AndroidUserPreferencesStore
@@ -72,10 +73,10 @@ class ShhimoActivity : ComponentActivity() {
             val queueActive = queueState.status in listOf(
                 PlaybackQueueStatus.Loading, PlaybackQueueStatus.Playing, PlaybackQueueStatus.Paused
             )
+            AppLocaleProvider(preferences.interfaceLanguage) {
             CompositionLocalProvider(
                 LocalNotationCache provides session.notationCache,
                 LocalDensity provides scaledDensity,
-                LocalAppLocale provides preferences.interfaceLanguage,
                 LocalLayoutDirection provides direction
             ) {
             PlatformTypographyTheme {
@@ -183,5 +184,6 @@ class ShhimoActivity : ComponentActivity() {
             }
             }
         }
+            }
     }
 }
