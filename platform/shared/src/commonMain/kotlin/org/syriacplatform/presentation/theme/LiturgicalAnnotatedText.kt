@@ -16,7 +16,10 @@ object LiturgicalAnnotatedText {
         fromParsed(LiturgicalTextMarkup.parse(source, allRed))
 
     fun fromParsed(parsed: ParsedLiturgicalText): AnnotatedString = buildAnnotatedString {
-        val value = parsed.text
+        // Preserve span offsets: replace breakable spaces before the Syriac full stop.
+        val value = parsed.text.replace(Regex("[ \\t]+(?=܀)")) { match ->
+            "\u00A0".repeat(match.value.length)
+        }
         var cursor = 0
         for (span in parsed.redSpans) {
             require(span.start >= cursor && span.endExclusive <= value.length &&
