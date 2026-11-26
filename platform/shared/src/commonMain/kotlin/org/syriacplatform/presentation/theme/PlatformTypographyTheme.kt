@@ -44,3 +44,6 @@ fun localizedControlFont(text: String): androidx.compose.ui.text.font.FontFamily
 fun LocalizedControlText(text: String) {
     androidx.compose.material3.Text(text = text, fontFamily = localizedControlFont(text))
 }
+
+/** Extra reading scale in landscape, independent of the saved user font preference. */
+const val LandscapeFontScale = 1.15f
