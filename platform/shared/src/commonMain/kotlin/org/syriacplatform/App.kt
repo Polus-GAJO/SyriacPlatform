@@ -1682,12 +1682,17 @@ internal fun MelodyNotationSection(
     requestedPage: Int = 0,
     showInlineButton: Boolean = true
 ) {
+    val cache = LocalNotationCache.current
     val notationResult by produceState<Result<List<MediaAsset>>?>(
-        initialValue = null,
+        initialValue = melodyId?.let { cache?.notations(it) }?.let { Result.Success(it) },
         key1 = content,
         key2 = melodyId
     ) {
-        value = melodyId?.let { content.loadMelodyNotations(it) }
+        value = melodyId?.let { id ->
+            cache?.notations(id)?.let { Result.Success(it) } ?: content.loadMelodyNotations(id).also { result ->
+                if (result is Result.Success) cache?.putNotations(id, result.data)
+            }
+        }
     }
     var showNotation by remember(melodyId) { mutableStateOf(initialOpen) }
     var page by remember(melodyId) { mutableStateOf(initialPage) }
@@ -1716,14 +1721,18 @@ internal fun MelodyNotationSection(
                 if (showNotation) {
                     val asset = assets[page.coerceIn(0, assets.lastIndex)]
                     val imageState by produceState<NotationImageState>(
-                        initialValue = NotationImageState.Loading,
+                        initialValue = cache?.image(asset.path)?.let { NotationImageState.Loaded(it) } ?: NotationImageState.Loading,
                         key1 = asset.path,
                         key2 = loadNotationBytes
                     ) {
                         value = try {
+                            cache?.image(asset.path)?.let { NotationImageState.Loaded(it) } ?: run {
                             val bytes = loadNotationBytes?.invoke(asset.path)
                                 ?: if (loadNotationBytes == null) Res.readBytes("files/${asset.path}") else error("Notation media not found")
-                            NotationImageState.Loaded(bytes.decodeToImageBitmap())
+                            NotationImageState.Loaded(bytes.decodeToImageBitmap().also { cache?.putImage(asset.path, it) })
+                            }
+                        } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                            throw cancelled
                         } catch (_: Exception) {
                             NotationImageState.Failed
                         }
