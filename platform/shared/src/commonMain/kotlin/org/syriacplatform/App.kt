@@ -1,5 +1,7 @@
 package org.syriacplatform
 
+import org.syriacplatform.presentation.theme.LocalizedControlText
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.rememberTransformableState
@@ -505,7 +507,7 @@ fun App(
         Dialog(onDismissRequest = { languageDialogOpen = false }) {
             Surface(shape = RoundedCornerShape(16.dp)) {
                 Column(modifier = Modifier.padding(24.dp)) {
-                    Text(stringResource(Res.string.settings_interface_language))
+                    LocalizedControlText(stringResource(Res.string.settings_interface_language))
                     listOf("ar" to "العربية", "en" to "English", "fr" to "Français", "de" to "Deutsch").forEach { (code, label) ->
                         TextButton(onClick = {
                             preferencesScope.launch {
@@ -527,7 +529,7 @@ fun App(
         Dialog(onDismissRequest = { fontSizeDialogOpen = false }) {
             Surface(shape = RoundedCornerShape(16.dp)) {
                 Column(modifier = Modifier.padding(24.dp)) {
-                    Text(stringResource(Res.string.settings_font_size_value, (draftScale * 100).toInt()))
+                    LocalizedControlText(stringResource(Res.string.settings_font_size_value, (draftScale * 100).toInt()))
                     Slider(
                         value = draftScale,
                         onValueChange = { draftScale = it },
@@ -546,7 +548,7 @@ fun App(
                             }
                             fontSizeDialogOpen = false
                         }) {
-                            Text(stringResource(Res.string.settings_save))
+                            LocalizedControlText(stringResource(Res.string.settings_save))
                         }
                     }
                 }
@@ -591,10 +593,10 @@ private fun HomeScreen(
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             TextButton(onClick = onOpenFontSize) {
-                Text(stringResource(Res.string.settings_font_size))
+                LocalizedControlText(stringResource(Res.string.settings_font_size))
             }
             TextButton(onClick = onOpenLanguage) {
-                Text(stringResource(Res.string.settings_interface_language))
+                LocalizedControlText(stringResource(Res.string.settings_interface_language))
             }
         }
         HorizontalDivider(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), color = MaterialTheme.colorScheme.outlineVariant)
@@ -693,7 +695,7 @@ private fun LiturgicalBackNavigation(onClick: () -> Unit, title: String? = null)
             )
         }
         TextButton(onClick = onClick, modifier = Modifier.align(Alignment.CenterStart)) {
-            Text(stringResource(Res.string.back))
+            LocalizedControlText(stringResource(Res.string.back))
         }
     }
     HorizontalDivider(
@@ -1050,7 +1052,7 @@ private fun PrayerDetailsScreen(
                                         playAllMessage = null
                                         queueController?.stop()
                                     }
-                                ) { Text("■ " + stringResource(Res.string.stop_playback)) }
+                                ) { LocalizedControlText("■ " + stringResource(Res.string.stop_playback)) }
                                 TextButton(
                                     enabled = queueState.status != PlaybackQueueStatus.Loading,
                                     onClick = {
@@ -1090,7 +1092,7 @@ private fun PrayerDetailsScreen(
                                             }
                                         }
                                     }
-                                ) { Text(stringResource(Res.string.play_all)) }
+                                ) { LocalizedControlText(stringResource(Res.string.play_all)) }
                             }
                         }
                     }
@@ -1185,9 +1187,7 @@ private fun MissingPrayerSelectionScreen(
             modifier =
                 Modifier.padding(top = 8.dp)
         ) {
-            Text(
-                text = stringResource(Res.string.back)
-            )
+            LocalizedControlText(stringResource(Res.string.back))
         }
     }
 }
@@ -1425,9 +1425,7 @@ private fun QoloDetailsScreen(
                     top = 24.dp
                 )
         ) {
-            Text(
-                text = stringResource(Res.string.back)
-            )
+            LocalizedControlText(stringResource(Res.string.back))
         }
     }
 }
@@ -1462,9 +1460,7 @@ private fun MissingOccasionSelectionScreen(
                     top = 24.dp
                 )
         ) {
-            Text(
-                text = stringResource(Res.string.back)
-            )
+            LocalizedControlText(stringResource(Res.string.back))
         }
     }
 }
@@ -1499,9 +1495,7 @@ private fun MissingQoloSelectionScreen(
                     top = 24.dp
                 )
         ) {
-            Text(
-                text = stringResource(Res.string.back)
-            )
+            LocalizedControlText(stringResource(Res.string.back))
         }
     }
 }
@@ -1657,7 +1651,7 @@ private fun MissingHymnSelectionScreen(
                     top = 24.dp
                 )
         ) {
-            Text(stringResource(Res.string.back))
+            LocalizedControlText(stringResource(Res.string.back))
         }
     }
 }
@@ -1717,7 +1711,7 @@ internal fun MelodyNotationSection(
                         page = 0
                         showNotation = true
                     }) {
-                        Text(stringResource(Res.string.view_notation, assets.size))
+                        LocalizedControlText(stringResource(Res.string.view_notation, assets.size))
                     }
                 }
                 if (showNotation) {
@@ -1805,7 +1799,7 @@ internal fun MelodyNotationSection(
                                         style = MaterialTheme.typography.titleMedium
                                     )
                                     TextButton(onClick = { showNotation = false }) {
-                                        Text(stringResource(Res.string.close))
+                                        LocalizedControlText(stringResource(Res.string.close))
                                     }
                                 }
                                 Box(
@@ -1845,17 +1839,17 @@ internal fun MelodyNotationSection(
                                     TextButton(
                                         enabled = page > 0,
                                         onClick = { page-- }
-                                    ) { Text(stringResource(Res.string.previous)) }
+                                    ) { LocalizedControlText(stringResource(Res.string.previous)) }
                                     TextButton(onClick = {
                                         zoom = 1f
                                         setPan(Offset.Zero)
                                     }) {
-                                        Text(stringResource(Res.string.reset_zoom))
+                                        LocalizedControlText(stringResource(Res.string.reset_zoom))
                                     }
                                     TextButton(
                                         enabled = page < assets.lastIndex,
                                         onClick = { page++ }
-                                    ) { Text(stringResource(Res.string.next)) }
+                                    ) { LocalizedControlText(stringResource(Res.string.next)) }
                                 }
                             }
                         }
