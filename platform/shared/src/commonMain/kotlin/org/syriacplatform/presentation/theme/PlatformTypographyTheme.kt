@@ -32,3 +32,15 @@ fun PlatformTypographyTheme(content: @Composable () -> Unit) {
     } else base
     MaterialTheme(typography = typography, content = content)
 }
+
+/** Explicit font for localized controls, including Arabic labels in mixed-language UI. */
+@Composable
+fun localizedControlFont(text: String): androidx.compose.ui.text.font.FontFamily? =
+    if (text.any { it in '\u0600'..'\u06FF' || it in '\u0750'..'\u077F' || it in '\u08A0'..'\u08FF' })
+        LiturgicalFontFamilies.arabic()
+    else null
+
+@Composable
+fun LocalizedControlText(text: String) {
+    androidx.compose.material3.Text(text = text, fontFamily = localizedControlFont(text))
+}
