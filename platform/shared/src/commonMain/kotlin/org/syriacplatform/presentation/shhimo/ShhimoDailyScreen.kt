@@ -178,7 +178,7 @@ fun ShhimoDailyScreen(
                         LocalizedControlText(stringResource(if (queueActive || queuePreparing) Res.string.stop_playback else Res.string.play_all))
                     }
                     queueControls()
-                    LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         items(prayer.itemIds) { id ->
                             Text(
                                 text = current.itemTitles[id] ?: "ܩܳܠܳܐ",
@@ -188,7 +188,7 @@ fun ShhimoDailyScreen(
                                     .clickable {
                                         onOpenLiturgicalItem(id, prayer.itemIds)
                                     }
-                                    .padding(horizontal = 12.dp, vertical = 10.dp)
+                                    .padding(horizontal = 12.dp, vertical = 8.dp)
                             )
                         }
                     }
