@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import org.syriacplatform.presentation.theme.LiturgicalFontFamilies
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -51,7 +52,7 @@ fun ShhimoReadingSettings(
                             onSave(preferences.copy(interfaceLanguage = code))
                             languageOpen = false
                         }) {
-                            Text((if (preferences.interfaceLanguage == code) "✓ " else "") + label)
+                            Text((if (preferences.interfaceLanguage == code) "✓ " else "") + label, fontFamily = if (code == "ar") LiturgicalFontFamilies.arabic() else LiturgicalFontFamilies.latin())
                         }
                     }
                 }
