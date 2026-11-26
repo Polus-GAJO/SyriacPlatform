@@ -13,6 +13,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.ContentScale
@@ -1749,6 +1750,14 @@ internal fun MelodyNotationSection(
                     var viewportWidth by remember { mutableStateOf(0f) }
                     var viewportHeight by remember { mutableStateOf(0f) }
 
+                    // Fit the whole page in portrait; fit its width in landscape.
+                    fun baseZoom(): Float {
+                        val image = bitmap ?: return 1f
+                        if (viewportWidth <= viewportHeight || viewportHeight <= 0f) return 1f
+                        val fit = minOf(viewportWidth / image.width, viewportHeight / image.height)
+                        return (viewportWidth / image.width / fit).coerceAtLeast(1f)
+                    }
+
                     fun constrainedPan(candidate: Offset, scale: Float): Offset {
                         val image = bitmap ?: return Offset.Zero
                         if (viewportWidth <= 0f || viewportHeight <= 0f) return Offset.Zero
@@ -1757,9 +1766,9 @@ internal fun MelodyNotationSection(
                             viewportHeight / image.height
                         )
                         val horizontalLimit =
-                            ((image.width * fit * scale - viewportWidth) / 2f).coerceAtLeast(0f)
+                            ((image.width * fit * baseZoom() * scale - viewportWidth) / 2f).coerceAtLeast(0f)
                         val verticalLimit =
-                            ((image.height * fit * scale - viewportHeight) / 2f).coerceAtLeast(0f)
+                            ((image.height * fit * baseZoom() * scale - viewportHeight) / 2f).coerceAtLeast(0f)
                         return Offset(
                             candidate.x.coerceIn(-horizontalLimit, horizontalLimit),
                             candidate.y.coerceIn(-verticalLimit, verticalLimit)
@@ -1799,7 +1808,7 @@ internal fun MelodyNotationSection(
                                     }
                                 }
                                 Box(
-                                    modifier = Modifier.fillMaxWidth().weight(1f),
+                                    modifier = Modifier.fillMaxWidth().weight(1f).clipToBounds(),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     when (val state = imageState) {
@@ -1819,8 +1828,8 @@ internal fun MelodyNotationSection(
                                                 }
                                                 .transformable(transformState)
                                                 .graphicsLayer(
-                                                    scaleX = zoom,
-                                                    scaleY = zoom,
+                                                    scaleX = zoom * baseZoom(),
+                                                    scaleY = zoom * baseZoom(),
                                                     translationX = pan.x,
                                                     translationY = pan.y
                                                 )
