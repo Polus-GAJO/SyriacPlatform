@@ -1542,7 +1542,7 @@ internal fun VerseTextWithTranslation(
                     Text(
                         text = remember(it) { LiturgicalAnnotatedText.fromSource(it, allRed = true) },
                         modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-                        style = SyriacTextStyles.body(),
+                        style = SyriacTextStyles.reading(it),
                         color = LiturgicalColors.Red,
                         textAlign = TextAlign.Right
                     )
@@ -1550,7 +1550,7 @@ internal fun VerseTextWithTranslation(
                 Text(
                     text = remember(syriacText) { LiturgicalAnnotatedText.fromSource(syriacText) },
                     modifier = Modifier.fillMaxWidth(),
-                    style = SyriacTextStyles.body(),
+                    style = SyriacTextStyles.reading(syriacText),
                     color = LiturgicalColors.Black,
                     textAlign = TextAlign.Right
                 )
@@ -1745,12 +1745,12 @@ internal fun MelodyNotationSection(
                     var viewportWidth by remember { mutableStateOf(0f) }
                     var viewportHeight by remember { mutableStateOf(0f) }
 
-                    // Fit the whole page in portrait; fit its width in landscape.
+                    // Fit the whole page in portrait; fit its width with a modest additional zoom in landscape.
                     fun baseZoom(): Float {
                         val image = bitmap ?: return 1f
                         if (viewportWidth <= viewportHeight || viewportHeight <= 0f) return 1f
                         val fit = minOf(viewportWidth / image.width, viewportHeight / image.height)
-                        return (viewportWidth / image.width / fit).coerceAtLeast(1f)
+                        return (viewportWidth / image.width / fit).coerceAtLeast(1f) * 1.15f
                     }
 
                     fun constrainedPan(candidate: Offset, scale: Float): Offset {
