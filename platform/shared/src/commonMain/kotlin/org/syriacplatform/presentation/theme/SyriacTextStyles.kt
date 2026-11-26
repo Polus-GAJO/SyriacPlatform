@@ -11,6 +11,7 @@ object SyriacTextStyles {
     fun body(): TextStyle = TextStyle(
         fontFamily = LiturgicalFontFamilies.syriac(),
         fontSize = LiturgicalTypography.SyriacBaseSp.sp,
+        lineHeight = (LiturgicalTypography.SyriacBaseSp * 1.35f).sp,
         textAlign = TextAlign.Right,
         textDirection = TextDirection.Rtl
     )
