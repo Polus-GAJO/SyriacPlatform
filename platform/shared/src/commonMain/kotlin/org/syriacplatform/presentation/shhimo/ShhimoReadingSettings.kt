@@ -1,5 +1,7 @@
 package org.syriacplatform.presentation.shhimo
 
+import org.syriacplatform.presentation.theme.LocalizedControlText
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,17 +38,17 @@ fun ShhimoReadingSettings(
     var fontOpen by remember { mutableStateOf(false) }
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         TextButton(onClick = { languageOpen = true }) {
-            Text(stringResource(Res.string.settings_interface_language))
+            LocalizedControlText(stringResource(Res.string.settings_interface_language))
         }
         TextButton(onClick = { fontOpen = true }) {
-            Text(stringResource(Res.string.settings_font_size))
+            LocalizedControlText(stringResource(Res.string.settings_font_size))
         }
     }
     if (languageOpen) {
         Dialog(onDismissRequest = { languageOpen = false }) {
             Surface(shape = RoundedCornerShape(16.dp)) {
                 Column(Modifier.padding(24.dp)) {
-                    Text(stringResource(Res.string.settings_interface_language))
+                    LocalizedControlText(stringResource(Res.string.settings_interface_language))
                     listOf("ar" to "العربية", "en" to "English", "fr" to "Français", "de" to "Deutsch").forEach { (code, label) ->
                         TextButton(onClick = {
                             onSave(preferences.copy(interfaceLanguage = code))
@@ -64,7 +66,7 @@ fun ShhimoReadingSettings(
         Dialog(onDismissRequest = { fontOpen = false }) {
             Surface(shape = RoundedCornerShape(16.dp)) {
                 Column(Modifier.padding(24.dp)) {
-                    Text(stringResource(Res.string.settings_font_size_value, (draftScale * 100).toInt()))
+                    LocalizedControlText(stringResource(Res.string.settings_font_size_value, (draftScale * 100).toInt()))
                     Slider(
                         value = draftScale,
                         onValueChange = { draftScale = it },
@@ -76,7 +78,7 @@ fun ShhimoReadingSettings(
                         TextButton(onClick = {
                             onSave(preferences.copy(fontScale = draftScale))
                             fontOpen = false
-                        }) { Text(stringResource(Res.string.settings_save)) }
+                        }) { LocalizedControlText(stringResource(Res.string.settings_save)) }
                     }
                 }
             }
