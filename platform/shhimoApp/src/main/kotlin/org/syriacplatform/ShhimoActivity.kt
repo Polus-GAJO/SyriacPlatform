@@ -1,6 +1,9 @@
 package org.syriacplatform
 
 import android.os.Bundle
+import android.content.res.Configuration
+import androidx.compose.ui.platform.LocalConfiguration
+import org.syriacplatform.presentation.theme.LandscapeFontScale
 import org.syriacplatform.presentation.theme.PlatformTypographyTheme
 import org.syriacplatform.audio.queue.PlaybackQueueStatus
 import org.syriacplatform.presentation.shhimo.ShhimoPrayerPlaybackControls
@@ -54,8 +57,9 @@ class ShhimoActivity : ComponentActivity() {
             val preferences by preferenceStore.preferences.collectAsState()
             val scope = rememberCoroutineScope()
             val systemDensity = LocalDensity.current
-            val scaledDensity = remember(systemDensity, preferences.fontScale) {
-                Density(systemDensity.density, systemDensity.fontScale * preferences.fontScale)
+            val landscapeFontScale = if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) LandscapeFontScale else 1f
+            val scaledDensity = remember(systemDensity, preferences.fontScale, landscapeFontScale) {
+                Density(systemDensity.density, systemDensity.fontScale * preferences.fontScale * landscapeFontScale)
             }
             val deviceDirection = LocalLayoutDirection.current
             val direction = when (preferences.interfaceLanguage) {
