@@ -1,6 +1,9 @@
 package org.syriacplatform
 
 import android.os.Bundle
+import android.content.res.Configuration
+import androidx.compose.ui.platform.LocalConfiguration
+import org.syriacplatform.presentation.theme.LandscapeFontScale
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -68,6 +71,7 @@ class MainActivity : ComponentActivity() {
                 App(
                     platform = platform,
                     initialSession = sessionSnapshot,
+                    landscapeFontScale = if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) LandscapeFontScale else 1f,
                     onSessionChanged = { updated -> sessionSnapshot = updated }
                 )
             }
