@@ -1,5 +1,7 @@
 package org.syriacplatform
 
+import org.syriacplatform.presentation.theme.LocalizedControlText
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -827,8 +829,8 @@ internal fun HymnDetailsScreen(
                                                             },
                                                             modifier = Modifier.padding(bottom = 8.dp)
                                                         ) {
-                                                            Text(
-                                                                if (playbackState.mediaAssetId == selectedRecording.id &&
+                                                            LocalizedControlText(
+if (playbackState.mediaAssetId == selectedRecording.id &&
                                                                     playbackState.status == PlaybackStatus.Playing
                                                                 ) stringResource(Res.string.pause_melody) else stringResource(Res.string.listen_melody)
                                                             )
@@ -1141,7 +1143,7 @@ internal fun HymnDetailsScreen(
             androidx.compose.material3.TextButton(
                 onClick = { translationMenuOpen = true },
                 enabled = toolbarLanguages.isNotEmpty(),
-            ) { Text(stringResource(Res.string.translation)) }
+            ) { LocalizedControlText(stringResource(Res.string.translation)) }
             androidx.compose.material3.DropdownMenu(
                 expanded = translationMenuOpen,
                 onDismissRequest = { translationMenuOpen = false }
@@ -1169,7 +1171,7 @@ internal fun HymnDetailsScreen(
                 }
                 if (selectedTranslationLanguage != null) {
                     androidx.compose.material3.DropdownMenuItem(
-                        text = { Text(stringResource(Res.string.hide_translation)) },
+                        text = { LocalizedControlText(stringResource(Res.string.hide_translation)) },
                         onClick = {
                             selectedTranslationLanguage = null
                             shownTranslation = null
@@ -1189,14 +1191,14 @@ internal fun HymnDetailsScreen(
                     }
                     else notationChoiceOpen = true
                 },
-            ) { Text(stringResource(Res.string.notation)) }
+            ) { LocalizedControlText(stringResource(Res.string.notation)) }
             androidx.compose.material3.DropdownMenu(
                 expanded = notationChoiceOpen,
                 onDismissRequest = { notationChoiceOpen = false }
             ) {
                 repeat(notationCount) { index ->
                     androidx.compose.material3.DropdownMenuItem(
-                        text = { Text(stringResource(Res.string.notation_number, index + 1)) },
+                        text = { LocalizedControlText(stringResource(Res.string.notation_number, index + 1)) },
                         onClick = {
                             notationChoiceOpen = false
                             notationRequestedPage = index
@@ -1209,7 +1211,7 @@ internal fun HymnDetailsScreen(
             androidx.compose.material3.TextButton(
                 onClick = { audioService?.stop(); onBack() },
                 modifier = Modifier.align(Alignment.CenterStart)
-            ) { Text(stringResource(Res.string.return_to_prayer)) }
+            ) { LocalizedControlText(stringResource(Res.string.return_to_prayer)) }
         }
     }
     val audioPlayerVisible = audioService != null &&
