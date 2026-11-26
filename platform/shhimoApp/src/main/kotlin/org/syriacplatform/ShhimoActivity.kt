@@ -68,6 +68,7 @@ class ShhimoActivity : ComponentActivity() {
                 PlaybackQueueStatus.Loading, PlaybackQueueStatus.Playing, PlaybackQueueStatus.Paused
             )
             CompositionLocalProvider(
+                LocalNotationCache provides session.notationCache,
                 LocalDensity provides scaledDensity,
                 LocalAppLocale provides preferences.interfaceLanguage,
                 LocalLayoutDirection provides direction
