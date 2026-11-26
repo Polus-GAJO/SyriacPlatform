@@ -14,7 +14,7 @@ object SyriacTextStyles {
         return if (hasArabic && !hasSyriac) body().copy(
             fontFamily = LiturgicalFontFamilies.arabic(),
             fontSize = (LiturgicalTypography.SyriacBaseSp * 0.85f).sp,
-            lineHeight = (LiturgicalTypography.SyriacBaseSp * 0.85f * 1.35f).sp
+            lineHeight = (LiturgicalTypography.SyriacBaseSp * 0.85f * 1.5f).sp
         ) else body()
     }
 
