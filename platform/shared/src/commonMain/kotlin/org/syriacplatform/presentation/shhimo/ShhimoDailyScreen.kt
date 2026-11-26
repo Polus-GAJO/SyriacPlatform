@@ -1,5 +1,7 @@
 package org.syriacplatform.presentation.shhimo
 
+import org.syriacplatform.presentation.theme.LocalizedControlText
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -140,7 +142,7 @@ fun ShhimoDailyScreen(
                         }
                         else navigationState.selectedDay = null
                     }) {
-                        Text(stringResource(Res.string.back))
+                        LocalizedControlText(stringResource(Res.string.back))
                     }
                 }
             }
@@ -173,7 +175,7 @@ fun ShhimoDailyScreen(
                         onClick = { if (queueActive || queuePreparing) onStopPrayer() else onPlayPrayer(prayer.itemIds) },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(stringResource(if (queueActive || queuePreparing) Res.string.stop_playback else Res.string.play_all))
+                        LocalizedControlText(stringResource(if (queueActive || queuePreparing) Res.string.stop_playback else Res.string.play_all))
                     }
                     queueControls()
                     LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
