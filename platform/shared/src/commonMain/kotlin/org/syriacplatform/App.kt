@@ -170,14 +170,15 @@ import kotlinx.coroutines.launch
 fun App(
     platform: PlatformContext,
     initialSession: AppSessionState = AppSessionState(),
-    onSessionChanged: (AppSessionState) -> Unit = {}
+    onSessionChanged: (AppSessionState) -> Unit = {},
+    landscapeFontScale: Float = 1f
 ) {
     val navigationState by
     platform.navigation.state.collectAsState()
     val userPreferences by platform.preferences.preferences.collectAsState()
     val systemDensity = LocalDensity.current
-    val scaledDensity = remember(systemDensity, userPreferences.fontScale) {
-        Density(systemDensity.density, systemDensity.fontScale * userPreferences.fontScale)
+    val scaledDensity = remember(systemDensity, userPreferences.fontScale, landscapeFontScale) {
+        Density(systemDensity.density, systemDensity.fontScale * userPreferences.fontScale * landscapeFontScale)
     }
     val preferencesScope = rememberCoroutineScope()
     var fontSizeDialogOpen by remember { mutableStateOf(false) }
@@ -1745,12 +1746,12 @@ internal fun MelodyNotationSection(
                     var viewportWidth by remember { mutableStateOf(0f) }
                     var viewportHeight by remember { mutableStateOf(0f) }
 
-                    // Fit the whole page in portrait; fit its width with a modest additional zoom in landscape.
+                    // Fit the whole page in portrait; fit its width in landscape.
                     fun baseZoom(): Float {
                         val image = bitmap ?: return 1f
                         if (viewportWidth <= viewportHeight || viewportHeight <= 0f) return 1f
                         val fit = minOf(viewportWidth / image.width, viewportHeight / image.height)
-                        return (viewportWidth / image.width / fit).coerceAtLeast(1f) * 1.15f
+                        return (viewportWidth / image.width / fit).coerceAtLeast(1f)
                     }
 
                     fun constrainedPan(candidate: Offset, scale: Float): Offset {
