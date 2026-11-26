@@ -455,12 +455,10 @@ internal fun HymnDetailsScreen(
                                 performanceRecordingsExpanded = !performanceRecordingsExpanded
                             }
                         ) { Text(
-                            text = stringResource(Res.string.available_recordings),
-                            style = LiturgicalTextStyles.secondary(
-                                MaterialTheme.typography.bodyMedium,
-                                LiturgicalLanguage.Arabic
-                            )
-                        ) }
+                                text = stringResource(Res.string.available_recordings),
+                                fontFamily = org.syriacplatform.presentation.theme.localizedControlFont(stringResource(Res.string.available_recordings)),
+                                color = LiturgicalColors.Black
+                            ) }
                         if (performanceRecordingsExpanded) {
                             availablePerformances.forEach { resolved ->
                                 Button(
@@ -839,12 +837,10 @@ internal fun HymnDetailsScreen(
                                         androidx.compose.material3.TextButton(
                                             onClick = { melodyRecordingsExpanded = !melodyRecordingsExpanded }
                                         ) { Text(
-                            text = stringResource(Res.string.available_recordings),
-                            style = LiturgicalTextStyles.secondary(
-                                MaterialTheme.typography.bodyMedium,
-                                LiturgicalLanguage.Arabic
-                            )
-                        ) }
+                                text = stringResource(Res.string.available_recordings),
+                                fontFamily = org.syriacplatform.presentation.theme.localizedControlFont(stringResource(Res.string.available_recordings)),
+                                color = LiturgicalColors.Black
+                            ) }
                                     }
                                 }
                                 if (melodyRecordingsExpanded) availableRecordings.forEach {
