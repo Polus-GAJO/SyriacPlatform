@@ -1136,7 +1136,7 @@ private fun PrayerDetailsScreen(
                                 .fillMaxWidth()
                                 .weight(1f),
                             verticalArrangement =
-                                Arrangement.spacedBy(6.dp)
+                                Arrangement.spacedBy(4.dp)
                         ) {
                             items(sequence.items) {
                                     item ->
@@ -1237,7 +1237,7 @@ private fun ResolvedLiturgicalItemView(
             Column(
                 modifier = Modifier.fillMaxWidth()
                     .clickable { onOpenHymn(item.item.id) }
-                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 val locationTitle = item.item.locationTitle
@@ -1258,7 +1258,7 @@ private fun ResolvedLiturgicalItemView(
             Column(
                 modifier = Modifier.fillMaxWidth()
                     .clickable { onOpenHymn(item.item.id) }
-                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -1782,7 +1782,8 @@ internal fun MelodyNotationSection(
                     ) {
                         Surface(
                             modifier = Modifier.fillMaxSize(),
-                            color = MaterialTheme.colorScheme.surface
+                            color = androidx.compose.ui.graphics.Color(0xFFEBD9AD).copy(alpha = 0.70f),
+                            contentColor = androidx.compose.ui.graphics.Color.Black
                         ) {
                             Column(
                                 modifier = Modifier
