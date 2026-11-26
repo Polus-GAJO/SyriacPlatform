@@ -1,5 +1,7 @@
 package org.syriacplatform.presentation.shhimo
 
+import org.syriacplatform.presentation.theme.LocalizedControlText
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -28,9 +30,9 @@ fun ShhimoPrayerPlaybackControls(
     if (error != null) Text(error, color = MaterialTheme.colorScheme.error)
     if (state.status in listOf(PlaybackQueueStatus.Loading, PlaybackQueueStatus.Playing, PlaybackQueueStatus.Paused)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = onPrevious) { Text(stringResource(Res.string.previous)) }
+            TextButton(onClick = onPrevious) { LocalizedControlText(stringResource(Res.string.previous)) }
             Text("${(state.currentIndex ?: 0) + 1} / ${state.entries.size}")
-            TextButton(onClick = onNext) { Text(stringResource(Res.string.next)) }
+            TextButton(onClick = onNext) { LocalizedControlText(stringResource(Res.string.next)) }
         }
     }
 }
