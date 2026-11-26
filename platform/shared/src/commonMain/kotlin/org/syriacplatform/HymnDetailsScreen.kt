@@ -499,7 +499,7 @@ internal fun HymnDetailsScreen(
                     }
                     Column(
                         modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
                         target.verses.forEachIndexed { index, verse ->
                             Surface(
@@ -830,7 +830,7 @@ internal fun HymnDetailsScreen(
                                                             modifier = Modifier.padding(bottom = 8.dp)
                                                         ) {
                                                             LocalizedControlText(
-if (playbackState.mediaAssetId == selectedRecording.id &&
+                                                                if (playbackState.mediaAssetId == selectedRecording.id &&
                                                                     playbackState.status == PlaybackStatus.Playing
                                                                 ) stringResource(Res.string.pause_melody) else stringResource(Res.string.listen_melody)
                                                             )
@@ -1031,7 +1031,7 @@ if (playbackState.mediaAssetId == selectedRecording.id &&
                     } else {
                         Column(
                             modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                            verticalArrangement = Arrangement.spacedBy(14.dp)
                         ) {
                             run {
                                 val note = (occurrenceNoteResult as? Result.Success)?.data?.text
