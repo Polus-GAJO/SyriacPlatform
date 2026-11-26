@@ -1782,7 +1782,7 @@ internal fun MelodyNotationSection(
                     ) {
                         Surface(
                             modifier = Modifier.fillMaxSize(),
-                            color = androidx.compose.ui.graphics.Color(0xFFEBD9AD).copy(alpha = 0.70f),
+                            color = androidx.compose.ui.graphics.Color(0xFFF8F2E4).copy(alpha = 0.80f),
                             contentColor = androidx.compose.ui.graphics.Color.Black
                         ) {
                             Column(
