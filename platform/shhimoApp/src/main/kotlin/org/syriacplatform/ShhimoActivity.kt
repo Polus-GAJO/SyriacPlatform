@@ -1,6 +1,7 @@
 package org.syriacplatform
 
 import android.os.Bundle
+import org.syriacplatform.presentation.theme.PlatformTypographyTheme
 import org.syriacplatform.audio.queue.PlaybackQueueStatus
 import org.syriacplatform.presentation.shhimo.ShhimoPrayerPlaybackControls
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -73,6 +74,7 @@ class ShhimoActivity : ComponentActivity() {
                 LocalAppLocale provides preferences.interfaceLanguage,
                 LocalLayoutDirection provides direction
             ) {
+            PlatformTypographyTheme {
             Column {
                 val hymnId = session.selectedHymnId
                 if (hymnId != null) {
@@ -173,6 +175,7 @@ class ShhimoActivity : ComponentActivity() {
                         )
                     }
                 }
+            }
             }
             }
         }
