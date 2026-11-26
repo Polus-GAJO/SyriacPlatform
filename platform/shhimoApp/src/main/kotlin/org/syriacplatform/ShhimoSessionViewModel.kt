@@ -37,6 +37,7 @@ import org.syriacplatform.presentation.shhimo.ShhimoNavigationState
  * ViewModel survives rotation, but is cleared when the Activity finishes.
  */
 class ShhimoSessionViewModel : ViewModel() {
+    val notationCache = NotationSessionCache()
     val navigation = ShhimoNavigationState()
     var weeklyQintoId by mutableStateOf(1L)
         private set
@@ -128,6 +129,7 @@ class ShhimoSessionViewModel : ViewModel() {
     }
 
     override fun onCleared() {
+        notationCache.clear()
         retainedAudio?.shutdown()
         retainedAudio = null
         super.onCleared()
