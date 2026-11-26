@@ -499,7 +499,7 @@ internal fun HymnDetailsScreen(
                     }
                     Column(
                         modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         target.verses.forEachIndexed { index, verse ->
                             Surface(
@@ -1031,7 +1031,7 @@ internal fun HymnDetailsScreen(
                     } else {
                         Column(
                             modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(14.dp)
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             run {
                                 val note = (occurrenceNoteResult as? Result.Success)?.data?.text
