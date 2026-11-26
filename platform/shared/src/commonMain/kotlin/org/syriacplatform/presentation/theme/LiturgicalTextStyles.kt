@@ -73,6 +73,8 @@ object LiturgicalTextStyles {
     @Composable
     fun note(base: TextStyle, language: LiturgicalLanguage): TextStyle =
         withLanguageFont(base, language).copy(
+            fontSize = base.fontSize * 1.15f,
+            lineHeight = base.lineHeight * 1.15f,
             textDirection = if (language == LiturgicalLanguage.Arabic ||
                 language == LiturgicalLanguage.Syriac) TextDirection.Rtl else TextDirection.Ltr
         )
