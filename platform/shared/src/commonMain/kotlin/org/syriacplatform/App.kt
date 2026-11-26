@@ -86,6 +86,7 @@ import org.syriacplatform.resources.performance_playback_failed
 import org.syriacplatform.resources.generic_text
 import org.syriacplatform.resources.whole_hymn
 import org.jetbrains.compose.resources.stringResource
+import org.syriacplatform.presentation.locale.AppLocaleProvider
 import org.syriacplatform.presentation.locale.LocalAppLocale
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.HorizontalDivider
@@ -239,9 +240,9 @@ fun App(
         publishSession(navigationState.currentDestination)
     }
 
+    AppLocaleProvider(uiLanguage) {
     CompositionLocalProvider(
         LocalDensity provides scaledDensity,
-        LocalAppLocale provides uiLanguage,
         LocalLayoutDirection provides interfaceLayoutDirection
     ) {
     PlatformTypographyTheme {
@@ -555,6 +556,7 @@ fun App(
                 }
             }
         }
+    }
     }
     }
 }
