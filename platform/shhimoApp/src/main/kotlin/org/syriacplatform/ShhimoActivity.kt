@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
@@ -41,6 +42,13 @@ import org.syriacplatform.presentation.shhimo.ShhimoDailyScreen
 
 /** Shhimo uses the same hymn detail UI as the Occasion app. */
 class ShhimoActivity : ComponentActivity() {
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        enableEdgeToEdge()
+        window.navigationBarColor = android.graphics.Color.TRANSPARENT
+        if (android.os.Build.VERSION.SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -59,11 +67,16 @@ class ShhimoActivity : ComponentActivity() {
                 }
         }
         setContent {
+            val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+            SideEffect {
+                window.navigationBarColor = android.graphics.Color.TRANSPARENT
+                if (android.os.Build.VERSION.SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
+            }
             val preferenceStore = remember { AndroidUserPreferencesStore(applicationContext) }
             val preferences by preferenceStore.preferences.collectAsState()
             val scope = rememberCoroutineScope()
             val systemDensity = LocalDensity.current
-            val landscapeFontScale = if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) LandscapeFontScale else 1f
+            val landscapeFontScale = if (isLandscape) LandscapeFontScale else 1f
             val scaledDensity = remember(systemDensity, preferences.fontScale, landscapeFontScale) {
                 Density(systemDensity.density, systemDensity.fontScale * preferences.fontScale * landscapeFontScale)
             }
