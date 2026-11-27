@@ -46,4 +46,4 @@ fun LocalizedControlText(text: String) {
 }
 
 /** Extra reading scale in landscape, independent of the saved user font preference. */
-const val LandscapeFontScale = 1.15f
+const val LandscapeFontScale = 1.30f
