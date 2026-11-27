@@ -8,6 +8,12 @@ import org.syriacplatform.presentation.theme.PlatformTypographyTheme
 import org.syriacplatform.audio.queue.PlaybackQueueStatus
 import org.syriacplatform.presentation.shhimo.ShhimoPrayerPlaybackControls
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.ui.Modifier
 import org.syriacplatform.presentation.shhimo.shhimoRecordingLabel
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
@@ -83,6 +89,9 @@ class ShhimoActivity : ComponentActivity() {
                 val hymnId = session.selectedHymnId
                 if (hymnId != null) {
                     ParchmentHymnBackground {
+                    androidx.compose.foundation.layout.Box(
+                        Modifier.windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal))
+                    ) {
                     ShhimoHymnDetails(
                         source = source,
                         audioService = audio,
@@ -115,6 +124,7 @@ class ShhimoActivity : ComponentActivity() {
                             session.selectedHymnId = null
                         }
                     )
+                    }
                     }
                 } else {
                     ShhimoDailyScreen(
@@ -158,6 +168,7 @@ class ShhimoActivity : ComponentActivity() {
                             )
                         },
                         modifier = androidx.compose.ui.Modifier.weight(1f)
+                            .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal))
                     )
                     if (queueActive || (queueState.status == PlaybackQueueStatus.Idle && playback.status != PlaybackStatus.Idle)) {
                         CompactAudioPlayer(
